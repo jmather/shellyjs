@@ -1,6 +1,8 @@
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
+var engines = require('consolidate');
+var hogan = require('hogan.js');
 //var mustache = require('mustache');
 //var hulk = require('hulk-hogan');
 //var expressHogan = require('express-hogan.js');
@@ -12,28 +14,19 @@ console.log('admin directory: ' + adminBase);
 console.log('admin static directory: ' + adminStatic);
 
 var app = express();
+//app.use(express.basicAuth(function(user, pass){
+//  return 'scott' == user & 'foo' == pass;
+//}));
 app.use(express.static(adminStatic));
 
 app.set('view engine', 'html');
 app.set('layout', 'layout'); // rendering by default
 app.set('view options', {layout: false});  // SWD turn layouts off - not sure this works with hogan
 //app.set('partials', {head:"head"}); // partails using by default on all pages
-app.enable('view cache');
+//app.enable('view cache');  // disable this for dev
 app.set('views', adminBase);
-app.engine('html', require('hogan-express'));
-//app.engine('hjs', expressHogan.renderFile); // mustache templates
-
-app.use('/', function(req, res, next) {
-  console.log('%s %s', req.method, req.url);
-	
-	res.render(path.basename(req.url), {});
-	next();
-});
-
-app.get('/', function(req, res) {
-	res.locals = {};
-	res.render("index", {});
-});
+app.engine('html', engines.hogan);
+//app.engine('html', require('hogan-express'));
 
 app.get('/test', function(req, res) {
  var view = {
@@ -42,9 +35,19 @@ app.get('/test', function(req, res) {
     return 2 + 4;
   }
  };
- var template = "{{title}} spends {{calc}}";
- var html = mustache.to_html(template, view);
+ var template = hogan.compile("{{title}} spends {{calc}}");
+ var html = template.render(view);
  res.send(html);
+});
+
+app.get('/menu_1.html', function(req, res) {
+	console.log("in menu");
+	res.render(path.basename(req.url), {user:'scott'});	
+});
+
+app.get('*', function(req, res) {
+  console.log('%s %s', req.method, req.url);	
+	res.render(path.basename(req.url), {});	
 });
 
 var adminServer = app.listen(gAdminPort);
