@@ -1,3 +1,7 @@
+// all constants up front for requires
+var gPort = 5101;
+global.gBaseDir = '/Users/scott/git/shelly';
+
 var util = require('util');
 var http = require('http');
 var restify = require('restify');
@@ -5,15 +9,10 @@ var winston = require('winston');
 
 var admin  = require('../src/admin.js');
 //util.puts(process.cwd());
-
-
-var gPort = 5101;
-global.gBaseDir = '/Users/scott/git/shelly';
 		
 var server = restify.createServer({
 	name: "shelly",
-}
-)
+});
 server.use(restify.bodyParser());
 
 server.post('/api', respond);

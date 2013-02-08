@@ -1,23 +1,38 @@
 var express = require('express');
 var fs = require('fs');
-var mustache = require('mustache');
+var path = require('path');
+//var mustache = require('mustache');
+//var hulk = require('hulk-hogan');
+//var expressHogan = require('express-hogan.js');
 
 var gAdminPort = 5100;
+var adminBase = global.gBaseDir + '/admin';
+var adminStatic = adminBase + '/static';
+console.log('admin directory: ' + adminBase);
+console.log('admin static directory: ' + adminStatic);
 
 var app = express();
+app.use(express.static(adminStatic));
 
-//app.get('/', function(req, res){
-//    res.send('Hello World');
-//});
+app.set('view engine', 'html');
+app.set('layout', 'layout'); // rendering by default
+app.set('view options', {layout: false});  // SWD turn layouts off - not sure this works with hogan
+//app.set('partials', {head:"head"}); // partails using by default on all pages
+app.enable('view cache');
+app.set('views', adminBase);
+app.engine('html', require('hogan-express'));
+//app.engine('hjs', expressHogan.renderFile); // mustache templates
 
-var adminBase = __dirname + '/../admin';
-console.log('admin directory: ' + adminBase);
-app.use(express.static(adminBase));
+app.use('/', function(req, res, next) {
+  console.log('%s %s', req.method, req.url);
+	
+	res.render(path.basename(req.url), {});
+	next();
+});
 
 app.get('/', function(req, res) {
-    fs.readFile(adminBase + '/index.htm', 'utf8', function(err, text){
-        res.send(text);
-    });
+	res.locals = {};
+	res.render("index", {});
 });
 
 app.get('/test', function(req, res) {
