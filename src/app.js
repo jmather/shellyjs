@@ -7,6 +7,12 @@ var http = require('http');
 var restify = require('restify');
 var winston = require('winston');
 
+global.db = require(global.gBaseDir + '/src/shdb.js');
+global.db.set('1', JSON.stringify({name:"scott"}));
+//global.db.get('test', function (err, value) {
+//	console.log('test=' + value)
+//});
+
 var admin  = require('../src/admin.js');
 //util.puts(process.cwd());
 		
@@ -35,7 +41,7 @@ function respond(req, res, next) {
 	var cmdFile = global.gBaseDir + '/functions/' + moduleName + '/' + moduleName + '.js'
 	delete require.cache[require.resolve(cmdFile)]
 	var module = require(cmdFile);
-	var data = module[funcName](req);
-	
-	res.send(JSON.stringify(data));
+	module[funcName](req, res, function(err, data) {
+		res.send(JSON.stringify(data));		
+	});
 }

@@ -1,17 +1,17 @@
 
 var test = "reg";
 
-exports.login = function(req)
+exports.login = function(req, res, cb)
 {
-	return {"reg.login":"foo foo foo"};
+	cb(null, {"reg.login":"foo foo foo"});
 }
 
-exports.logout = function(req)
+exports.logout = function(req, res, cb)
 {
-	return {"reg.logout":"foo foo foo"};
+	cb(null, {"reg.logout":"foo foo foo"});
 }
 
-exports.create = function(req)
+exports.create = function(req, res, cb)
 {
-	return {"reg.create":"foo foo foo"};
+	cb(null, {"reg.create":"foo foo foo"});
 }

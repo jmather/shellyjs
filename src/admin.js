@@ -3,9 +3,6 @@ var fs = require('fs');
 var path = require('path');
 var engines = require('consolidate');
 var hogan = require('hogan.js');
-//var mustache = require('mustache');
-//var hulk = require('hulk-hogan');
-//var expressHogan = require('express-hogan.js');
 
 var gAdminPort = 5100;
 var adminBase = global.gBaseDir + '/admin';
@@ -26,7 +23,6 @@ app.set('view options', {layout: false});  // SWD turn layouts off - not sure th
 //app.enable('view cache');  // disable this for dev
 app.set('views', adminBase);
 app.engine('html', engines.hogan);
-//app.engine('html', require('hogan-express'));
 
 app.get('/test', function(req, res) {
  var view = {

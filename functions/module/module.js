@@ -1,6 +1,6 @@
 var fs = require("fs");
 
-exports.list = function(req, cb)
+exports.list = function(req, res, cb)
 {
 	var modules = new Object;
 	var funcDir = global.gBaseDir + '/functions';
@@ -14,7 +14,7 @@ exports.list = function(req, cb)
 			modules[entry] = getAllMethods(module);
 		}
 	})
-	return modules;
+	cb(null, modules);
 }
 
 function getAllMethods(object) {

@@ -1,10 +1,10 @@
 
-exports.take = function(req)
+exports.take = function(req, res, cb)
 {
-	return {"turn.login":"foo foo foo"};
+	cb(null, {"turn.take":"foo foo foo"});
 }
 
-exports.status = function(req)
+exports.status = function(req, res, cb)
 {
-	return {"turn.status":"foo foo foo"};
+	cb(null, {"turn.status":"foo foo foo"});
 }

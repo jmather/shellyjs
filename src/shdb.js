@@ -1,0 +1,48 @@
+// shdb - module to provide key value db access
+
+shdb = exports;
+
+var redis = require("redis"),
+	client = redis.createClient();
+
+// if you'd like to select database 3, instead of 0 (default), call
+// client.select(3, function() { /* ... */ });
+
+client.on("error", function (err) {
+  console.log("Error " + err);
+});
+
+
+shdb.init = function() {
+	console.log("db init");
+/*
+client.set("string key", "string val", redis.print);
+client.hset("hash key", "hashtest 1", "some value", redis.print);
+client.hset(["hash key", "hashtest 2", "some other value"], redis.print);
+client.hkeys("hash key", function (err, replies) {
+  console.log(replies.length + " replies:");
+  replies.forEach(function (reply, i) {
+    console.log("    " + i + ": " + reply);
+  });
+});
+*/
+}
+
+shdb.get = function(key, cb) {
+	console.log(key, cb);
+	client.get(key, cb);
+}
+
+shdb.set = function(key, value, cb) {
+	client.set(key, value, function(err, value) {
+		if(typeof(cb)=='function')
+		{
+			cb(err);
+		}
+	});
+}
+
+shdb.destroy = function() {
+	// gracefull end
+  client.quit();	
+}
