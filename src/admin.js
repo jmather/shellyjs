@@ -15,7 +15,7 @@ var app = express();
 //  return 'scott' == user & 'foo' == pass;
 //}));
 app.use(express.favicon(adminStatic + '/images/favicon.ico')); 
-app.use(express.static(adminStatic));
+app.use('/static', express.static(adminStatic));
 
 app.set('view engine', 'html');
 app.set('layout', 'layout'); // rendering by default
@@ -38,15 +38,12 @@ app.get('/test', function(req, res) {
 });
 
 app.get('/menu_1.html', function(req, res) {
+	console.log("in menu_1");	
 	var modulePack = require(global.gBaseDir + '/functions/module/module.js');
-	console.log("in menu");
 	var map  = new Object();
-	map.user = 'Scott';
-	console.log(modulePack.list.toString());
-	map.modules = modulePack.list(req, res, function(err, data) {
-//		map.modules = data.modules;
-		map.modules = JSON.stringify(data.modules);
-//	console.log(JSON.stringify(map.modules));
+	map.user = 'Scott';	
+	modulePack.list(req, res, function(err, data) {
+		map.modules = JSON.stringify(data);
 		res.render(path.basename(req.url), map);	
 	});
 });

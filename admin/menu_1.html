@@ -1,6 +1,9 @@
 <html>
 <head>
 <title>Shelly Admin Menu</title>
+
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
 <style type="text/css">
 body {
 	font-family:verdana,arial,sans-serif;
@@ -8,33 +11,65 @@ body {
 	margin:10px;
 	background-color:#ff9900;
 	}
+h3 {
+    margin: 0;
+}
+.moduleDiv {
+    margin-bottom: 10px;
+}
+.moduleName {
+    margin-left: 10px;
+}
+.moduleFunction {
+    margin-left: 20px;
+}
 </style>
     <script lang="javascript">
-        var gModules = {{{modules}}};
+        var Env = new Object();
+        Env.gModules = {{{modules}}};
+
+        function createModule(name, m)
+        {
+            debug.info("create module:", name, m);
+
+            // create the module
+            var $newModule = $("#moduleTemplate").clone();
+            $newModule.attr("moduleName", name);
+            $newModule.addClass("module-"+name);
+            $newModule.css("display", "block");
+            var $moduleName = $newModule.find(".moduleName");
+            $moduleName.text(name);
+
+            // list the functions
+            for (fkey in m.functions) {
+                var $newFunction = $("#functionTemplate").clone();
+                var $functionLink = $newFunction.find(".functionLink");
+                $functionLink.text(fkey);
+                $newFunction.css("display", "block");
+                $newModule.append($newFunction);
+            }
+            $(".moduleList").append($newModule);
+        }
+
+        $(init);
+        function init()
+        {
+            for (mkey in Env.gModules) {
+                createModule(mkey, Env.gModules[mkey]);
+            }
+        }
     </script>
 </head>
 <body>
 <h3>Hello {{user}}</h3>
-<h3>Modules</h3>
-{{#modules}}
-<h4>{{name}}</h4>
-  {{#functions}}
-    <p>{{name}} - {{#params}}{{name}}{{^last}}, {{/last}}{{/params}}</p>
-  {{/functions}}
-{{/modules}}
-<h3>Functions</h3>
-<p><a href="functions/info.html" target="content">info</a></p>
-<h3>Users</h3>
-<p><a href="users/lookup.html" target="content">lookup</a></p>
-<h3>Objects</h3>
-<p><a href="objects/lookup.html" target="content">lookup</a></p>
-<!--
-<h4>More Examples:</h4>
-<a href="http://www.quackit.com/html/templates/frames/frames_example_1.html" target="_top">Example 1</a><br />
-<a href="http://www.quackit.com/html/templates/frames/frames_example_2.html" target="_top">Example 2</a><br />
-<a href="http://www.quackit.com/html/templates/frames/frames_example_3.html" target="_top">Example 3</a><br />
-<a href="http://www.quackit.com/html/templates/frames/frames_example_4.html" target="_top">Example 4</a><br />
-<a href="http://www.quackit.com/html/templates/frames/frames_example_5.html" target="_top">Example 5</a><br />
--->
+<h3>Module Functions</h3>
+<div class="moduleList">
+    <div class="moduleDiv" id="moduleTemplate" style="display:none">
+        <div class="moduleName">moduleName</div>
+        <div class="moduleFunction" id="functionTemplate" style="display:none">
+            <a class="functionLink" href="" target="content">moduleFunction</a>
+        </div>
+    </div>
+</div>
 </body>
 </html>
