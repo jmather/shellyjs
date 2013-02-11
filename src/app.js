@@ -39,9 +39,9 @@ function respond(req, res, next) {
 	// locate module and fire function
 	// SWD for now clear cache each time - will add server command to reload a module
 	var cmdFile = global.gBaseDir + '/functions/' + moduleName + '/' + moduleName + '.js'
-	delete require.cache[require.resolve(cmdFile)]
+	delete require.cache[require.resolve(cmdFile)];
 	var module = require(cmdFile);
 	module[funcName](req, res, function(err, data) {
-		res.send(JSON.stringify(data));		
+		res.send(JSON.stringify(data));
 	});
 }

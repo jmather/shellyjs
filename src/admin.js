@@ -14,6 +14,7 @@ var app = express();
 //app.use(express.basicAuth(function(user, pass){
 //  return 'scott' == user & 'foo' == pass;
 //}));
+app.use(express.favicon(adminStatic + '/images/favicon.ico')); 
 app.use(express.static(adminStatic));
 
 app.set('view engine', 'html');
@@ -37,11 +38,20 @@ app.get('/test', function(req, res) {
 });
 
 app.get('/menu_1.html', function(req, res) {
+	var modulePack = require(global.gBaseDir + '/functions/module/module.js');
 	console.log("in menu");
-	res.render(path.basename(req.url), {user:'scott'});	
+	var map  = new Object();
+	map.user = 'Scott';
+	console.log(modulePack.list.toString());
+	map.modules = modulePack.list(req, res, function(err, data) {
+//		map.modules = data.modules;
+		map.modules = JSON.stringify(data.modules);
+//	console.log(JSON.stringify(map.modules));
+		res.render(path.basename(req.url), map);	
+	});
 });
 
-app.get('*', function(req, res) {
+app.get('*.html', function(req, res) {
   console.log('%s %s', req.method, req.url);	
 	res.render(path.basename(req.url), {});	
 });

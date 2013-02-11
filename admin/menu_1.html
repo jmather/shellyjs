@@ -9,9 +9,19 @@ body {
 	background-color:#ff9900;
 	}
 </style>
+    <script lang="javascript">
+        var gModules = {{{modules}}};
+    </script>
 </head>
 <body>
-<h3>Hello no cache {{user}}</h3>
+<h3>Hello {{user}}</h3>
+<h3>Modules</h3>
+{{#modules}}
+<h4>{{name}}</h4>
+  {{#functions}}
+    <p>{{name}} - {{#params}}{{name}}{{^last}}, {{/last}}{{/params}}</p>
+  {{/functions}}
+{{/modules}}
 <h3>Functions</h3>
 <p><a href="functions/info.html" target="content">info</a></p>
 <h3>Users</h3>
