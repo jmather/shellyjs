@@ -48,6 +48,14 @@ app.get('/menu_1.html', function(req, res) {
 	});
 });
 
+app.get('/function/:module/:function', function(req, res) {
+	var map = new Object();
+	map.module = req.param("module");
+	map.function = req.param("function");
+	console.log(map);												// SWD req.params ia an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
+	res.render('function.html', {params: JSON.stringify(map)});
+});
+
 app.get('*.html', function(req, res) {
   console.log('%s %s', req.method, req.url);	
 	res.render(path.basename(req.url), {});	

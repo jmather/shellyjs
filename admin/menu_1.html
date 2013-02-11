@@ -1,7 +1,6 @@
 <html>
 <head>
 <title>Shelly Admin Menu</title>
-
     <script src="/static/js/jquery-1.7.1.min.js"></script>
     <script src="/static/js/ba-debug.js"></script>
 <style type="text/css">
@@ -45,6 +44,7 @@ h3 {
                 var $newFunction = $("#functionTemplate").clone();
                 var $functionLink = $newFunction.find(".functionLink");
                 $functionLink.text(fkey);
+                $functionLink.attr("href", "function/"+mkey+"/"+fkey);
                 $newFunction.css("display", "block");
                 $newModule.append($newFunction);
             }
