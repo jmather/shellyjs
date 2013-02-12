@@ -5,8 +5,7 @@ var gDefs = new Object();
 
 gDefs.login = {
 	desc: 'user login',
-	params: {email: 'user email', password: 'user passwor'},
-	returns: {id:'user id'},
+	params: {email: {dtype:"string"}, password: {dtype:'string'}},
 	security: []
 };
 exports.login = function(req, res, cb)
@@ -17,7 +16,6 @@ exports.login = function(req, res, cb)
 gDefs.logout = {
 	desc: '',
 	params: {},
-	returns: {},
 	security: []
 };
 exports.logout = function(req, res, cb)
@@ -28,7 +26,6 @@ exports.logout = function(req, res, cb)
 gDefs.create = {
 	desc: '',
 	params: {},
-	returns: {},
 	security: []
 };
 exports.create = function(req, res, cb)

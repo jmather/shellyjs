@@ -56,7 +56,9 @@ app.get('/function/:module/:function', function(req, res) {
 	var map = new Object();
 	map.module = req.param("module");
 	map.function = req.param("function");
-	var modulePack = require(global.gBaseDir + '/functions/' + map.module + '/' + map.module + '.js');
+	var cmdFile = global.gBaseDir + '/functions/' + map.module + '/' + map.module + '.js';
+	delete require.cache[require.resolve(cmdFile)];	
+	var modulePack = require(cmdFile);
 	map.functions = modulePack.functions;
 	map.desc = modulePack.desc;
 //	console.log(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode

@@ -8,7 +8,7 @@
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
     <style type="text/css">
         #jsoneditor {
-            width: 500px;
+            width: 300px;
             height: 400px;
             float: left;
         }
@@ -17,30 +17,69 @@
             height: 400px;
             float:right;
         }
-    </style>
-    <style type="text/css">
         body {
             font-family:verdana,arial,sans-serif;
             font-size:10pt;
             margin:30px;
         }
+        .nameCell {
+            font-weight: bold;
+            width: 100px;
+        }
     </style>
     <script language="javascript">
         var Env = new Object();
-        Env.params = {{{params}});
+        Env = {{{params}});
 
-        function callFunction()
+
+        function initParams(sendEdit, respEdit)
         {
+            var cmd = Env.module + "." + Env.function;
+            var input = {cmd:cmd};
+
+            $('#moduleName').text(Env.module);
+            $('#functionName').text(Env.function);
+            var funcInfo = Env.functions[Env.function];
+            var paramInfo = "";
+            console.log(funcInfo);
+            for (key in funcInfo.params)
+            {
+                paramInfo += key + "=" + funcInfo.params[key].dtype + " ";
+                input[key] = '';
+            }
+            $('#functionParams').text(paramInfo);
+            sendEdit.set(input);
+            respEdit.set();
         }
+
 
         $(init);
         function init()
         {
-            var cmd = Env.params.module + "." + Env.params.function;
-            editor.set({cmd:cmd});
+            var container = document.getElementById("jsoneditor");
+//    var editor = new jsoneditor.JSONEditor(container);
+            var editor = new jsoneditor.JSONFormatter(container);
+            var respContainer = document.getElementById("jsonResp");
+            var respEdit = new jsoneditor.JSONFormatter(respContainer);
 
-            $('#moduleName').text(Env.params.module);
-            $('#functionName').text(Env.params.function);
+            initParams(editor, respEdit);
+
+            var cmd = Env.module + "." + Env.function;
+            var input = {cmd:cmd};
+
+            $('#moduleName').text(Env.module);
+            $('#functionName').text(Env.function);
+            var funcInfo = Env.functions[Env.function];
+            var paramInfo = "";
+            console.log(funcInfo);
+            for (key in funcInfo.params)
+            {
+                paramInfo += key + "=" + funcInfo.params[key].dtype + " ";
+                input[key] = '';
+            }
+            $('#functionParams').text(paramInfo);
+            editor.set(input);
+
 
             $('#callFunction').click(function() {
                 var cmd = editor.get();
@@ -54,53 +93,36 @@
 //                            data: JSON.stringify({cmd: "reg.login"}),
                             data: cmd,
                             success: function (data, status) {
-                                respView.set(data);
+                                respEdit.set(data);
                             }
                         })
+            });
+            $('#resetFunction').click(function() {
+                initParams(editor, respEdit)
             });
         }
     </script>
 </head>
 <body>
 <table>
-    <tr><td>module:</td><td><div id="moduleName">{module_name}</div></td></tr>
-    <tr><td>function:</td><td><div id="functionName">{function_name}</div></td></tr>
+    <tr>
+        <td class="nameCell">module:</td><td><div id="moduleName">{module_name}</div></td>
+        <td style="width:100px"></td><td></td>
+    </tr>
+    <tr>
+        <td class="nameCell">function:</td><td><div id="functionName">{function_name}</div></td>
+        <td class="nameCell" style="text-align:right;">params:</td><td><div id="functionParams">{function_params}</div></td>
+    </tr>
 </table>
 <p>
-    <button id="setJSON">Set JSON</button>
-    <button id="getJSON">Get JSON</button>
-    <button id="resetFunction">reset</button>
     <button id="callFunction">call function</button>
+    <button id="resetFunction">reset</button>
 </p>
 <div id="jsoneditor"></div>
 <div id="jsonResp"></div>
 
 <script type="text/javascript" >
     // create the editor
-    var container = document.getElementById("jsoneditor");
-//    var editor = new jsoneditor.JSONEditor(container);
-    var editor = new jsoneditor.JSONFormatter(container);
-    var respContainer = document.getElementById("jsonResp");
-    var respView = new jsoneditor.JSONFormatter(respContainer);
-
-    // set json
-    document.getElementById("setJSON").onclick = function () {
-        var json = {
-            "array": [1, 2, 3],
-            "boolean": true,
-            "null": null,
-            "number": 123,
-            "object": {"a": "b", "c": "d"},
-            "string": "Hello World"
-        };
-        editor.set(json);
-    };
-
-    // get json
-    document.getElementById("getJSON").onclick = function () {
-        var json = editor.get();
-        alert(JSON.stringify(json, null, 2));
-    };
 </script>
 
 </body>
