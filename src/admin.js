@@ -48,11 +48,18 @@ app.get('/menu_1.html', function(req, res) {
 	});
 });
 
+app.get('/function', function(req, res) {
+	res.send("here");
+});
+
 app.get('/function/:module/:function', function(req, res) {
 	var map = new Object();
 	map.module = req.param("module");
 	map.function = req.param("function");
-	console.log(map);												// SWD req.params ia an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
+	var modulePack = require(global.gBaseDir + '/functions/' + map.module + '/' + map.module + '.js');
+	map.functions = modulePack.functions;
+	map.desc = modulePack.desc;
+//	console.log(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
 	res.render('function.html', {params: JSON.stringify(map)});
 });
 

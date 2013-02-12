@@ -19,7 +19,39 @@ var admin  = require('../src/admin.js');
 var server = restify.createServer({
 	name: "shelly",
 });
+//server.use(restify.acceptParser(server.acceptable));
+//server.use(restify.authorizationParser());
+//server.use(restify.dateParser());
+//server.use(restify.queryParser());
+//server.use(restify.bodyParser());
+/*
+server.use(restify.throttle({
+  burst: 100,
+  rate: 50,
+  ip: true, // throttle based on source ip address
+  overrides: {
+    '127.0.0.1': {
+      rate: 0, // unlimited
+      burst: 0
+    }
+  }
+}));
+*/
 server.use(restify.bodyParser());
+/*
+server.use(
+  function crossOrigin(req,res,next){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    return next();
+  }
+);
+*/
+
+server.get('/hello', function(req, res, next) {
+	res.send("hello");
+	return next();
+});
 
 server.post('/api', respond);
 server.post('/api/:version', respond);
@@ -42,6 +74,12 @@ function respond(req, res, next) {
 	delete require.cache[require.resolve(cmdFile)];
 	var module = require(cmdFile);
 	module[funcName](req, res, function(err, data) {
-		res.send(JSON.stringify(data));
+		// SWD think restify should be doing this for us - or we are missing a setting
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+		
+		res.send(data);
+		
 	});
+	next();
 }

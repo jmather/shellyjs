@@ -3,22 +3,105 @@
 <title>Raw function editor</title>
     <script src="/static/js/jquery-1.7.1.min.js"></script>
     <script src="/static/js/ba-debug.js"></script>
-<style type="text/css">
-body {
-	font-family:verdana,arial,sans-serif;
-	font-size:10pt;
-	margin:30px;
-#	background-color:#a1f861;
-	}
-</style>
+
+    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+    <style type="text/css">
+        #jsoneditor {
+            width: 500px;
+            height: 400px;
+            float: left;
+        }
+        #jsonResp {
+            width: 500px;
+            height: 400px;
+            float:right;
+        }
+    </style>
+    <style type="text/css">
+        body {
+            font-family:verdana,arial,sans-serif;
+            font-size:10pt;
+            margin:30px;
+        }
+    </style>
     <script language="javascript">
         var Env = new Object();
         Env.params = {{{params}});
+
+        function callFunction()
+        {
+        }
+
+        $(init);
+        function init()
+        {
+            var cmd = Env.params.module + "." + Env.params.function;
+            editor.set({cmd:cmd});
+
+            $('#moduleName').text(Env.params.module);
+            $('#functionName').text(Env.params.function);
+
+            $('#callFunction').click(function() {
+                var cmd = editor.get();
+                $.ajax
+                        ({
+                            type: "POST",
+                            url: 'http://localhost:5101/api',
+                            dataType: 'json',
+                            async: false,
+                            //json object to sent to the authentication url
+//                            data: JSON.stringify({cmd: "reg.login"}),
+                            data: cmd,
+                            success: function (data, status) {
+                                respView.set(data);
+                            }
+                        })
+            });
+        }
     </script>
 </head>
 <body>
-{{params}}
-<h1>Raw Function Editor</h1>
+<table>
+    <tr><td>module:</td><td><div id="moduleName">{module_name}</div></td></tr>
+    <tr><td>function:</td><td><div id="functionName">{function_name}</div></td></tr>
+</table>
+<p>
+    <button id="setJSON">Set JSON</button>
+    <button id="getJSON">Get JSON</button>
+    <button id="resetFunction">reset</button>
+    <button id="callFunction">call function</button>
+</p>
+<div id="jsoneditor"></div>
+<div id="jsonResp"></div>
+
+<script type="text/javascript" >
+    // create the editor
+    var container = document.getElementById("jsoneditor");
+//    var editor = new jsoneditor.JSONEditor(container);
+    var editor = new jsoneditor.JSONFormatter(container);
+    var respContainer = document.getElementById("jsonResp");
+    var respView = new jsoneditor.JSONFormatter(respContainer);
+
+    // set json
+    document.getElementById("setJSON").onclick = function () {
+        var json = {
+            "array": [1, 2, 3],
+            "boolean": true,
+            "null": null,
+            "number": 123,
+            "object": {"a": "b", "c": "d"},
+            "string": "Hello World"
+        };
+        editor.set(json);
+    };
+
+    // get json
+    document.getElementById("getJSON").onclick = function () {
+        var json = editor.get();
+        alert(JSON.stringify(json, null, 2));
+    };
+</script>
 
 </body>
 </html>
