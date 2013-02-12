@@ -7,12 +7,12 @@
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
     <style type="text/css">
-        #jsoneditor {
+        #inputEditor {
             width: 300px;
             height: 400px;
             float: left;
         }
-        #jsonResp {
+        #outputEditor {
             width: 500px;
             height: 400px;
             float:right;
@@ -32,7 +32,7 @@
         Env = {{{params}});
 
 
-        function initParams(sendEdit, respEdit)
+        function initParams(inputEdit, outputEdit)
         {
             var cmd = Env.module + "." + Env.function;
             var input = {cmd:cmd};
@@ -47,39 +47,26 @@
                 paramInfo += key + "=" + funcInfo.params[key].dtype + " ";
                 input[key] = '';
             }
+            if(paramInfo.length==0)
+            {
+                paramInfo = "(none)";
+            }
             $('#functionParams').text(paramInfo);
-            sendEdit.set(input);
-            respEdit.set();
+            inputEdit.set(input);
+            outputEdit.set();
         }
 
 
         $(init);
         function init()
         {
-            var container = document.getElementById("jsoneditor");
+            var inputContainer = document.getElementById("inputEditor");
 //    var editor = new jsoneditor.JSONEditor(container);
-            var editor = new jsoneditor.JSONFormatter(container);
-            var respContainer = document.getElementById("jsonResp");
-            var respEdit = new jsoneditor.JSONFormatter(respContainer);
+            var inputEdit = new jsoneditor.JSONFormatter(inputContainer);
+            var outputContainer = document.getElementById("outputEditor");
+            var outputEdit = new jsoneditor.JSONFormatter(outputContainer);
 
-            initParams(editor, respEdit);
-
-            var cmd = Env.module + "." + Env.function;
-            var input = {cmd:cmd};
-
-            $('#moduleName').text(Env.module);
-            $('#functionName').text(Env.function);
-            var funcInfo = Env.functions[Env.function];
-            var paramInfo = "";
-            console.log(funcInfo);
-            for (key in funcInfo.params)
-            {
-                paramInfo += key + "=" + funcInfo.params[key].dtype + " ";
-                input[key] = '';
-            }
-            $('#functionParams').text(paramInfo);
-            editor.set(input);
-
+            initParams(inputEdit, outputEdit);
 
             $('#callFunction').click(function() {
                 var cmd = editor.get();
@@ -89,16 +76,14 @@
                             url: 'http://localhost:5101/api',
                             dataType: 'json',
                             async: false,
-                            //json object to sent to the authentication url
-//                            data: JSON.stringify({cmd: "reg.login"}),
                             data: cmd,
                             success: function (data, status) {
-                                respEdit.set(data);
+                                outputEdit.set(data);
                             }
                         })
             });
             $('#resetFunction').click(function() {
-                initParams(editor, respEdit)
+                initParams(inputEdit, outputEdit)
             });
         }
     </script>
@@ -118,12 +103,7 @@
     <button id="callFunction">call function</button>
     <button id="resetFunction">reset</button>
 </p>
-<div id="jsoneditor"></div>
-<div id="jsonResp"></div>
-
-<script type="text/javascript" >
-    // create the editor
-</script>
-
+<div id="inputEditor"></div>
+<div id="outputEditor"></div>
 </body>
 </html>
