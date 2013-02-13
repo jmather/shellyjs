@@ -2,8 +2,8 @@ var fs = require("fs");
 
 exports.desc = "utility functions for shelly modules"
 exports.functions = {
-	list: {desc: 'list all modules installed', params: {}, security: [], example: {}},
-	info: {desc: 'get info for a single module', params: {name:{dtype:'string'}}, security: [], example: {name:'module'}}
+	list: {desc: 'list all modules installed', params: {}, security: []},
+	info: {desc: 'get info for a single module', params: {name:{dtype:'string'}}, security: []}
 };
 
 function getInfo(name)

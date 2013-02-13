@@ -19,7 +19,7 @@ var admin  = require('../src/admin.js');
 var server = restify.createServer({
 	name: "shelly",
 });
-//server.use(restify.acceptParser(server.acceptable));
+server.use(restify.acceptParser(server.acceptable));
 //server.use(restify.authorizationParser());
 //server.use(restify.dateParser());
 //server.use(restify.queryParser());
@@ -105,7 +105,7 @@ function respond(req, res, next) {
 		wrapper.error = error;
 		if(error!=0)
 		{
-			wrapper.info = module.functions[funcName].errors[error];
+			wrapper.info = module.errors[error];
 		}
 		wrapper.data = data;
 		res.send(wrapper);

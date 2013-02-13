@@ -69,6 +69,12 @@ shdb.kset = function(keyType, params, value, cb) {
 	});
 }
 
+shdb.nextId = function(keyType, cb) {
+	var key = gDbScope + 'idgen:' + keyType;
+	console.log('shdb.nextId: key = ' + key);
+	client.incrby(key, 1, cb);
+}
+
 shdb.destroy = function() {
 	// gracefull end
   client.quit();	
