@@ -36,6 +36,7 @@
         {
             var cmd = Env.module + "." + Env.function;
             var input = {cmd:cmd};
+            input.session = 'xxxx';
 
             $('#moduleName').text(Env.module);
             $('#functionName').text(Env.function);
@@ -61,7 +62,8 @@
         function init()
         {
             var inputContainer = document.getElementById("inputEditor");
-//    var editor = new jsoneditor.JSONEditor(container);
+// SWD - graphic editor
+//    var inputEdit = new jsoneditor.JSONEditor(container);
             var inputEdit = new jsoneditor.JSONFormatter(inputContainer);
             var outputContainer = document.getElementById("outputEditor");
             var outputEdit = new jsoneditor.JSONFormatter(outputContainer);
@@ -69,7 +71,7 @@
             initParams(inputEdit, outputEdit);
 
             $('#callFunction').click(function() {
-                var cmd = editor.get();
+                var cmd = inputEdit.get();
                 $.ajax
                         ({
                             type: "POST",

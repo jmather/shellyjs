@@ -62,24 +62,54 @@ server.listen(gPort, function() {
 
 function respond(req, res, next) {
 	util.puts('cmd = ' + req.params.cmd);
+	// SWD think restify should be doing this for us - or we are missing a setting
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	
+	// default return wrapper
+	var wrapper = new Object();
+	wrapper.cmd = req.params.cmd;
+	wrapper.session = req.params.session;
+	wrapper.ts = new Date().getTime();
+	wrapper.error = 1;			// default to error, function must clear
+	wrapper.info = '';
 	
 	// get cmd to fire
 	var cmdParts = req.params.cmd.split('.');
 	var moduleName = cmdParts[0];
 	var funcName = cmdParts[1];
-	
-	// locate module and fire function
-	// SWD for now clear cache each time - will add server command to reload a module
 	var cmdFile = global.gBaseDir + '/functions/' + moduleName + '/' + moduleName + '.js'
+	
+	// load module
+	// SWD for now clear cache each time - will add server command to reload a module
 	delete require.cache[require.resolve(cmdFile)];
 	var module = require(cmdFile);
-	module[funcName](req, res, function(err, data) {
-		// SWD think restify should be doing this for us - or we are missing a setting
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-		
-		res.send(data);
+	
+	// validate params
+	for (key in module.functions[funcName].params)
+	{
+		if(typeof(req.params[key])=='undefined')
+		{
+			wrapper.error = 1;
+			// TODO: SWD strip param name for production
+			wrapper.info = 'missing param: '+key
+			console.log(wrapper);
+			res.send(wrapper);
+			return next();
+		}
+	}
+
+	// call function
+	module[funcName](req, res, function(error, data) {
+		// default returns
+		wrapper.error = error;
+		if(error!=0)
+		{
+			wrapper.info = module.functions[funcName].errors[error];
+		}
+		wrapper.data = data;
+		res.send(wrapper);
 		
 	});
-	next();
+	return next();
 }

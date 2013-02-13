@@ -1,4 +1,7 @@
 // shdb - module to provide key value db access
+var util = require('util');
+
+var gDbScope = "dev:";
 
 shdb = exports;
 
@@ -33,7 +36,31 @@ shdb.get = function(key, cb) {
 	client.get(key, cb);
 }
 
+var gKeyTypes = {
+	kUser: {tpl: "u:%s"},
+	kEmailMap: {tpl: "em:%s"}
+}
+
+shdb.kget = function(keyType, params, cb) {
+	var key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
+	console.log('kget: '+ gKeyTypes[keyType].tpl + '->' + key);
+	client.get(key, function(err, value) {
+		cb(err, value);
+	});
+}
+
 shdb.set = function(key, value, cb) {
+	client.set(key, value, function(err, value) {
+		if(typeof(cb)=='function')
+		{
+			cb(err);
+		}
+	});
+}
+
+shdb.kset = function(keyType, params, value, cb) {
+	var key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
+	console.log('kset: '+ gKeyTypes[keyType].tpl + '->' + key);
 	client.set(key, value, function(err, value) {
 		if(typeof(cb)=='function')
 		{
