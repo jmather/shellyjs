@@ -63,11 +63,13 @@ function getWrapper(req)
 
 server.use(function(req, res, next) {
 	console.log('session check');
-	if(req.params.cmd == 'reg.login')
+	var cmd = req.params.cmd;
+	if(cmd == 'reg.login' || cmd == 'reg.create' || cmd == 'reg.check')
 	{
 		return next();
 	}
-	if(!session.check(req.params.session)) {
+	var session = req.params.session;
+	if(typeof(session) == 'undefined' || !session.check(session)) {
 	  res.header("Access-Control-Allow-Origin", "*");
 	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
 		var wrapper = getWrapper(req);
