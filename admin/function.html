@@ -36,7 +36,10 @@
         {
             var cmd = Env.module + "." + Env.function;
             var input = {cmd:cmd};
-            input.session = 'xxxx';
+            if(cmd!='reg.login' && cmd!='reg.check' && cmd!='reg.create')
+            {
+                input.session = 'xxxx';
+            }
 
             $('#moduleName').text(Env.module);
             $('#functionName').text(Env.function);

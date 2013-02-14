@@ -11,10 +11,10 @@ var passwordVersion = 1;
 
 exports.desc = "handles user login/logout and new user registration"
 exports.functions = {
-	login: {desc: 'user login',	params: {email: {dtype:"string"}, password: {dtype:'string'}},	security: []},
-	logout: {desc: 'user login',	params: {email: {dtype:"string"}, password: {dtype:'string'}},	security: []},
 	create: {desc: 'user login',	params: {email: {dtype:"string"}, password: {dtype:'string'}},	security: []},
-	check: {desc: 'check if user exists',	params: {email: {dtype:"string"}},	security: []}
+	check: {desc: 'check if user exists',	params: {email: {dtype:"string"}},	security: []},
+	login: {desc: 'user login',	params: {email: {dtype:"string"}, password: {dtype:'string'}},	security: []},
+	logout: {desc: 'user logout',	params: {},	security: []}
 }
 exports.errors = {
 		100:'user already created',
