@@ -68,8 +68,8 @@ server.use(function(req, res, next) {
 	{
 		return next();
 	}
-	var session = req.params.session;
-	if(typeof(session) == 'undefined' || !session.check(session)) {
+	var psession = req.params.session;
+	if(!session.check(psession)) {
 	  res.header("Access-Control-Allow-Origin", "*");
 	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
 		var wrapper = getWrapper(req);
@@ -77,6 +77,7 @@ server.use(function(req, res, next) {
 		wrapper.info = "bad session";
 		res.send(wrapper);
 	}
+	console.log("session OK");
 	return next();
 }
 );

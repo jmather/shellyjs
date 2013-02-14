@@ -20,7 +20,7 @@ session.create = function(uid) {
 }
 
 session.check = function(key) {
-	console.log('session.check' + key);
+	console.log('session.check key=' + key);
 	if(key == 'xxxx') {
 		return true;
 	}
