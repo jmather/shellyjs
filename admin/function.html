@@ -48,8 +48,19 @@
             console.log(funcInfo);
             for (key in funcInfo.params)
             {
-                paramInfo += key + "=" + funcInfo.params[key].dtype + " ";
-                input[key] = '';
+                var dtype = funcInfo.params[key].dtype;
+                paramInfo += key + "=" + dtype  + " ";
+                if(dtype == 'object') {
+                    input[key] = {};
+                } else if (dtype == 'int') {
+                    input[key] = 0;
+                } else if (dtype == 'float') {
+                    input[key] = 0.0;
+                } else if (dtype == 'array') {
+                    input[key] = [];
+                } else if (dtype == 'string') {
+                    input[key] = '';
+                }
             }
             if(paramInfo.length==0)
             {
@@ -74,14 +85,15 @@
             initParams(inputEdit, outputEdit);
 
             $('#callFunction').click(function() {
-                var cmd = inputEdit.get();
+                var input = inputEdit.get();
+                console.log(input);
                 $.ajax
                         ({
                             type: "POST",
                             url: 'http://localhost:5101/api',
                             dataType: 'json',
                             async: false,
-                            data: cmd,
+                            data: input,
                             success: function (data, status) {
                                 outputEdit.set(data);
                             }

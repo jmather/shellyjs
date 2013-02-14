@@ -15,6 +15,10 @@ client.on("error", function (err) {
   console.log("Error " + err);
 });
 
+var gKeyTypes = {
+	kUser: {tpl: "u:%s"},
+	kEmailMap: {tpl: "em:%s"}
+}
 
 shdb.init = function() {
 	console.log("db init");
@@ -34,11 +38,6 @@ client.hkeys("hash key", function (err, replies) {
 shdb.get = function(key, cb) {
 	console.log(key, cb);
 	client.get(key, cb);
-}
-
-var gKeyTypes = {
-	kUser: {tpl: "u:%s"},
-	kEmailMap: {tpl: "em:%s"}
 }
 
 shdb.kget = function(keyType, params, cb) {
