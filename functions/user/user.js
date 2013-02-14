@@ -1,3 +1,4 @@
+var _ = require('underscore');
 
 var db = global.db;
 
@@ -11,7 +12,8 @@ user.functions = {
 
 user.errors = {
 	100: "get user object failed",
-	101: "set user object failed"
+	101: "set user object failed",
+	102: "set user object failed, unable to load merge"
 }
 
 user.get = function(req, res, cb)
@@ -29,12 +31,21 @@ user.set = function(req, res, cb)
 {
 	var uid = req.params.uid;
 	var user = req.params.user;
-	var userStr = JSON.stringify(user);
-	db.kset('kUser', uid, userStr, function(err, res) {
-		if(err != null) {
-			cb(101);
+	
+	db.kget('kUser', req.params.uid, function(err, value){
+		if(value == null) {
+			cb(102);
 			return;
 		}
-		cb(0, user);
-	});
+		var oldUser = JSON.parse(value);
+	  user = _.extend(oldUser, user);
+		var userStr = JSON.stringify(user);
+		db.kset('kUser', uid, userStr, function(err, res) {
+			if(err != null) {
+				cb(101);
+				return;
+			}
+			cb(0, user);
+		});
+	});	
 }

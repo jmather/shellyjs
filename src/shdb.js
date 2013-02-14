@@ -16,8 +16,9 @@ client.on("error", function (err) {
 });
 
 var gKeyTypes = {
+	kEmailMap: {tpl: "em:%s"},
 	kUser: {tpl: "u:%s"},
-	kEmailMap: {tpl: "em:%s"}
+	kGame: {tpl: "game:%s"}
 }
 
 shdb.init = function() {
