@@ -7,6 +7,8 @@ var http = require('http');
 var restify = require('restify');
 var winston = require('winston');
 
+var session = require(global.gBaseDir + '/src/session.js');
+
 global.db = require(global.gBaseDir + '/src/shdb.js');
 global.db.set('1', JSON.stringify({name:"scott"}));
 //global.db.get('test', function (err, value) {
@@ -47,6 +49,35 @@ server.use(
   }
 );
 */
+
+function getWrapper(req)
+{
+	var wrapper = new Object();
+	wrapper.cmd = req.params.cmd;
+	wrapper.session = req.params.session;
+	wrapper.ts = new Date().getTime();
+	wrapper.error = 1;			// default to error, function must clear
+	wrapper.info = '';
+	return wrapper;
+}
+
+server.use(function(req, res, next) {
+	console.log('session check');
+	if(req.params.cmd == 'reg.login')
+	{
+		return next();
+	}
+	if(!session.check(req.params.session)) {
+	  res.header("Access-Control-Allow-Origin", "*");
+	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
+		var wrapper = getWrapper(req);
+		wrapper.error = 1;
+		wrapper.info = "bad session";
+		res.send(wrapper);
+	}
+	return next();
+}
+);
 
 server.get('/hello', function(req, res, next) {
 	res.send("hello");

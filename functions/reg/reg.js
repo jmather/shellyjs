@@ -1,8 +1,13 @@
+var util = require('util');
+var crypto = require('crypto');
 var check = require('validator').check;
 var sanitize = require('validator').sanitize;
 var session = require(global.gBaseDir + '/src/session.js');
 
 var gDb = global.db;
+
+var passwordSecret = '94d634f9-c273-4d59-9b28-bc26185d656f';
+var passwordVersion = 1;
 
 exports.desc = "handles user login/logout and new user registration"
 exports.functions = {
@@ -15,7 +20,20 @@ exports.errors = {
 		100:'user already created',
 		101:'user does not exist',
 		102:'bad user name',
-		103:'bad password'	
+		103:'bad password',
+		104: 'bad login'
+}
+
+function hashPassword(uid, password)
+{
+	var secStr = util.format('uid=%s;pw=%s;secret=%s', uid, password, passwordSecret);
+	return passwordVersion + ':' + crypto.createHash('md5').update(secStr).digest("hex");
+}
+
+function checkPassword(uid, password, hash)
+{
+	newHash = hashPassword(uid, password)
+	return newHash == hash;
 }
 
 exports.login = function(req, res, cb)
@@ -32,10 +50,25 @@ exports.login = function(req, res, cb)
 		return;
 	}
 	
-	var uid = 1;
-	out.session = session.create(uid);
-	cb(0, out);
-	
+	gDb.kget('kEmailMap', email, function (error, value) {
+		if(value==null)	{
+			cb(101);
+			return;
+		} else {
+			out = JSON.parse(value);
+			
+			// check password
+			if(checkPassword(out.uid, password, out.password)) {
+				out.session = session.create(out.uid);
+				out.check = session.check(out.session);
+				cb(0, out);
+				return;			
+			} else {
+				cb(104);
+				return;
+			}
+		}
+	});	
 }
 
 exports.logout = function(req, res, cb)
@@ -58,8 +91,7 @@ exports.create = function(req, res, cb)
 	}
 	
 	gDb.kget('kEmailMap', email, function (error, value) {
-		if(value!=null)
-		{
+		if(value!=null) {
 			cb(100);
 			return;
 		} else {
@@ -68,7 +100,7 @@ exports.create = function(req, res, cb)
 				out.uid = value;
 				out.session = session.create(out.uid);		
 				out.email = email;
-				out.password = password;
+				out.password = hashPassword(out.uid, password);
 				var ts = new Date().getTime();
 				out.created = ts;
 				out.lastModified = ts;
@@ -93,8 +125,7 @@ exports.check = function(req, res, cb)
 	}	
 	
 	gDb.kget('kEmailMap', email, function (error, value) {
-		if(value!=null)
-		{
+		if(value!=null) {
 			cb(0, JSON.parse(value));
 			return;
 		} else {
