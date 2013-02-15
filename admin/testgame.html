@@ -1,0 +1,235 @@
+<html>
+<head>
+<title>Raw function editor</title>
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+    <style type="text/css">
+        #inputEditor {
+            width: 100%;
+            height: 400px;
+        }
+        #outputEditor {
+            width: 100%;
+            height: 400px;
+        }
+        body {
+            font-family:verdana,arial,sans-serif;
+            font-size:10pt;
+            margin:30px;
+        }
+        .nameCell {
+            font-weight: bold;
+            width: 100px;
+        }
+    </style>
+    <script language="javascript">
+        var Env = new Object();
+        var Env = {{{params}}};
+
+        function log(msg)
+        {
+            if (typeof(msg) == 'object')
+            {
+//                msg = "<div style='color:red;'>" + JSON.stringify(msg) + "/div>";
+                msg = JSON.stringify(msg);
+            }
+            var $mlog = $("#messageLog");
+            $mlog.append(msg+"\n").scrollTop($mlog[0].scrollHeight - $mlog.height());
+        }
+
+        function formatJson(val) {
+            val = val.replace(/(\n|\t)/gm, '');	// strip all newlines first
+
+            var retval = '';
+            var str = val;
+            var pos = 0;
+            var strLen = str.length;
+            var indentStr = '\t';
+            var newLine = '\n';
+            var char = '';
+
+            for (var i=0; i<strLen; i++) {
+                char = str.substring(i,i+1);
+
+                if (char == '}' || char == ']') {
+                    retval = retval + newLine;
+                    pos = pos - 1;
+
+                    for (var j=0; j<pos; j++) {
+                        retval = retval + indentStr;
+                    }
+                }
+
+                retval = retval + char;
+
+                if (char == '{' || char == '[' || char == ',') {
+                    retval = retval + newLine;
+
+                    if (char == '{' || char == '[') {
+                        pos = pos + 1;
+                    }
+
+                    for (var k=0; k<pos; k++) {
+                        retval = retval + indentStr;
+                    }
+                }
+            }
+
+            return retval;
+        }
+
+
+        function setDefaultParam(name, value)
+        {
+            var dParams = getDefaultParams();
+            dParams[name] = value;
+            var cmdDefaults =formatJson(JSON.stringify(dParams));
+            $("#defaultEdit").val(cmdDefaults);
+            $.cookie("cmdDefaults", cmdDefaults, {path: '/', expires: 365});
+        }
+
+        function getDefaultParams()
+        {
+            var dParams = {};
+            var cmdDefaults = $.cookie("cmdDefaults");
+            if(typeof(cmdDefaults)!='undefined')
+            {
+                $('#defaultEdit').val(cmdDefaults);
+                try {
+                    var dParams = JSON.parse(cmdDefaults);
+                } catch(e) {
+                    console.log(cmdDefaults);
+                    alert("error loading defaults: " + e.message);
+                    dParams = {};
+                }
+            }
+            return dParams;
+        }
+
+        function populateCmd(name, target)
+        {
+            var dParams = getDefaultParams();
+
+            cmd = "game." + name;
+            var input = {cmd:cmd};
+            var key = "session";
+            if(typeof(dParams[key]) != 'undefined') {
+                input[key] = dParams[key];
+            } else {
+                input.session = 'xxxx';
+            }
+
+            var paramInfo = "";
+            var funcInfo = Env.functions[name];
+            for (key in funcInfo.params)
+            {
+                var dtype = funcInfo.params[key].dtype;
+
+                if(typeof(dParams[key]) != 'undefined') {
+                    input[key] = dParams[key];
+                    continue;
+                }
+                if(dtype == 'object') {
+                    input[key] = {};
+                } else if (dtype == 'int') {
+                    input[key] = 0;
+                } else if (dtype == 'float') {
+                    input[key] = 0.0;
+                } else if (dtype == 'array') {
+                    input[key] = [];
+                } else if (dtype == 'string') {
+                    input[key] = '';
+                }
+            }
+            target.set(input);
+        }
+
+        $(init);
+        function init()
+        {
+            var inputContainer = document.getElementById("inputEditor");
+// SWD - graphic editor
+//    var inputEdit = new jsoneditor.JSONEditor(container);
+            var inputEdit = new jsoneditor.JSONFormatter(inputContainer);
+            var outputContainer = document.getElementById("outputEditor");
+            var outputEdit = new jsoneditor.JSONFormatter(outputContainer);
+
+            var dParam = getDefaultParams();
+
+            $('#saveDefaults').click(function() {
+                var cmdDefaults = $('#defaultEdit').val();
+                $.cookie("cmdDefaults", cmdDefaults, {path: '/', expires: 365});
+            });
+
+            $('#user1Create').click(function() {
+                populateCmd("create", inputEdit);
+            });
+
+            $('#callFunction').click(function() {
+                var input = inputEdit.get();
+                console.log(input);
+                $.ajax
+                        ({
+                            type: "POST",
+                            url: 'http://localhost:5101/api',
+                            dataType: 'json',
+                            async: false,
+                            data: input,
+                            success: function (res, status) {
+                                log(res);
+                                if(typeof(res.data.gameId) != 'undefined')
+                                {
+                                    setDefaultParam("gameId", res.data.gameId);
+                                }
+                            }
+                        })
+            });
+            $('#resetFunction').click(function() {
+                initParams(inputEdit, outputEdit)
+            });
+        }
+    </script>
+</head>
+<body>
+<p>
+</p>
+<table style="width:100%;">
+    <tr>
+        <td style="width:70%;">message log</td>
+        <td>default params</td>
+    </tr>
+    <tr>
+        <td><textarea id="messageLog" readonly style="height:100;width:100%;"></textarea></td>
+        <td><textarea id="defaultEdit" style="height:100;width:100%;"></textarea></td>
+    </tr>
+</table>
+<table style="width:100%;">
+    <tr>
+        <td style="width:50%;">user 1</td>
+        <td>user 2</td>
+    </tr>
+    <tr>
+        <td>
+            <button id="user1Create">create</button>
+            <button id="">notify</button>
+            <button id="">turn</button>
+            <button id="callFunction" style="float:right;">make call</button>
+        </td>
+        <td>
+            <button id="">create</button>
+            <button id="">notify</button>
+            <button id="">turn</button>
+            <button id="callFunction" style="float:right;">make call</button>
+        </td>
+    </tr>
+    <tr>
+        <td><div id="inputEditor"></div></td>
+        <td><div id="outputEditor"></div></td>
+    </tr>
+</table>
+</body>
+</html>

@@ -68,12 +68,18 @@
             $('#moduleName').text(Env.module);
             $('#functionName').text(Env.function);
             var funcInfo = Env.functions[Env.function];
+            $('#functionDescription').text(funcInfo.desc);
             var paramInfo = "";
             console.log(funcInfo);
             for (key in funcInfo.params)
             {
                 var dtype = funcInfo.params[key].dtype;
-                paramInfo += key + "=" + dtype  + " ";
+                paramInfo += key + "=" + dtype;
+                if(typeof(funcInfo.params[key].options) != 'undefined')
+                {
+                    paramInfo += "(" + funcInfo.params[key].options + ")";
+                }
+                paramInfo += "<br>";
 
                 if(typeof(dParams[key]) != 'undefined') {
                     input[key] = dParams[key];
@@ -95,7 +101,7 @@
             {
                 paramInfo = "(none)";
             }
-            $('#functionParams').text(paramInfo);
+            $('#functionParams').html(paramInfo);
             inputEdit.set(input);
             outputEdit.set();
         }
@@ -115,7 +121,7 @@
 
             $('#saveDefaults').click(function() {
                 var cmdDefaults = $('#defaultEdit').val();
-                $.cookie("cmdDefaults", cmdDefaults, {path: '/'});
+                $.cookie("cmdDefaults", cmdDefaults, {path: '/', expires: 365});
             });
 
             $('#callFunction').click(function() {
@@ -140,14 +146,18 @@
     </script>
 </head>
 <body>
-<table border="0" style="float:left;">
+<table border="1" style="float:left;">
     <tr>
         <td class="nameCell">module:</td><td><div id="moduleName">{module_name}</div></td>
-        <td style="width:100px"></td><td></td>
     </tr>
     <tr>
         <td class="nameCell">function:</td><td><div id="functionName">{function_name}</div></td>
-        <td class="nameCell" style="text-align:right;">params:</td><td><div id="functionParams">{function_params}</div></td>
+    </tr>
+    <tr>
+        <td class="nameCell">description:</td><td><div id="functionDescription">{function_description}</div></td>
+    </tr>
+    <tr>
+        <td class="nameCell" style="vertical-align: text-top;">params:</td><td><div id="functionParams">{function_params}</div></td>
     </tr>
 </table>
 <textarea id="defaultEdit" style="float:right;height:100;width:200;"></textarea>

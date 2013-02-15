@@ -52,6 +52,18 @@ app.get('/function', function(req, res) {
 	res.send("here");
 });
 
+app.get('/testgame.html', function(req, res) {
+	console.log("in testgame");
+	var map = new Object();
+	map.module = "game";
+	var cmdFile = global.gBaseDir + '/functions/' + map.module + '/' + map.module + '.js';
+	delete require.cache[require.resolve(cmdFile)];	
+	var modulePack = require(cmdFile);
+	map.functions = modulePack.functions;
+//	console.log(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
+	res.render('testgame.html', {params: JSON.stringify(map)});
+});
+
 app.get('/function/:module/:function', function(req, res) {
 	var map = new Object();
 	map.module = req.param("module");
