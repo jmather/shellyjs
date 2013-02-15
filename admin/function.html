@@ -2,6 +2,7 @@
 <head>
 <title>Raw function editor</title>
     <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
@@ -31,14 +32,37 @@
         var Env = new Object();
         Env = {{{params}});
 
+        function getDefaultParams()
+        {
+            var dParams = {};
+            var cmdDefaults = $.cookie("cmdDefaults");
+            if(typeof(cmdDefaults)!='undefined')
+            {
+                $('#defaultEdit').val(cmdDefaults);
+                try {
+                    var dParams = JSON.parse(cmdDefaults);
+                } catch(e) {
+                    console.log(cmdDefaults);
+                    alert("error loading defaults: " + e.message);
+                    dParams = {};
+                }
+            }
+            return dParams;
+        }
 
         function initParams(inputEdit, outputEdit)
         {
             var cmd = Env.module + "." + Env.function;
+            var dParams = getDefaultParams();
             var input = {cmd:cmd};
             if(cmd!='reg.login' && cmd!='reg.check' && cmd!='reg.create')
             {
-                input.session = 'xxxx';
+                var key = "session";
+                if(typeof(dParams[key]) != 'undefined') {
+                    input[key] = dParams[key];
+                } else {
+                    input.session = 'xxxx';
+                }
             }
 
             $('#moduleName').text(Env.module);
@@ -50,6 +74,11 @@
             {
                 var dtype = funcInfo.params[key].dtype;
                 paramInfo += key + "=" + dtype  + " ";
+
+                if(typeof(dParams[key]) != 'undefined') {
+                    input[key] = dParams[key];
+                    continue;
+                }
                 if(dtype == 'object') {
                     input[key] = {};
                 } else if (dtype == 'int') {
@@ -84,6 +113,11 @@
 
             initParams(inputEdit, outputEdit);
 
+            $('#saveDefaults').click(function() {
+                var cmdDefaults = $('#defaultEdit').val();
+                $.cookie("cmdDefaults", cmdDefaults, {path: '/'});
+            });
+
             $('#callFunction').click(function() {
                 var input = inputEdit.get();
                 console.log(input);
@@ -106,7 +140,7 @@
     </script>
 </head>
 <body>
-<table>
+<table border="0" style="float:left;">
     <tr>
         <td class="nameCell">module:</td><td><div id="moduleName">{module_name}</div></td>
         <td style="width:100px"></td><td></td>
@@ -116,6 +150,9 @@
         <td class="nameCell" style="text-align:right;">params:</td><td><div id="functionParams">{function_params}</div></td>
     </tr>
 </table>
+<textarea id="defaultEdit" style="float:right;height:100;width:200;"></textarea>
+<button id="saveDefaults" style="float:right">set</button>
+<div style="clear:both"/>
 <p>
     <button id="callFunction">call function</button>
     <button id="resetFunction">reset</button>

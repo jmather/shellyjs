@@ -76,8 +76,10 @@ server.use(function(req, res, next) {
 		wrapper.error = 1;
 		wrapper.info = "bad session";
 		res.send(wrapper);
+		return next();
 	}
-	console.log("session OK");
+	req.params.uid = psession.split(':')[1];
+	console.log("session OK: uid = " + req.params.uid);
 	return next();
 }
 );

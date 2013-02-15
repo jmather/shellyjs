@@ -21,18 +21,19 @@ session.create = function(uid) {
 
 session.check = function(key) {
 	console.log('session.check key=' + key);
-	if(key == 'xxxx') {
-		return true;
-	}
 	var keyParts = key.split(':');
 	if (keyParts.length != 4)
 	{
 		return false;
-	}
+	}	
+	var version = keyParts[0];
 	var uid = keyParts[1];
 	var hash = keyParts[2];
+	// SWD for testing
+	if(hash == 'xxxx') {
+		return true;
+	}
 	var ts = keyParts[3];
-	var version = keyParts[0];
 	var secStr = util.format('uid=%s;ts=%s;secret=%s', uid, ts, sessionSecret);
 	var newHash = crypto.createHash('md5').update(secStr).digest("hex");
 	return newHash == hash;
