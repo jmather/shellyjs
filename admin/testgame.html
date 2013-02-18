@@ -198,12 +198,21 @@
             $('#user1Create').click(function() {
                 populateCmd("create", inputEdit);
             });
+            $('#user1Kick').click(function() {
+                populateCmd("kick", inputEdit);
+            });
+            $('#user1Turn').click(function() {
+                populateCmd("turn", inputEdit);
+            });
             $('#gameGet').click(function() {
                 populateCmd("get", inputEdit);
             });
 
             $('#user2Join').click(function() {
                 populateCmd("join", user2Edit);
+            });
+            $('#user2Turn').click(function() {
+                populateCmd("turn", user2Edit);
             });
             $('#user2Leave').click(function() {
                 populateCmd("leave", user2Edit);
@@ -212,23 +221,7 @@
 
             $('#callFunction').click(function() {
                 var input = inputEdit.get();
-                console.log(input);
-                $.ajax
-                        ({
-                            type: "POST",
-                            url: 'http://localhost:5101/api',
-                            dataType: 'json',
-                            async: false,
-                            data: input,
-                            success: function (res, status) {
-                                log(res);
-                                setState(res);
-                                if(typeof(res.data.gameId) != 'undefined')
-                                {
-                                    setDefaultParam("gameId", res.data.gameId);
-                                }
-                            }
-                        })
+                callServer(input);
             });
             $('#user2CallFunction').click(function() {
                 var input = user2Edit.get();
@@ -264,13 +257,14 @@
             <button id="user1Create">create</button>
             <button id="gameGet">info</button>
             <button id="">notify</button>
-            <button id="">turn</button>
+            <button id="user1Turn">turn</button>
+            <button id="user1Kick">kick</button>
             <button id="callFunction" style="float:right;">make call</button>
         </td>
         <td>
             <button id="user2Join">join</button>
             <button id="user2Leave">leave</button>
-            <button id="">turn</button>
+            <button id="user2Turn">turn</button>
             <button id="user2CallFunction" style="float:right;">make call</button>
         </td>
     </tr>

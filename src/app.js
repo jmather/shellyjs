@@ -109,6 +109,7 @@ function respond(req, res, next) {
 	wrapper.ts = new Date().getTime();
 	wrapper.error = 1;			// default to error, function must clear
 	wrapper.info = '';
+	wrapper.data = {};
 	
 	// get cmd to fire
 	var cmdParts = req.params.cmd.split('.');
@@ -128,7 +129,7 @@ function respond(req, res, next) {
 		{
 			wrapper.error = 1;
 			// TODO: SWD strip param name for production
-			wrapper.info = 'missing param: '+key
+			wrapper.info = 'missing param: '+key;
 			console.log(wrapper);
 			res.send(wrapper);
 			return next();
@@ -143,7 +144,10 @@ function respond(req, res, next) {
 		{
 			wrapper.info = module.errors[error];
 		}
-		wrapper.data = data;
+		if(data != null && typeof(data) != undefined)
+		{
+			wrapper.data = data;
+		}
 		res.send(wrapper);
 		
 	});
