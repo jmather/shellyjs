@@ -1,4 +1,4 @@
-var _ = require("underscore");
+var _ = require("lodash");
 
 var db = global.db;
 
@@ -15,6 +15,7 @@ game.functions = {
 																							security: []},
 	start: {desc: 'start a game', params: {gameId:{dtype:'string'}}, security: []},
 	join: {desc: 'join an existing game', params: {gameId:{dtype:'string'}}, security: []},
+	leave: {desc: 'leave an existing game', params: {gameId:{dtype:'string'}}, security: []},
 	end: {desc: 'end a game', params: {gameId: {dtype:'string'}, message:{dtype:'string'}}, security: []},
 	get: {desc: 'get game object', params: {gameId:{dtype:'string'}}, security: []},
 	set: {desc: 'set game object', params: {gameId:{dtype:'string'}, game: {dtype: 'object'}}, security: []}
@@ -109,6 +110,52 @@ game.end = function(req, res, cb)
 		}
 		cb(0, out);
 	});
+}
+
+function merge(gameId, data, cb)
+{
+	db.kget('kGame', gameId, function(err, res){
+		if(res == null) {
+			cb(102);
+			return;
+		}
+		var oldGame = JSON.parse(res);
+	  game = _.merge(oldGame, data);
+		var gameStr = JSON.stringify(game);
+		db.kset('kGame', gameId, gameStr, function(err, res) {
+			if(err != null) {
+				cb(101);
+				return;
+			}
+			cb(0, game);
+		});
+	});	
+}
+
+game.join = function(req, res, cb)
+{
+	var uid = req.params.uid;	
+	var gameId = req.params.gameId;
+	
+	var out = new Object();
+	out.players = {};
+	out.players[uid] = {status: 'ready'};
+	out.foo = 'foo';
+	
+	merge(gameId, out, cb);	
+}
+
+game.leave = function(req, res, cb)
+{
+	var uid = req.params.uid;	
+	var gameId = req.params.gameId;
+	
+	var out = new Object();
+	out.players = {};
+	out.players[uid] = {status: 'left'};
+	out.foo = 'foo';
+	
+	merge(gameId, out, cb);	
 }
 
 game.get = function(req, res, cb)
