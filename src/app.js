@@ -103,13 +103,7 @@ function respond(req, res, next) {
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
 	
 	// default return wrapper
-	var wrapper = new Object();
-	wrapper.cmd = req.params.cmd;
-	wrapper.session = req.params.session;
-	wrapper.ts = new Date().getTime();
-	wrapper.error = 1;			// default to error, function must clear
-	wrapper.info = '';
-	wrapper.data = {};
+	var wrapper = getWrapper(req);
 	
 	// get cmd to fire
 	var cmdParts = req.params.cmd.split('.');
@@ -135,21 +129,37 @@ function respond(req, res, next) {
 			return next();
 		}
 	}
+	
+	// add the env function for any module commands to fill in
+	req.env = {};
 
 	// call function
-	module[funcName](req, res, function(error, data) {
-		// default returns
-		wrapper.error = error;
-		if(error!=0)
-		{
-			wrapper.info = module.errors[error];
-		}
-		if(data != null && typeof(data) != undefined)
-		{
-			wrapper.data = data;
-		}
-		res.send(wrapper);
-		
+	if(typeof(module.pre) != 'function') {
+		console.log('no pre - using default');
+		module.pre = function(req, res, cb) {cb(0);}
+	}
+	if(typeof(module.post) != 'function') {
+		console.log('no post - using default');
+		module.post = function(req, res, cb) {cb(0);}
+	}
+	module.pre(req, res, function(error, data) {
+		// SWD check error
+		module[funcName](req, res, function(error, data) {
+			// default returns
+			wrapper.error = error;
+			if(error!=0)
+			{
+				wrapper.info = module.errors[error];
+			}
+			if(data != null && typeof(data) != undefined)
+			{
+				wrapper.data = data;
+			}
+			module.post(req, res, function(error, data) {
+				// SWD check error
+				res.send(wrapper);				
+			});
+		});
 	});
 	return next();
 }

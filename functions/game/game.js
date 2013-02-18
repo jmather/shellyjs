@@ -30,14 +30,64 @@ game.errors = {
 	103: "unable to set game state",
 	104: "game has already started",
 	105: "not your turn",
-	106: "user has already joined"
+	106: "user has already joined",
+	107: "unable to parse game state"
+}
+
+game.pre = function(req, res, cb)
+{
+	if(typeof(req.params.gameId) == 'undefined')
+	{
+		cb(0);
+		return;
+	}
+	
+	var gameId = req.params.gameId;
+	console.log("game.pre: populating game info for " + gameId);
+	db.kget('kGame', gameId, function(err, res) {
+		if(res == null) {
+			cb(102);
+			return;
+		}
+		// SWD try catch around this
+		var game = JSON.parse(res);
+		if(game == null) {
+			cb(107);
+			return;
+		}
+		console.log("game.pre: setting game for " + gameId);
+		req.env.game = game;
+		cb(0);
+	});
+}
+
+game.post = function(req, rs, cb)
+{
+	console.log("game.post");
+	if(typeof(req.env.game) == 'undefined')  // no game to save
+	{
+		cb(0);
+		return;
+	}
+	console.log("game.post - saving game");
+	var game = req.env.game;
+	var gameId = req.env.game.gameId;
+	
+	var gameStr = JSON.stringify(game);	
+	db.kset('kGame', gameId, gameStr, function(err, res) {
+		if(err != null) {
+			cb(101);
+			return;
+		}
+		cb(0);
+	});
 }
 
 game.create = function(req, res, cb)
 {
 	var uid = req.params.uid;
 	
-	var out = new Object();
+	var game = new Object();
 
 	/*
 	var email = sanitize(req.params.email).trim();
@@ -52,144 +102,75 @@ game.create = function(req, res, cb)
 	*/
 	
 	db.nextId("game", function(err, res) {
-		out.gameId = res;
+		game.gameId = res;
 		var ts = new Date().getTime();
-		out.created = ts;
-		out.lastModified = ts;
-		out.status = 'created';
-		out.players = {};
-		out.players[uid] = {status: 'ready'};
-		out.playerOrder = [uid];
-		out.whoTurn = uid;
-		out.turnsPlayed = 0;
+		game.created = ts;
+		game.lastModified = ts;
+		game.status = 'created';
+		game.players = {};
+		game.players[uid] = {status: 'ready'};
+		game.playerOrder = [uid];
+		game.whoTurn = uid;
+		game.turnsPlayed = 0;
 		
-		var gameStr = JSON.stringify(out);
-		db.kset('kGame', out.gameId, gameStr, function(err, res) {
-			if(err != null) {
-				cb(101);
-				return;
-			}
-			cb(0, out);
-		});
+		req.env.game = game;
+		cb(0, game);	
 	});
 }
 
 game.start = function(req, res, cb)
 {
-	var gameId = req.params.gameId;
+	var game = req.env.game;
 	
-	db.kget('kGame', gameId, function(err, res) {
-		if(res == null) {
-			cb(102);
-			return;
-		}
-		var game = JSON.parse(res);
-		if(game.status != 'created')
-		{
-			cb(104);
-			return;
-		}
+	game.status = "playing";
 	
-		var out = new Object();
-		out.status = "playing";
-		var outStr = JSON.stringify(out);
-		db.kset('kGame', gameId, outStr, function(err, res) {
-			if(err != null) {
-				cb(101);
-				return;
-			}
-			cb(0, out);
-		});
-	});
+	cb(0, game);
 }
 
 game.end = function(req, res, cb)
 {
-	var gameId = req.params.gameId;
+	var game = req.env.game;
 	
-	var out = new Object();
-	out.status = "over";
-	var outStr = JSON.stringify(out);
-	db.kset('kGame', gameId, outStr, function(err, res) {
-		if(err != null) {
-			cb(101);
-			return;
-		}
-		cb(0, out);
-	});
-}
-
-function merge(gameId, data, cb)
-{
-	db.kget('kGame', gameId, function(err, res){
-		if(res == null) {
-			cb(102);
-			return;
-		}
-		var oldGame = JSON.parse(res);
-	  game = _.merge(oldGame, data);
-		var gameStr = JSON.stringify(game);
-		db.kset('kGame', gameId, gameStr, function(err, res) {
-			if(err != null) {
-				cb(101);
-				return;
-			}
-			cb(0, game);
-		});
-	});	
+	game.status = "over";
+	
+	cb(0, game);
 }
 
 game.join = function(req, res, cb)
 {
-	var uid = req.params.uid;	
-	var gameId = req.params.gameId;
+	var uid = req.params.uid;
+	var game = req.env.game;
 	
-	db.kget('kGame', gameId, function(err, res){
-		if(res == null) {
-			cb(102);
-			return;
-		}
-		var game = JSON.parse(res);
-		if(typeof(game.players[uid]) == 'object') {
-			cb(106);
-			return;
-		}
-		game.players[uid] = {status: 'ready'};
-		game.playerOrder.push(uid);
-		var gameStr = JSON.stringify(game);
-		db.kset('kGame', gameId, gameStr, function(err, res) {
-			if(err != null) {
-				cb(101);
-				return;
-			}
-			cb(0, game);
-		});
-	});
+	if(typeof(game.players[uid]) == 'object') {
+		cb(106);  // already in game
+		return;
+	}
+	game.players[uid] = {status: 'ready'};
+	game.playerOrder.push(uid);
+	
+	cb(0, game);
 }
 
 game.leave = function(req, res, cb)
 {
-	var uid = req.params.uid;	
-	var gameId = req.params.gameId;
+	var uid = req.params.uid;
+	var game = req.env.game;
 	
-	var out = new Object();
-	out.players = {};
-	out.players[uid] = {status: 'left'};
+	// SWD checke user
+	game.players[uid] = {status: 'left'};
 	
-	merge(gameId, out, cb);	
+	cb(0, game);
 }
 
 game.kick = function(req, res, cb)
 {
-	var uid = req.params.uid;
-	var gameId = req.params.gameId;
 	var kickId = req.params.kickId;
+	var game = req.env.game;
 	
-	var out = new Object();
-	out.players = {};
-	out.players[kickId] = {status: 'kicked'};
+	// SWD check user
+	game.players[kickId] = {status: 'kicked'};
 	
-	merge(gameId, out, cb);	
+	cb(0, game);
 }
 
 game.turn = function(req, res, cb)
@@ -197,50 +178,34 @@ game.turn = function(req, res, cb)
 	var uid = req.params.uid;
 	var gameId = req.params.gameId;
 	
+	var game = req.env.game;
+	
 	var out = new Object();
 	
-	db.kget('kGame', req.params.gameId, function(err, res) {
-		if(res == null) {
-			cb(102);
-			return;
+	if(game.whoTurn != uid) {
+		cb(105);  // not your turn			
+	} else {
+		var nextIndex = game.playerOrder.indexOf(uid) + 1;
+		if(nextIndex == game.playerOrder.length) {
+			nextIndex = 0;
 		}
-		var game = JSON.parse(res);
-		if(game.whoTurn != uid) {
-			cb(105);  // not your turn			
-		} else {
-			var nextIndex = game.playerOrder.indexOf(uid) + 1;
-			if(nextIndex == game.playerOrder.length) {
-				nextIndex = 0;
-			}
-			game.whoTurn = game.playerOrder[nextIndex];
-			game.turnsPlayed++;
-			var gameStr = JSON.stringify(game);
-			db.kset('kGame', gameId, gameStr, function(err, res) {
-				if(err != null) {
-					cb(101);
-					return;
-				}
-				cb(0, game);
-			});
-		}
-	});
+		game.whoTurn = game.playerOrder[nextIndex];
+		game.turnsPlayed++;
+		cb(0, game);
+	}
 }
 
 game.get = function(req, res, cb)
 {
-	db.kget('kGame', req.params.gameId, function(err, res) {
-		if(res == null) {
-			cb(102);
-			return;
-		}
-		cb(0, JSON.parse(res));
-	});
+	cb(0, req.env.game);
 }
 
 game.set = function(req, res, cb)
 {
-	var gameId = req.params.gameId;
-	var game = req.params.game;
+	var game = req.env.game;
+	var newGame = req.params.game;
 	
-	merge(gameId, game, cb);
+	game = _.merge(game, newGame);
+	
+	cb(0, game);
 }
