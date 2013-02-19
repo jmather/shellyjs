@@ -70,6 +70,7 @@ server.use(function(req, res, next) {
 		return next();
 	}
 	var psession = req.params.session;
+	// SWD - should grab user object out of check and stuff into req.session
 	if(!session.check(psession)) {
 	  res.header("Access-Control-Allow-Origin", "*");
 	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
@@ -79,8 +80,9 @@ server.use(function(req, res, next) {
 		res.send(wrapper);
 		return next();
 	}
-	req.params.uid = psession.split(':')[1];
-	console.log("session OK: uid = " + req.params.uid);
+	req.session = {};
+	req.session.uid = psession.split(':')[1];
+	console.log("session OK: uid = " + req.session.uid);
 	return next();
 }
 );
@@ -140,8 +142,8 @@ function respond(req, res, next) {
 			return next();
 		}
 	}
-	
-	// add the env function for any module commands to fill in
+
+	// init for modules to use to pass data
 	req.env = {};
 
 	// ensure we have pre/post functions

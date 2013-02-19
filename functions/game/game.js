@@ -84,7 +84,7 @@ game.post = function(req, rs, cb)
 
 game.create = function(req, res, cb)
 {
-	var uid = req.params.uid;
+	var uid = req.session.uid;
 	
 	var game = new Object();
 	
@@ -126,7 +126,7 @@ game.end = function(req, res, cb)
 
 game.join = function(req, res, cb)
 {
-	var uid = req.params.uid;
+	var uid = req.session.uid;
 	var game = req.env.game;
 	
 	if(typeof(game.players[uid]) == 'object') {
@@ -141,7 +141,7 @@ game.join = function(req, res, cb)
 
 game.leave = function(req, res, cb)
 {
-	var uid = req.params.uid;
+	var uid = req.session.uid;
 	var game = req.env.game;
 	
 	// SWD checke user
@@ -163,7 +163,7 @@ game.kick = function(req, res, cb)
 
 game.turn = function(req, res, cb)
 {
-	var uid = req.params.uid;
+	var uid = req.session.uid;
 	var gameId = req.params.gameId;
 	
 	var game = req.env.game;
