@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var crypto = require('crypto');
 
 var db = global.db;
 
@@ -63,14 +64,23 @@ object.post = function(req, res, cb)
 		return;
 	}
 	
-	var objectStr = JSON.stringify(object);
-	db.kset('kObject', [object.className, object.oid], objectStr, function(err, res) {
-		if(err != null) {
-			cb(101);
+	var newHash = crypto.createHash('md5').update(JSON.stringify(object.data)).digest("hex");
+	if(newHash != object.hash)
+	{
+		console.log("object modified - saving");
+		object.hash = newHash;
+		var objectStr = JSON.stringify(object);
+		db.kset('kObject', [object.className, object.oid], objectStr, function(err, res) {
+			if(err != null) {
+				cb(101);
+				return;
+			}
+			cb(0);
 			return;
-		}
+		});
+	} else {
 		cb(0);
-	});
+	}
 }
 
 object.create = function(req, res, cb)
@@ -86,6 +96,7 @@ object.create = function(req, res, cb)
 		var ts = new Date().getTime();
 		object.created = ts;
 		object.lastModified = ts;
+		object.hash = '';
 		object.data = req.params.object;
 	
 		req.env.object = object;
