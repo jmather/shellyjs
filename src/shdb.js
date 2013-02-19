@@ -18,7 +18,8 @@ client.on("error", function (err) {
 var gKeyTypes = {
 	kEmailMap: {tpl: "em:%s"},
 	kUser: {tpl: "u:%s"},
-	kGame: {tpl: "game:%s"}
+	kGame: {tpl: "game:%s"},
+	kObject: {tpl: "object:%s:%s"}	
 }
 
 shdb.init = function() {
@@ -41,8 +42,23 @@ shdb.get = function(key, cb) {
 	client.get(key, cb);
 }
 
+function genKey(keyType, params) {
+	if(typeof(params)=='object')
+	{
+		var pa = [gKeyTypes[keyType].tpl].concat(params);
+		console.log(pa);
+		key = gDbScope + util.format.apply(util.format, pa);
+		
+	} else {
+		key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
+	}
+	return key;
+}
+
 shdb.kget = function(keyType, params, cb) {
-	var key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
+	// SWD check keyType undefined
+	
+	var key = genKey(keyType, params);
 	console.log('kget: '+ gKeyTypes[keyType].tpl + '->' + key);
 	client.get(key, function(err, value) {
 		cb(err, value);
@@ -59,7 +75,9 @@ shdb.set = function(key, value, cb) {
 }
 
 shdb.kset = function(keyType, params, value, cb) {
-	var key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
+	// SWD check keyType undefined
+
+	var key = genKey(keyType, params);
 	console.log('kset: '+ gKeyTypes[keyType].tpl + '->' + key);
 	client.set(key, value, function(err, value) {
 		if(typeof(cb)=='function')
