@@ -9,7 +9,6 @@ game.functions = {
 	create: {desc: 'create a new game', params: {name:{dtype: 'string'},
 																							style: {dtype:'string', options:'turn, round, live'},
 																							access: {dtype:'string', options:'public, private, invite'},
-																							ownerId:{dtype:'string'},
 																							minPlayers:{dtype:'int'},
 																							maxPlayers:{dtype:'int'}},
 																							security: []},
@@ -76,7 +75,7 @@ game.post = function(req, rs, cb)
 	var gameStr = JSON.stringify(game);	
 	db.kset('kGame', gameId, gameStr, function(err, res) {
 		if(err != null) {
-			cb(101);
+			cb(103);
 			return;
 		}
 		cb(0);
@@ -88,21 +87,10 @@ game.create = function(req, res, cb)
 	var uid = req.params.uid;
 	
 	var game = new Object();
-
-	/*
-	var email = sanitize(req.params.email).trim();
-	var password = sanitize(req.params.password).trim();
-	try {
-		check(email, 102).isEmail();
-		check(password, 103).len(6);
-	} catch (e) {
-		cb(e.message);
-		return;
-	}
-	*/
 	
 	db.nextId("game", function(err, res) {
 		game.gameId = res;
+		game.name = req.params.name;
 		var ts = new Date().getTime();
 		game.created = ts;
 		game.lastModified = ts;

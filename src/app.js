@@ -58,6 +58,7 @@ function getWrapper(req)
 	wrapper.ts = new Date().getTime();
 	wrapper.error = 1;			// default to error, function must clear
 	wrapper.info = '';
+	wrapper.data = {};
 	return wrapper;
 }
 
@@ -96,6 +97,16 @@ server.listen(gPort, function() {
 	console.log('%s listening at %s', server.name, server.url);
 });
 
+function errorStr(error, module)
+{
+	var info = '';
+	if(error != 0 && typeof(module.errors) != 'undefined' && typeof(module.errors[error]) != undefined)
+	{
+		info = module.errors[error];
+	}
+	return info;
+}
+
 function respond(req, res, next) {
 	util.puts('cmd = ' + req.params.cmd);
 	// SWD think restify should be doing this for us - or we are missing a setting
@@ -133,7 +144,7 @@ function respond(req, res, next) {
 	// add the env function for any module commands to fill in
 	req.env = {};
 
-	// call function
+	// ensure we have pre/post functions
 	if(typeof(module.pre) != 'function') {
 		console.log('no pre - using default');
 		module.pre = function(req, res, cb) {cb(0);}
@@ -142,24 +153,38 @@ function respond(req, res, next) {
 		console.log('no post - using default');
 		module.post = function(req, res, cb) {cb(0);}
 	}
+	
+	// call the pre, function, post sequence
 	module.pre(req, res, function(error, data) {
-		// SWD check error
+		if(error != 0) {
+			wrapper.error = error;
+			wrapper.info = errorStr(error, module);
+			res.send(wrapper);
+			return;
+		}
 		module[funcName](req, res, function(error, data) {
 			// default returns
 			wrapper.error = error;
-			if(error!=0)
-			{
-				wrapper.info = module.errors[error];
-			}
+			wrapper.info = errorStr(error, module);
 			if(data != null && typeof(data) != undefined)
 			{
 				wrapper.data = data;
 			}
 			module.post(req, res, function(error, data) {
-				// SWD check error
-				res.send(wrapper);				
+				// SWD right now treat this has a hard error, but should be able to retry or something
+				if(error != 0) {
+					wrapper.error = error;
+					wrapper.info = errorStr(error, module);
+					wrapper.data = {};  // clear the data that was not saved;
+					res.send(wrapper);
+					return;
+				} else {				
+					res.send(wrapper);
+					return;
+				}
 			});
 		});
 	});
+	// SWD not sure we want to next() on async while functions are getting called
 	return next();
 }
