@@ -79,15 +79,16 @@ object.create = function(req, res, cb)
 	var className = req.params.className;
 	
 	var object = {};
-	db.nextId('object', function(error, value) {
+	db.nextId('object-' + className, function(error, value) {
 		// create the object
 		object.oid = value.toString();
 		object.className = className;
 		var ts = new Date().getTime();
 		object.created = ts;
 		object.lastModified = ts;
+		object.data = req.params.object;
 	
-		req.env.object = _.merge(object, req.params.object);
+		req.env.object = object;
   	cb(0, object);
 	});
 }
@@ -108,7 +109,9 @@ object.set = function(req, res, cb)
 	var object = req.env.object
 	var newObject = req.params.object;
 
-	req.env.object = _.merge(object, newObject);
+	req.env.object.data = _.merge(object.data, newObject);
+	var ts = new Date().getTime();
+	req.env.object.lastModified = ts;
 	
 	cb(0, req.env.object);
 }

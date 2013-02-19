@@ -45,10 +45,8 @@ shdb.get = function(key, cb) {
 function genKey(keyType, params) {
 	if(typeof(params)=='object')
 	{
-		var pa = [gKeyTypes[keyType].tpl].concat(params);
-		console.log(pa);
-		key = gDbScope + util.format.apply(util.format, pa);
-		
+		var paramArray = [gKeyTypes[keyType].tpl].concat(params);
+		key = gDbScope + util.format.apply(util.format, paramArray);		
 	} else {
 		key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
 	}
