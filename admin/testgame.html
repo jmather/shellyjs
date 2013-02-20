@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Raw function editor</title>
+<title>Game Simulator</title>
     <script src="/static/js/jquery-1.7.1.min.js"></script>
     <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
     <style type="text/css">
-        #inputEditor {
+        #user1Editor {
             width: 100%;
             height: 200px;
         }
@@ -32,8 +32,7 @@
 
         function log(msg)
         {
-            if (typeof(msg) == 'object')
-            {
+            if (typeof(msg) == 'object') {
 //                msg = "<div style='color:red;'>" + JSON.stringify(msg) + "/div>";
                 msg = JSON.stringify(msg);
             }
@@ -83,36 +82,59 @@
         }
 
 
-        function setDefaultParam(name, value)
+        function setDefaultParam($defaults, name, value)
         {
-            var dParams = getDefaultParams();
+            var dParams = getDefaultParams($defaults);
             dParams[name] = value;
             var cmdDefaults =formatJson(JSON.stringify(dParams));
-            $("#defaultEdit").val(cmdDefaults);
-            $.cookie("cmdDefaults", cmdDefaults, {path: '/', expires: 365});
+            $defaults.val(cmdDefaults);
+
+            saveDefaultParams($defaults);
         }
 
-        function getDefaultParams()
+        function saveDefaultParams($defaults)
+        {
+           var cmdDefaults = $defaults.val();
+           console.log("saving: " + $defaults.attr("id") + " = " + cmdDefaults);
+           $.cookie($defaults.attr("id"), cmdDefaults, {path: '/', expires: 365});
+        }
+
+        function getDefaultParams($defaults)
         {
             var dParams = {};
-            var cmdDefaults = $.cookie("cmdDefaults");
-            if(typeof(cmdDefaults)!='undefined')
-            {
-                $('#defaultEdit').val(cmdDefaults);
-                try {
-                    var dParams = JSON.parse(cmdDefaults);
-                } catch(e) {
-                    console.log(cmdDefaults);
-                    alert("error loading defaults: " + e.message);
-                    dParams = {};
-                }
+            var cmdDefaults = $defaults.val();
+            try {
+                var dParams = JSON.parse(cmdDefaults);
+            } catch(e) {
+                console.log(cmdDefaults);
+//                    alert("error loading defaults: " + e.message);
             }
             return dParams;
         }
 
-        function populateCmd(name, target)
+        function initDefaultParams($defaults)
         {
-            var dParams = getDefaultParams();
+            var dParams = {};
+            var cmdDefaults = $.cookie($defaults.attr("id"));
+            if(typeof(cmdDefaults)!='undefined')
+            {
+                $defaults.val(cmdDefaults);
+                try {
+                    var dParams = JSON.parse(cmdDefaults);
+                } catch(e) {
+                    console.log(cmdDefaults);
+//                    alert("error loading defaults: " + e.message);
+                    dParams = {};
+                }
+            } else {
+                $defaults.val("{}");
+            }
+            return dParams;
+        }
+
+        function populateCmd(name, target, $defaults)
+        {
+            var dParams = getDefaultParams($defaults)
 
             cmd = "game." + name;
             var input = {cmd:cmd};
@@ -148,8 +170,12 @@
             target.set(input);
         }
 
-        function setState(data)
+        function setState(resp)
         {
+            var data = resp;
+            if($("#stripMsg").attr("checked") == "checked" && resp.error == 0) {
+                data = resp.data;
+            }
             var niceJson = formatJson(JSON.stringify(data));
             $("#gameState").val(niceJson);
         }
@@ -169,7 +195,8 @@
                             setState(res);
                             if(typeof(res.data.gameId) != 'undefined')
                             {
-                                setDefaultParam("gameId", res.data.gameId);
+                                setDefaultParam($("#user1Defaults"), "gameId", res.data.gameId);
+                                setDefaultParam($("#user2Defaults"), "gameId", res.data.gameId);
                             }
                         },
                         error: function (xhr, status, error) {
@@ -181,46 +208,54 @@
         $(init);
         function init()
         {
-            var inputContainer = document.getElementById("inputEditor");
+            var inputContainer = document.getElementById("user1Editor");
 // SWD - graphic editor
-//    var inputEdit = new jsoneditor.JSONEditor(container);
-            var inputEdit = new jsoneditor.JSONFormatter(inputContainer);
+//    var user1Edit = new jsoneditor.JSONEditor(container);
+            var user1Edit = new jsoneditor.JSONFormatter(inputContainer);
             var user2Container = document.getElementById("user2Editor");
             var user2Edit = new jsoneditor.JSONFormatter(user2Container);
 
-            var dParam = getDefaultParams();
+            var $user1Defaults = $("#user1Defaults");
+            var $user2Defaults = $("#user2Defaults");
 
-            $('#saveDefaults').click(function() {
-                var cmdDefaults = $('#defaultEdit').val();
-                $.cookie("cmdDefaults", cmdDefaults, {path: '/', expires: 365});
+            initDefaultParams($user1Defaults);
+            initDefaultParams($user2Defaults);
+
+            $('#user1SetDefaults').click(function() {
+                saveDefaultParams($user1Defaults);
             });
+
+            $('#user2SetDefaults').click(function() {
+                saveDefaultParams($user2Defaults);
+            });
+
 
             $('#user1Create').click(function() {
-                populateCmd("create", inputEdit);
+                populateCmd("create", user1Edit, $user1Defaults);
             });
             $('#user1Kick').click(function() {
-                populateCmd("kick", inputEdit);
+                populateCmd("kick", user1Edit, $user1Defaults);
             });
             $('#user1Turn').click(function() {
-                populateCmd("turn", inputEdit);
+                populateCmd("turn", user1Edit, $user1Defaults);
             });
             $('#gameGet').click(function() {
-                populateCmd("get", inputEdit);
+                populateCmd("get", user1Edit, $user1Defaults);
             });
 
             $('#user2Join').click(function() {
-                populateCmd("join", user2Edit);
+                populateCmd("join", user2Edit, $user2Defaults);
             });
             $('#user2Turn').click(function() {
-                populateCmd("turn", user2Edit);
+                populateCmd("turn", user2Edit, $user2Defaults);
             });
             $('#user2Leave').click(function() {
-                populateCmd("leave", user2Edit);
+                populateCmd("leave", user2Edit, $user2Defaults);
             });
 
 
-            $('#callFunction').click(function() {
-                var input = inputEdit.get();
+            $('#user1CallFunction').click(function() {
+                var input = user1Edit.get();
                 callServer(input);
             });
             $('#user2CallFunction').click(function() {
@@ -229,7 +264,7 @@
             });
 
             $('#resetFunction').click(function() {
-                initParams(inputEdit, user2Edit)
+                initParams(user1Edit, user2Edit)
             });
         }
     </script>
@@ -239,12 +274,17 @@
 </p>
 <table style="width:100%;">
     <tr>
-        <td style="width:70%;">game state</td>
+        <td style="width:70%;">game state <input id="stripMsg" type="checkbox" checked="checked">strip envelope no error</input></td>
         <td>default params</td>
     </tr>
     <tr>
         <td><textarea id="gameState" style="height:300;width:100%;"></textarea></td>
-        <td valign="top"><textarea id="defaultEdit" style="height:100;width:100%;"></textarea></td>
+        <td valign="top">
+            User 1<button id="user1SetDefaults" style="float:right">set</button>
+            <textarea id="user1Defaults" style="height:100;width:100%;"></textarea>
+            User 2<button id="user2SetDefaults" style="float:right">set</button>
+            <textarea id="user2Defaults" style="height:100;width:100%;"></textarea>
+        </td>
     </tr>
 </table>
 <table style="width:100%;">
@@ -259,7 +299,7 @@
             <button id="">notify</button>
             <button id="user1Turn">turn</button>
             <button id="user1Kick">kick</button>
-            <button id="callFunction" style="float:right;">make call</button>
+            <button id="user1CallFunction" style="float:right;">make call</button>
         </td>
         <td>
             <button id="user2Join">join</button>
@@ -269,7 +309,7 @@
         </td>
     </tr>
     <tr>
-        <td><div id="inputEditor"></div></td>
+        <td><div id="user1Editor"></div></td>
         <td><div id="user2Editor"></div></td>
     </tr>
 </table>
