@@ -28,27 +28,22 @@ object.pre = function(req, res, cb)
 	var className = req.params.className;
 	var oid = req.params.oid;
 	
+	if(cmd == 'object.create') {
+		cb(0);
+		return;
+	}
+	
 	// SWD - eventually check security session.uid has rights to object
 	
 	req.env.object = null;
 	db.kget('kObject', [className, oid], function(err, value){
 		if(value == null) {
-			if(cmd == 'object.create')
-			{
-				cb(0);  // create call and no object - ok
-			} else {
-				cb(100); // not create and no object - error
-			}
+			cb(100); // not create and no object - error
 			return;
 		} else {
-			if(cmd == 'object.create')
-			{
-				cb(103); // create and object exists - error
-			} else {
-				var object = JSON.parse(value);
-				req.env.object = object;
-				cb(0);
-			}
+			var object = JSON.parse(value);
+			req.env.object = object;
+			cb(0);
 			return;
 		}
 	});
@@ -64,13 +59,20 @@ object.post = function(req, res, cb)
 		return;
 	}
 	
-	var newHash = crypto.createHash('md5').update(JSON.stringify(object.data)).digest("hex");
-	if(newHash != object.hash)
+	// get the hash by removing the info, re-hashing, and replacing info
+	var info = object._info;
+	delete object._info;
+	var newHash = crypto.createHash('md5').update(JSON.stringify(object)).digest("hex");
+	object._info = info;
+	
+	if(newHash != info.hash)
 	{
 		console.log("object modified - saving");
-		object.hash = newHash;
+		object._info.hash = newHash;
+		var ts = new Date().getTime();
+		req.env.object._info.lastModified = ts;	
 		var objectStr = JSON.stringify(object);
-		db.kset('kObject', [object.className, object.oid], objectStr, function(err, res) {
+		db.kset('kObject', [object._info.className, object._info.oid], objectStr, function(err, res) {
 			if(err != null) {
 				cb(101);
 				return;
@@ -91,13 +93,15 @@ object.create = function(req, res, cb)
 	var object = {};
 	db.nextId('object-' + className, function(error, value) {
 		// create the object
-		object.oid = value.toString();
-		object.className = className;
 		var ts = new Date().getTime();
-		object.created = ts;
-		object.lastModified = ts;
-		object.hash = '';
-		object.data = req.params.object;
+		object._info = {
+			oid : value.toString(),
+			className : className,
+			created : ts,
+			lastModified : ts,
+			hash : ''
+		};
+		object = _.merge(object, req.params.object);
 	
 		req.env.object = object;
   	cb(0, object);
@@ -119,10 +123,12 @@ object.set = function(req, res, cb)
 {
 	var object = req.env.object
 	var newObject = req.params.object;
+	
+	if(typeof(newObject._info) != 'undefined') {
+		delete newObject._info; // never merge the info block;
+	}
 
-	req.env.object.data = _.merge(object.data, newObject);
-	var ts = new Date().getTime();
-	req.env.object.lastModified = ts;
+	req.env.object = _.merge(object, newObject);
 	
 	cb(0, req.env.object);
 }
