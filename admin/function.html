@@ -32,6 +32,47 @@
         var Env = new Object();
         Env = {{{params}});
 
+        function formatJson(val) {
+            val = val.replace(/(\n|\t)/gm, '');	// strip all newlines first
+
+            var retval = '';
+            var str = val;
+            var pos = 0;
+            var strLen = str.length;
+            var indentStr = '\t';
+            var newLine = '\n';
+            var char = '';
+
+            for (var i=0; i<strLen; i++) {
+                char = str.substring(i,i+1);
+
+                if (char == '}' || char == ']') {
+                    retval = retval + newLine;
+                    pos = pos - 1;
+
+                    for (var j=0; j<pos; j++) {
+                        retval = retval + indentStr;
+                    }
+                }
+
+                retval = retval + char;
+
+                if (char == '{' || char == '[' || char == ',') {
+                    retval = retval + newLine;
+
+                    if (char == '{' || char == '[') {
+                        pos = pos + 1;
+                    }
+
+                    for (var k=0; k<pos; k++) {
+                        retval = retval + indentStr;
+                    }
+                }
+            }
+
+            return retval;
+        }
+
         function getDefaultParams()
         {
             var dParams = {};
@@ -123,11 +164,17 @@
 
             $('#saveDefaults').click(function() {
                 var cmdDefaults = $('#defaultEdit').val();
-                $.cookie("cmdDefaults", cmdDefaults, {path: '/', expires: 365});
+                var data = formatJson(cmdDefaults);
+                $('#defaultEdit').val(data);
+                $.cookie("cmdDefaults", data, {path: '/', expires: 365});
             });
 
             $('#callFunction').click(function() {
-                var input = inputEdit.get();
+                try {
+                    var input = inputEdit.get();
+                } catch (e) {
+                    alert("error parsing input: " + e.message);
+                }
                 console.log(input);
                 $.ajax
                         ({
@@ -148,7 +195,7 @@
     </script>
 </head>
 <body>
-<table border="1" style="float:left;">
+<table border="0" style="float:left;">
     <tr>
         <td class="nameCell">module:</td><td><div id="moduleName">{module_name}</div></td>
     </tr>
@@ -162,7 +209,7 @@
         <td class="nameCell" style="vertical-align: text-top;">params:</td><td><div id="functionParams">{function_params}</div></td>
     </tr>
 </table>
-<textarea id="defaultEdit" style="float:right;height:100;width:200;"></textarea>
+<textarea id="defaultEdit" style="float:right;height:145;width:300;"></textarea>
 <button id="saveDefaults" style="float:right">set</button>
 <div style="clear:both"/>
 <p>
