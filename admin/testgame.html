@@ -156,7 +156,9 @@
                     continue;
                 }
                 if(dtype == 'object') {
-                    input[key] = {};
+                    input[key] = null;
+                } else if (dtype == 'array') {
+                    input[key] = null;
                 } else if (dtype == 'int') {
                     input[key] = 0;
                 } else if (dtype == 'float') {

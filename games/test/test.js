@@ -17,3 +17,7 @@ test.turn = function(req, cb)
 		cb(0, {message:"try again"});
 	}
 }
+
+test.myfunc = function(req, cb) {
+	cb(0, {message:"hellow world"});
+}

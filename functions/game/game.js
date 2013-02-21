@@ -24,7 +24,7 @@ game.functions = {
 	set: {desc: 'set game object', params: {gameId:{dtype:'string'}, game: {dtype: 'object'}}, security: []},
 	
 	list: {desc: 'list all loaded games', params: {}, security: []},
-	call: {desc: 'call a game specific function', params: {gameId:{dtype:'string'}, func: {dtype:'string'}, params: {dtype: 'object'}}, security: []},
+	call: {desc: 'call a game specific function', params: {gameId:{dtype:'string'}, func: {dtype:'string'}, args: {dtype: 'object'}}, security: []},
 };
 
 game.errors = {
@@ -36,7 +36,8 @@ game.errors = {
 	105: "not your turn",
 	106: "user has already joined",
 	107: "unable to parse game state",
-	108: "unable to load game"
+	108: "unable to load game",
+	109: "unable to load custom function"
 }
 
 function loadGame(name)
@@ -245,9 +246,16 @@ game.list = function(req, res, cb)
 	
 	cb(0);
 }
+
 game.call = function(req, res, cb)
 {
-	console.log("game.call");
+	console.log("game.call - req.params.func");
+	var module = req.env.gameModule;
 	
-	cb(0);
+	if(typeof(module[req.params.func]) == 'undefined') {
+		cb(109)
+		return;
+	}
+	
+	req.env.gameModule[req.params.func](req, cb);
 }
