@@ -2,6 +2,8 @@ var _ = require("lodash");
 
 var db = global.db;
 
+var gGameDir = global.gBaseDir + '/games';
+
 var game = exports;
 
 game.desc = "game state and control module"
@@ -19,7 +21,10 @@ game.functions = {
 	turn: {desc: 'calling user taking their turn', params: {gameId:{dtype:'string'}}, security: []},
 	end: {desc: 'end a game', params: {gameId: {dtype:'string'}, message:{dtype:'string'}}, security: []},
 	get: {desc: 'get game object', params: {gameId:{dtype:'string'}}, security: []},
-	set: {desc: 'set game object', params: {gameId:{dtype:'string'}, game: {dtype: 'object'}}, security: []}
+	set: {desc: 'set game object', params: {gameId:{dtype:'string'}, game: {dtype: 'object'}}, security: []},
+	
+	list: {desc: 'list all loaded games', params: {}, security: []},
+	call: {desc: 'call a game specific function', params: {gameId:{dtype:'string'}, func: {dtype:'string'}, params: {dtype: 'object'}}, security: []},
 };
 
 game.errors = {
@@ -30,14 +35,37 @@ game.errors = {
 	104: "game has already started",
 	105: "not your turn",
 	106: "user has already joined",
-	107: "unable to parse game state"
+	107: "unable to parse game state",
+	108: "unable to load game"
+}
+
+function loadGame(name)
+{	
+	var gameFile = gGameDir + '/' + name + '/' + name + '.js';
+	// SWD for now clear cache each time - will add server command to reload a module
+	// SWD should check for all required functions
+	try {
+		delete require.cache[require.resolve(gameFile)];
+		var module = require(gameFile);
+	} catch  (e) {
+		console.log(e.message);
+		return null;
+	}
+	return module;
 }
 
 game.pre = function(req, res, cb)
 {
-	if(typeof(req.params.gameId) == 'undefined')
+	if(req.params.cmd == 'game.create')
 	{
-		cb(0);
+		var name = req.params.name;
+		console.log("game.pre: game create:"  + name);
+		req.env.gameModule = loadGame(name);
+		if(req.env.gameModule==null) {
+			cb(108);
+		} else {
+			cb(0);			
+		}
 		return;
 	}
 	
@@ -54,7 +82,14 @@ game.pre = function(req, res, cb)
 			cb(107);
 			return;
 		}
-		console.log("game.pre: setting game for " + gameId);
+		
+		console.log("game.pre: setting game:"  + game.name + " = " + gameId);
+		req.env.gameModule = loadGame(game.name);
+		if(req.env.gameModule==null) {
+			cb(108);
+			return;
+		}
+
 		req.env.game = game;
 		cb(0);
 	});
@@ -102,7 +137,10 @@ game.create = function(req, res, cb)
 		game.turnsPlayed = 0;
 		
 		req.env.game = game;
-		cb(0, game);	
+		
+		req.env.gameModule.init(req, function(error, data) {
+			cb(error, data);
+		});
 	});
 }
 
@@ -179,7 +217,10 @@ game.turn = function(req, res, cb)
 		}
 		game.whoTurn = game.playerOrder[nextIndex];
 		game.turnsPlayed++;
-		cb(0, game);
+		
+		req.env.gameModule.turn(req, function(error, data) {
+			cb(error, data);
+		});
 	}
 }
 
@@ -196,4 +237,17 @@ game.set = function(req, res, cb)
 	game = _.merge(game, newGame);
 	
 	cb(0, game);
+}
+
+game.list = function(req, res, cb)
+{
+	console.log("game.list");
+	
+	cb(0);
+}
+game.call = function(req, res, cb)
+{
+	console.log("game.call");
+	
+	cb(0);
 }
