@@ -45,13 +45,8 @@ function loadGame(name)
 	var gameFile = gGameDir + '/' + name + '/' + name + '.js';
 	// SWD for now clear cache each time - will add server command to reload a module
 	// SWD should check for all required functions
-	try {
-		delete require.cache[require.resolve(gameFile)];
-		var module = require(gameFile);
-	} catch  (e) {
-		console.log(e.message);
-		return null;
-	}
+	delete require.cache[require.resolve(gameFile)];
+	var module = require(gameFile);
 	return module;
 }
 
@@ -60,14 +55,13 @@ game.pre = function(req, res, cb)
 	if(req.params.cmd == 'game.create')
 	{
 		var name = req.params.name;
-		console.log("game.pre: game create:"  + name);
-		req.env.gameModule = loadGame(name);
-		if(req.env.gameModule==null) {
-			cb(108);
-		} else {
-			cb(0);			
+		try {
+			console.log("game.pre: game.create = "  + name);
+			req.env.gameModule = loadGame(name);
+		} catch (e) {
+			cb(108, e);
+			return;
 		}
-		return;
 	}
 	
 	var gameId = req.params.gameId;
@@ -83,11 +77,12 @@ game.pre = function(req, res, cb)
 			cb(107);
 			return;
 		}
-		
-		console.log("game.pre: setting game:"  + game.name + " = " + gameId);
-		req.env.gameModule = loadGame(game.name);
-		if(req.env.gameModule==null) {
-			cb(108);
+
+		try {		
+			console.log("game.pre: setting game:"  + game.name + " = " + gameId);
+			req.env.gameModule = loadGame(game.name);
+		} catch (e) {
+			cb(108, e);
 			return;
 		}
 

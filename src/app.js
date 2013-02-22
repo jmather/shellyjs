@@ -109,6 +109,19 @@ function errorStr(error, module)
 	return info;
 }
 
+function setWrapper(error, data, wrapper) {
+	wrapper.error = error;
+	wrapper.info = errorStr(error, module);
+	if(typeof(data) != 'undefined') {
+		if(error == 0) {
+			wrapper.data = data;
+		} else {
+			wrapper.data = data.toString();
+		}
+	}
+	return wrapper;
+}
+
 function respond(req, res, next) {
 	util.puts('cmd = ' + req.params.cmd);
 	// SWD think restify should be doing this for us - or we are missing a setting
@@ -159,31 +172,27 @@ function respond(req, res, next) {
 	// call the pre, function, post sequence
 	module.pre(req, res, function(error, data) {
 		if(error != 0) {
-			wrapper.error = error;
-			wrapper.info = errorStr(error, module);
+			console.log("pre error: ", data);
+			wrapper = setWrapper(error, data, wrapper);
 			res.send(wrapper);
 			return;
 		}
 		module[funcName](req, res, function(error, data) {
-			// default returns
-			wrapper.error = error;
-			wrapper.info = errorStr(error, module);
-			if(data != null && typeof(data) != undefined)
-			{
-				wrapper.data = data;
+			wrapper = setWrapper(error, data, wrapper);
+			if(error != 0) {
+				// bail out, no post as function failed
+				console.log("func error: ", data);
+				res.send(wrapper);
+				return;
 			}
 			module.post(req, res, function(error, data) {
-				// SWD right now treat this has a hard error, but should be able to retry or something
+				console.log("post error: ", data);
 				if(error != 0) {
-					wrapper.error = error;
-					wrapper.info = errorStr(error, module);
-					wrapper.data = {};  // clear the data that was not saved;
-					res.send(wrapper);
-					return;
-				} else {				
-					res.send(wrapper);
-					return;
+				// SWD right now treat this has a hard error and overwrite the data
+					wrapper = setWrapper(error, data, wrapper);
 				}
+				res.send(wrapper);
+				return;
 			});
 		});
 	});
