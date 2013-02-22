@@ -25,21 +25,26 @@ tictactoe.join = function(req, cb)
 
 tictactoe.turn = function(req, cb)
 {
+	var uid = req.session.uid;
 	var move = req.params.move;
 	var game = req.env.game;
-	var uid = req.session.uid;
-	var gameBoard = req.env.game.state.gameBoard;
+	var gameBoard = game.state.gameBoard;
 	
 	if(gameBoard[move.x][move.y] != '') {
 		cb(1, "this square has been taken");
 		return;
 	}
 	
-	gameBoard[move.x][move.y] = "X";
+	if(game.state.xes == uid)
+	{
+		gameBoard[move.x][move.y] = "X";
+	} else {
+		gameBoard[move.x][move.y] = "Y";		
+	}
 	
 	req.env.game.state.gameBoard = gameBoard;
 	
 	// check win
 	
-	cb(0, gameBoard)
+	cb(0, req.env.game)
 }

@@ -109,7 +109,7 @@ function errorStr(error, module)
 	return info;
 }
 
-function setWrapper(error, data, wrapper) {
+function setWrapper(error, data, wrapper, module) {
 	wrapper.error = error;
 	wrapper.info = errorStr(error, module);
 	if(typeof(data) != 'undefined') {
@@ -173,12 +173,13 @@ function respond(req, res, next) {
 	module.pre(req, res, function(error, data) {
 		if(error != 0) {
 			console.log("pre error: ", data);
-			wrapper = setWrapper(error, data, wrapper);
+			wrapper = setWrapper(error, data, wrapper, module);
 			res.send(wrapper);
 			return;
 		}
 		module[funcName](req, res, function(error, data) {
-			wrapper = setWrapper(error, data, wrapper);
+			wrapper = setWrapper(error, data, wrapper, module);
+			wrapper.info = errorStr(error, module);
 			if(error != 0) {
 				// bail out, no post as function failed
 				console.log("func error: ", data);
@@ -189,7 +190,7 @@ function respond(req, res, next) {
 				console.log("post error: ", data);
 				if(error != 0) {
 				// SWD right now treat this has a hard error and overwrite the data
-					wrapper = setWrapper(error, data, wrapper);
+					wrapper = setWrapper(error, data, wrapper, module);
 				}
 				res.send(wrapper);
 				return;

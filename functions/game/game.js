@@ -22,6 +22,7 @@ game.functions = {
 	end: {desc: 'end a game', params: {gameId: {dtype:'string'}, message:{dtype:'string'}}, security: []},
 	get: {desc: 'get game object', params: {gameId:{dtype:'string'}}, security: []},
 	set: {desc: 'set game object', params: {gameId:{dtype:'string'}, game: {dtype: 'object'}}, security: []},
+	reset: {desc: 'reset game for another round', params: {gameId:{dtype:'string'}}, security: []},
 	
 	list: {desc: 'list all loaded games', params: {}, security: []},
 	call: {desc: 'call a game specific function', params: {gameId:{dtype:'string'}, func: {dtype:'string'}, args: {dtype: 'object'}}, security: []},
@@ -125,6 +126,7 @@ game.create = function(req, res, cb)
 		game.gameId = res;
 		game.name = req.params.name;
 		var ts = new Date().getTime();
+		game.ownerId = uid;
 		game.created = ts;
 		game.lastModified = ts;
 		game.status = 'created';
@@ -132,6 +134,7 @@ game.create = function(req, res, cb)
 		game.players[uid] = {status: 'ready'};
 		game.playerOrder = [uid];
 		game.whoTurn = uid;
+		game.rounds = 0;
 		game.turnsPlayed = 0;
 		
 		req.env.game = game;
@@ -235,6 +238,17 @@ game.set = function(req, res, cb)
 	game = _.merge(game, newGame);
 	
 	cb(0, game);
+}
+
+game.reset = function(req, res, cb) {
+	var game = req.env.game;
+	game.rounds++;
+	game.turns = 0;
+	game.whoTurn = game.ownerId;
+	
+	req.env.gameModule.init(req, function(error, data) {
+		cb(error, data);
+	});
 }
 
 game.list = function(req, res, cb)
