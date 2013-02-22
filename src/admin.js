@@ -7,6 +7,7 @@ var hogan = require('hogan.js');
 var gAdminPort = 5100;
 var adminBase = global.gBaseDir + '/admin';
 var adminStatic = adminBase + '/static';
+var adminGames = adminBase + '/games';
 console.log('admin directory: ' + adminBase);
 console.log('admin static directory: ' + adminStatic);
 
@@ -16,6 +17,7 @@ var app = express();
 //}));
 app.use(express.favicon(adminStatic + '/images/favicon.ico')); 
 app.use('/static', express.static(adminStatic));
+app.use('/games', express.static(adminGames));
 
 app.set('view engine', 'html');
 app.set('layout', 'layout'); // rendering by default

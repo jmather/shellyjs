@@ -58,6 +58,8 @@ game.pre = function(req, res, cb)
 		try {
 			console.log("game.pre: game.create = "  + name);
 			req.env.gameModule = loadGame(name);
+			cb(0);
+			return;
 		} catch (e) {
 			cb(108, e);
 			return;

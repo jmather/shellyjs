@@ -1,0 +1,269 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+<title>Tic Tac Toe</title>
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+    <style type="text/css">
+        #user1Editor {
+            width: 100%;
+            height: 200px;
+        }
+        #user2Editor {
+            width: 100%;
+            height: 200px;
+        }
+        body {
+            font-family:verdana,arial,sans-serif;
+            font-size:10pt;
+            margin:30px;
+        }
+        .nameCell {
+            font-weight: bold;
+            width: 100px;
+        }
+        .tictac {
+            height: 200;
+            width: 50;
+        }
+    </style>
+    <script language="javascript">
+        var Env = new Object();
+
+        function log(msg)
+        {
+            if (typeof(msg) == 'object') {
+//                msg = "<div style='color:red;'>" + JSON.stringify(msg) + "/div>";
+                msg = JSON.stringify(msg);
+            }
+            var $mlog = $("#messageLog");
+            $mlog.append(msg+"\n").scrollTop($mlog[0].scrollHeight - $mlog.height());
+        }
+
+        function setDefaultParam($defaults, name, value)
+        {
+            var dParams = getDefaultParams($defaults);
+            dParams[name] = value;
+            var cmdDefaults =formatJson(JSON.stringify(dParams));
+            $defaults.val(cmdDefaults);
+
+            saveDefaultParams($defaults);
+        }
+
+        function saveDefaultParams($defaults)
+        {
+           var cmdDefaults = $defaults.val();
+           console.log("saving: " + $defaults.attr("id") + " = " + cmdDefaults);
+           $.cookie($defaults.attr("id"), cmdDefaults, {path: '/', expires: 365});
+        }
+
+        function getDefaultParams($defaults)
+        {
+            var dParams = {};
+            var cmdDefaults = $defaults.val();
+            try {
+                var dParams = JSON.parse(cmdDefaults);
+            } catch(e) {
+                console.log(cmdDefaults);
+//                    alert("error loading defaults: " + e.message);
+            }
+            return dParams;
+        }
+
+        function initDefaultParams($defaults)
+        {
+            var dParams = {};
+            var cmdDefaults = $.cookie($defaults.attr("id"));
+            if(typeof(cmdDefaults)!='undefined')
+            {
+                $defaults.val(cmdDefaults);
+                try {
+                    var dParams = JSON.parse(cmdDefaults);
+                } catch(e) {
+                    console.log(cmdDefaults);
+//                    alert("error loading defaults: " + e.message);
+                    dParams = {};
+                }
+            } else {
+                $defaults.val("{}");
+            }
+            return dParams;
+        }
+
+        function populateCmd(name, target, $defaults)
+        {
+            var dParams = getDefaultParams($defaults)
+
+            cmd = "game." + name;
+            var input = {cmd:cmd};
+            var key = "session";
+            if(typeof(dParams[key]) != 'undefined') {
+                input[key] = dParams[key];
+            } else {
+                input.session = 'xxxx';
+            }
+
+            var paramInfo = "";
+            var funcInfo = Env.functions[name];
+            for (key in funcInfo.params)
+            {
+                var dtype = funcInfo.params[key].dtype;
+
+                if(typeof(dParams[key]) != 'undefined') {
+                    input[key] = dParams[key];
+                    continue;
+                }
+                if(dtype == 'object') {
+                    input[key] = null;
+                } else if (dtype == 'array') {
+                    input[key] = null;
+                } else if (dtype == 'int') {
+                    input[key] = 0;
+                } else if (dtype == 'float') {
+                    input[key] = 0.0;
+                } else if (dtype == 'array') {
+                    input[key] = [];
+                } else if (dtype == 'string') {
+                    input[key] = '';
+                }
+            }
+            target.set(input);
+        }
+
+        function setState(resp)
+        {
+            var data = resp;
+            if($("#stripMsg").attr("checked") == "checked" && resp.error == 0) {
+                data = resp.data;
+            }
+            var niceJson = formatJson(JSON.stringify(data));
+            $("#gameState").val(niceJson);
+        }
+
+        function callServer(input)
+        {
+            console.log(input);
+            $.ajax
+                    ({
+                        type: "POST",
+                        url: 'http://localhost:5101/api',
+                        dataType: 'json',
+                        async: false,
+                        data: input,
+                        success: function (res, status) {
+                            log(res);
+                            setState(res);
+                            if(typeof(res.data.gameId) != 'undefined')
+                            {
+                                setDefaultParam($("#user1Defaults"), "gameId", res.data.gameId);
+                                setDefaultParam($("#user2Defaults"), "gameId", res.data.gameId);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            log(xhr.responseText);
+                        }
+                    })
+        }
+
+        function squarePress(cell) {
+            alert($(cell).attr("id"));
+        }
+
+        function turn(x, y) {
+            
+        }
+
+        $(init);
+        function init()
+        {
+            $("#sqr1").click(function() {
+                var $sq = $(this);
+                var val = $sq.val();
+                if(val==' ') {
+                    $sq.val('X');
+                }
+                if(val=='X') {
+                    $sq.val('Y');
+                }
+                if(val=='Y') {
+                    $sq.val(' ');
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<p>
+</p>
+<table border="1" style="width:100%;">
+    <tr>
+        <td style="width:70%;">list games</td>
+        <td>default params</td>
+    </tr>
+    <tr>
+        <td valign="top" style="">
+            <div id="gameList">
+                <div id="gameTemplate" style="">
+                    <span id="gameName">game1</span><button>join</button>
+                </div>
+             </div>
+        </td>
+        <td valign="top">
+            User 1<button id="user1SetDefaults" style="float:right">set</button>
+            <textarea id="user1Defaults" style="height:100;width:100%;"></textarea>
+            User 2<button id="user2SetDefaults" style="float:right">set</button>
+            <textarea id="user2Defaults" style="height:100;width:100%;"></textarea>
+        </td>
+    </tr>
+</table>
+
+<FORM NAME="tic">
+    <input type="button" id="sqr1" class="tictac" value=" "/>
+    <input type="button" id="sqr2" class="tictac" value=" "/>
+    <input type="button" id="sqr3" class="tictac" value=" "/><br/>
+    <input type="button" id="sqr4" class="tictac" value=" "/>
+    <input type="button" id="sqr5" class="tictac" value=" "/>
+    <input type="button" id="sqr6" class="tictac" value=" "/><br/>
+    <input type="button" id="sqr7" class="tictac" value=" "/>
+    <input type="button" id="sqr8" class="tictac" value=" "/>
+    <input type="button" id="sqr9" class="tictac" value=" "/>
+</form>
+
+<table style="width:100%;">
+    <tr>
+        <td style="width:50%;">user 1</td>
+        <td>user 2</td>
+    </tr>
+    <tr>
+        <td>
+            <button id="user1Create">create</button>
+            <button id="gameGet">info</button>
+            <button id="">notify</button>
+            <button id="user1Turn">turn</button>
+            <button id="user1Kick">kick</button>
+            <button id="user1CallFunction" style="float:right;">make call</button>
+        </td>
+        <td>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="user1Editor"></div>
+        </td>
+    </tr>
+</table>
+
+<table style="width:100%;">
+    <tr>
+        <td style="width:70%;">message log</td>
+    </tr>
+    <tr>
+        <td><textarea id="messageLog" readonly style="height:100;width:100%;"></textarea></td>
+    </tr>
+</table>
+
+</body>
+</html>
