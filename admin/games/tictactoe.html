@@ -197,7 +197,7 @@
             var received_msg = evt.data;
             log("socket: onmessage = " + evt.data);
             var msg = JSON.parse(evt.data);
-            if(msg.cmd == 'game.turn') {
+            if(msg.error == 0 && msg.cmd == 'game.turn') {
                 setState(msg.data);
             }
 //            alert("Message is received...");
@@ -221,6 +221,16 @@
             sendWs(data);
         }
 
+        function getURLParameter(name) {
+            return decodeURI(
+                    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+            );
+        }
+        var psess = getURLParameter("session");
+        if(psess != 'null')
+        {
+            Env.baseParams.session = psess;
+        }
 
         $(init);
         function init()

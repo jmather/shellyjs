@@ -248,6 +248,7 @@ game.reset = function(req, res, cb) {
 	game.whoTurn = game.ownerId;
 	
 	req.env.gameModule.init(req, function(error, data) {
+		global.live.notify(game.gameId, game);
 		cb(error, data);
 	});
 }

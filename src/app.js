@@ -61,7 +61,7 @@ server.use(function(req, res, next) {
 	if(!session.check(psession)) {
 	  res.header("Access-Control-Allow-Origin", "*");
 	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
-		var wrapper = shutil.wrapper(cmd, psesion, null);
+		var wrapper = shutil.wrapper(cmd, psession, null);
 		wrapper.error = 1;
 		wrapper.info = "bad session";
 		res.send(wrapper);
@@ -169,14 +169,14 @@ function respond(req, res, next) {
 			wrapper = setWrapper(error, data, wrapper, module);
 			wrapper.info = errorStr(error, module);
 			if(error != 0) {
-				// bail out, no post as function failed
 				console.log("func error: ", data);
+				// bail out, no post as function failed
 				res.send(wrapper);
 				return;
 			}
 			module.post(req, res, function(error, data) {
-				console.log("post error: ", data);
 				if(error != 0) {
+					console.log("post error: ", data);
 				// SWD right now treat this has a hard error and overwrite the data
 					wrapper = setWrapper(error, data, wrapper, module);
 				}

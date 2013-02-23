@@ -1,4 +1,5 @@
 var WebSocketServer = require('ws').Server
+var WebSocket = require('ws').client
 var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
@@ -21,7 +22,9 @@ live.start = function()
 	console.log("websocket listening: " + gPort)
 
 	wss.on('connection', function(ws) {
-		console.log("connect")
+		console.log("socket: connect")
+		
+		var socketNotify = function(message) {}
 		
 	  ws.on('message', function(message) {
 			console.log('received: %s', message);
@@ -31,18 +34,27 @@ live.start = function()
 		ws.on('error', function(err) {
 			console.log(err);
 		})
+	
+		var socketNotify = function(message) {
+			if(ws.readyState == 1) {
+				// 1 = OPEN - SWD: find this in ws module later
+				var wrapper = shutil.wrapper("game.turn", 0, message);
+				wrapper.error = 0;
+				ws.send(JSON.stringify(wrapper));
+		    console.log(message);
+			} else {
+				console.log("socket: dead socket");
+			}
+		};
+		eventEmitter.on('someOccurence', socketNotify);
 		
-		eventEmitter.on('someOccurence', function(message) {
-			var wrapper = shutil.wrapper("game.turn", 0, message);
-			ws.send(JSON.stringify(wrapper));
-	    console.log(message);
+		ws.on('close', function(ws) {
+			console.log("socket: close")
+			eventEmitter.removeListener("someOccurence", socketNotify);
 		});
-	});
 
-	wss.on('disconnect', function(ws) {
-		console.log("disconnect")
 	});
-
+	
 	wss.on('error', function(err) {
 		console.log(err);
 	});
