@@ -4,6 +4,7 @@
     <script src="/static/js/jquery-1.7.1.min.js"></script>
     <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
+    <script src="/static/js/reconnecting-websocket.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
@@ -184,14 +185,11 @@
             callServer(data);
         }
 
-        var ws = new WebSocket("ws://localhost:5102");
+        var ws = new ReconnectingWebSocket("ws://localhost:5102");
         ws.onopen = function() {
             log("socket: onopen");
-            listReadyGames();
-
-//            var msg = "foo";
-//            log("socket: send = " + msg);
-//            ws.send(msg);
+            gameInit(Env.baseParams.gameId);
+            //listReadyGames();
         };
         ws.onmessage = function (evt) {
             var received_msg = evt.data;
@@ -203,8 +201,6 @@
 //            alert("Message is received...");
         };
         ws.onclose = function() {
-            // websocket is closed.
-//            alert("Connection is closed...");
         };
 
         function sendWs(data)
@@ -218,6 +214,14 @@
         {
             var data = Env.baseParams;
             data.cmd = "match.list";
+            sendWs(data);
+        }
+
+        function gameInit(gameId)
+        {
+            var data = Env.baseParams;
+            data.cmd = "game.join";
+            data.gameId = gameId;
             sendWs(data);
         }
 
