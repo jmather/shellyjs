@@ -7,16 +7,15 @@ var http = require('http');
 var restify = require('restify');
 var winston = require('winston');
 
+var shutil = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
 
 global.db = require(global.gBaseDir + '/src/shdb.js');
-global.db.set('1', JSON.stringify({name:"scott"}));
-//global.db.get('test', function (err, value) {
-//	console.log('test=' + value)
-//});
 
 var admin  = require('../src/admin.js');
-//util.puts(process.cwd());
+
+global.live  = require('../src/live.js');
+global.live.start();
 		
 var server = restify.createServer({
 	name: "shelly",
@@ -50,18 +49,6 @@ server.use(
 );
 */
 
-function getWrapper(req)
-{
-	var wrapper = new Object();
-	wrapper.cmd = req.params.cmd;
-	wrapper.session = req.params.session;
-	wrapper.ts = new Date().getTime();
-	wrapper.error = 1;			// default to error, function must clear
-	wrapper.info = '';
-	wrapper.data = {};
-	return wrapper;
-}
-
 server.use(function(req, res, next) {
 	console.log('session check');
 	var cmd = req.params.cmd;
@@ -74,7 +61,7 @@ server.use(function(req, res, next) {
 	if(!session.check(psession)) {
 	  res.header("Access-Control-Allow-Origin", "*");
 	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
-		var wrapper = getWrapper(req);
+		var wrapper = shutil.wrapper(cmd, psesion, null);
 		wrapper.error = 1;
 		wrapper.info = "bad session";
 		res.send(wrapper);
@@ -113,7 +100,7 @@ function setWrapper(error, data, wrapper, module) {
 	wrapper.error = error;
 	wrapper.info = errorStr(error, module);
 	if(typeof(data) != 'undefined') {
-		if(error == 0) {
+		if(typeof(data) == 'object') {
 			wrapper.data = data;
 		} else {
 			wrapper.data = data.toString();
@@ -129,7 +116,8 @@ function respond(req, res, next) {
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
 	
 	// default return wrapper
-	var wrapper = getWrapper(req);
+	var wrapper = shutil.wrapper(req.params.cmd, req.params.sesion, null);
+	
 	
 	// get cmd to fire
 	var cmdParts = req.params.cmd.split('.');

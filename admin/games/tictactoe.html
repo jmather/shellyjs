@@ -177,16 +177,50 @@
                     })
         }
 
-        function squarePress(cell) {
-            alert($(cell).attr("id"));
-        }
-
         function turn(x, y) {
             var data = Env.baseParams;
             data.cmd = "game.turn";
             data.move = {x:x, y:y};
             callServer(data);
         }
+
+        var ws = new WebSocket("ws://localhost:5102");
+        ws.onopen = function() {
+            log("socket: onopen");
+            listReadyGames();
+
+//            var msg = "foo";
+//            log("socket: send = " + msg);
+//            ws.send(msg);
+        };
+        ws.onmessage = function (evt) {
+            var received_msg = evt.data;
+            log("socket: onmessage = " + evt.data);
+            var msg = JSON.parse(evt.data);
+            if(msg.cmd == 'game.turn') {
+                setState(msg.data);
+            }
+//            alert("Message is received...");
+        };
+        ws.onclose = function() {
+            // websocket is closed.
+//            alert("Connection is closed...");
+        };
+
+        function sendWs(data)
+        {
+            var msg = JSON.stringify(data);
+            log("socket: send = " + msg);
+            ws.send(msg);
+        }
+
+        function listReadyGames()
+        {
+            var data = Env.baseParams;
+            data.cmd = "match.list";
+            sendWs(data);
+        }
+
 
         $(init);
         function init()
@@ -221,7 +255,6 @@
                 data.cmd = "game.get";
                 callServer(data);
             });
-
 
         }
     </script>
