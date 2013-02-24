@@ -43,7 +43,7 @@ live.start = function()
 		})
 	
 		var socketNotify = function(message) {
-			console.log("socket: socketNoitfy")
+			console.log("socket: socketNotify")
 			if(ws.readyState == 1) {
 				// 1 = OPEN - SWD: find this in ws module later
 				var wrapper = shutil.wrapper("game.turn", 0, message);

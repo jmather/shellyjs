@@ -110,81 +110,20 @@ function setWrapper(error, data, wrapper, module) {
 }
 
 function respond(req, res, next) {
-	util.puts('cmd = ' + req.params.cmd);
-	// SWD think restify should be doing this for us - or we are missing a setting
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	var cmd = req.params.cmd;
+	console.log("respond: " + cmd);
 	
-	// default return wrapper
-	var wrapper = shutil.wrapper(req.params.cmd, req.params.sesion, null);
+	var wrapper = {};
+	wrapper.ts = new Date().getTime();
+	wrapper.cmd = cmd;
 	
-	
-	// get cmd to fire
-	var cmdParts = req.params.cmd.split('.');
-	var moduleName = cmdParts[0];
-	var funcName = cmdParts[1];
-	var cmdFile = global.gBaseDir + '/functions/' + moduleName + '/' + moduleName + '.js'
-	
-	// load module
-	// SWD for now clear cache each time - will add server command to reload a module
-	delete require.cache[require.resolve(cmdFile)];
-	var module = require(cmdFile);
-	
-	// validate params
-	for (key in module.functions[funcName].params)
-	{
-		if(typeof(req.params[key])=='undefined')
-		{
-			wrapper.error = 1;
-			// TODO: SWD strip param name for production
-			wrapper.info = 'missing param: '+key;
-			console.log(wrapper);
-			res.send(wrapper);
-			return next();
-		}
-	}
-
-	// init for modules to use to pass data
-	req.env = {};
-
-	// ensure we have pre/post functions
-	if(typeof(module.pre) != 'function') {
-		console.log('no pre - using default');
-		module.pre = function(req, res, cb) {cb(0);}
-	}
-	if(typeof(module.post) != 'function') {
-		console.log('no post - using default');
-		module.post = function(req, res, cb) {cb(0);}
-	}
-	
-	// call the pre, function, post sequence
-	module.pre(req, res, function(error, data) {
-		if(error != 0) {
-			console.log("pre error: ", data);
-			wrapper = setWrapper(error, data, wrapper, module);
-			res.send(wrapper);
-			return;
-		}
-		module[funcName](req, res, function(error, data) {
-			wrapper = setWrapper(error, data, wrapper, module);
-			wrapper.info = errorStr(error, module);
-			if(error != 0) {
-				console.log("func error: ", data);
-				// bail out, no post as function failed
-				res.send(wrapper);
-				return;
-			}
-			module.post(req, res, function(error, data) {
-				if(error != 0) {
-					console.log("post error: ", data);
-				// SWD right now treat this has a hard error and overwrite the data
-					wrapper = setWrapper(error, data, wrapper, module);
-				}
-				res.send(wrapper);
-				return;
-			});
-		});
+	shutil.call(cmd, req, res, function(error, data) {
+		console.log("respond: sending data");
+		wrapper.error = error;
+		wrapper.data = data;
+		
+	  res.header("Access-Control-Allow-Origin", "*");
+	  res.header("Access-Control-Allow-Headers", "X-Requested-With");		
+		res.send(wrapper);
 	});
-	// SWD not sure we want to next() on async while functions are getting called
-	return next();
 }
