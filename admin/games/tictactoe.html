@@ -37,14 +37,30 @@
                           gameId: "161"
                          }
 
-        function log(msg)
+        function log(api, type, msg)
         {
+            color = "black";
+            bodyColor = "black";
+            if(type=="error") {
+                color = "red"
+                bodyColor = "red";
+            }
+            if(api=="rest") {
+                color = "blue";
+            }
+            if(api=="socket") {
+                color = "green";
+            }
             if (typeof(msg) == 'object') {
-//                msg = "<div style='color:red;'>" + JSON.stringify(msg) + "/div>";
                 msg = JSON.stringify(msg);
             }
             var $mlog = $("#messageLog");
-            $mlog.append(msg+"\n").scrollTop($mlog[0].scrollHeight - $mlog.height());
+            var disp = "<div style='font-size:10px;white-space:nowrap;'>";
+            disp += "<span style='color:" + color + ";'>" + api + ": </span>";
+            disp += "<span style='color:" + color + ";'>" + type + ": </span>";
+            disp += "<span style='color:" + bodyColor + ";'>" + msg + "</span>";
+            disp += "</div>";
+            $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
         }
 
         function setDefaultParam($defaults, name, value)
@@ -60,7 +76,7 @@
         function saveDefaultParams($defaults)
         {
            var cmdDefaults = $defaults.val();
-           console.log("saving: " + $defaults.attr("id") + " = " + cmdDefaults);
+           console.log("log", "save", $defaults.attr("id") + " = " + cmdDefaults);
            $.cookie($defaults.attr("id"), cmdDefaults, {path: '/', expires: 365});
         }
 
@@ -71,7 +87,6 @@
             try {
                 var dParams = JSON.parse(cmdDefaults);
             } catch(e) {
-//                console.log(cmdDefaults);
 //                    alert("error loading defaults: " + e.message);
             }
             return dParams;
@@ -87,9 +102,6 @@
                 try {
                     var dParams = JSON.parse(cmdDefaults);
                 } catch(e) {
-//                    console.log(cmdDefaults);
-//                    alert("error loading defaults: " + e.message);
-                    dParams = {};
                 }
             } else {
                 $defaults.val("{}");
@@ -149,9 +161,8 @@
 
         function callServer(input)
         {
-//            console.log(input);
             input.session = $("#user1Defaults").val();
-            log(input);
+            log("rest", "send", input);
             $.ajax
                     ({
                         type: "POST",
@@ -160,7 +171,7 @@
                         async: false,
                         data: input,
                         success: function (res, status) {
-                            log(res);
+                            log("rest", "recv", res);
                             if(res.error == 0)
                             {
                                 setState(res.data);
@@ -169,12 +180,11 @@
 //                                    setDefaultParam($("#user1Defaults"), "gameId", res.data.gameId);
 //                                }
                             } else {
-                                log(res);
-                                log("ERROR: " + res.error + " : " + JSON.stringify(res.data));
+                                log("rest", "error", res.error + " : " + JSON.stringify(res.data));
                             }
                         },
                         error: function (xhr, status, error) {
-                            log(xhr.responseText);
+                            log("rest", "error", xhr.responseText);
                         }
                     })
         }
@@ -186,15 +196,16 @@
             callServer(data);
         }
 
-        var ws = new ReconnectingWebSocket("ws://localhost:5102");
+        var url = "ws://localhost:5102";
+        var ws = new ReconnectingWebSocket(url);
         ws.onopen = function() {
-            log("socket: onopen");
+            log("socket", "onopen", url);
             gameInit(Env.baseParams.gameId);
             //listReadyGames();
         };
         ws.onmessage = function (evt) {
             var received_msg = evt.data;
-            log("socket: onmessage = " + evt.data);
+            log("socket", "onmessage", evt.data);
             var msg = JSON.parse(evt.data);
             if(msg.error == 0 && msg.cmd == 'game.turn') {
                 setState(msg.data);
@@ -207,7 +218,7 @@
         function sendWs(data)
         {
             var msg = JSON.stringify(data);
-            log("socket: send = " + msg);
+            log("socket", "send", msg);
             ws.send(msg);
         }
 
@@ -221,6 +232,7 @@
         function gameInit(gameId)
         {
             var data = Env.baseParams;
+            data.session = $("#user1Defaults").val();
             data.cmd = "game.join";
             data.gameId = gameId;
             sendWs(data);
@@ -291,10 +303,8 @@
              </div>
         </td>
         <td valign="top">
-            User 1<button id="user1SetDefaults" style="float:right">set</button>
+            User<button id="user1SetDefaults" style="float:right">set</button>
             <textarea id="user1Defaults" style="height:100;width:100%;"></textarea>
-            User 2<button id="user2SetDefaults" style="float:right">set</button>
-            <textarea id="user2Defaults" style="height:100;width:100%;"></textarea>
         </td>
     </tr>
 </table>
@@ -332,7 +342,7 @@
         <td style="width:70%;">message log</td>
     </tr>
     <tr>
-        <td><textarea id="messageLog" readonly style="height:100;width:100%;"></textarea></td>
+        <td><div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div></td>
     </tr>
 </table>
 
