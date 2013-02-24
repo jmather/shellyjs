@@ -70,9 +70,9 @@
         function setState(game)
         {
             var gameBoard = game.state.gameBoard;
-            for (x in gameBoard) {
-                for (y in gameBoard[x]) {
-                    $("#"+x+y).val(gameBoard[x][y]);
+            for (var i=0; i<3; i++) {
+                for (var j=0; j<3; j++) {
+                    $("#x" + i + "y" + j).val(gameBoard[i][j]);
                 }
             }
             if(typeof(game.gameId) != 'undefined') {
@@ -195,8 +195,8 @@
 
             $(".tictac").click(function() {
                 var id = $(this).attr("id");
-                var x = id.slice(0,2);
-                var y = id.slice(2,4);
+                var x = id.slice(1,2);
+                var y = id.slice(3,4);
                 turn(x, y);
             });
 
@@ -262,15 +262,15 @@
 </table>
 
 <FORM NAME="tic">
+    <input type="button" id="x0y0" class="tictac" value=" "/>
+    <input type="button" id="x0y1" class="tictac" value=" "/>
+    <input type="button" id="x0y2" class="tictac" value=" "/><br/>
+    <input type="button" id="x1y0" class="tictac" value=" "/>
     <input type="button" id="x1y1" class="tictac" value=" "/>
-    <input type="button" id="x1y2" class="tictac" value=" "/>
-    <input type="button" id="x1y3" class="tictac" value=" "/><br/>
+    <input type="button" id="x1y2" class="tictac" value=" "/><br/>
+    <input type="button" id="x2y0" class="tictac" value=" "/>
     <input type="button" id="x2y1" class="tictac" value=" "/>
     <input type="button" id="x2y2" class="tictac" value=" "/>
-    <input type="button" id="x2y3" class="tictac" value=" "/><br/>
-    <input type="button" id="x3y1" class="tictac" value=" "/>
-    <input type="button" id="x3y2" class="tictac" value=" "/>
-    <input type="button" id="x3y3" class="tictac" value=" "/>
 </form>
 
 <table border="1" style="width:100%;">

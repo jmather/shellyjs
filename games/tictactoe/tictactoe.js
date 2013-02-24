@@ -4,13 +4,14 @@ var tictactoe = exports;
 
 tictactoe.init = function(req, cb)
 {
-	gameBoard = {x1:{y1:'', y2:'', y3:''},
-								x2:{y1:'', y2:'', y3:''},
-								x3:{y1:'', y2:'', y3:''}
-							};
+	gameBoard = [
+							 ['','',''],
+							 ['','',''],
+							 ['','','']
+							 ];
 							
 	req.env.game.state = {};
-	req.env.game.state.gameBoard = gameBoard;
+	req.env.game.state.gameBoard = gameBoard;  // SWD: change this to just board
 	// first player is always X
 	req.env.game.state.xes = req.session.uid;
 	cb(0, req.env.game)
@@ -25,9 +26,9 @@ tictactoe.join = function(req, cb)
 
 function checkFull(gb) {
 	var res = true;
-	for (var i=1; i<4; i++) {
-		for (var j=0; j<4; j++){
-			if(gb["x"+i]["y"+j] == '') {
+	for (var i=0; i<3; i++) {
+		for (var j=0; j<3; j++){
+			if(gb[i][j] == '') {
 				return false;
 			}
 		}
@@ -39,19 +40,30 @@ function checkWin(gb) {
 	var res = {winner: '', set: null};
 	
 	console.log("checkWin");
-	for (var i=1; i<4; i++) {
-		console.log(i);
-		if(gb["x"+i]["y1"] == gb["x"+i]["y2"] && gb["x"+i]["y1"] == gb["x"+i]["y3"]) {
-			if(gb["x"+i]["y1"]!='') {
-				res.winner = gb["x"+1]["y1"];
+	for (var i=0; i<3; i++) {
+		if(gb[i][0] == gb[i][1] && gb[i][0] == gb[i][2]) {
+			if(gb[i][1]!='') {
+				res.winner = gb[i][1];
 				return res;			
 			}
 		}
-		if(gb["x1"]["y"+i] == gb["x2"]["y"+i] && gb["x1"]["y"+i] == gb["x3"]["y"+i]) {
-			if(gb["x1"]["y"+i] != '') {
-				res.winner = gb["x1"]["y"+i];
+		if(gb[0][i] == gb[1][i] && gb[0][i] == gb[2][i]) {
+			if(gb[1][i] != '') {
+				res.winner = gb[1][i];
 				return res;
 			}
+		}
+	}
+	if(gb[0,0]==gb[1,1] && gb[0,0]==gb[2,2]) {
+		if(gb[1][1] != '') {
+			res.winner = gb[1][1];
+			return res;
+		}
+	}
+	if(gb[0,2]==gb[1,1] && gb[0,2]==gb[2,0]) {
+		if(gb[1][1] != '') {
+			res.winner = gb[1][1];
+			return res;
 		}
 	}
 	return res;
