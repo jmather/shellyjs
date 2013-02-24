@@ -167,6 +167,14 @@ game.join = function(req, res, cb)
 {
 	var uid = req.session.uid;
 	var game = req.env.game;
+	var user = req.session.user;
+	
+	// set users current games and ts
+	var currentGames = user.get("currentGames");
+	var ts = new Date().getTime();
+	currentGames[game.gameId] = {lastJoin: ts};
+	console.log("SWD", currentGames);
+	user.set("currentGames", currentGames);
 	
 	if(typeof(game.players[uid]) == 'object') {
 		cb(106);  // already in game
@@ -175,7 +183,15 @@ game.join = function(req, res, cb)
 	game.players[uid] = {status: 'ready'};
 	game.playerOrder.push(uid);
 	
-	cb(0, game);
+/*					 
+	user.save(function(error, data) {
+		if(error != 0) {
+			cb(error, data);
+		} else {
+			cb(0, game);
+		}
+	});
+*/	
 }
 
 game.leave = function(req, res, cb)

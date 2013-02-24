@@ -207,6 +207,9 @@
             var received_msg = evt.data;
             log("socket", "onmessage", evt.data);
             var msg = JSON.parse(evt.data);
+            if(msg.error != 0) {
+                log("socket", "error", msg.error + " : " + JSON.stringify(msg.data));
+            }
             if(msg.error == 0 && msg.cmd == 'game.turn') {
                 setState(msg.data);
             }

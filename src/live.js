@@ -4,6 +4,7 @@ var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
 var shutil = require(global.gBaseDir + '/src/shutil.js');
+var shUser = require(global.gBaseDir + '/src/shuser.js');
 
 gPort = 5102;
 
@@ -38,20 +39,32 @@ live.start = function()
 			}
 			req.session = {};
 			req.session.uid = req.params.session.split(':')[1];
-			
-			shutil.call(req.params.cmd, req, res, function(error, data) {
-				if(req.params.cmd == 'game.join') {
-					if(error == 0 || error == 106) {
-						// let them listen for events
-						var channel = "notify-" + req.params.gameId;
-						console.log("socket: on channel=" + channel);
-						eventEmitter.on(channel, socketNotify);					
-					}
-					var wrapper = shutil.wrapper("game.turn", error, data);
-					ws.send(JSON.stringify(wrapper));				
+			console.log("loading user: uid = " + req.session.uid);
+			var user = new shUser();
+			user.loadOrCreate(req.session.uid, function(error, data) {
+				if(error != 0) {
+					var wrapper = shutil.wrapper(req.params.cmd, req.params.session, {info: "unable to load user: " + req.session.uid});
+					wrapper.error = 2;
+					ws.send(JSON.stringify(wrapper));	
+					return;
 				}
+				console.log("user loaded: " + req.session.uid);
+				req.session.user = user;
+			
+				shutil.call(req.params.cmd, req, res, function(error, data) {
+					if(req.params.cmd == 'game.join') {
+						if(error == 0 || error == 106) {
+							// let them listen for events, if join or or already playing(106)
+							var channel = "notify-" + req.params.gameId;
+							console.log("socket: on channel=" + channel);
+							eventEmitter.on(channel, socketNotify);					
+						}
+						var wrapper = shutil.wrapper(req.params.session, req.params.session, data);
+						ws.send(JSON.stringify(wrapper));
+						return;
+					}
+				});
 			});
-			console.log('received: %s', message);
 		});
 		ws.on('error', function(err) {
 			console.log(err);

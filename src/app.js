@@ -7,10 +7,12 @@ var http = require('http');
 var restify = require('restify');
 var winston = require('winston');
 
+// do first so any of our modules can use
+global.db = require(global.gBaseDir + '/src/shdb.js');
+
 var shutil = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
-
-global.db = require(global.gBaseDir + '/src/shdb.js');
+var shUser = require(global.gBaseDir + '/src/shuser.js');
 
 var admin  = require('../src/admin.js');
 
@@ -72,9 +74,24 @@ server.use(function(req, res, next) {
 	req.session = {};
 	req.session.uid = psession.split(':')[1];
 	console.log("session OK: uid = " + req.session.uid);
-	return next();
-}
-);
+	
+	// loading user - SWD: always do it for now
+	console.log("loading user: uid = " + req.session.uid);
+	var user = new shUser();
+	// make sure we have a user object as we are passed session check
+	user.loadOrCreate(req.session.uid, function(error, data) {
+		if(error != 0) {
+			var wrapper = shutil.wrapper(cmd, psession, {info: "unable to load user: " + req.session.uid});
+			wrapper.error = 2;
+			res.send(wrapper);
+			return 0;
+		}
+		console.log("user loaded: " + req.session.uid);
+		req.session.user = user;
+		return next();
+	});
+
+});
 
 server.get('/hello', function(req, res, next) {
 	res.send("hello");
