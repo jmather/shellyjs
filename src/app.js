@@ -48,6 +48,11 @@ server.use(
   }
 );
 */
+server.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	return next();
+});
 
 server.use(function(req, res, next) {
 	console.log('session check');
@@ -59,13 +64,10 @@ server.use(function(req, res, next) {
 	var psession = req.params.session;
 	// SWD - should grab user object out of check and stuff into req.session
 	if(!session.check(psession)) {
-	  res.header("Access-Control-Allow-Origin", "*");
-	  res.header("Access-Control-Allow-Headers", "X-Requested-With");	
-		var wrapper = shutil.wrapper(cmd, psession, null);
+		var wrapper = shutil.wrapper(cmd, psession, {info: "bad session token"});
 		wrapper.error = 1;
-		wrapper.info = "bad session";
 		res.send(wrapper);
-		return next();
+		return 0;
 	}
 	req.session = {};
 	req.session.uid = psession.split(':')[1];
@@ -96,19 +98,6 @@ function errorStr(error, module)
 	return info;
 }
 
-function setWrapper(error, data, wrapper, module) {
-	wrapper.error = error;
-	wrapper.info = errorStr(error, module);
-	if(typeof(data) != 'undefined') {
-		if(typeof(data) == 'object') {
-			wrapper.data = data;
-		} else {
-			wrapper.data = data.toString();
-		}
-	}
-	return wrapper;
-}
-
 function respond(req, res, next) {
 	var cmd = req.params.cmd;
 	console.log("respond: " + cmd);
@@ -122,8 +111,8 @@ function respond(req, res, next) {
 		wrapper.error = error;
 		wrapper.data = data;
 		
-	  res.header("Access-Control-Allow-Origin", "*");
-	  res.header("Access-Control-Allow-Headers", "X-Requested-With");		
+//	  res.header("Access-Control-Allow-Origin", "*");
+//	  res.header("Access-Control-Allow-Headers", "X-Requested-With");		
 		res.send(wrapper);
 	});
 }

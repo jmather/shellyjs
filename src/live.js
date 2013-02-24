@@ -27,16 +27,31 @@ live.start = function()
 		var socketNotify = function(message) {}
 		
 	  ws.on('message', function(message) {
-			var params = JSON.parse(message);
-			if(params.cmd == 'game.join') {
-				var channel = "notify-" + params.gameId;
-				console.log("socket: on channel=" + channel);
-				eventEmitter.on(channel, socketNotify);
-				
+			var req = {};
+			var res = {};
+			
+			req.params = JSON.parse(message);
+			if(!session.check(req.params.session)) {
+				var wrapper = shutil.wrapper("game.turn", 1, "bad session");
+				ws.send(JSON.stringify(wrapper));
+				return
 			}
+			req.session = {};
+			req.session.uid = req.params.session.split(':')[1];
+			
+			shutil.call(req.params.cmd, req, res, function(error, data) {
+				if(req.params.cmd == 'game.join') {
+					if(error == 0 || error == 106) {
+						// let them listen for events
+						var channel = "notify-" + req.params.gameId;
+						console.log("socket: on channel=" + channel);
+						eventEmitter.on(channel, socketNotify);					
+					}
+					var wrapper = shutil.wrapper("game.turn", error, data);
+					ws.send(JSON.stringify(wrapper));				
+				}
+			});
 			console.log('received: %s', message);
-//			var wrapper = shutil.wrapper("match.test", 0, null);
-//			ws.send(JSON.stringify(wrapper));
 		});
 		ws.on('error', function(err) {
 			console.log(err);

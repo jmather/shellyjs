@@ -220,7 +220,10 @@ game.turn = function(req, res, cb)
 		game.turnsPlayed++;
 		
 		req.env.gameModule.turn(req, function(error, data) {
-			global.live.notify(gameId, data);
+			if(error == 0)
+			{
+				global.live.notify(gameId, data);  // notify others
+			}
 			cb(error, data);
 		});
 	}

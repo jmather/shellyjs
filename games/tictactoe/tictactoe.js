@@ -31,7 +31,7 @@ tictactoe.turn = function(req, cb)
 	var gameBoard = game.state.gameBoard;
 	
 	if(gameBoard[move.x][move.y] != '') {
-		cb(1, "this square has been taken");
+		cb(200, {info: "this square has been taken"});
 		return;
 	}
 	

@@ -36,19 +36,6 @@ function errorStr(error, module)
 	return info;
 }
 
-function setWrapper(error, data, wrapper, module) {
-	wrapper.error = error;
-	wrapper.info = errorStr(error, module);
-	if(typeof(data) != 'undefined') {
-		if(typeof(data) == 'object') {
-			wrapper.data = data;
-		} else {
-			wrapper.data = data.toString();
-		}
-	}
-	return wrapper;
-}
-
 shutil.call = function(cmd, req, res, cb)
 {
 	console.log('cmd = ' + cmd);
@@ -72,19 +59,15 @@ shutil.call = function(cmd, req, res, cb)
 	{
 		if(typeof(req.params[key])=='undefined')
 		{
-			cb(2, {cmdtt: cmd, info: "missing param: " + key});
+			cb(2, {cmd: cmd, info: "missing param: " + key});
 			return;
-//			wrapper.error = 1;
-//			// TODO: SWD strip param name for production
-//			wrapper.info = 'missing param: '+key;
-//			console.log(wrapper);
-//			res.send(wrapper);
-//			return next();
 		}
 	}
 
 	// init for modules to use to pass data
-	req.env = {};
+	if (typeof(req.env) == 'undefined') {
+		req.env = {};
+	}
 
 	// ensure we have pre/post functions
 	if(typeof(module.pre) != 'function') {
@@ -107,7 +90,7 @@ shutil.call = function(cmd, req, res, cb)
 			var retError = error;
 			var retData = data;
 			if(error != 0) {
-				if(typeof(data) != 'object') {
+				if(typeof(data) == 'undefined') {
 					data = {cmd: cmd, info: errorStr(error, module)};
 				}
 				console.log("func error: ", data);
