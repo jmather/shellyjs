@@ -67,8 +67,8 @@ gqueue.nextAvailable = function(req, res, cb) {
 		if(error != 0) {
 			// put the game back in the available queue
 			gq.unshift(gameInfo);
-			cb(error, data);
 		}
+		cb(error, data);
 	});
 	
 //	game.pre(req, res, function(error, data) {

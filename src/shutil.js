@@ -2,7 +2,7 @@
 
 var shutil = exports;
 
-shutil.wrapper = function(cmd, session, data)
+shutil.wrapper = function(cmd, session, error, data)
 {
 	if (typeof(data) == 'undefined') {
 		data = null;
@@ -12,8 +12,7 @@ shutil.wrapper = function(cmd, session, data)
 	wrapper.cmd = cmd;
 	wrapper.session = session;
 	wrapper.ts = new Date().getTime();
-	wrapper.error = 1;			// default to error, function must clear
-	wrapper.info = '';
+	wrapper.error = error;
 	wrapper.data = data;
 	
 	return wrapper;
@@ -82,6 +81,9 @@ shutil.call = function(cmd, req, res, cb)
 	// call the pre, function, post sequence
 	module.pre(req, res, function(error, data) {
 		if(error != 0) {
+			if(typeof(data) == 'undefined') {
+				data = {cmd: cmd, info: errorStr(error, module)};
+			}
 			console.log("pre error: ", data);
 			cb(error, data);
 			return;
@@ -93,14 +95,16 @@ shutil.call = function(cmd, req, res, cb)
 				if(typeof(data) == 'undefined') {
 					data = {cmd: cmd, info: errorStr(error, module)};
 				}
-				console.log("func error: ", data);
+				console.log("func error: ", error, data);
 				// bail out, no post as function failed
 				cb(error, data);
 				return;
 			}
 			module.post(req, res, function(error, data) {
 				if(error != 0) {
-					data = {module: moduleName, function: funcName, info: errorStr(error, module)};
+					if(typeof(data) == 'undefined') {					
+						data = {module: moduleName, function: funcName, info: errorStr(error, module)};
+					}
 					cb(error, data);
 				} else {					
 					cb(retError, retData);

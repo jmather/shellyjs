@@ -8,12 +8,7 @@ var game = exports;
 
 game.desc = "game state and control module"
 game.functions = {
-	create: {desc: 'create a new game', params: {name:{dtype: 'string'},
-																							style: {dtype:'string', options:'turn, round, live'},
-																							access: {dtype:'string', options:'public, private, invite'},
-																							minPlayers:{dtype:'int'},
-																							maxPlayers:{dtype:'int'}},
-																							security: []},
+	create: {desc: 'create a new game', params: {name:{dtype: 'string'}}, security: []},
 	start: {desc: 'start a game', params: {gameId:{dtype:'string'}}, security: []},
 	join: {desc: 'join an existing game', params: {gameId:{dtype:'string'}}, security: []},
 	leave: {desc: 'leave an existing game', params: {gameId:{dtype:'string'}}, security: []},
@@ -35,7 +30,7 @@ game.errors = {
 	103: "unable to set game state",
 	104: "game has already started",
 	105: "not your turn",
-	106: "user has already joined",
+	106: "user has already joined", // not used anymore
 	107: "unable to parse game state",
 	108: "unable to load game",
 	109: "unable to load custom function"
@@ -177,21 +172,12 @@ game.join = function(req, res, cb)
 	user.set("currentGames", currentGames);
 	
 	if(typeof(game.players[uid]) == 'object') {
-		cb(106);  // already in game
-		return;
+		game.players[uid].status = 'ready';
+	} else {
+		game.players[uid] = {status: 'ready'};
+		game.playerOrder.push(uid);
 	}
-	game.players[uid] = {status: 'ready'};
-	game.playerOrder.push(uid);
-	
-/*					 
-	user.save(function(error, data) {
-		if(error != 0) {
-			cb(error, data);
-		} else {
-			cb(0, game);
-		}
-	});
-*/	
+	cb(0, game);
 }
 
 game.leave = function(req, res, cb)

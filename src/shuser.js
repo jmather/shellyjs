@@ -73,10 +73,10 @@ User.prototype.get = function(key) {
 User.prototype.set = function(key, value) {
 	this._dirty = true;
 	this._data[key] = value;
-	// temp save until we figure out user pre/post save
-	this.save(function(error, data) {
-		// don't care for now
+	this.save(function() {
+		// SWD: don't care for now
 	});
+
 }
 
 User.prototype.getData = function() {

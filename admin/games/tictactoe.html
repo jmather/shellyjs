@@ -37,6 +37,10 @@
                           gameId: "161"
                          }
 
+        function clone(obj) {
+            return $.extend({}, obj);
+        }
+
         function log(api, type, msg)
         {
             color = "black";
@@ -63,92 +67,6 @@
             $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
         }
 
-        function setDefaultParam($defaults, name, value)
-        {
-            var dParams = getDefaultParams($defaults);
-            dParams[name] = value;
-//            var cmdDefaults =formatJson(JSON.stringify(dParams));
-//            $defaults.val(cmdDefaults);
-
-            saveDefaultParams($defaults);
-        }
-
-        function saveDefaultParams($defaults)
-        {
-           var cmdDefaults = $defaults.val();
-           console.log("log", "save", $defaults.attr("id") + " = " + cmdDefaults);
-           $.cookie($defaults.attr("id"), cmdDefaults, {path: '/', expires: 365});
-        }
-
-        function getDefaultParams($defaults)
-        {
-            var dParams = {};
-            var cmdDefaults = $defaults.val();
-            try {
-                var dParams = JSON.parse(cmdDefaults);
-            } catch(e) {
-//                    alert("error loading defaults: " + e.message);
-            }
-            return dParams;
-        }
-
-        function initDefaultParams($defaults)
-        {
-            var dParams = {};
-            var cmdDefaults = $.cookie($defaults.attr("id"));
-            if(typeof(cmdDefaults)!='undefined')
-            {
-                $defaults.val(cmdDefaults);
-                try {
-                    var dParams = JSON.parse(cmdDefaults);
-                } catch(e) {
-                }
-            } else {
-                $defaults.val("{}");
-            }
-            return dParams;
-        }
-
-        function populateCmd(name, target, $defaults)
-        {
-            var dParams = getDefaultParams($defaults)
-
-            cmd = "game." + name;
-            var input = {cmd:cmd};
-            var key = "session";
-            if(typeof(dParams[key]) != 'undefined') {
-                input[key] = dParams[key];
-            } else {
-                input.session = 'xxxx';
-            }
-
-            var paramInfo = "";
-            var funcInfo = Env.functions[name];
-            for (key in funcInfo.params)
-            {
-                var dtype = funcInfo.params[key].dtype;
-
-                if(typeof(dParams[key]) != 'undefined') {
-                    input[key] = dParams[key];
-                    continue;
-                }
-                if(dtype == 'object') {
-                    input[key] = null;
-                } else if (dtype == 'array') {
-                    input[key] = null;
-                } else if (dtype == 'int') {
-                    input[key] = 0;
-                } else if (dtype == 'float') {
-                    input[key] = 0.0;
-                } else if (dtype == 'array') {
-                    input[key] = [];
-                } else if (dtype == 'string') {
-                    input[key] = '';
-                }
-            }
-            target.set(input);
-        }
-
         function setState(game)
         {
             var gameBoard = game.state.gameBoard;
@@ -157,11 +75,14 @@
                     $("#"+x+y).val(gameBoard[x][y]);
                 }
             }
+            if(typeof(game.gameId) != 'undefined') {
+                $("#gameId").text(game.gameId);
+                Env.baseParams.gameId = game.gameId;
+            }
         }
 
         function callServer(input)
         {
-            input.session = $("#user1Defaults").val();
             log("rest", "send", input);
             $.ajax
                     ({
@@ -175,10 +96,6 @@
                             if(res.error == 0)
                             {
                                 setState(res.data);
-//                                if(typeof(res.data.gameId) != 'undefined')
-//                                {
-//                                    setDefaultParam($("#user1Defaults"), "gameId", res.data.gameId);
-//                                }
                             } else {
                                 log("rest", "error", res.error + " : " + JSON.stringify(res.data));
                             }
@@ -190,7 +107,7 @@
         }
 
         function turn(x, y) {
-            var data = Env.baseParams;
+            var data = clone(Env.baseParams);
             data.cmd = "game.turn";
             data.move = {x:x, y:y};
             callServer(data);
@@ -200,7 +117,7 @@
         var ws = new ReconnectingWebSocket(url);
         ws.onopen = function() {
             log("socket", "onopen", url);
-            gameInit(Env.baseParams.gameId);
+            gameInit();
             //listReadyGames();
         };
         ws.onmessage = function (evt) {
@@ -210,7 +127,7 @@
             if(msg.error != 0) {
                 log("socket", "error", msg.error + " : " + JSON.stringify(msg.data));
             }
-            if(msg.error == 0 && msg.cmd == 'game.turn') {
+            if(msg.error == 0 && (msg.cmd == 'game.turn' || msg.cmd == 'gqueue.nextAvailable')) {
                 setState(msg.data);
             }
 //            alert("Message is received...");
@@ -227,17 +144,15 @@
 
         function listReadyGames()
         {
-            var data = Env.baseParams;
+            var data = clone(Env.baseParams);
             data.cmd = "match.list";
             sendWs(data);
         }
 
-        function gameInit(gameId)
+        function gameInit()
         {
-            var data = Env.baseParams;
-            data.session = $("#user1Defaults").val();
+            var data = clone(Env.baseParams);
             data.cmd = "game.join";
-            data.gameId = gameId;
             sendWs(data);
         }
 
@@ -251,13 +166,22 @@
         {
             Env.baseParams.session = psess;
         }
+        var pgameId = getURLParameter("gameId");
+        if(pgameId != 'null')
+        {
+            Env.baseParams.gameId = pgameId;
+        }
 
         $(init);
         function init()
         {
             $("#user1Defaults").val(Env.baseParams.session);
 
-            var data = Env.baseParams;
+            $("#uid").text(Env.baseParams.session.split(':')[1]);
+            $("#gameId").text(Env.baseParams.gameId);
+            $("#session").text(Env.baseParams.session);
+
+            var data = clone(Env.baseParams);
             data.cmd = "game.get";
             callServer(data);
 
@@ -268,20 +192,37 @@
                 turn(x, y);
             });
 
+            $("#gameCreate").click(function() {
+                var data = clone(Env.baseParams);
+                delete data.gameId;
+                data.cmd = "game.create";
+                data.name = "tictactoe";
+                callServer(data);
+            });
+
             $("#gameReset").click(function() {
-                var data = Env.baseParams;
+                var data = clone(Env.baseParams);
                 data.cmd = "game.reset";
                 callServer(data);
             });
 
-            $("#gameJoin").click(function() {
-                var data = Env.baseParams;
-                data.cmd = "game.join";
+            $("#gameInvite").click(function() {
+                var data = clone(Env.baseParams);
+                data.cmd = "gqueue.add";
+                data.data = {display: "fun game"};
                 callServer(data);
             });
 
+            $("#gameFind").click(function() {
+                var data = clone(Env.baseParams);
+                data.cmd = "gqueue.nextAvailable";
+                delete data.gameId;
+                sendWs(data);
+//                callServer(data);
+            });
+
             $("#gameUpdate").click(function() {
-                var data = Env.baseParams;
+                var data = clone(Env.baseParams);
                 data.cmd = "game.get";
                 callServer(data);
             });
@@ -306,8 +247,8 @@
              </div>
         </td>
         <td valign="top">
-            User<button id="user1SetDefaults" style="float:right">set</button>
-            <textarea id="user1Defaults" style="height:100;width:100%;"></textarea>
+            User<button id="tttSetDefaults" style="float:right">set</button>
+            <textarea id="tttDefaults" style="height:100;width:100%;"></textarea>
         </td>
     </tr>
 </table>
@@ -326,12 +267,13 @@
 
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:50%;">user 1</td>
+        <td style="width:50%;">user=<span id="uid"></span> game=</span><span id="gameId">0</span> session=<span id="session"></span></td>
     </tr>
     <tr>
         <td>
-            <button id="user1Create">create</button>
-            <button id="gameJoin">join</button>
+            <button id="gameCreate">create</button>
+            <button id="gameInvite">invite</button>
+            <button id="gameFind">find game</button>
             <button id="gameUpdate">update</button>
             <button id="">notify</button>
             <button id="user1Kick">kick</button>
