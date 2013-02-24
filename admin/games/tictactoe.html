@@ -95,7 +95,11 @@
                             log("rest", "recv", res);
                             if(res.error == 0)
                             {
-                                setState(res.data);
+                                if(typeof(res.data.event) != 'undefined') {
+                                    setState(res.data.game);
+                                } else {
+                                    setState(res.data);
+                                }
                             } else {
                                 log("rest", "error", res.error + " : " + JSON.stringify(res.data));
                             }
@@ -128,7 +132,11 @@
                 log("socket", "error", msg.error + " : " + JSON.stringify(msg.data));
             }
             if(msg.error == 0 && (msg.cmd == 'game.turn' || msg.cmd == 'gqueue.nextAvailable')) {
-                setState(msg.data);
+                if(typeof(msg.data.event) != 'undefined') {
+                    setState(msg.data.game);
+                } else {
+                    setState(msg.data);
+                }
             }
 //            alert("Message is received...");
         };

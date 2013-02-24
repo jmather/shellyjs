@@ -205,9 +205,14 @@ game.kick = function(req, res, cb)
 game.turn = function(req, res, cb)
 {
 	var uid = req.session.uid;
-	var gameId = req.params.gameId;
-	
+	var gameId = req.params.gameId;	
 	var game = req.env.game;
+	
+	if(game.status == 'over') {
+		var data = {event: "evt.game.over", game: game};
+		cb(0, data);
+		return;
+	}
 	
 	var out = new Object();
 	
@@ -251,6 +256,8 @@ game.reset = function(req, res, cb) {
 	game.rounds++;
 	game.turns = 0;
 	game.whoTurn = game.ownerId;
+	game.status = "playing";
+	game.winner = null;
 	
 	req.env.gameModule.init(req, function(error, data) {
 		global.live.notify(game.gameId, game);
