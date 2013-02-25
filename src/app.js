@@ -122,7 +122,7 @@ function respond(req, res, next) {
 	wrapper.cmd = cmd;
 	
 	shutil.call(cmd, req, res, function(error, data) {
-		console.log("respond: sending data");
+		console.log("respond: sending data", data);
 		var event = data;
 		if(error != 0) {
 			event = shutil.event("event.error", data);

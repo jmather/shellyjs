@@ -170,8 +170,7 @@ game.join = function(req, res, cb)
 	// set users current games and ts
 	var currentGames = user.get("currentGames");
 	var ts = new Date().getTime();
-	currentGames[game.gameId] = {lastJoin: ts};
-	console.log("SWD", currentGames);
+	currentGames[game.gameId] = {name: game.name, lastJoin: ts};
 	user.set("currentGames", currentGames);
 	
 	if(typeof(game.players[uid]) == 'object') {

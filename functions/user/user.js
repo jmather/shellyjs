@@ -1,5 +1,7 @@
 var _ = require('lodash');
 
+var shutil = require(global.gBaseDir + '/src/shutil.js');
+
 var db = global.db;
 
 var user = exports;
@@ -7,7 +9,9 @@ var user = exports;
 user.desc = "utility functions for shelly modules"
 user.functions = {
 	get: {desc: 'get user object', params: {uid:{dtype:'string'}}, security: []},
-	set: {desc: 'set user object', params: {uid:{dtype:'string'}, user: {dtype: 'object'}}, security: []}
+	set: {desc: 'set user object', params: {uid:{dtype:'string'}, user: {dtype: 'object'}}, security: []},
+	games: {desc: 'list games user is playing', params: {}, security: []},
+	gameRemove: {desc: 'remove a game from the playing list', params: {gameId:{dtype:'string'}}, security: []}
 };
 
 user.errors = {
@@ -24,21 +28,6 @@ user.pre = function(req, res, cb)
 	
 	// SWD - eventually check security session.uid has rights to params.uid
 	cb(0);
-/*	
-	db.kget('kUser', uid, function(err, value){
-		if(value == null) {
-			cb(100);
-			return;
-		}
-		var user = JSON.parse(value);
-		if(typeof(user) != 'object') {
-			// something went very wrong
-			user = {};
-		}
-		req.env.user = user;
-		cb(0);
-	});
-*/
 }
 
 user.post = function(req, res, cb)
@@ -47,16 +36,6 @@ user.post = function(req, res, cb)
 	var uid = req.params.uid;
 	// SWD: work out pre/post user save later, for now save on every set
 	cb(0);
-/*	
-	var userStr = JSON.stringify(req.env.user);
-	db.kset('kUser', uid, userStr, function(err, res) {
-		if(err != null) {
-			cb(101);
-			return;
-		}
-		cb(0);
-	});
-	*/
 }
 
 user.get = function(req, res, cb)
@@ -72,4 +51,20 @@ user.set = function(req, res, cb)
 	req.session.user.setData(newUser);
 
 	cb(0, req.session.user.getData());
+}
+
+user.games = function(req, res, cb)
+{
+	cb(0, shutil.event("event.user.games", req.session.user.get('currentGames')));
+}
+
+user.gameRemove = function(req, res, cb)
+{
+	var gameId = req.params.gameId;
+	var user = req.session.user;
+	var currentGames = user.get('currentGames');
+	delete currentGames[gameId];
+	user.set(currentGames);
+	
+	cb(0, shutil.event("event.user.games", currentGames));
 }

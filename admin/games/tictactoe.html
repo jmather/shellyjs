@@ -91,6 +91,31 @@
             $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
         }
 
+        function setMyGames(gameList)
+        {
+            $(".activeGame").remove();
+            for (gameId in gameList) {
+                var $newGame = $("#gameTemplate").clone();
+                $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
+                $newGame.attr("gameId", gameId);
+                $newGame.addClass("activeGame");
+                $newGame.css("display", "block");
+
+                $newGame.find("#myGameJoin").click(function() {
+                    Env.baseParams.gameId = $(this).parent().attr('gameId');
+                    gameInit();
+                });
+                $newGame.find("#myGameRemove").click(function() {
+                    var data = clone(Env.baseParams);
+                    data.cmd = "user.gameRemove";
+                    data.gameId = $(this).parent().attr("gameId");
+                    sendWs(data);
+                });
+
+                $("#gameList").append($newGame);
+            }
+        }
+
         function setState(game)
         {
             var gameBoard = game.state.gameBoard;
@@ -155,6 +180,10 @@
                 setState(res.data);
                 return;
             }
+            if(res.event == 'event.user.games') {
+                setMyGames(res.data);
+                return;
+            }
             log(from, "unknown-event", JSON.stringify(res));
         }
 
@@ -183,7 +212,7 @@
         ws.onopen = function() {
             log("socket", "onopen", url);
             gameInit();
-            //listReadyGames();
+            listMyGames();
         };
         ws.onmessage = function (evt) {
             var received_msg = evt.data;
@@ -209,10 +238,10 @@
             sendWs(data);
         }
 
-        function listReadyGames()
+        function listMyGames()
         {
             var data = clone(Env.baseParams);
-            data.cmd = "match.list";
+            data.cmd = "user.games";
             sendWs(data);
         }
 
@@ -273,6 +302,9 @@
 //                sendRest(data);
             });
 
+            $("#listMyGames").click(function() {
+                listMyGames();
+            });
         }
     </script>
 </head>
@@ -281,14 +313,14 @@
 </p>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:70%;">list games</td>
+        <td style="width:70%;">list games <button id="listMyGames">refresh</button> </td>
         <td>info</td>
     </tr>
     <tr>
         <td valign="top" style="">
             <div id="gameList">
-                <div id="gameTemplate" style="">
-                    <span id="gameName">game1</span><button>join</button>
+                <div id="gameTemplate" style="display:none;">
+                    <span id="gameName">game1</span><button id="myGameJoin">join</button><button id="myGameRemove">remove</button>
                 </div>
              </div>
         </td>
