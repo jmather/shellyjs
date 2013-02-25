@@ -97,6 +97,7 @@
             for (var i=0; i<3; i++) {
                 for (var j=0; j<3; j++) {
                     $("#x" + i + "y" + j).text(gameBoard[i][j]);
+                    $("#x" + i + "y" + j).css('background', '#ccc');
                 }
             }
 
@@ -111,9 +112,16 @@
             $("#whoTurn").text(whoTurn);
 
             if(game.status == 'over') {
-                $('#gameWinner').text(game.winner);
+                $('#gameWinner').text(game.state.winner);
             } else {
                 $('#gameWinner').text('');
+            }
+
+            var winnerSet = game.state.winnerSet;
+            if (winnerSet != null) {
+                for(var i=0; i<winnerSet.length; i++) {
+                    $("#"+winnerSet[i]).css("background", "green");
+                }
             }
 
             if(game.state.xes == $("#uid").text())
