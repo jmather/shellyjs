@@ -33,8 +33,9 @@ live.start = function()
 			
 			req.params = JSON.parse(message);
 			if(!session.check(req.params.session)) {
-				var wrapper = shutil.wrapper("game.turn", 0, 1, "bad session");
-				ws.send(JSON.stringify(wrapper));
+//				var wrapper = shutil.wrapper("game.turn", 0, 1, "bad session");
+				var event = shutil.event("event.error", {info: 'bad session token'});
+				ws.send(JSON.stringify(event));
 				return
 			}
 			req.session = {};
@@ -43,8 +44,9 @@ live.start = function()
 			var user = new shUser();
 			user.loadOrCreate(req.session.uid, function(error, data) {
 				if(error != 0) {
-					var wrapper = shutil.wrapper(req.params.cmd, req.params.session, error, {info: "unable to load user: " + req.session.uid});
-					ws.send(JSON.stringify(wrapper));	
+//					var wrapper = shutil.wrapper(req.params.cmd, req.params.session, error, {info: "unable to load user: " + req.session.uid});
+					var event = shutil.event("event.error", {info: "unable to load user: " + req.session.uid});
+					ws.send(JSON.stringify(event));	
 					return;
 				}
 				console.log("user loaded: " + req.session.uid);
@@ -59,8 +61,8 @@ live.start = function()
 							console.log("socket: on channel=" + channel);
 							eventEmitter.on(channel, socketNotify);					
 						}
-						var wrapper = shutil.wrapper(req.params.cmd, req.params.session, error, data);
-						ws.send(JSON.stringify(wrapper));
+//						var wrapper = shutil.wrapper(req.params.cmd, req.params.session, error, data);
+						ws.send(JSON.stringify(data));
 						return;
 					}
 				});
@@ -74,8 +76,9 @@ live.start = function()
 			console.log("socket: socketNotify")
 			if(ws.readyState == 1) {
 				// 1 = OPEN - SWD: find this in ws module later
-				var wrapper = shutil.wrapper("game.turn", 0, 0, message);
-				ws.send(JSON.stringify(wrapper));
+//				var wrapper = shutil.wrapper("game.turn", 0, 0, message);
+//				ws.send(JSON.stringify(wrapper));
+				ws.send(JSON.stringify(message));
 			} else {
 				console.log("socket: dead socket");
 			}

@@ -1,5 +1,7 @@
 var _ = require('lodash');
 
+var shutil = require(global.gBaseDir + '/src/shutil.js');
+
 var tictactoe = exports;
 
 tictactoe.init = function(req, cb)
@@ -14,7 +16,8 @@ tictactoe.init = function(req, cb)
 	req.env.game.state.gameBoard = gameBoard;  // SWD: change this to just board
 	// first player is always X
 	req.env.game.state.xes = req.session.uid;
-	cb(0, req.env.game)
+	
+	cb(0, shutil.event("event.game.info", req.env.game));
 }
 
 tictactoe.join = function(req, cb)
@@ -42,25 +45,26 @@ function checkWin(gb) {
 	console.log("checkWin");
 	for (var i=0; i<3; i++) {
 		if(gb[i][0] == gb[i][1] && gb[i][0] == gb[i][2]) {
-			if(gb[i][1]!='') {
-				res.winner = gb[i][1];
+			if(gb[i][0]!='') {
+				res.winner = gb[i][0];
 				return res;			
 			}
 		}
 		if(gb[0][i] == gb[1][i] && gb[0][i] == gb[2][i]) {
-			if(gb[1][i] != '') {
-				res.winner = gb[1][i];
+			if(gb[0][i] != '') {
+				res.winner = gb[0][i];
 				return res;
 			}
 		}
 	}
-	if(gb[0,0]==gb[1,1] && gb[0,0]==gb[2,2]) {
+	
+	if(gb[0][0]==gb[1][1] && gb[0][0]==gb[2][2]) {
 		if(gb[1][1] != '') {
 			res.winner = gb[1][1];
 			return res;
 		}
 	}
-	if(gb[0,2]==gb[1,1] && gb[0,2]==gb[2,0]) {
+	if(gb[0][2]==gb[1][1] && gb[0][2]==gb[2][0]) {
 		if(gb[1][1] != '') {
 			res.winner = gb[1][1];
 			return res;
@@ -85,25 +89,25 @@ tictactoe.turn = function(req, cb)
 	{
 		gameBoard[move.x][move.y] = "X";
 	} else {
-		gameBoard[move.x][move.y] = "Y";		
+		gameBoard[move.x][move.y] = "O";		
 	}
 	
 	var win = checkWin(gameBoard);
 	if(win.winner != '') {
 		game.status = "over";
 		game.winner = uid;
-		var data = {event: "evt.game.over", winner: win.winner, game: game};
-		cb(0, data);
+		game.whoTurn = 0;
+		cb(0, shutil.event('event.game.over', game));
 		return;
 	}
 	
 	if(checkFull(gameBoard)) {
 		game.status = "over";
 		game.winner = 0;
-		var data = {event: "evt.game.over", game: game};
-		cb(0, data);
+		game.whoTurn = 0;
+		cb(0, shutil.event('event.game.over', game));
 		return;
 	}
 	
-	cb(0, game)
+	cb(0, shutil.event('event.game.info', game));
 }

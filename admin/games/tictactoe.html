@@ -1,4 +1,4 @@
-<html xmlns="http://www.w3.org/1999/html">
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Tic Tac Toe</title>
     <script src="/static/js/jquery-1.7.1.min.js"></script>
@@ -9,26 +9,25 @@
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
     <style type="text/css">
-        #user1Editor {
-            width: 100%;
-            height: 200px;
-        }
-        #user2Editor {
-            width: 100%;
-            height: 200px;
-        }
         body {
             font-family:verdana,arial,sans-serif;
             font-size:10pt;
             margin:30px;
         }
-        .nameCell {
-            font-weight: bold;
-            width: 100px;
-        }
-        .tictac {
-            height: 50;
-            width: 50;
+        .tictac{
+            display:block;
+            float:left;
+            border-style:solid;
+            border-color:#bbb #888 #666 #aaa;
+            border-width:3px 4px 4px 3px;
+            width:4em;
+            height:2em;
+            background:#ccc;
+            color:#333;
+            line-height:2;
+            text-align:center;
+            text-decoration:none;
+            font-weight:900;
         }
     </style>
     <script language="javascript">
@@ -72,13 +71,58 @@
             var gameBoard = game.state.gameBoard;
             for (var i=0; i<3; i++) {
                 for (var j=0; j<3; j++) {
-                    $("#x" + i + "y" + j).val(gameBoard[i][j]);
+                    $("#x" + i + "y" + j).text(gameBoard[i][j]);
                 }
             }
+
+            $("#gameStatus").text(game.status);
+            var whoTurn = game.whoTurn;
+            if (game.whoTurn == $("#uid").text()) {
+                whoTurn = "yours";
+            }
+            if(game.whoTurn == 0) {
+                whoTurn = "no ones";
+            }
+            $("#whoTurn").text(whoTurn);
+
+            if(game.status == 'over') {
+                $('#gameWinner').text(game.winner);
+            } else {
+                $('#gameWinner').text('');
+            }
+
+            if(game.state.xes == $("#uid").text())
+            {
+                $("#gamePlaying").text("X's");
+            } else {
+                $("#gamePlaying").text("O's")
+            }
+
             if(typeof(game.gameId) != 'undefined') {
                 $("#gameId").text(game.gameId);
                 Env.baseParams.gameId = game.gameId;
             }
+
+        }
+
+        function processEvent(res, from) {
+            if(typeof(res.event) == 'undefined') {
+                log(from, "error", "old message: "+JSON.stringify(res));
+                return;
+            }
+            if(res.event == 'event.error') {
+                log(from, "error", JSON.stringify(res.data));
+                return;
+            }
+            if(res.event == 'event.game.info') {
+                setState(res.data);
+                return;
+            }
+            if(res.event == 'event.game.over') {
+                setState(res.data);
+                return;
+            }
+            log(from, "unknown-event", JSON.stringify(res));
         }
 
         function callServer(input)
@@ -93,16 +137,7 @@
                         data: input,
                         success: function (res, status) {
                             log("rest", "recv", res);
-                            if(res.error == 0)
-                            {
-                                if(typeof(res.data.event) != 'undefined') {
-                                    setState(res.data.game);
-                                } else {
-                                    setState(res.data);
-                                }
-                            } else {
-                                log("rest", "error", res.error + " : " + JSON.stringify(res.data));
-                            }
+                            processEvent(res, "rest");
                         },
                         error: function (xhr, status, error) {
                             log("rest", "error", xhr.responseText);
@@ -128,17 +163,7 @@
             var received_msg = evt.data;
             log("socket", "onmessage", evt.data);
             var msg = JSON.parse(evt.data);
-            if(msg.error != 0) {
-                log("socket", "error", msg.error + " : " + JSON.stringify(msg.data));
-            }
-            if(msg.error == 0 && (msg.cmd == 'game.turn' || msg.cmd == 'gqueue.nextAvailable')) {
-                if(typeof(msg.data.event) != 'undefined') {
-                    setState(msg.data.game);
-                } else {
-                    setState(msg.data);
-                }
-            }
-//            alert("Message is received...");
+            processEvent(msg, "socket");
         };
         ws.onclose = function() {
         };
@@ -183,8 +208,6 @@
         $(init);
         function init()
         {
-            $("#user1Defaults").val(Env.baseParams.session);
-
             $("#uid").text(Env.baseParams.session.split(':')[1]);
             $("#gameId").text(Env.baseParams.gameId);
             $("#session").text(Env.baseParams.session);
@@ -244,7 +267,7 @@
 <table border="1" style="width:100%;">
     <tr>
         <td style="width:70%;">list games</td>
-        <td>default params</td>
+        <td>info</td>
     </tr>
     <tr>
         <td valign="top" style="">
@@ -255,27 +278,40 @@
              </div>
         </td>
         <td valign="top">
-            User<button id="tttSetDefaults" style="float:right">set</button>
-            <textarea id="tttDefaults" style="height:100;width:100%;"></textarea>
+            <div>user=<span id="uid"></span></div>
+            <div>session=<span id="session"></span></div>
+            <div>game=<span id="gameId">0</span>
         </td>
     </tr>
 </table>
 
-<FORM NAME="tic">
-    <input type="button" id="x0y0" class="tictac" value=" "/>
-    <input type="button" id="x0y1" class="tictac" value=" "/>
-    <input type="button" id="x0y2" class="tictac" value=" "/><br/>
-    <input type="button" id="x1y0" class="tictac" value=" "/>
-    <input type="button" id="x1y1" class="tictac" value=" "/>
-    <input type="button" id="x1y2" class="tictac" value=" "/><br/>
-    <input type="button" id="x2y0" class="tictac" value=" "/>
-    <input type="button" id="x2y1" class="tictac" value=" "/>
-    <input type="button" id="x2y2" class="tictac" value=" "/>
-</form>
+<table border="1">
+    <tr>
+        <td width="50%">
+            <div id="x0y0" class="tictac"></div>
+            <div id="x1y0" class="tictac"></div>
+            <div id="x2y0" class="tictac"></div>
+            <div style="clear:both;"/>
+            <div id="x0y1" class="tictac"></div>
+            <div id="x1y1" class="tictac"></div>
+            <div id="x2y1" class="tictac"></div>
+            <div style="clear:both;"/>
+            <div id="x0y2" class="tictac"></div>
+            <div id="x1y2" class="tictac"></div>
+            <div id="x2y2" class="tictac"></div>
+        </td>
+        <td>
+            <div>status: <span id="gameStatus"></span></div>
+            <div>whose turn: <span id="whoTurn"></span></div>
+            <div>winner: <span id="gameWinner"></span></div>
+            <div>playing: <span id="gamePlaying"></span></div>
+        </td>
+    </tr>
+</table>
 
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:50%;">user=<span id="uid"></span> game=</span><span id="gameId">0</span> session=<span id="session"></span></td>
+        <td style="width:50%;">controls</td>
     </tr>
     <tr>
         <td>

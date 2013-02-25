@@ -1,5 +1,7 @@
 var _ = require("lodash");
 
+var shutil = require(global.gBaseDir + '/src/shutil.js');
+
 var db = global.db;
 
 var gGameDir = global.gBaseDir + '/games';
@@ -57,7 +59,7 @@ game.pre = function(req, res, cb)
 			cb(0);
 			return;
 		} catch (e) {
-			cb(108, e);
+			cb(108, {cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+name, message: e.message});		
 			return;
 		}
 	}
@@ -72,7 +74,7 @@ game.pre = function(req, res, cb)
 		// SWD try catch around this
 		var game = JSON.parse(res);
 		if(game == null) {
-			cb(107);
+			cb(107, {cmd:req.params.cmd, func:'game.pre', info:'parse game data', message: e.message});
 			return;
 		}
 
@@ -80,7 +82,7 @@ game.pre = function(req, res, cb)
 			console.log("game.pre: setting game:"  + game.name + " = " + gameId);
 			req.env.gameModule = loadGame(game.name);
 		} catch (e) {
-			cb(108, e);
+			cb(108, {cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+game.name, message: e.message});
 			return;
 		}
 
@@ -134,6 +136,7 @@ game.create = function(req, res, cb)
 		
 		req.env.game = game;
 		
+		// SWD make sure init is there
 		req.env.gameModule.init(req, function(error, data) {
 			cb(error, data);
 		});
@@ -177,7 +180,7 @@ game.join = function(req, res, cb)
 		game.players[uid] = {status: 'ready'};
 		game.playerOrder.push(uid);
 	}
-	cb(0, game);
+	cb(0, shutil.event('event.game.info', game));
 }
 
 game.leave = function(req, res, cb)
@@ -204,12 +207,13 @@ game.kick = function(req, res, cb)
 
 game.turn = function(req, res, cb)
 {
+	var self = this;
 	var uid = req.session.uid;
 	var gameId = req.params.gameId;	
 	var game = req.env.game;
 	
 	if(game.status == 'over') {
-		var data = {event: "evt.game.over", game: game};
+		var data = shutil.event("event.game.over", game);
 		cb(0, data);
 		return;
 	}
@@ -217,7 +221,7 @@ game.turn = function(req, res, cb)
 	var out = new Object();
 	
 	if(game.whoTurn != uid) {
-		cb(105);  // not your turn			
+		cb(105, {cmd: req.params.cmd, message:'not your turn', whoTurn: game.whoTurn});
 	} else {
 		var nextIndex = game.playerOrder.indexOf(uid) + 1;
 		if(nextIndex == game.playerOrder.length) {
@@ -226,9 +230,13 @@ game.turn = function(req, res, cb)
 		game.whoTurn = game.playerOrder[nextIndex];
 		game.turnsPlayed++;
 		
+		//SWD make sure turn function is there
 		req.env.gameModule.turn(req, function(error, data) {
 			if(error == 0)
 			{
+				if(typeof(data)=='undefined') {
+					data = shutil.event("event.game.info", game)
+				}
 				global.live.notify(gameId, data);  // notify others
 			}
 			cb(error, data);
@@ -238,7 +246,12 @@ game.turn = function(req, res, cb)
 
 game.get = function(req, res, cb)
 {
-	cb(0, req.env.game);
+	// SWD - game is bad name for this all over
+	var game = req.env.game;
+	
+	var data = shutil.event("event.game.info", game);
+	console.log(data);
+	cb(0, data);
 }
 
 game.set = function(req, res, cb)
@@ -248,10 +261,13 @@ game.set = function(req, res, cb)
 	
 	game = _.merge(game, newGame);
 	
-	cb(0, game);
+	var data = shutil.event("event.game.info", game);
+	cb(0, data);
 }
 
 game.reset = function(req, res, cb) {
+	var self = this;
+	
 	var game = req.env.game;
 	game.rounds++;
 	game.turns = 0;
@@ -260,7 +276,12 @@ game.reset = function(req, res, cb) {
 	game.winner = null;
 	
 	req.env.gameModule.init(req, function(error, data) {
-		global.live.notify(game.gameId, game);
+		if (error == 0) {
+			global.live.notify(game.gameId, data);
+			if(typeof(data) == 'undefined') {
+				data = shutil.event("event.game.reset", game)
+			}
+		}
 		cb(error, data);
 	});
 }

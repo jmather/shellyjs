@@ -1,4 +1,4 @@
-
+var _ = require("lodash");
 
 var shutil = exports;
 
@@ -16,6 +16,16 @@ shutil.wrapper = function(cmd, session, error, data)
 	wrapper.data = data;
 	
 	return wrapper;
+}
+
+shutil.event = function(event, data)
+{
+	var resp = new Object();
+	resp.event = event;
+	resp.ts = new Date().getTime();
+	resp.data = data;
+	
+	return resp;
 }
 
 function errorStr(error, module)
