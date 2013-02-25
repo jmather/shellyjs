@@ -36,6 +36,25 @@
                           gameId: "161"
                          }
 
+
+
+        // allow for baseParam overrides from url
+        function getURLParameter(name) {
+            return decodeURI(
+                    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+            );
+        }
+        var psess = getURLParameter("session");
+        if(psess != 'null')
+        {
+            Env.baseParams.session = psess;
+        }
+        var pgameId = getURLParameter("gameId");
+        if(pgameId != 'null')
+        {
+            Env.baseParams.gameId = pgameId;
+        }
+
         function clone(obj) {
             return $.extend({}, obj);
         }
@@ -125,7 +144,7 @@
             log(from, "unknown-event", JSON.stringify(res));
         }
 
-        function callServer(input)
+        function sendRest(input)
         {
             log("rest", "send", input);
             $.ajax
@@ -143,13 +162,6 @@
                             log("rest", "error", xhr.responseText);
                         }
                     })
-        }
-
-        function turn(x, y) {
-            var data = clone(Env.baseParams);
-            data.cmd = "game.turn";
-            data.move = {x:x, y:y};
-            callServer(data);
         }
 
         var url = "ws://localhost:5102";
@@ -175,13 +187,7 @@
             ws.send(msg);
         }
 
-        function listReadyGames()
-        {
-            var data = clone(Env.baseParams);
-            data.cmd = "match.list";
-            sendWs(data);
-        }
-
+        // basic functions
         function gameInit()
         {
             var data = clone(Env.baseParams);
@@ -189,20 +195,19 @@
             sendWs(data);
         }
 
-        function getURLParameter(name) {
-            return decodeURI(
-                    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-            );
-        }
-        var psess = getURLParameter("session");
-        if(psess != 'null')
+        function listReadyGames()
         {
-            Env.baseParams.session = psess;
+            var data = clone(Env.baseParams);
+            data.cmd = "match.list";
+            sendWs(data);
         }
-        var pgameId = getURLParameter("gameId");
-        if(pgameId != 'null')
-        {
-            Env.baseParams.gameId = pgameId;
+
+        function turn(x, y) {
+            var data = clone(Env.baseParams);
+            data.cmd = "game.turn";
+            data.move = {x:x, y:y};
+//            sendRest(data);
+            sendWs(data);
         }
 
         $(init);
@@ -211,10 +216,6 @@
             $("#uid").text(Env.baseParams.session.split(':')[1]);
             $("#gameId").text(Env.baseParams.gameId);
             $("#session").text(Env.baseParams.session);
-
-            var data = clone(Env.baseParams);
-            data.cmd = "game.get";
-            callServer(data);
 
             $(".tictac").click(function() {
                 var id = $(this).attr("id");
@@ -228,20 +229,20 @@
                 delete data.gameId;
                 data.cmd = "game.create";
                 data.name = "tictactoe";
-                callServer(data);
+                sendRest(data);
             });
 
             $("#gameReset").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "game.reset";
-                callServer(data);
+                sendRest(data);
             });
 
             $("#gameInvite").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "gqueue.add";
                 data.data = {display: "fun game"};
-                callServer(data);
+                sendRest(data);
             });
 
             $("#gameFind").click(function() {
@@ -249,13 +250,13 @@
                 data.cmd = "gqueue.nextAvailable";
                 delete data.gameId;
                 sendWs(data);
-//                callServer(data);
             });
 
             $("#gameUpdate").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "game.get";
-                callServer(data);
+                sendWs(data);
+//                sendRest(data);
             });
 
         }
@@ -300,7 +301,7 @@
             <div id="x1y2" class="tictac"></div>
             <div id="x2y2" class="tictac"></div>
         </td>
-        <td>
+        <td valign="top">
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>
