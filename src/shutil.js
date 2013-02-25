@@ -2,24 +2,12 @@ var _ = require("lodash");
 
 var shutil = exports;
 
-shutil.wrapper = function(cmd, session, error, data)
+shutil.event = function(event, data)
 {
 	if (typeof(data) == 'undefined') {
 		data = null;
 	}
-
-	var wrapper = new Object();
-	wrapper.cmd = cmd;
-	wrapper.session = session;
-	wrapper.ts = new Date().getTime();
-	wrapper.error = error;
-	wrapper.data = data;
 	
-	return wrapper;
-}
-
-shutil.event = function(event, data)
-{
 	var resp = new Object();
 	resp.event = event;
 	resp.ts = new Date().getTime();
