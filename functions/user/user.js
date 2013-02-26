@@ -14,12 +14,6 @@ user.functions = {
 	gameRemove: {desc: 'remove a game from the playing list', params: {gameId:{dtype:'string'}}, security: []}
 };
 
-user.errors = {
-	100: "get user object failed",
-	101: "set user object failed",
-	102: "set user object failed, unable to load merge"
-}
-
 user.pre = function(req, res, cb)
 {
 	console.log('user.pre');

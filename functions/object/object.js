@@ -15,14 +15,6 @@ object.functions = {
 	set: {desc: 'set object', params: {className:{dtype:'string'}, oid:{dtype:'string'}, object: {dtype: 'object'}}, security: []}
 };
 
-object.errors = {
-	100: "get object failed",
-	101: "set object failed",
-	102: "set object failed, unable to load merge",
-	103: "object already exists",
-	104: "unable to save null object"
-}
-
 object.pre = function(req, res, cb)
 {
 	console.log('object.pre');
@@ -76,7 +68,7 @@ object.post = function(req, res, cb)
 		var objectStr = JSON.stringify(object);
 		db.kset('kObject', [object._info.className, object._info.oid], objectStr, function(err, res) {
 			if(err != null) {
-				cb(101, shutil.error("object_save", "unable to save object"));
+				cb(1, shutil.error("object_save", "unable to save object"));
 				return;
 			}
 			cb(0);

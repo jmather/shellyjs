@@ -17,13 +17,6 @@ exports.functions = {
 	login: {desc: 'user login',	params: {email: {dtype:"string"}, password: {dtype:'string'}},	security: []},
 	logout: {desc: 'user logout',	params: {},	security: []}
 }
-exports.errors = {
-		100:'user already created',
-		101:'user does not exist',
-		102:'bad user name',
-		103:'bad password',
-		104: 'bad login'
-}
 
 function hashPassword(uid, password)
 {
@@ -130,7 +123,7 @@ exports.check = function(req, res, cb)
 			cb(0, JSON.parse(value));
 			return;
 		} else {
-			cb(101, shutil.error("unregistered", "this email is not registered", {email: email}));
+			cb(1, shutil.error("unregistered", "this email is not registered", {email: email}));
 			return;
 		}
 	});

@@ -100,16 +100,8 @@ function respond(req, res, next) {
 	var cmd = req.params.cmd;
 	console.log("respond: " + cmd);
 	
-	var wrapper = {};
-	wrapper.ts = new Date().getTime();
-	wrapper.cmd = cmd;
-	
 	shutil.call(cmd, req, res, function(error, data) {
-		console.log("respond: sending data", data);
-		var event = data;
-		if(error != 0) {
-			event = shutil.event("event.error", data);
-		}		
-		res.send(event);
+		console.log("back from call: " + req.params.cmd);
+		res.send(data);
 	});
 }

@@ -4,7 +4,7 @@ var shutil = require(global.gBaseDir + '/src/shutil.js');
 
 var tictactoe = exports;
 
-tictactoe.init = function(req, cb)
+tictactoe.create = function(req, cb)
 {
 	gameBoard = [
 							 ['','',''],

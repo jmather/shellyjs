@@ -25,19 +25,6 @@ game.functions = {
 	call: {desc: 'call a game specific function', params: {gameId:{dtype:'string'}, func: {dtype:'string'}, args: {dtype: 'object'}}, security: []},
 };
 
-game.errors = {
-	100: "unable to start game",
-	101: "unable to end game",
-	102: "unable to get game state foo",
-	103: "unable to set game state",
-	104: "game has already started",
-	105: "not your turn",
-	106: "user has already joined", // not used anymore
-	107: "unable to parse game state",
-	108: "unable to load game",
-	109: "unable to load custom function"
-}
-
 function loadGame(name)
 {	
 	var gameFile = gGameDir + '/' + name + '/' + name + '.js';
@@ -107,7 +94,7 @@ game.post = function(req, rs, cb)
 	var gameStr = JSON.stringify(game);	
 	db.kset('kGame', gameId, gameStr, function(err, res) {
 		if(err != null) {
-			cb(103, shutil.error("game_save", "unable to save game", {info: err}));
+			cb(1, shutil.error("game_save", "unable to save game", {info: err}));
 			return;
 		}
 		cb(0);
@@ -140,7 +127,12 @@ game.create = function(req, res, cb)
 		req.session.user.addGame(game);
 	
 		// SWD make sure init is there
-		req.env.gameModule.init(req, function(error, data) {
+		req.env.gameModule.create(req, function(error, data) {
+			if(error != 0) {
+				if(typeof(data) == 'undefined') {
+					data = shutil.event("event.game.info", game)
+				}
+			}
 			cb(error, data);
 		});
 	});
@@ -205,7 +197,6 @@ game.kick = function(req, res, cb)
 
 game.turn = function(req, res, cb)
 {
-	var self = this;
 	var uid = req.session.uid;
 	var gameId = req.params.gameId;	
 	var game = req.env.game;
@@ -262,9 +253,8 @@ game.set = function(req, res, cb)
 	cb(0, data);
 }
 
-game.reset = function(req, res, cb) {
-	var self = this;
-	
+game.reset = function(req, res, cb)
+{
 	var game = req.env.game;
 	game.rounds++;
 	game.turns = 0;
@@ -272,11 +262,12 @@ game.reset = function(req, res, cb) {
 	game.status = "playing";
 	game.winner = null;
 	
-	req.env.gameModule.init(req, function(error, data) {
+	// SWD - should change to gameModule.reset
+	req.env.gameModule.create(req, function(error, data) {
 		if (error == 0) {
 			global.live.notify(game.gameId, data);
 			if(typeof(data) == 'undefined') {
-				data = shutil.event("event.game.reset", game)
+				data = shutil.event("event.game.info", game)
 			}
 		}
 		cb(error, data);
@@ -296,7 +287,7 @@ game.call = function(req, res, cb)
 	var module = req.env.gameModule;
 	
 	if(typeof(module[req.params.func]) == 'undefined') {
-		cb(109, shutil.error("game_call", "function does not exist", {func: req.params.func}));
+		cb(1, shutil.error("game_call", "function does not exist", {func: req.params.func}));
 		return;
 	}
 	

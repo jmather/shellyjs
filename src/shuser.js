@@ -60,7 +60,7 @@ User.prototype.save = function(cb) {
 	var dataStr = JSON.stringify(this._data);
 	db.kset('kUser', this._uid, dataStr, function(err, res) {
 		if(err != null) {
-			cb(101, shutil.error("user_save", "unable to save user data", {uid: self._uid}));
+			cb(1, shutil.error("user_save", "unable to save user data", {uid: self._uid}));
 			return;
 		}
 		cb(0);

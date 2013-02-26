@@ -6,11 +6,6 @@ exports.functions = {
 	info: {desc: 'get info for a single module', params: {name:{dtype:'string'}}, security: []}
 };
 
-exports.errors = {
-	100: "unable to load module",
-	101: "unable to load one or more modules",
-}
-
 function getInfo(name)
 {
 	console.log("getInfo name="+name);
@@ -30,7 +25,7 @@ function getInfo(name)
 		var funcModule = require(cmdFile)
 	} catch(e) {
 		m.error = 100;
-		m.info = exports.errors[100];
+		m.info = "unable to load module";
 		return m;
 	}
 	if(typeof(funcModule.desc) != 'undefined') {

@@ -2,22 +2,23 @@ var _ = require('lodash');
 
 var test = exports;
 
-test.init = function(req, cb)
+test.create = function(req, cb)
 {
 	req.env.game.state = {number:_.random(10)};
-	cb(0, req.env.game)
+
+	cb(0); // by default game.create returns game object
 }
 
 test.turn = function(req, cb)
 {
 	if (req.params.guess == req.env.game.state.number)
 	{
-		cb(0, {message:"you won"});
+		cb(0, shutil.event("event.test.info", {message:"you won"}));
 	} else {
-		cb(0, {message:"try again"});
+		cb(0, shutile.event("event.test.info", {message:"try again"}));
 	}
 }
 
 test.myfunc = function(req, cb) {
-	cb(0, {message:"hellow world"});
+	cb(0, shutil.event("event.test.myfunc", {message:"hellow world"}));
 }
