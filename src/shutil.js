@@ -18,27 +18,7 @@ shutil.event = function(event, data)
 
 shutil.error = function(data)
 {
-	var res = this.event("event.error", data);
-	console.log("SWD ", res);
-	return res;
-//	return this.event("event.error", data);
-}
-
-function errorStr(error, module)
-{
-	var info = '';
-	
-	if(error == 0 ) {
-		return info;
-	}
-	if(error < 100) {
-		info = "system error";
-	}
-	if(typeof(module.errors) != 'undefined' && typeof(module.errors[error]) != undefined)
-	{
-		info = module.errors[error];
-	}
-	return info;
+	return this.event("event.error", data);
 }
 
 shutil.call = function(cmd, req, res, cb)
@@ -87,10 +67,6 @@ shutil.call = function(cmd, req, res, cb)
 	// call the pre, function, post sequence
 	module.pre(req, res, function(error, data) {
 		if(error != 0) {
-			if(typeof(data) == 'undefined') {
-				console.log("SWD: bad data");
-				data = {cmd: cmd, info: errorStr(error, module)};
-			}
 			console.log("pre error: ", data);
 			cb(error, data);
 			return;
@@ -99,21 +75,16 @@ shutil.call = function(cmd, req, res, cb)
 			var retError = error;
 			var retData = data;
 			if(error != 0) {
-				if(typeof(data) == 'undefined') {
-					data = {cmd: cmd, info: errorStr(error, module)};
-				}
-				console.log("func error: ", error, data);
 				// bail out, no post as function failed
+				console.log("func error: ", error, data);
 				cb(error, data);
 				return;
 			}
 			module.post(req, res, function(error, data) {
 				if(error != 0) {
-					if(typeof(data) == 'undefined') {					
-						data = {module: moduleName, function: funcName, info: errorStr(error, module)};
-					}
 					cb(error, data);
-				} else {					
+				} else {
+					// return data from actual function call
 					cb(retError, retData);
 				}
 			});

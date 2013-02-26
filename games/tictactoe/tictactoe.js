@@ -87,7 +87,7 @@ tictactoe.turn = function(req, cb)
 	}
 	
 	if(gameBoard[move.x][move.y] != '') {
-		cb(200, shutile.error({info: "this square has been taken"}));
+		cb(200, shutil.error({info: "this square has been taken"}));
 		return;
 	}
 	

@@ -118,6 +118,7 @@
 
         function setState(game)
         {
+            hideError();
             var gameBoard = game.state.gameBoard;
             for (var i=0; i<3; i++) {
                 for (var j=0; j<3; j++) {
@@ -169,6 +170,7 @@
                 return;
             }
             if(res.event == 'event.error') {
+                showError(res.data.message);
                 log(from, "error", JSON.stringify(res.data));
                 return;
             }
@@ -253,6 +255,15 @@
             sendWs(data);
         }
 
+        function showError(msg) {
+            $("#errorMessage").css("display", "block");
+            $("#errorMessage").text(msg);
+        }
+
+        function hideError() {
+            $("#errorMessage").css("display", "none");
+        }
+
         $(init);
         function init()
         {
@@ -331,9 +342,9 @@
     </tr>
 </table>
 
-<table border="1">
+<table border="1" width="100%">
     <tr>
-        <td width="50%">
+        <td style="width:215px;">
             <div id="x0y0" class="tictac"></div>
             <div id="x1y0" class="tictac"></div>
             <div id="x2y0" class="tictac"></div>
@@ -346,12 +357,15 @@
             <div id="x1y2" class="tictac"></div>
             <div id="x2y2" class="tictac"></div>
         </td>
-        <td valign="top">
+        <td valign="top" style="width:200px;">
             <div>game=<span id="gameId">0</span>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>
             <div>playing: <span id="gamePlaying"></span></div>
+        </td>
+        <td>
+            <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
         </td>
     </tr>
 </table>
