@@ -63,29 +63,12 @@ server.use(function(req, res, next) {
 	{
 		return next();
 	}
-	var psession = req.params.session;
-	// SWD - should grab user object out of check and stuff into req.session
-	if(!session.check(psession)) {
-		var event = shutil.event("event.error", {info: 'bad session token'});
-		res.send(event);
-		return 0;
-	}
-	req.session = {};
-	req.session.uid = psession.split(':')[1];
-	console.log("session OK: uid = " + req.session.uid);
 	
-	// loading user - SWD: always do it for now
-	console.log("loading user: uid = " + req.session.uid);
-	var user = new shUser();
-	// make sure we have a user object as we are passed session check
-	user.loadOrCreate(req.session.uid, function(error, data) {
+	shutil.fillSession(req, res, function(error, data) {
 		if(error != 0) {
-			var event = shutil.event("event.error", {info: "unable to load user: " + req.session.uid});
-			res.send(event);
+			res.send(data);
 			return 0;
 		}
-		console.log("user loaded: " + req.session.uid);
-		req.session.user = user;
 		return next();
 	});
 

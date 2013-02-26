@@ -1,5 +1,9 @@
 var _ = require("lodash");
 
+// used by fill session
+var session = require(global.gBaseDir + '/src/session.js');
+var shUser = require(global.gBaseDir + '/src/shuser.js');
+
 var shutil = exports;
 
 shutil.event = function(event, data)
@@ -22,6 +26,26 @@ shutil.error = function(code, message, data)
 	res.code = code;
 	res.message = message;
 	return res;
+}
+
+shutil.fillSession = function(req, res, cb) {
+	if(!session.check(req.params.session)) {
+		cb(1, shutil.event("event.error", {info: 'bad session token'}));
+		return;
+	}
+	req.session = {};
+	req.session.uid = req.params.session.split(':')[1];
+	console.log("loading user: uid = " + req.session.uid);
+	var user = new shUser();
+	user.loadOrCreate(req.session.uid, function(error, data) {
+		if(error != 0) {
+			cb(1, shutil.event("event.error", {info: "unable to load user: " + req.session.uid}));
+			return;
+		}
+		console.log("user loaded: " + req.session.uid);
+		req.session.user = user;
+		cb(0);
+	});
 }
 
 shutil.call = function(cmd, req, res, cb)

@@ -17,8 +17,7 @@ live.notify = function(gameId, data) {
 	eventEmitter.emit(channel, data);
 }
 
-live.start = function()
-{
+live.start = function() {
   wss = new WebSocketServer({port: gPort});
 	console.log("websocket listening: " + gPort)
 
@@ -31,25 +30,15 @@ live.start = function()
 			var req = {};
 			var res = {};
 			
+			// fill in req.params
 			req.params = JSON.parse(message);
-			if(!session.check(req.params.session)) {
-				var event = shutil.event("event.error", {info: 'bad session token'});
-				ws.send(JSON.stringify(event));
-				return
-			}
-			req.session = {};
-			req.session.uid = req.params.session.split(':')[1];
-			console.log("loading user: uid = " + req.session.uid);
-			var user = new shUser();
-			user.loadOrCreate(req.session.uid, function(error, data) {
+			
+			// fill in req.session
+			shutil.fillSession(req, res, function(error, data) {
 				if(error != 0) {
-					var event = shutil.event("event.error", {info: "unable to load user: " + req.session.uid});
-					ws.send(JSON.stringify(event));	
+					ws.send(JSON.stringify(data));
 					return;
 				}
-				console.log("user loaded: " + req.session.uid);
-				req.session.user = user;
-			
 				shutil.call(req.params.cmd, req, res, function(error, data) {
 					console.log("back from call: " + req.params.cmd);
 					var cmd = req.params.cmd;
