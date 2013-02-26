@@ -16,6 +16,14 @@ shutil.event = function(event, data)
 	return resp;
 }
 
+shutil.error = function(data)
+{
+	var res = this.event("event.error", data);
+	console.log("SWD ", res);
+	return res;
+//	return this.event("event.error", data);
+}
+
 function errorStr(error, module)
 {
 	var info = '';
@@ -47,7 +55,7 @@ shutil.call = function(cmd, req, res, cb)
 		delete require.cache[require.resolve(cmdFile)];
 		var module = require(cmdFile);
 	} catch(e) {
-		cb(1, {info: "unable to load module: " + moduleName});
+		cb(1, shutil.error({info: "unable to load module: " + moduleName}));
 		return;
 	}
 	
@@ -80,6 +88,7 @@ shutil.call = function(cmd, req, res, cb)
 	module.pre(req, res, function(error, data) {
 		if(error != 0) {
 			if(typeof(data) == 'undefined') {
+				console.log("SWD: bad data");
 				data = {cmd: cmd, info: errorStr(error, module)};
 			}
 			console.log("pre error: ", data);

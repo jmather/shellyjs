@@ -318,7 +318,7 @@
     </tr>
     <tr>
         <td valign="top" style="">
-            <div id="gameList">
+            <div id="gameList" style="height:150;width:100%;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
                     <span id="gameName">game1</span><button id="myGameJoin">join</button><button id="myGameRemove">remove</button>
                 </div>
@@ -327,7 +327,6 @@
         <td valign="top">
             <div>user=<span id="uid"></span></div>
             <div>session=<span id="session"></span></div>
-            <div>game=<span id="gameId">0</span>
         </td>
     </tr>
 </table>
@@ -348,6 +347,7 @@
             <div id="x2y2" class="tictac"></div>
         </td>
         <td valign="top">
+            <div>game=<span id="gameId">0</span>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>

@@ -18,15 +18,10 @@ tictactoe.init = function(req, cb)
 	req.env.game.state.xes = req.session.uid;
 	req.env.game.state.winner = 0;
 	req.env.game.state.winnerSet = null;
+	req.env.game.state.xes = req.session.uid;
+	
 	
 	cb(0, shutil.event("event.game.info", req.env.game));
-}
-
-tictactoe.join = function(req, cb)
-{
-	// make sure user is not already in game - game.js should do this
-	// second player is always O
-	req.env.game.state.oes = req.session.uid;
 }
 
 function checkFull(gb) {
@@ -85,9 +80,14 @@ tictactoe.turn = function(req, cb)
 	var move = req.params.move;
 	var game = req.env.game;
 	var gameBoard = game.state.gameBoard;
-		
+	
+	if(Object.keys(game.players).length < 2) {
+		cb(200, shutil.error({info: "not enough players in game", playerCount: Object.keys(game.players).length}));
+		return;
+	}
+	
 	if(gameBoard[move.x][move.y] != '') {
-		cb(200, {info: "this square has been taken"});
+		cb(200, shutile.error({info: "this square has been taken"}));
 		return;
 	}
 	

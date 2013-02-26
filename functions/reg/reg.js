@@ -2,6 +2,7 @@ var util = require('util');
 var crypto = require('crypto');
 var check = require('validator').check;
 var sanitize = require('validator').sanitize;
+var shutil = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
 
 var gDb = global.db;
@@ -52,7 +53,7 @@ exports.login = function(req, res, cb)
 	
 	gDb.kget('kEmailMap', email, function (error, value) {
 		if(value==null)	{
-			cb(101);
+			cb(101, shutil.error({info: "email is not registered"}));
 			return;
 		} else {
 			out = JSON.parse(value);
@@ -64,7 +65,7 @@ exports.login = function(req, res, cb)
 				cb(0, out);
 				return;			
 			} else {
-				cb(104);
+				cb(104, shutil.error({info: "incorrect password"}));
 				return;
 			}
 		}
@@ -83,16 +84,16 @@ exports.create = function(req, res, cb)
 	var email = sanitize(req.params.email).trim();
 	var password = sanitize(req.params.password).trim();
 	try {
-		check(email, 102).isEmail();
-		check(password, 103).len(6);
+		check(email, "invalid email").isEmail();
+		check(password, "invalid passwrod").len(6);
 	} catch (e) {
-		cb(e.message);
+		cb(1, shutil.error({info: e.message}));
 		return;
 	}
 	
 	gDb.kget('kEmailMap', email, function (error, value) {
 		if(value!=null) {
-			cb(100);
+			cb(100, shutil.error({info: "email is not registered"}));
 			return;
 		} else {
 			db.nextId('user', function(error, value) {
@@ -129,7 +130,7 @@ exports.check = function(req, res, cb)
 			cb(0, JSON.parse(value));
 			return;
 		} else {
-			cb(101)
+			cb(101, shutil.error({info: "email is not registered"}));
 			return;
 		}
 	});

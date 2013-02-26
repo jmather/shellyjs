@@ -31,7 +31,7 @@ gqueue.add = function(req, res, cb) {
 	// SWD: this will be too slow, change to hash presence list for data, and check/add/remove from that also
 	for (var i=0; i<gq.length; i++) {
 		if (gq[i].gameId == gameId) {
-			cb(101);
+			cb(101, shutil.error({info: 'game already in queue'}));
 			return;
 		}
 	}
@@ -57,7 +57,7 @@ gqueue.remove = function(req, res, cb) {
 
 gqueue.nextAvailable = function(req, res, cb) {
 	if(gq.length == 0) {
-		cb(100);
+		cb(100, shutil.error({info: 'no games available'}));
 		return;
 	}
 	gameInfo = gq.shift();

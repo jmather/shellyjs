@@ -30,14 +30,14 @@ User.prototype.load = function(uid, cb) {
 	var self = this;
 	db.kget('kUser', uid, function(err, value) {
 		if(value == null) {
-			cb(100, {info: "unable to load user data"});
+			cb(100, shutil.error({info: "unable to load user data"}));
 			return;
 		}
 		try {
 			var savedData = JSON.parse(value);
 			self._data = _.merge(self._data, savedData);
 		} catch(e) {
-			cb(100, {info: "unable to parse user data", extra: e.message});
+			cb(100, shutil.error({info: "unable to parse user data", extra: e.message}));
 			return;
 		}
 		cb(0, self._data);
@@ -59,7 +59,7 @@ User.prototype.save = function(cb) {
 	var dataStr = JSON.stringify(this._data);
 	db.kset('kUser', this._uid, dataStr, function(err, res) {
 		if(err != null) {
-			cb(101, {info: "unable to save user data"});
+			cb(101, shutil.error({info: "unable to save user data"}))
 			return;
 		}
 		cb(0);
@@ -86,5 +86,15 @@ User.prototype.getData = function() {
 User.prototype.setData = function(data) {
 	this._dirty = true;
 	this._data = _.merge(this._data, data);
+}
+
+User.prototype.addGame = function(game)
+{	
+		// set users current games and ts
+		var ts = new Date().getTime();
+		this._data.currentGames[game.gameId] = {name: game.name, lastJoin: ts};
+		this.save(function() {
+			// don't care;
+		})
 }
 

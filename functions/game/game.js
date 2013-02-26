@@ -28,7 +28,7 @@ game.functions = {
 game.errors = {
 	100: "unable to start game",
 	101: "unable to end game",
-	102: "unable to get game state",
+	102: "unable to get game state foo",
 	103: "unable to set game state",
 	104: "game has already started",
 	105: "not your turn",
@@ -59,7 +59,7 @@ game.pre = function(req, res, cb)
 			cb(0);
 			return;
 		} catch (e) {
-			cb(108, {cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+name, message: e.message});		
+			cb(108, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+name, message: e.message}));
 			return;
 		}
 	}
@@ -68,13 +68,13 @@ game.pre = function(req, res, cb)
 	console.log("game.pre: populating game info for " + gameId);
 	db.kget('kGame', gameId, function(err, res) {
 		if(res == null) {
-			cb(102);
+			cb(102, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'unable to load game loadGame', gameId: gameId}));
 			return;
 		}
 		// SWD try catch around this
 		var game = JSON.parse(res);
 		if(game == null) {
-			cb(107, {cmd:req.params.cmd, func:'game.pre', info:'parse game data', message: e.message});
+			cb(107, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'parse game data', message: e.message}));
 			return;
 		}
 
@@ -82,7 +82,7 @@ game.pre = function(req, res, cb)
 			console.log("game.pre: setting game:"  + game.name + " = " + gameId);
 			req.env.gameModule = loadGame(game.name);
 		} catch (e) {
-			cb(108, {cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+game.name, message: e.message});
+			cb(108, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+game.name, message: e.message}));
 			return;
 		}
 
@@ -106,7 +106,7 @@ game.post = function(req, rs, cb)
 	var gameStr = JSON.stringify(game);	
 	db.kset('kGame', gameId, gameStr, function(err, res) {
 		if(err != null) {
-			cb(103);
+			cb(103, shutil.error({info: 'unable to save game'}));
 			return;
 		}
 		cb(0);
@@ -136,6 +136,8 @@ game.create = function(req, res, cb)
 		
 		req.env.game = game;
 		
+		req.session.user.addGame(game);
+	
 		// SWD make sure init is there
 		req.env.gameModule.init(req, function(error, data) {
 			cb(error, data);
@@ -167,11 +169,7 @@ game.join = function(req, res, cb)
 	var game = req.env.game;
 	var user = req.session.user;
 	
-	// set users current games and ts
-	var currentGames = user.get("currentGames");
-	var ts = new Date().getTime();
-	currentGames[game.gameId] = {name: game.name, lastJoin: ts};
-	user.set("currentGames", currentGames);
+	user.addGame(game);
 	
 	if(typeof(game.players[uid]) == 'object') {
 		game.players[uid].status = 'ready';
@@ -212,15 +210,14 @@ game.turn = function(req, res, cb)
 	var game = req.env.game;
 	
 	if(game.status == 'over') {
-		var data = shutil.event("event.game.over", game);
-		cb(0, data);
+		cb(0, shutil.event("event.game.over", game));
 		return;
 	}
 	
 	var out = new Object();
 	
 	if(game.whoTurn != uid) {
-		cb(105, {cmd: req.params.cmd, message:'not your turn', whoTurn: game.whoTurn});
+		cb(105, shutil.error({cmd: req.params.cmd, message:'not your turn', whoTurn: game.whoTurn}));
 	} else {
 		var nextIndex = game.playerOrder.indexOf(uid) + 1;
 		if(nextIndex == game.playerOrder.length) {
@@ -298,7 +295,7 @@ game.call = function(req, res, cb)
 	var module = req.env.gameModule;
 	
 	if(typeof(module[req.params.func]) == 'undefined') {
-		cb(109)
+		cb(109, shutil.error({info: 'function does not exist', func: req.params.func}));
 		return;
 	}
 	
