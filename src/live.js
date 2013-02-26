@@ -14,12 +14,12 @@ var wss = null;
 
 live.notify = function(gameId, data) {
 	console.log('notify game: gameId = ' + gameId);
-	eventEmitter.emit("notify.game."+gameId, data);
+	eventEmitter.emit(channel("game", gameId), data);
 }
 
 live.notifyUser = function(uid, data) {
 	console.log('notify user: uid = ' + uid);
-	eventEmitter.emit("notify.user."+uid, data);
+	eventEmitter.emit(channel("user", uid), data);
 }
 
 function channel(name, id)
@@ -66,8 +66,9 @@ live.start = function() {
 						if(error == 0) {
 							// let them listen for events, if joined, nextAvailable forwards to game.join
 							// allow for rejoins to come in by checking listener array
-							var gameChannel = channel("game.", req.params.gameId);
+							var gameChannel = channel("game", req.params.gameId);
 							if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1) {
+								console.log("add channel: "+gameChannel);
 								wsGames.push(req.params.gameId);
 								eventEmitter.on(gameChannel, socketNotify);
 							}
