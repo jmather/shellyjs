@@ -317,6 +317,10 @@
             $("#listMyGames").click(function() {
                 listMyGames();
             });
+
+            $("#test").click(function() {
+                ws.close();
+            });
         }
     </script>
 </head>
@@ -384,6 +388,7 @@
             <button id="">notify</button>
             <button id="user1Kick">kick</button>
             <button id="gameReset" style="float:right;">reset</button>
+            <button id="test" style="float:right;">test</button>
         </td>
     </tr>
 </table>

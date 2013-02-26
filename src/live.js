@@ -1,4 +1,5 @@
 var WebSocketServer = require('ws').Server
+var util = require('util');
 var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
@@ -21,12 +22,19 @@ live.notifyUser = function(uid, data) {
 	eventEmitter.emit("notify.user."+uid, data);
 }
 
+function channel(name, id)
+{
+	return "notify." + name + "." + id;
+}
+
 live.start = function() {
   wss = new WebSocketServer({port: gPort});
 	console.log("websocket listening: " + gPort)
 
 	wss.on('connection', function(ws) {
 		console.log("socket: connect")
+		var wsUid = 0;
+		var wsGames = [];
 	
 	  ws.on('message', function(message) {
 			var req = {};
@@ -41,11 +49,14 @@ live.start = function() {
 					ws.send(JSON.stringify(data));
 					return;
 				}
-				// valid user - hook them into events
 				// this will eventually move to a live.init command, but for now check listener array
-				var userChannel = "notify.user." + req.session.uid;
+				// SWD - don't change users on a socket - or we lose ability to remove the listener
+				// used to clean up user listener
+				wsUid = req.session.uid;				
+				// valid user - hook them into events
+				var userChannel = channel("user", req.session.uid);
 				if(eventEmitter.listeners(userChannel).indexOf(socketNotify) == -1) {
-					eventEmitter.on("notify.user."+req.session.uid, socketNotify);
+					eventEmitter.on(userChannel, socketNotify);
 				}
 
 				shutil.call(req.params.cmd, req, res, function(error, data) {
@@ -55,9 +66,10 @@ live.start = function() {
 						if(error == 0) {
 							// let them listen for events, if joined, nextAvailable forwards to game.join
 							// allow for rejoins to come in by checking listener array
-							var gameChannel = "notify.game."+req.params.gameId;
+							var gameChannel = channel("game.", req.params.gameId);
 							if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1) {
-								eventEmitter.on("notify.game."+req.params.gameId, socketNotify);
+								wsGames.push(req.params.gameId);
+								eventEmitter.on(gameChannel, socketNotify);
 							}
 						}
 					}
@@ -73,7 +85,14 @@ live.start = function() {
 			
 		ws.on('close', function(ws) {
 			console.log("socket: close")
-			eventEmitter.removeListener("someOccurence", socketNotify);
+			var userChannel = channel("user", wsUid);
+			console.log("socket: close cleanup - " + userChannel)
+			eventEmitter.removeAllListeners(userChannel, socketNotify);
+			for(var i=0; i<wsGames.length; i++) {
+				var gameChannel = channel("game", wsGames[i]);
+				console.log("socket: close cleanup - " + gameChannel)
+				eventEmitter.removeAllListeners(gameChannel, socketNotify);
+			}
 		});
 
 		// helper functions in valid ws scope		
