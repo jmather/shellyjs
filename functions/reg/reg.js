@@ -53,7 +53,7 @@ exports.login = function(req, res, cb)
 	
 	gDb.kget('kEmailMap', email, function (error, value) {
 		if(value==null)	{
-			cb(101, shutil.error({info: "email is not registered"}));
+			cb(1, shutil.error("email_notfound", "email is not registered", {email: email}));
 			return;
 		} else {
 			out = JSON.parse(value);
@@ -65,7 +65,7 @@ exports.login = function(req, res, cb)
 				cb(0, out);
 				return;			
 			} else {
-				cb(104, shutil.error({info: "incorrect password"}));
+				cb(1, shutil.error("password_bad", "incorrect password", {email: email}));
 				return;
 			}
 		}
@@ -87,13 +87,13 @@ exports.create = function(req, res, cb)
 		check(email, "invalid email").isEmail();
 		check(password, "invalid passwrod").len(6);
 	} catch (e) {
-		cb(1, shutil.error({info: e.message}));
+		cb(1, shutil.error("params_bad", "email or password is not valid", {info: e.message}));
 		return;
 	}
 	
 	gDb.kget('kEmailMap', email, function (error, value) {
 		if(value!=null) {
-			cb(100, shutil.error({info: "email is not registered"}));
+			cb(1, shutil.error("email_used", "this email is already registered", {email: email}));
 			return;
 		} else {
 			db.nextId('user', function(error, value) {
@@ -130,7 +130,7 @@ exports.check = function(req, res, cb)
 			cb(0, JSON.parse(value));
 			return;
 		} else {
-			cb(101, shutil.error({info: "email is not registered"}));
+			cb(101, shutil.error("unregistered", "this email is not registered", {email: email}));
 			return;
 		}
 	});

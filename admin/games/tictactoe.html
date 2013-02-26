@@ -138,6 +138,7 @@
             $("#whoTurn").text(whoTurn);
 
             if(game.status == 'over') {
+                showError("game over");
                 $('#gameWinner').text(game.state.winner);
             } else {
                 $('#gameWinner').text('');
@@ -170,8 +171,8 @@
                 return;
             }
             if(res.event == 'event.error') {
-                showError(res.data.message);
-                log(from, "error", JSON.stringify(res.data));
+                showError(res.message);
+                log(from, "error", JSON.stringify(res));
                 return;
             }
             if(res.event == 'event.game.info') {

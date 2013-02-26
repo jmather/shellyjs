@@ -31,7 +31,7 @@ gqueue.add = function(req, res, cb) {
 	// SWD: this will be too slow, change to hash presence list for data, and check/add/remove from that also
 	for (var i=0; i<gq.length; i++) {
 		if (gq[i].gameId == gameId) {
-			cb(101, shutil.error({info: 'game already in queue'}));
+			cb(101, shutil.error("queue_add", "game already in queue", {gameId: gameId}));
 			return;
 		}
 	}
@@ -57,7 +57,7 @@ gqueue.remove = function(req, res, cb) {
 
 gqueue.nextAvailable = function(req, res, cb) {
 	if(gq.length == 0) {
-		cb(100, shutil.error({info: 'no games available'}));
+		cb(100, shutil.error("queue_none", "no games available"));
 		return;
 	}
 	gameInfo = gq.shift();
@@ -65,21 +65,12 @@ gqueue.nextAvailable = function(req, res, cb) {
 	req.params.gameId = gameInfo.gameId;
 	shutil.call("game.join", req, res, function(error, data) {
 		if(error != 0) {
+			// check to see if game is really full and valid
 			// put the game back in the available queue
 			gq.unshift(gameInfo);
 		}
 		cb(error, data);
-	});
-	
-//	game.pre(req, res, function(error, data) {
-//		game.join(req, res, function(error, data) {
-//			var retError = error;
-//			var retData = data;
-//			game.post(req, res, function(error, data) {
-//				cb(retError, retData);
-//			});
-//		});
-//	});
+	});	
 }
 
 gqueue.list = function(req, res, cb) {

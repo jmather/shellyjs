@@ -16,9 +16,12 @@ shutil.event = function(event, data)
 	return resp;
 }
 
-shutil.error = function(data)
+shutil.error = function(code, message, data)
 {
-	return this.event("event.error", data);
+	var res = this.event("event.error", data);
+	res.code = code;
+	res.message = message;
+	return res;
 }
 
 shutil.call = function(cmd, req, res, cb)
@@ -35,7 +38,7 @@ shutil.call = function(cmd, req, res, cb)
 		delete require.cache[require.resolve(cmdFile)];
 		var module = require(cmdFile);
 	} catch(e) {
-		cb(1, shutil.error({info: "unable to load module: " + moduleName}));
+		cb(1, shutil.error("module_require", "unable to load module", {name: moduleName, info: e.message}));
 		return;
 	}
 	

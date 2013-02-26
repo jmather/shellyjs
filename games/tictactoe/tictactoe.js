@@ -80,14 +80,14 @@ tictactoe.turn = function(req, cb)
 	var move = req.params.move;
 	var game = req.env.game;
 	var gameBoard = game.state.gameBoard;
-	
+
 	if(Object.keys(game.players).length < 2) {
-		cb(200, shutil.error({info: "not enough players in game", playerCount: Object.keys(game.players).length}));
+		cb(2, shutil.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.players).length}));
 		return;
 	}
 	
 	if(gameBoard[move.x][move.y] != '') {
-		cb(200, shutil.error({info: "this square has been taken"}));
+		cb(2, shutil.error("move_bad", "this square has been taken"));
 		return;
 	}
 	

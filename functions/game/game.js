@@ -59,7 +59,7 @@ game.pre = function(req, res, cb)
 			cb(0);
 			return;
 		} catch (e) {
-			cb(108, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+name, message: e.message}));
+			cb(1, shutil.error("game_require", "unable to load game module", {name: name, info: e.message}));
 			return;
 		}
 	}
@@ -68,13 +68,14 @@ game.pre = function(req, res, cb)
 	console.log("game.pre: populating game info for " + gameId);
 	db.kget('kGame', gameId, function(err, res) {
 		if(res == null) {
-			cb(102, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'unable to load game loadGame', gameId: gameId}));
+			cb(1, shutil.error("game_get", "nable to get game", {gameId: gameId}));
 			return;
 		}
-		// SWD try catch around this
-		var game = JSON.parse(res);
-		if(game == null) {
-			cb(107, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'parse game data', message: e.message}));
+		
+		try {
+			var game = JSON.parse(res);
+		} catch(e) {
+			cb(1, shutil.error("game_parse", "error reading game data", {info: e.message}));
 			return;
 		}
 
@@ -82,7 +83,7 @@ game.pre = function(req, res, cb)
 			console.log("game.pre: setting game:"  + game.name + " = " + gameId);
 			req.env.gameModule = loadGame(game.name);
 		} catch (e) {
-			cb(108, shutil.error({cmd:req.params.cmd, func:'game.pre', info:'loadGame:'+game.name, message: e.message}));
+			cb(1, shutil.error("game_require", "unable to laod game module", {name: game.name, message: e.message}));
 			return;
 		}
 
@@ -106,7 +107,7 @@ game.post = function(req, rs, cb)
 	var gameStr = JSON.stringify(game);	
 	db.kset('kGame', gameId, gameStr, function(err, res) {
 		if(err != null) {
-			cb(103, shutil.error({info: 'unable to save game'}));
+			cb(103, shutil.error("game_save", "unable to save game", {info: err}));
 			return;
 		}
 		cb(0);
@@ -217,7 +218,7 @@ game.turn = function(req, res, cb)
 	var out = new Object();
 	
 	if(game.whoTurn != uid) {
-		cb(105, shutil.error({cmd: req.params.cmd, message:'not your turn', whoTurn: game.whoTurn}));
+		cb(1, shutil.error("game_noturn", "not your turn", {whoTurn: game.whoTurn}));
 	} else {
 		var nextIndex = game.playerOrder.indexOf(uid) + 1;
 		if(nextIndex == game.playerOrder.length) {
@@ -295,7 +296,7 @@ game.call = function(req, res, cb)
 	var module = req.env.gameModule;
 	
 	if(typeof(module[req.params.func]) == 'undefined') {
-		cb(109, shutil.error({info: 'function does not exist', func: req.params.func}));
+		cb(109, shutil.error("game_call", "function does not exist", {func: req.params.func}));
 		return;
 	}
 	

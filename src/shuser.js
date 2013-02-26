@@ -30,14 +30,14 @@ User.prototype.load = function(uid, cb) {
 	var self = this;
 	db.kget('kUser', uid, function(err, value) {
 		if(value == null) {
-			cb(100, shutil.error({info: "unable to load user data"}));
+			cb(1, shutil.error("user_get", "unable to load user data", {uid: uid}));
 			return;
 		}
 		try {
 			var savedData = JSON.parse(value);
 			self._data = _.merge(self._data, savedData);
 		} catch(e) {
-			cb(100, shutil.error({info: "unable to parse user data", extra: e.message}));
+			cb(1, shutil.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
 			return;
 		}
 		cb(0, self._data);
@@ -56,10 +56,11 @@ User.prototype.loadOrCreate = function(uid, cb) {
 }
 
 User.prototype.save = function(cb) {
+	var self = this;
 	var dataStr = JSON.stringify(this._data);
 	db.kset('kUser', this._uid, dataStr, function(err, res) {
 		if(err != null) {
-			cb(101, shutil.error({info: "unable to save user data"}))
+			cb(101, shutil.error("user_save", "unable to save user data", {uid: self._uid}));
 			return;
 		}
 		cb(0);
