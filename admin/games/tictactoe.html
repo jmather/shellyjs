@@ -213,18 +213,23 @@
         var url = "ws://localhost:5102";
         var ws = new ReconnectingWebSocket(url);
         ws.onopen = function() {
+            console.log("socket: open");
             log("socket", "onopen", url);
             gameInit();
             listMyGames();
-        };
+        }
         ws.onmessage = function (evt) {
             var received_msg = evt.data;
             log("socket", "onmessage", evt.data);
             var msg = JSON.parse(evt.data);
             processEvent(msg, "socket");
-        };
-        ws.onclose = function() {
-        };
+        }
+        ws.onclose = function(evt) {
+            console.log("socket: close");
+        }
+        ws.onerror = function(evt) {
+            log("socket", "error", JSON.stringify(evt));
+        }
 
         function sendWs(data)
         {
