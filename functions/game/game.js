@@ -65,6 +65,9 @@ game.pre = function(req, res, cb)
 			cb(1, shutil.error("game_parse", "error reading game data", {info: e.message}));
 			return;
 		}
+		
+		// SWD fixup for now
+		game.gameId = game.gameId.toString();
 
 		try {		
 			console.log("game.pre: setting game:"  + game.name + " = " + gameId);
@@ -108,7 +111,7 @@ game.create = function(req, res, cb)
 	var game = new Object();
 	
 	db.nextId("game", function(err, res) {
-		game.gameId = res;
+		game.gameId = res.toString();
 		game.name = req.params.name;
 		var ts = new Date().getTime();
 		game.ownerId = uid;
@@ -167,9 +170,12 @@ game.join = function(req, res, cb)
 	if(typeof(game.players[uid]) == 'object') {
 		game.players[uid].status = 'ready';
 	} else {
+		// only notify if new user
+		global.live.notify(game.gameId, shutil.event("event.game.user.join", {uid: uid}));
 		game.players[uid] = {status: 'ready'};
 		game.playerOrder.push(uid);
 	}
+
 	cb(0, shutil.event('event.game.info', game));
 }
 
@@ -178,10 +184,10 @@ game.leave = function(req, res, cb)
 	var uid = req.session.uid;
 	var game = req.env.game;
 	
-	// SWD checke user
 	game.players[uid] = {status: 'left'};
 	
-	cb(0, game);
+	global.live.notify(game.gameId, shutil.event("event.game.user.leave", {uid: uid}));	
+	cb(0, shutil.event("event.game.leave", game.players));
 }
 
 game.kick = function(req, res, cb)

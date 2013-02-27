@@ -3,7 +3,8 @@ var util = require('util')
   , events = require('events')
 	, _ = require("lodash")
 	
-	
+var shutil = require(global.gBaseDir + '/src/shutil.js');
+
 var db = global.db;
 
 function User() {

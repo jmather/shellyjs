@@ -58,7 +58,7 @@
         var pgameId = getURLParameter("gameId");
         if(pgameId != 'null')
         {
-            Env.baseParams.gameId = pgameId;
+            Env.baseParams.gameId = pgameId.toString();
         }
 
         function clone(obj) {
@@ -102,8 +102,8 @@
                 $newGame.css("display", "block");
 
                 $newGame.find("#myGameJoin").click(function() {
-                    Env.baseParams.gameId = $(this).parent().attr('gameId');
-                    gameInit();
+                    var gameId = $(this).parent().attr('gameId');
+                    gameInit(gameId);
                 });
                 $newGame.find("#myGameRemove").click(function() {
                     var data = clone(Env.baseParams);
@@ -187,6 +187,14 @@
                 setMyGames(res.data);
                 return;
             }
+            if(res.event == 'event.game.user.join'
+                    || res.event == 'event.game.user.online'
+                    || res.event == 'event.game.user.offline'
+                    || res.event == 'event.live.game')
+            {
+                // ignore for now
+                return;
+            }
             log(from, "unknown-event", JSON.stringify(res));
         }
 
@@ -215,7 +223,8 @@
         ws.onopen = function() {
             console.log("socket: open");
             log("socket", "onopen", url);
-            gameInit();
+            liveInit();
+            gameInit(Env.baseParams.gameId);
             listMyGames();
         }
         ws.onmessage = function (evt) {
@@ -239,9 +248,23 @@
         }
 
         // basic functions
-        function gameInit()
+        function liveInit()
         {
             var data = clone(Env.baseParams);
+            data.cmd = "live.game";
+            data.status = "on";
+            sendWs(data);
+        }
+
+        function gameInit(gameId)
+        {
+            var data = clone(Env.baseParams);
+            // leave old game
+            if(gameId != Env.baseParams.gameId) {
+                data.cmd = "game.leave";
+                sendWs(data);
+            }
+            data.gameId = gameId;
             data.cmd = "game.join";
             sendWs(data);
         }
