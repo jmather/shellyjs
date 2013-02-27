@@ -89,7 +89,9 @@ Game.prototype.setPlayer = function(uid, status) {
 	this._dirty = true;
 	if(typeof(this._data.players[uid]) == 'undefined') {
 		this._data.players[uid] = {status: "ready"};
-		this._data.playerOrder.push(uid);		
+		if(this._data.playerOrder.indexOf(uid) == -1) {
+			this._data.playerOrder.push(uid);
+		}
 	} else {
 		this._data.players[uid].status = status;
 	}
