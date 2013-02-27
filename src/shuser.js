@@ -94,7 +94,7 @@ User.prototype.addGame = function(game)
 {	
 		// set users current games and ts
 		var ts = new Date().getTime();
-		this._data.currentGames[game.gameId] = {name: game.name, lastJoin: ts};
+		this._data.currentGames[game.get("gameId")] = {name: game.get("name"), lastJoin: ts};
 		this.save(function() {
 			// don't care;
 		})

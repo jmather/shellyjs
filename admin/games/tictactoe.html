@@ -223,7 +223,6 @@
         ws.onopen = function() {
             console.log("socket: open");
             log("socket", "onopen", url);
-            liveInit();
             gameInit(Env.baseParams.gameId);
             listMyGames();
         }
@@ -248,11 +247,12 @@
         }
 
         // basic functions
-        function liveInit()
+        function liveInit(gameId, status)
         {
             var data = clone(Env.baseParams);
+            data.gameId = gameId;
             data.cmd = "live.game";
-            data.status = "on";
+            data.status = status;
             sendWs(data);
         }
 
@@ -263,10 +263,12 @@
             if(gameId != Env.baseParams.gameId) {
                 data.cmd = "game.leave";
                 sendWs(data);
+                liveInit(Env.baseParams.gameId, "off");
             }
             data.gameId = gameId;
             data.cmd = "game.join";
             sendWs(data);
+            liveInit(gameId, "on");
         }
 
         function listMyGames()

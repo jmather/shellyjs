@@ -1,6 +1,7 @@
 var _ = require("lodash");
 
 var shutil = require(global.gBaseDir + '/src/shutil.js');
+var shGame = require(global.gBaseDir + '/src/shgame.js');
 
 var db = global.db;
 
@@ -53,32 +54,23 @@ game.pre = function(req, res, cb)
 	
 	var gameId = req.params.gameId;
 	console.log("game.pre: populating game info for " + gameId);
-	db.kget('kGame', gameId, function(err, res) {
-		if(res == null) {
-			cb(1, shutil.error("game_get", "nable to get game", {gameId: gameId}));
+	var game = new shGame();
+	game.load(gameId, function(error, data) {
+		if(error != 0) {
+			cb(error, data);
 			return;
 		}
-		
+		var gameName = game.get("name");
 		try {
-			var game = JSON.parse(res);
-		} catch(e) {
-			cb(1, shutil.error("game_parse", "error reading game data", {info: e.message}));
-			return;
-		}
-		
-		// SWD fixup for now
-		game.gameId = game.gameId.toString();
-
-		try {		
-			console.log("game.pre: setting game:"  + game.name + " = " + gameId);
-			req.env.gameModule = loadGame(game.name);
+			console.log("game.pre: setting game:"  + gameName + " = " + gameId);
+			req.env.gameModule = loadGame(gameName);
 		} catch (e) {
-			cb(1, shutil.error("game_require", "unable to laod game module", {name: game.name, message: e.message}));
+			cb(1, shutil.error("game_require", "unable to laod game module", {name: gameName, message: e.message}));
 			return;
 		}
 
 		req.env.game = game;
-		cb(0);
+		cb(0);	
 	});
 }
 
@@ -91,40 +83,24 @@ game.post = function(req, rs, cb)
 		return;
 	}
 	console.log("game.post - saving game");
-	var game = req.env.game;
-	var gameId = req.env.game.gameId;
 	
-	var gameStr = JSON.stringify(game);	
-	db.kset('kGame', gameId, gameStr, function(err, res) {
-		if(err != null) {
-			cb(1, shutil.error("game_save", "unable to save game", {info: err}));
-			return;
-		}
-		cb(0);
-	});
+	req.env.game.save(cb);
 }
 
 game.create = function(req, res, cb)
 {
 	var uid = req.session.uid;
 	
-	var game = new Object();
+	var game = new shGame();
 	
-	db.nextId("game", function(err, res) {
-		game.gameId = res.toString();
-		game.name = req.params.name;
-		var ts = new Date().getTime();
-		game.ownerId = uid;
-		game.created = ts;
-		game.lastModified = ts;
-		game.status = 'created';
-		game.players = {};
-		game.players[uid] = {status: 'ready'};
-		game.playerOrder = [uid];
-		game.whoTurn = uid;
-		game.rounds = 0;
-		game.turnsPlayed = 0;
+	db.nextId("game", function(err, data) {
+		game.set("gameId", data.toString());
+		game.set("name", req.params.name);
+		game.set("ownerId", uid);
+		game.setPlayer(uid, 'ready');
+		game.set("whoTurn", uid);
 		
+		// add to request environment
 		req.env.game = game;
 		
 		req.session.user.addGame(game);
@@ -133,7 +109,7 @@ game.create = function(req, res, cb)
 		req.env.gameModule.create(req, function(error, data) {
 			if(error != 0) {
 				if(typeof(data) == 'undefined') {
-					data = shutil.event("event.game.info", game)
+					data = shutil.event("event.game.info", game.getData())
 				}
 			}
 			cb(error, data);
@@ -145,18 +121,18 @@ game.start = function(req, res, cb)
 {
 	var game = req.env.game;
 	
-	game.status = "playing";
+	game.set("status", "playing");
 	
-	cb(0, game);
+	cb(0, game.getData());
 }
 
 game.end = function(req, res, cb)
 {
 	var game = req.env.game;
 	
-	game.status = "over";
+	game.set("status", "over");
 	
-	cb(0, game);
+	cb(0, game.getData());
 }
 
 game.join = function(req, res, cb)
@@ -164,19 +140,21 @@ game.join = function(req, res, cb)
 	var uid = req.session.uid;
 	var game = req.env.game;
 	var user = req.session.user;
+		
+	var players = game.get("players");
+	if(typeof(players[uid]) == 'undefined' && Object.keys(players).length == game.get("maxPlayers")) {
+		cb(1, shutil.error("game_full", "game has maximum amount of players", {maxPlayers: game.get("maxPlayers")}));
+		return;
+	}
 	
 	user.addGame(game);
-	
-	if(typeof(game.players[uid]) == 'object') {
-		game.players[uid].status = 'ready';
-	} else {
+	if(typeof(players[uid]) != 'object') {
 		// only notify if new user
 		global.live.notify(game.gameId, shutil.event("event.game.user.join", {uid: uid}));
-		game.players[uid] = {status: 'ready'};
-		game.playerOrder.push(uid);
 	}
+	game.setPlayer(uid, "ready");
 
-	cb(0, shutil.event('event.game.info', game));
+	cb(0, shutil.event('event.game.info', game.getData()));
 }
 
 game.leave = function(req, res, cb)
@@ -184,10 +162,11 @@ game.leave = function(req, res, cb)
 	var uid = req.session.uid;
 	var game = req.env.game;
 	
-	game.players[uid] = {status: 'left'};
+//	game.setPlayer(uid, "left");
+	game.removePlayer(uid);
 	
 	global.live.notify(game.gameId, shutil.event("event.game.user.leave", {uid: uid}));	
-	cb(0, shutil.event("event.game.leave", game.players));
+	cb(0, shutil.event("event.game.leave", game.get("players")));
 }
 
 game.kick = function(req, res, cb)
@@ -197,22 +176,22 @@ game.kick = function(req, res, cb)
 	
 	// SWD check user
 	game.players[kickId] = {status: 'kicked'};
+	game.setPlayer(kickId, "kicked");
 	
-	cb(0, game);
+	cb(0, shutil.event("event.game.leave", game.get("players")));
 }
 
 game.turn = function(req, res, cb)
 {
 	var uid = req.session.uid;
-	var gameId = req.params.gameId;	
-	var game = req.env.game;
+	var gameId = req.params.gameId;
+	// fast and loose - muse setData before return or sub call
+	var game = req.env.game.getData();
 	
 	if(game.status == 'over') {
 		cb(0, shutil.event("event.game.over", game));
 		return;
 	}
-	
-	var out = new Object();
 	
 	if(game.whoTurn != uid) {
 		cb(1, shutil.error("game_noturn", "not your turn", {whoTurn: game.whoTurn}));
@@ -223,6 +202,8 @@ game.turn = function(req, res, cb)
 		}
 		game.whoTurn = game.playerOrder[nextIndex];
 		game.turnsPlayed++;
+		
+		req.env.game.set(game);
 		
 		//SWD make sure turn function is there
 		req.env.gameModule.turn(req, function(error, data) {
@@ -243,9 +224,7 @@ game.get = function(req, res, cb)
 	// SWD - game is bad name for this all over
 	var game = req.env.game;
 	
-	var data = shutil.event("event.game.info", game);
-	console.log(data);
-	cb(0, data);
+	cb(0, shutil.event("event.game.info", game.getData()));
 }
 
 game.set = function(req, res, cb)
@@ -253,20 +232,22 @@ game.set = function(req, res, cb)
 	var game = req.env.game;
 	var newGame = req.params.game;
 	
-	game = _.merge(game, newGame);
+	game.setData(newGame);
 	
-	var data = shutil.event("event.game.info", game);
-	cb(0, data);
+	cb(0, shutil.event("event.game.info", game.getData()));
 }
 
 game.reset = function(req, res, cb)
 {
-	var game = req.env.game;
+	var game = req.env.game.getData();
+	
 	game.rounds++;
 	game.turns = 0;
 	game.whoTurn = game.ownerId;
 	game.status = "playing";
 	game.winner = null;
+	
+	req.env.game.setData(game);
 	
 	// SWD - should change to gameModule.reset
 	req.env.gameModule.create(req, function(error, data) {
@@ -284,7 +265,7 @@ game.list = function(req, res, cb)
 {
 	console.log("game.list");
 	
-	cb(0);
+	cb(0, shutil.event("not_implemented"));
 }
 
 game.call = function(req, res, cb)

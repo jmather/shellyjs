@@ -12,16 +12,18 @@ tictactoe.create = function(req, cb)
 							 ['','','']
 							 ];
 							
-	req.env.game.state = {};
-	req.env.game.state.gameBoard = gameBoard;  // SWD: change this to just board
+	var state = {};
+	state.gameBoard = gameBoard;  // SWD: change this to just board
 	// first player is always X
-	req.env.game.state.xes = req.session.uid;
-	req.env.game.state.winner = 0;
-	req.env.game.state.winnerSet = null;
-	req.env.game.state.xes = req.session.uid;
+	state.xes = req.session.uid;
+	state.winner = 0;
+	state.winnerSet = null;
+	state.xes = req.session.uid;
 	
+	req.env.game.set("maxPlayers", 2);
+	req.env.game.set("state", state);
 	
-	cb(0, shutil.event("event.game.info", req.env.game));
+	cb(0, shutil.event("event.game.info", req.env.game.getData()));
 }
 
 function checkFull(gb) {
@@ -79,9 +81,10 @@ tictactoe.turn = function(req, cb)
 	var uid = req.session.uid;
 	var move = req.params.move;
 	var game = req.env.game;
-	var gameBoard = game.state.gameBoard;
+	var state = req.env.game.get("state");
+	var gameBoard = state.gameBoard;
 
-	if(Object.keys(game.players).length < 2) {
+	if(Object.keys(game.get("players")).length < 2) {
 		cb(2, shutil.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.players).length}));
 		return;
 	}
@@ -91,7 +94,7 @@ tictactoe.turn = function(req, cb)
 		return;
 	}
 	
-	if(game.state.xes == uid)
+	if(state.xes == uid)
 	{
 		gameBoard[move.x][move.y] = "X";
 	} else {
@@ -100,22 +103,25 @@ tictactoe.turn = function(req, cb)
 	
 	var win = checkWin(gameBoard);
 	if(win.winner != '') {
-		game.status = "over";
-		game.whoTurn = 0;
-		game.state.winner = uid;
-		game.state.winnerSet = win.set;
-		cb(0, shutil.event('event.game.over', game));
+		game.set("status", "over");
+		game.set("whoTurn", 0);
+		state.winner = uid;
+		state.winnerSet = win.set;
+		game.set("state", state);
+		cb(0, shutil.event('event.game.over', game.getData()));
 		return;
 	}
 	
 	if(checkFull(gameBoard)) {
-		game.status = "over";
-		game.whoTurn = 0;
-		game.state.winner = 0;
-		game.state.winnerSet = null;		
-		cb(0, shutil.event('event.game.over', game));
+		game.set("status", "over");
+		game.set("whoTurn", 0);
+		state.winner = 0;
+		state.winnerSet = null;		
+		game.set("state", state);
+		cb(0, shutil.event('event.game.over', game.getData()));
 		return;
 	}
 	
-	cb(0, shutil.event('event.game.info', game));
+	game.set("state", state);
+	cb(0, shutil.event('event.game.info', game.getData()));
 }
