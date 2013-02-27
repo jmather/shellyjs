@@ -85,7 +85,7 @@ tictactoe.turn = function(req, cb)
 	var gameBoard = state.gameBoard;
 
 	if(Object.keys(game.get("players")).length < 2) {
-		cb(2, shutil.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.players).length}));
+		cb(2, shutil.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.get("players")).length}));
 		return;
 	}
 	

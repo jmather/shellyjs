@@ -259,10 +259,8 @@
         function gameInit(gameId)
         {
             var data = clone(Env.baseParams);
-            // leave old game
+            // turn off live events for old game
             if(gameId != Env.baseParams.gameId) {
-                data.cmd = "game.leave";
-                sendWs(data);
                 liveInit(Env.baseParams.gameId, "off");
             }
             data.gameId = gameId;
