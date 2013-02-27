@@ -73,8 +73,10 @@ live.start = function() {
 					var gameId = req.params.gameId;
 					var gameChannel = channel("game", gameId);
 					
-					if(req.params.status == "on") {
-						if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1) {
+					if(req.params.status == "on")
+					{
+						if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1)
+						{
 							console.log("add game channel: "+gameChannel);
 							global.live.notify(gameId, shutil.event('event.game.user.online', {uid: wsUid}));
 							wsGames.push(gameId);
@@ -90,11 +92,11 @@ live.start = function() {
 									}
 								}
 							});
-						} else {
-							console.log("remove game channel:" + gameChannel);
-							eventEmitter.removeListener(gameChannel, socketNotify);
-							global.live.notify(gameId, shutil.event('event.game.user.offline', {uid: wsUid}));
 						}
+					} else {
+						console.log("remove game channel:" + gameChannel);
+						eventEmitter.removeListener(gameChannel, socketNotify);
+						global.live.notify(gameId, shutil.event('event.game.user.offline', {uid: wsUid}));
 					}
 					ws.send(JSON.stringify(shutil.event("event.live.game", {status: req.params.status, game : gameId})));
 					return;
@@ -126,11 +128,9 @@ live.start = function() {
 		})
 			
 		ws.on('close', function(ws) {
-			console.log("socket: close")
+			console.log("socket: close", wsUid);
 			
-			console.log(gUsers);
 			delete gUsers[wsUid];
-			console.log(gUsers);
 			
 			var userChannel = channel("user", wsUid);
 			console.log("socket: close cleanup - " + userChannel)
