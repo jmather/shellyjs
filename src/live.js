@@ -32,12 +32,8 @@ function channel(name, id)
 }
 
 function sendWs(ws, error, data) {
-	var level = 'info';
-	if(error !=  0) {
-		level = 'error';
-	}
 	var msg = JSON.stringify(data);
-	shlog.send(level, msg);
+	shlog.send(error, "live - %s", msg);
 	ws.send(msg);
 }
 
@@ -46,12 +42,12 @@ live.start = function() {
 	shlog.info("websocket listening: " + gPort)
 
 	wss.on('connection', function(ws) {
-		shlog.info("socket: connect")
+		shlog.info("socket: connect");
 		var wsUid = 0;
 		var wsGames = [];
 	
 	  ws.on('message', function(message) {
-			shlog.recv(message);
+			shlog.recv("live - %s", message);
 			
 			var req = {};
 			var res = {};
@@ -63,13 +59,13 @@ live.start = function() {
 			sh.fillSession(req, res, function(error, data) {
 				if(error != 0) {
 					sendWs(ws, error, data);
-//					ws.send(JSON.stringify(data));
 					return;
 				}
 				
 				// valid user
 				wsUid = req.session.uid;
 				gUsers[wsUid] = {status: "online"};
+
 				if(req.params.cmd == "live.user") {
 					// hook them into user events
 					var userChannel = channel("user", req.session.uid);
@@ -142,7 +138,7 @@ live.start = function() {
 		})
 			
 		ws.on('close', function(ws) {
-			shlog.info("socket: close", wsUid);
+			shlog.info("socket: close");
 			
 			delete gUsers[wsUid];
 			

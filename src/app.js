@@ -98,10 +98,10 @@ function errorStr(error, module)
 
 function respond(req, res, next) {
 	var cmd = req.params.cmd;
-	shlog.info("respond: " + cmd);
 	
+	shlog.recv("rest - %s", JSON.stringify(req.params));
 	sh.call(cmd, req, res, function(error, data) {
-		shlog.info("back from call: " + req.params.cmd);
+		shlog.send(error, "rest - %s", JSON.stringify(data));
 		res.send(data);
 	});
 }

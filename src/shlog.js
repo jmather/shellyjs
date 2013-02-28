@@ -9,8 +9,8 @@ var gDebug = {
 	"app": {},
 	"admin": {},
 //	"game": {},
-//	"live": {},
-	"recv": {},
+	"live": {},
+//	"recv": {},
 //	"send": {},
 }
 
@@ -67,9 +67,13 @@ shlog.recv = function()
 shlog.send = function()
 {
 	var callerName = "send";
-	
+		
 	var args = Array.prototype.slice.call(arguments);
-	var level = args.shift();
+	var error = args.shift();
+	var level = 'info';
+	if(error !=  0) {
+		level = 'error';
+	}
 
 	if(typeof(gDebug[callerName]) != 'undefined') {
 		var msg = util.format("%s - %s", callerName, util.format.apply(this, args));
