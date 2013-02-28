@@ -5,7 +5,6 @@ global.gBaseDir = '/Users/scott/git/shelly';
 var util = require('util');
 var http = require('http');
 var restify = require('restify');
-var winston = require('winston');
 
 // do first so any of our modules can use
 global.db = require(global.gBaseDir + '/src/shdb.js');

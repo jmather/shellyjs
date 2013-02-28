@@ -1,10 +1,61 @@
+var path = require("path");
+var util = require("util");
+
 var _ = require("lodash");
+var stackTrace = require('stack-trace');
 
 // used by fill session
 var session = require(global.gBaseDir + '/src/session.js');
 var shUser = require(global.gBaseDir + '/src/shuser.js');
 
 var shutil = exports;
+
+// SWD cut over to winston categories for prod
+var gDebug = {
+	"app": {},
+}
+
+var winston = require('winston');
+winston.remove(winston.transports.Console);
+winston.add(winston.transports.Console, { colorize: true, timestamp: false });
+
+shutil.log = function()
+{
+	// SWD disable module filter for prod
+	var trace = stackTrace.get();
+	
+	var functionName = trace[1].getFunctionName();
+	var idx = 1;
+	if(functionName == 'shutil.info'
+		 || functionName == 'shutil.debug'
+		 || functionName == 'shutil.error') {
+		idx = 2;
+	}
+	var callerFn = trace[idx].getFileName();
+	var callerName = path.basename(callerFn, ".js");
+	
+	var args = Array.prototype.slice.call(arguments);
+	var level = args.shift();
+	
+	if(typeof(gDebug[callerName]) != 'undefined') {
+		var msg = util.format("%d - %s", process.pid, util.format.apply(this, args));
+		winston.log(level, msg);
+	}
+}
+
+shutil.info = function()
+{
+	var args = Array.prototype.slice.call(arguments);
+	args.unshift("info");
+	this.log.apply(this, args);
+}
+
+shutil.error = function()
+{
+	var args = Array.prototype.slice.call(arguments);
+	args.unshift("info");
+	this.log.apply(this, args);
+}
 
 shutil.event = function(event, data)
 {
