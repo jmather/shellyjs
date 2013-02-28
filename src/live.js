@@ -43,8 +43,8 @@ live.start = function() {
 
 	wss.on('connection', function(ws) {
 		shlog.info("socket: connect");
-		var wsUid = 0;
-		var wsGames = [];
+		ws.uid = 0;
+		ws.games = [];
 	
 	  ws.on('message', function(message) {
 			shlog.recv("live - %s", message);
@@ -63,8 +63,8 @@ live.start = function() {
 				}
 				
 				// valid user
-				wsUid = req.session.uid;
-				gUsers[wsUid] = {status: "online"};
+				ws.uid = req.session.uid;
+				gUsers[ws.uid] = {status: "online"};
 
 				if(req.params.cmd == "live.user") {
 					// hook them into user events
@@ -73,7 +73,7 @@ live.start = function() {
 						shlog.info("add user channel: "+userChannel);
 						eventEmitter.on(userChannel, socketNotify);
 					}
-					ws.send(JSON.stringify(sh.event("event.live.user", {status: "on", uid: wsUid})));
+					ws.send(JSON.stringify(sh.event("event.live.user", {status: "on", uid: ws.uid})));
 					return;
 				}
 				if(req.params.cmd == "live.game")
@@ -87,9 +87,9 @@ live.start = function() {
 					{
 						if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1)
 						{
-							shlog.info("add game channel: "+gameChannel);
-							global.live.notify(gameId, sh.event('event.game.user.online', {uid: wsUid}));
-							wsGames.push(gameId);
+							shlog.info("add game channel: "+gameChannel, ws.games);
+							global.live.notify(gameId, sh.event('event.game.user.online', {uid: ws.uid}));
+							ws.games.push(gameId);
 							eventEmitter.on(gameChannel, socketNotify);
 							
 							// must send myself notifs for games existing online users
@@ -97,38 +97,28 @@ live.start = function() {
 							game.load(gameId, function (error, data) {
 								var players = game.get("players");
 								for (uid in players) {
-									if(uid != wsUid && typeof(gUsers[uid]) != "undefined") {
+									if(uid != ws.uid && typeof(gUsers[uid]) != "undefined") {
 										ws.send(JSON.stringify(sh.event('event.game.user.online', {uid: uid})));
 									}
 								}
 							});
 						}
 					} else {
-						shlog.info("remove game channel:" + gameChannel);
+						shlog.info("remove game channel:" + gameChannel, ws.games);
+						var idx = ws.games.indexOf(req.params.gameId);
+						if(idx != -1) {
+							ws.games.splice(idx, 1);
+						}
 						eventEmitter.removeListener(gameChannel, socketNotify);
-						global.live.notify(gameId, sh.event('event.game.user.offline', {uid: wsUid}));
+						global.live.notify(gameId, sh.event('event.game.user.offline', {uid: ws.uid}));
 					}
 					ws.send(JSON.stringify(sh.event("event.live.game", {status: req.params.status, game : gameId})));
 					return;
 				}
 
 				sh.call(req.params.cmd, req, res, function(error, data) {
-					shlog.info("back from call: " + req.params.cmd);
-					var cmd = req.params.cmd;
-					if(error == 0) {
-						if(cmd == 'game.leave') {
-							// SWD not sure we want to do this
-								var gameChannel = channel("game", req.params.gameId);
-								shlog.info("remove channel: "+gameChannel);
-								var idx = wsGames.indexOf(req.params.gameId);
-								if(idx != -1) {
-									wsGames.splice(idx, 1);
-								}
-								eventEmitter.removeListener(gameChannel, socketNotify);
-							}
-						}
-						sendWs(ws, error, data);
-						return;
+					sendWs(ws, error, data);
+					return;
 				});  // end sh.call
 			});  // end sh.fillSession
 		});  // end ws.on-message
@@ -137,20 +127,20 @@ live.start = function() {
 			shlog.info(err);
 		})
 			
-		ws.on('close', function(ws) {
+		ws.on('close', function() {
 			shlog.info("socket: close");
 			
-			delete gUsers[wsUid];
+			delete gUsers[this.uid];
 			
-			var userChannel = channel("user", wsUid);
+			var userChannel = channel("user", this.uid);
 			shlog.info("socket: close cleanup - " + userChannel)
 			eventEmitter.removeAllListeners(userChannel, socketNotify);
-			for(var i=0; i<wsGames.length; i++) {
-				var gameChannel = channel("game", wsGames[i]);
+			for(var i=0; i<ws.games.length; i++) {
+				var gameChannel = channel("game", ws.games[i]);
 				shlog.info("socket: close cleanup - " + gameChannel)
 				eventEmitter.removeListener(gameChannel, socketNotify);
-				// since game is still in wsGames - user did not "game.leave" - SWD: we could enum the game.players like on set
-				global.live.notify(wsGames[i], sh.event('event.game.user.offline', {uid: wsUid}));
+				// since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
+				global.live.notify(ws.games[i], sh.event('event.game.user.offline', {uid: this.uid}));
 			}
 		});
 
