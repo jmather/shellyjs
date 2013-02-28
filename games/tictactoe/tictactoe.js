@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var tictactoe = exports;
 
@@ -23,7 +23,7 @@ tictactoe.create = function(req, cb)
 	req.env.game.set("maxPlayers", 2);
 	req.env.game.set("state", state);
 	
-	cb(0, shutil.event("event.game.info", req.env.game.getData()));
+	cb(0, sh.event("event.game.info", req.env.game.getData()));
 }
 
 function checkFull(gb) {
@@ -85,12 +85,12 @@ tictactoe.turn = function(req, cb)
 	var gameBoard = state.gameBoard;
 
 	if(Object.keys(game.get("players")).length < 2) {
-		cb(2, shutil.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.get("players")).length}));
+		cb(2, sh.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.get("players")).length}));
 		return;
 	}
 	
 	if(gameBoard[move.x][move.y] != '') {
-		cb(2, shutil.error("move_bad", "this square has been taken"));
+		cb(2, sh.error("move_bad", "this square has been taken"));
 		return;
 	}
 	
@@ -108,7 +108,7 @@ tictactoe.turn = function(req, cb)
 		state.winner = uid;
 		state.winnerSet = win.set;
 		game.set("state", state);
-		cb(0, shutil.event('event.game.over', game.getData()));
+		cb(0, sh.event('event.game.over', game.getData()));
 		return;
 	}
 	
@@ -118,10 +118,10 @@ tictactoe.turn = function(req, cb)
 		state.winner = 0;
 		state.winnerSet = null;		
 		game.set("state", state);
-		cb(0, shutil.event('event.game.over', game.getData()));
+		cb(0, sh.event('event.game.over', game.getData()));
 		return;
 	}
 	
 	game.set("state", state);
-	cb(0, shutil.event('event.game.info', game.getData()));
+	cb(0, sh.event('event.game.info', game.getData()));
 }

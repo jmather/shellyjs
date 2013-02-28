@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var db = global.db;
 
@@ -49,7 +49,7 @@ user.set = function(req, res, cb)
 
 user.games = function(req, res, cb)
 {
-	cb(0, shutil.event("event.user.games", req.session.user.get('currentGames')));
+	cb(0, sh.event("event.user.games", req.session.user.get('currentGames')));
 }
 
 user.gameRemove = function(req, res, cb)
@@ -60,5 +60,5 @@ user.gameRemove = function(req, res, cb)
 	delete currentGames[gameId];
 	user.set(currentGames);
 	
-	cb(0, shutil.event("event.user.games", currentGames));
+	cb(0, sh.event("event.user.games", currentGames));
 }

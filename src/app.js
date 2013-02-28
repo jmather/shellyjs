@@ -10,7 +10,7 @@ var winston = require('winston');
 // do first so any of our modules can use
 global.db = require(global.gBaseDir + '/src/shdb.js');
 
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
 var shUser = require(global.gBaseDir + '/src/shuser.js');
 
@@ -64,7 +64,7 @@ server.use(function(req, res, next) {
 		return next();
 	}
 	
-	shutil.fillSession(req, res, function(error, data) {
+	sh.fillSession(req, res, function(error, data) {
 		if(error != 0) {
 			res.send(data);
 			return 0;
@@ -100,7 +100,7 @@ function respond(req, res, next) {
 	var cmd = req.params.cmd;
 	console.log("respond: " + cmd);
 	
-	shutil.call(cmd, req, res, function(error, data) {
+	sh.call(cmd, req, res, function(error, data) {
 		console.log("back from call: " + req.params.cmd);
 		res.send(data);
 	});

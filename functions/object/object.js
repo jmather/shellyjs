@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var crypto = require('crypto');
 
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var db = global.db;
 
@@ -32,7 +32,7 @@ object.pre = function(req, res, cb)
 	req.env.object = null;
 	db.kget('kObject', [className, oid], function(err, value){
 		if(value == null) {
-			cb(1, shutil.error("object_get", "unable to get object", {className: className, oid: oid}));
+			cb(1, sh.error("object_get", "unable to get object", {className: className, oid: oid}));
 			return;
 		} else {
 			var object = JSON.parse(value);
@@ -49,7 +49,7 @@ object.post = function(req, res, cb)
 	var object = req.env.object;
 	
 	if(req.env.object==null) {
-		cb(1, shutil.error("object_null", "object is not valid to save"));
+		cb(1, sh.error("object_null", "object is not valid to save"));
 		return;
 	}
 	
@@ -68,7 +68,7 @@ object.post = function(req, res, cb)
 		var objectStr = JSON.stringify(object);
 		db.kset('kObject', [object._info.className, object._info.oid], objectStr, function(err, res) {
 			if(err != null) {
-				cb(1, shutil.error("object_save", "unable to save object"));
+				cb(1, sh.error("object_save", "unable to save object"));
 				return;
 			}
 			cb(0);

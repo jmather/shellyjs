@@ -1,6 +1,6 @@
 var events = require('events');
 
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var game = require(global.gBaseDir + '/functions/game/game.js');
 
@@ -26,7 +26,7 @@ gqueue.add = function(req, res, cb) {
 	// SWD: this will be too slow, change to hash presence list for data, and check/add/remove from that also
 	for (var i=0; i<gq.length; i++) {
 		if (gq[i].gameId == gameId) {
-			cb(1, shutil.error("queue_add", "game already in queue", {gameId: gameId}));
+			cb(1, sh.error("queue_add", "game already in queue", {gameId: gameId}));
 			return;
 		}
 	}
@@ -34,7 +34,7 @@ gqueue.add = function(req, res, cb) {
 	var ts = new Date().getTime();
 	var gameInfo = {gameId: gameId, data: data, ts: ts};
 	gq.push(gameInfo);
-	cb(0, shutil.event("event.gqueue.game.add", gameInfo));
+	cb(0, sh.event("event.gqueue.game.add", gameInfo));
 }
 
 gqueue.remove = function(req, res, cb) {
@@ -47,18 +47,18 @@ gqueue.remove = function(req, res, cb) {
 		}
 	}
 	
-	cb(0, shutil.event("event.gqueue.game.remove", gameInfo));
+	cb(0, sh.event("event.gqueue.game.remove", gameInfo));
 }
 
 gqueue.nextAvailable = function(req, res, cb) {
 	if(gq.length == 0) {
-		cb(1, shutil.error("queue_none", "no games available"));
+		cb(1, sh.error("queue_none", "no games available"));
 		return;
 	}
 	gameInfo = gq.shift();
 	
 	req.params.gameId = gameInfo.gameId;
-	shutil.call("game.join", req, res, function(error, data) {
+	sh.call("game.join", req, res, function(error, data) {
 		if(error != 0) {
 			// check to see if game is really full and valid
 			// put the game back in the available queue
@@ -75,5 +75,5 @@ gqueue.list = function(req, res, cb) {
 		cb(0, gq.slice(0, limit));
 		return;
 	}
-	cb(0, shutil.event("event.gqueue.list", gq));
+	cb(0, sh.event("event.gqueue.list", gq));
 }

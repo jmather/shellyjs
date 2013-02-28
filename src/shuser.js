@@ -3,7 +3,7 @@ var util = require('util')
   , events = require('events')
 	, _ = require("lodash")
 	
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var db = global.db;
 
@@ -31,14 +31,14 @@ User.prototype.load = function(uid, cb) {
 	var self = this;
 	db.kget('kUser', uid, function(err, value) {
 		if(value == null) {
-			cb(1, shutil.error("user_get", "unable to load user data", {uid: uid}));
+			cb(1, sh.error("user_get", "unable to load user data", {uid: uid}));
 			return;
 		}
 		try {
 			var savedData = JSON.parse(value);
 			self._data = _.merge(self._data, savedData);
 		} catch(e) {
-			cb(1, shutil.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
+			cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
 			return;
 		}
 		cb(0, self._data);
@@ -61,7 +61,7 @@ User.prototype.save = function(cb) {
 	var dataStr = JSON.stringify(this._data);
 	db.kset('kUser', this._uid, dataStr, function(err, res) {
 		if(err != null) {
-			cb(1, shutil.error("user_save", "unable to save user data", {uid: self._uid}));
+			cb(1, sh.error("user_save", "unable to save user data", {uid: self._uid}));
 			return;
 		}
 		cb(0);

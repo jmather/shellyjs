@@ -13,12 +13,12 @@ test.turn = function(req, cb)
 {
 	if (req.params.guess == req.env.game.state.number)
 	{
-		cb(0, shutil.event("event.test.info", {message:"you won"}));
+		cb(0, sh.event("event.test.info", {message:"you won"}));
 	} else {
-		cb(0, shutile.event("event.test.info", {message:"try again"}));
+		cb(0, sh.event("event.test.info", {message:"try again"}));
 	}
 }
 
 test.myfunc = function(req, cb) {
-	cb(0, shutil.event("event.test.myfunc", {message:"hellow world"}));
+	cb(0, sh.event("event.test.myfunc", {message:"hellow world"}));
 }

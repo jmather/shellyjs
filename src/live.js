@@ -4,7 +4,7 @@ var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
 
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 var shUser = require(global.gBaseDir + '/src/shuser.js');
 var shGame = require(global.gBaseDir + '/src/shgame.js');
 
@@ -47,7 +47,7 @@ live.start = function() {
 			req.params = JSON.parse(message);
 			
 			// fill in req.session
-			shutil.fillSession(req, res, function(error, data) {
+			sh.fillSession(req, res, function(error, data) {
 				if(error != 0) {
 					ws.send(JSON.stringify(data));
 					return;
@@ -63,7 +63,7 @@ live.start = function() {
 						console.log("add user channel: "+userChannel);
 						eventEmitter.on(userChannel, socketNotify);
 					}
-					ws.send(JSON.stringify(shutil.event("event.live.user", {status: "on", uid: wsUid})));
+					ws.send(JSON.stringify(sh.event("event.live.user", {status: "on", uid: wsUid})));
 					return;
 				}
 				if(req.params.cmd == "live.game")
@@ -78,7 +78,7 @@ live.start = function() {
 						if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1)
 						{
 							console.log("add game channel: "+gameChannel);
-							global.live.notify(gameId, shutil.event('event.game.user.online', {uid: wsUid}));
+							global.live.notify(gameId, sh.event('event.game.user.online', {uid: wsUid}));
 							wsGames.push(gameId);
 							eventEmitter.on(gameChannel, socketNotify);
 							
@@ -88,7 +88,7 @@ live.start = function() {
 								var players = game.get("players");
 								for (uid in players) {
 									if(uid != wsUid && typeof(gUsers[uid]) != "undefined") {
-										ws.send(JSON.stringify(shutil.event('event.game.user.online', {uid: uid})));
+										ws.send(JSON.stringify(sh.event('event.game.user.online', {uid: uid})));
 									}
 								}
 							});
@@ -96,13 +96,13 @@ live.start = function() {
 					} else {
 						console.log("remove game channel:" + gameChannel);
 						eventEmitter.removeListener(gameChannel, socketNotify);
-						global.live.notify(gameId, shutil.event('event.game.user.offline', {uid: wsUid}));
+						global.live.notify(gameId, sh.event('event.game.user.offline', {uid: wsUid}));
 					}
-					ws.send(JSON.stringify(shutil.event("event.live.game", {status: req.params.status, game : gameId})));
+					ws.send(JSON.stringify(sh.event("event.live.game", {status: req.params.status, game : gameId})));
 					return;
 				}
 
-				shutil.call(req.params.cmd, req, res, function(error, data) {
+				sh.call(req.params.cmd, req, res, function(error, data) {
 					console.log("back from call: " + req.params.cmd);
 					var cmd = req.params.cmd;
 					if(error == 0) {
@@ -119,8 +119,8 @@ live.start = function() {
 						}
 						ws.send(JSON.stringify(data));
 						return;
-				});  // end shutil.call
-			});  // end shutil.fillSession
+				});  // end sh.call
+			});  // end sh.fillSession
 		});  // end ws.on-message
 		
 		ws.on('error', function(err) {
@@ -140,7 +140,7 @@ live.start = function() {
 				console.log("socket: close cleanup - " + gameChannel)
 				eventEmitter.removeListener(gameChannel, socketNotify);
 				// since game is still in wsGames - user did not "game.leave" - SWD: we could enum the game.players like on set
-				global.live.notify(wsGames[i], shutil.event('event.game.user.offline', {uid: wsUid}));
+				global.live.notify(wsGames[i], sh.event('event.game.user.offline', {uid: wsUid}));
 			}
 		});
 

@@ -3,7 +3,7 @@ var util = require('util')
   , events = require('events')
 	, _ = require("lodash")
 	
-var shutil = require(global.gBaseDir + '/src/shutil.js');
+var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var db = global.db;
 
@@ -39,7 +39,7 @@ Game.prototype.load = function(gameId, cb) {
 	var self = this;
 	db.kget('kGame', gameId, function(err, value) {
 		if(value == null) {
-			cb(1, shutil.error("game_get", "unable to load game data", {gameId: gameId}));
+			cb(1, sh.error("game_get", "unable to load game data", {gameId: gameId}));
 			return;
 		}
 		try {
@@ -48,7 +48,7 @@ Game.prototype.load = function(gameId, cb) {
 			savedData.gameId = savedData.gameId.toString();			
 			self._data = _.merge(self._data, savedData);
 		} catch(e) {
-			cb(1, shutil.error("game_parse", "unable to parse game data", {gameId: gameId, extra: e.message}));
+			cb(1, sh.error("game_parse", "unable to parse game data", {gameId: gameId, extra: e.message}));
 			return;
 		}
 		cb(0, self._data);
@@ -60,7 +60,7 @@ Game.prototype.save = function(cb) {
 	var dataStr = JSON.stringify(this._data);
 	db.kset('kGame', this._data.gameId, dataStr, function(err, res) {
 		if(err != null) {
-			cb(1, shutil.error("game_save", "unable to save game data", {gameId: self._data.gameId}));
+			cb(1, sh.error("game_save", "unable to save game data", {gameId: self._data.gameId}));
 			return;
 		}
 		cb(0);
