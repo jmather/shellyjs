@@ -1,5 +1,6 @@
 var events = require('events');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var game = require(global.gBaseDir + '/functions/game/game.js');

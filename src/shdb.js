@@ -1,6 +1,8 @@
 // shdb - module to provide key value db access
 var util = require('util');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
+
 var gDbScope = "dev:";
 
 shdb = exports;
@@ -12,7 +14,7 @@ var redis = require("redis"),
 // client.select(3, function() { /* ... */ });
 
 client.on("error", function (err) {
-  console.log("Error " + err);
+  shlog.info("Error " + err);
 });
 
 var gKeyTypes = {
@@ -23,22 +25,22 @@ var gKeyTypes = {
 }
 
 shdb.init = function() {
-	console.log("db init");
+	shlog.info("db init");
 /*
 client.set("string key", "string val", redis.print);
 client.hset("hash key", "hashtest 1", "some value", redis.print);
 client.hset(["hash key", "hashtest 2", "some other value"], redis.print);
 client.hkeys("hash key", function (err, replies) {
-  console.log(replies.length + " replies:");
+  shlog.info(replies.length + " replies:");
   replies.forEach(function (reply, i) {
-    console.log("    " + i + ": " + reply);
+    shlog.info("    " + i + ": " + reply);
   });
 });
 */
 }
 
 shdb.get = function(key, cb) {
-	console.log(key, cb);
+	shlog.info(key, cb);
 	client.get(key, cb);
 }
 
@@ -57,7 +59,7 @@ shdb.kget = function(keyType, params, cb) {
 	// SWD check keyType undefined
 	
 	var key = genKey(keyType, params);
-	console.log('kget: '+ gKeyTypes[keyType].tpl + '->' + key);
+	shlog.info('kget: '+ gKeyTypes[keyType].tpl + '->' + key);
 	client.get(key, function(err, value) {
 		cb(err, value);
 	});
@@ -76,7 +78,7 @@ shdb.kset = function(keyType, params, value, cb) {
 	// SWD check keyType undefined
 
 	var key = genKey(keyType, params);
-	console.log('kset: '+ gKeyTypes[keyType].tpl + '->' + key);
+	shlog.info('kset: '+ gKeyTypes[keyType].tpl + '->' + key);
 	client.set(key, value, function(err, value) {
 		if(typeof(cb)=='function')
 		{
@@ -87,7 +89,7 @@ shdb.kset = function(keyType, params, value, cb) {
 
 shdb.nextId = function(keyType, cb) {
 	var key = gDbScope + 'idgen:' + keyType;
-	console.log('shdb.nextId: key = ' + key);
+	shlog.info('shdb.nextId: key = ' + key);
 	client.incrby(key, 1, cb);
 }
 

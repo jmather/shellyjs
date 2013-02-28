@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var crypto = require('crypto');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var db = global.db;
@@ -17,7 +18,7 @@ object.functions = {
 
 object.pre = function(req, res, cb)
 {
-	console.log('object.pre');
+	shlog.info('object.pre');
 	var cmd = req.params.cmd;
 	var className = req.params.className;
 	var oid = req.params.oid;
@@ -45,7 +46,7 @@ object.pre = function(req, res, cb)
 
 object.post = function(req, res, cb)
 {
-	console.log('object.post');
+	shlog.info('object.post');
 	var object = req.env.object;
 	
 	if(req.env.object==null) {
@@ -61,7 +62,7 @@ object.post = function(req, res, cb)
 	
 	if(newHash != info.hash)
 	{
-		console.log("object modified - saving");
+		shlog.info("object modified - saving");
 		object._info.hash = newHash;
 		var ts = new Date().getTime();
 		req.env.object._info.lastModified = ts;	
@@ -81,7 +82,7 @@ object.post = function(req, res, cb)
 
 object.create = function(req, res, cb)
 {
-	console.log('object.create');
+	shlog.info('object.create');
 	var className = req.params.className;
 	
 	var object = {};
@@ -104,7 +105,7 @@ object.create = function(req, res, cb)
 
 object.destroy = function(req, res, cb)
 {
-	console.logl('object.destroy');
+	shlog.infol('object.destroy');
 	cb(0);
 }
 

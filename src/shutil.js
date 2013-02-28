@@ -4,9 +4,9 @@ var util = require("util");
 var _ = require("lodash");
 var stackTrace = require('stack-trace');
 
-// used by fill session
-var session = require(global.gBaseDir + '/src/session.js');
-var shUser = require(global.gBaseDir + '/src/shuser.js');
+var shlog = require(global.gBaseDir + '/src/shlog.js');
+var session = require(global.gBaseDir + '/src/session.js');  // used by fill session
+var shUser = require(global.gBaseDir + '/src/shuser.js');  // used by fill session
 
 var shutil = exports;
 
@@ -86,14 +86,14 @@ shutil.fillSession = function(req, res, cb) {
 	}
 	req.session = {};
 	req.session.uid = req.params.session.split(':')[1];
-	console.log("loading user: uid = " + req.session.uid);
+	shlog.info("loading user: uid = " + req.session.uid);
 	var user = new shUser();
 	user.loadOrCreate(req.session.uid, function(error, data) {
 		if(error != 0) {
 			cb(1, shutil.event("event.error", {info: "unable to load user: " + req.session.uid}));
 			return;
 		}
-		console.log("user loaded: " + req.session.uid);
+		shlog.info("user loaded: " + req.session.uid);
 		req.session.user = user;
 		cb(0);
 	});
@@ -101,7 +101,7 @@ shutil.fillSession = function(req, res, cb) {
 
 shutil.call = function(cmd, req, res, cb)
 {
-	console.log('cmd = ' + cmd);
+	shlog.info('cmd = ' + cmd);
 	var cmdParts = cmd.split('.');
 	var moduleName = cmdParts[0];
 	var funcName = cmdParts[1];	
@@ -134,18 +134,18 @@ shutil.call = function(cmd, req, res, cb)
 
 	// ensure we have pre/post functions
 	if(typeof(module.pre) != 'function') {
-		console.log('no pre - using default');
+		shlog.info('no pre - using default');
 		module.pre = function(req, res, cb) {cb(0);}
 	}
 	if(typeof(module.post) != 'function') {
-		console.log('no post - using default');
+		shlog.info('no post - using default');
 		module.post = function(req, res, cb) {cb(0);}
 	}
 	
 	// call the pre, function, post sequence
 	module.pre(req, res, function(error, data) {
 		if(error != 0) {
-			console.log("pre error: ", data);
+			shlog.info("pre error: ", data);
 			cb(error, data);
 			return;
 		}
@@ -154,7 +154,7 @@ shutil.call = function(cmd, req, res, cb)
 			var retData = data;
 			if(error != 0) {
 				// bail out, no post as function failed
-				console.log("func error: ", error, data);
+				shlog.info("func error: ", error, data);
 				cb(error, data);
 				return;
 			}

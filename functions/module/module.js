@@ -1,5 +1,7 @@
 var fs = require("fs");
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
+
 exports.desc = "utility functions for shelly modules"
 exports.functions = {
 	list: {desc: 'list all modules installed', params: {}, security: []},
@@ -8,7 +10,7 @@ exports.functions = {
 
 function getInfo(name)
 {
-	console.log("getInfo name="+name);
+	shlog.info("getInfo name="+name);
 	var funcDir = global.gBaseDir + '/functions';	
 	var cmdFile = funcDir + '/' + name + '/' + name + '.js';
 	
@@ -39,7 +41,7 @@ function getInfo(name)
 
 exports.info = function(req, res, cb)
 {
-	console.log("module.info name="+req.params.name);
+	shlog.info("module.info name="+req.params.name);
 	var m = getInfo(req.params.name);
 	cb(m.error, m);
 }

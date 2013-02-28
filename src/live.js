@@ -4,6 +4,7 @@ var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 var shUser = require(global.gBaseDir + '/src/shuser.js');
 var shGame = require(global.gBaseDir + '/src/shgame.js');
@@ -16,12 +17,12 @@ var wss = null;
 var gUsers = {};
 
 live.notify = function(gameId, data) {
-	console.log('notify game: gameId = ' + gameId);
+	shlog.info('notify game: gameId = ' + gameId);
 	eventEmitter.emit(channel("game", gameId), data);
 }
 
 live.notifyUser = function(uid, data) {
-	console.log('notify user: uid = ' + uid);
+	shlog.info('notify user: uid = ' + uid);
 	eventEmitter.emit(channel("user", uid), data);
 }
 
@@ -32,10 +33,10 @@ function channel(name, id)
 
 live.start = function() {
   wss = new WebSocketServer({port: gPort});
-	console.log("websocket listening: " + gPort)
+	shlog.info("websocket listening: " + gPort)
 
 	wss.on('connection', function(ws) {
-		console.log("socket: connect")
+		shlog.info("socket: connect")
 		var wsUid = 0;
 		var wsGames = [];
 	
@@ -60,7 +61,7 @@ live.start = function() {
 					// hook them into user events
 					var userChannel = channel("user", req.session.uid);
 					if(eventEmitter.listeners(userChannel).indexOf(socketNotify) == -1) {
-						console.log("add user channel: "+userChannel);
+						shlog.info("add user channel: "+userChannel);
 						eventEmitter.on(userChannel, socketNotify);
 					}
 					ws.send(JSON.stringify(sh.event("event.live.user", {status: "on", uid: wsUid})));
@@ -77,7 +78,7 @@ live.start = function() {
 					{
 						if(eventEmitter.listeners(gameChannel).indexOf(socketNotify) == -1)
 						{
-							console.log("add game channel: "+gameChannel);
+							shlog.info("add game channel: "+gameChannel);
 							global.live.notify(gameId, sh.event('event.game.user.online', {uid: wsUid}));
 							wsGames.push(gameId);
 							eventEmitter.on(gameChannel, socketNotify);
@@ -94,7 +95,7 @@ live.start = function() {
 							});
 						}
 					} else {
-						console.log("remove game channel:" + gameChannel);
+						shlog.info("remove game channel:" + gameChannel);
 						eventEmitter.removeListener(gameChannel, socketNotify);
 						global.live.notify(gameId, sh.event('event.game.user.offline', {uid: wsUid}));
 					}
@@ -103,13 +104,13 @@ live.start = function() {
 				}
 
 				sh.call(req.params.cmd, req, res, function(error, data) {
-					console.log("back from call: " + req.params.cmd);
+					shlog.info("back from call: " + req.params.cmd);
 					var cmd = req.params.cmd;
 					if(error == 0) {
 						if(cmd == 'game.leave') {
 							// SWD not sure we want to do this
 								var gameChannel = channel("game", req.params.gameId);
-								console.log("remove channel: "+gameChannel);
+								shlog.info("remove channel: "+gameChannel);
 								var idx = wsGames.indexOf(req.params.gameId);
 								if(idx != -1) {
 									wsGames.splice(idx, 1);
@@ -124,20 +125,20 @@ live.start = function() {
 		});  // end ws.on-message
 		
 		ws.on('error', function(err) {
-			console.log(err);
+			shlog.info(err);
 		})
 			
 		ws.on('close', function(ws) {
-			console.log("socket: close", wsUid);
+			shlog.info("socket: close", wsUid);
 			
 			delete gUsers[wsUid];
 			
 			var userChannel = channel("user", wsUid);
-			console.log("socket: close cleanup - " + userChannel)
+			shlog.info("socket: close cleanup - " + userChannel)
 			eventEmitter.removeAllListeners(userChannel, socketNotify);
 			for(var i=0; i<wsGames.length; i++) {
 				var gameChannel = channel("game", wsGames[i]);
-				console.log("socket: close cleanup - " + gameChannel)
+				shlog.info("socket: close cleanup - " + gameChannel)
 				eventEmitter.removeListener(gameChannel, socketNotify);
 				// since game is still in wsGames - user did not "game.leave" - SWD: we could enum the game.players like on set
 				global.live.notify(wsGames[i], sh.event('event.game.user.offline', {uid: wsUid}));
@@ -146,18 +147,18 @@ live.start = function() {
 
 		// helper functions in valid ws scope		
 		var socketNotify = function(message) {
-			console.log("socket: socketNotify")
+			shlog.info("socket: socketNotify")
 			if(ws.readyState == 1) {
 				// 1 = OPEN - SWD: find this in ws module later
 				ws.send(JSON.stringify(message));
 			} else {
-				console.log("socket: dead socket");
+				shlog.info("socket: dead socket");
 			}
 		};
 
 	}); // end wss.on-connection
 	
 	wss.on('error', function(err) {
-		console.log(err);
+		shlog.info(err);
 	});
 }

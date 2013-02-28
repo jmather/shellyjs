@@ -2,6 +2,8 @@
 var util = require('util');
 var crypto = require('crypto');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
+
 session = exports;
 
 var sessionSecret = 'e8017600-764f-11e2-bcfd-0800200c9a66';
@@ -9,7 +11,7 @@ var sessionFormat = 'uid=%s;ts=%s;secret=%s';
 var sessionVersion = 1;
 
 session.create = function(uid) {
-	console.log("session.create");
+	shlog.info("session.create");
 	
 	var ts = new Date().getTime();
 	
@@ -20,7 +22,7 @@ session.create = function(uid) {
 }
 
 session.check = function(key) {
-	console.log('session.check key=' + key);
+	shlog.info('session.check key=' + key);
 	var keyParts = key.split(':');
 	if (keyParts.length != 4)
 	{

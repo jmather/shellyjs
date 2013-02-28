@@ -1,5 +1,6 @@
 var _ = require('lodash');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var db = global.db;
@@ -16,7 +17,7 @@ user.functions = {
 
 user.pre = function(req, res, cb)
 {
-	console.log('user.pre');
+	shlog.info('user.pre');
 	var uid = req.params.uid;
 	// user is always preloaded now
 	
@@ -26,7 +27,7 @@ user.pre = function(req, res, cb)
 
 user.post = function(req, res, cb)
 {
-	console.log('user.post');
+	shlog.info('user.post');
 	var uid = req.params.uid;
 	// SWD: work out pre/post user save later, for now save on every set
 	cb(0);
@@ -34,7 +35,7 @@ user.post = function(req, res, cb)
 
 user.get = function(req, res, cb)
 {
-	console.log(req.env.user);
+	shlog.info(req.env.user);
 	cb(0, req.session.user.getData());
 }
 

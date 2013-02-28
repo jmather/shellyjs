@@ -2,6 +2,8 @@ var util = require('util');
 var crypto = require('crypto');
 var check = require('validator').check;
 var sanitize = require('validator').sanitize;
+
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
 
@@ -36,7 +38,7 @@ exports.login = function(req, res, cb)
 	
 	var email = sanitize(req.params.email).trim();
 	var password = sanitize(req.params.password).trim();
-	console.log(email);
+	shlog.info(email);
 	try {
 		check(email, 102).isEmail();
 	} catch (e) {

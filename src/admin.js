@@ -4,12 +4,15 @@ var path = require('path');
 var engines = require('consolidate');
 var hogan = require('hogan.js');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
+
 var gAdminPort = 5100;
 var adminBase = global.gBaseDir + '/admin';
 var adminStatic = adminBase + '/static';
 var adminGames = adminBase + '/games';
-console.log('admin directory: ' + adminBase);
-console.log('admin static directory: ' + adminStatic);
+
+shlog.info('admin directory: ' + adminBase);
+shlog.info('admin static directory: ' + adminStatic);
 
 var app = express();
 //app.use(express.basicAuth(function(user, pass){
@@ -40,7 +43,7 @@ app.get('/test', function(req, res) {
 });
 
 app.get('/menu_1.html', function(req, res) {
-	console.log("in menu_1");	
+	shlog.info("in menu_1");	
 	var modulePack = require(global.gBaseDir + '/functions/module/module.js');
 	var map  = new Object();
 	map.user = 'Scott';	
@@ -55,14 +58,14 @@ app.get('/function', function(req, res) {
 });
 
 app.get('/testgame.html', function(req, res) {
-	console.log("in testgame");
+	shlog.info("in testgame");
 	var map = new Object();
 	map.module = "game";
 	var cmdFile = global.gBaseDir + '/functions/' + map.module + '/' + map.module + '.js';
 	delete require.cache[require.resolve(cmdFile)];	
 	var modulePack = require(cmdFile);
 	map.functions = modulePack.functions;
-//	console.log(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
+//	shlog.info(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
 	res.render('testgame.html', {params: JSON.stringify(map)});
 });
 
@@ -75,14 +78,14 @@ app.get('/function/:module/:function', function(req, res) {
 	var modulePack = require(cmdFile);
 	map.functions = modulePack.functions;
 	map.desc = modulePack.desc;
-//	console.log(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
+//	shlog.info(map);												// SWD req.params is an array indexed by param names [module: 'a', function: 'b'] - it doesn't json encode
 	res.render('function.html', {params: JSON.stringify(map)});
 });
 
 app.get('*.html', function(req, res) {
-  console.log('%s %s', req.method, req.url);	
+  shlog.info('%s %s', req.method, req.url);	
 	res.render(path.basename(req.url), {});	
 });
 
 var adminServer = app.listen(gAdminPort);
-console.log('Admin server started on port %d', adminServer.address().port);
+shlog.info('Admin server started on port %d', adminServer.address().port);

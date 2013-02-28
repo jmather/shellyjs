@@ -1,5 +1,6 @@
 var _ = require('lodash');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 
 var tictactoe = exports;
@@ -41,7 +42,7 @@ function checkFull(gb) {
 function checkWin(gb) {
 	var res = {winner: '', set: null};
 	
-	console.log("checkWin");
+	shlog.log("checkWin");
 	for (var i=0; i<3; i++) {
 		if(gb[i][0] == gb[i][1] && gb[i][0] == gb[i][2]) {
 			if(gb[i][0]!='') {

@@ -9,6 +9,7 @@ var restify = require('restify');
 // do first so any of our modules can use
 global.db = require(global.gBaseDir + '/src/shdb.js');
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
 var shUser = require(global.gBaseDir + '/src/shuser.js');
@@ -56,7 +57,7 @@ server.use(function(req, res, next) {
 });
 
 server.use(function(req, res, next) {
-	console.log('session check');
+	shlog.info('session check');
 	var cmd = req.params.cmd;
 	if(cmd == 'reg.login' || cmd == 'reg.create' || cmd == 'reg.check')
 	{
@@ -82,7 +83,7 @@ server.post('/api', respond);
 server.post('/api/:version', respond);
 
 server.listen(gPort, function() {
-	console.log('%s listening at %s', server.name, server.url);
+	shlog.info('%s listening at %s', server.name, server.url);
 });
 
 function errorStr(error, module)
@@ -97,10 +98,10 @@ function errorStr(error, module)
 
 function respond(req, res, next) {
 	var cmd = req.params.cmd;
-	console.log("respond: " + cmd);
+	shlog.info("respond: " + cmd);
 	
 	sh.call(cmd, req, res, function(error, data) {
-		console.log("back from call: " + req.params.cmd);
+		shlog.info("back from call: " + req.params.cmd);
 		res.send(data);
 	});
 }

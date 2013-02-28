@@ -1,5 +1,6 @@
 var _ = require("lodash");
 
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 var shGame = require(global.gBaseDir + '/src/shgame.js');
 
@@ -42,7 +43,7 @@ game.pre = function(req, res, cb)
 	{
 		var name = req.params.name;
 		try {
-			console.log("game.pre: game.create = "  + name);
+			shlog.info("game.pre: game.create = "  + name);
 			req.env.gameModule = loadGame(name);
 			cb(0);
 			return;
@@ -53,7 +54,7 @@ game.pre = function(req, res, cb)
 	}
 	
 	var gameId = req.params.gameId;
-	console.log("game.pre: populating game info for " + gameId);
+	shlog.info("game.pre: populating game info for " + gameId);
 	var game = new shGame();
 	game.load(gameId, function(error, data) {
 		if(error != 0) {
@@ -62,7 +63,7 @@ game.pre = function(req, res, cb)
 		}
 		var gameName = game.get("name");
 		try {
-			console.log("game.pre: setting game:"  + gameName + " = " + gameId);
+			shlog.info("game.pre: setting game:"  + gameName + " = " + gameId);
 			req.env.gameModule = loadGame(gameName);
 		} catch (e) {
 			cb(1, sh.error("game_require", "unable to laod game module", {name: gameName, message: e.message}));
@@ -76,13 +77,13 @@ game.pre = function(req, res, cb)
 
 game.post = function(req, rs, cb)
 {
-	console.log("game.post");
+	shlog.info("game.post");
 	if(typeof(req.env.game) == 'undefined')  // no game to save
 	{
 		cb(0);
 		return;
 	}
-	console.log("game.post - saving game");
+	shlog.info("game.post - saving game");
 	
 	req.env.game.save(cb);
 }
@@ -263,14 +264,14 @@ game.reset = function(req, res, cb)
 
 game.list = function(req, res, cb)
 {
-	console.log("game.list");
+	shlog.info("game.list");
 	
 	cb(0, sh.event("not_implemented"));
 }
 
 game.call = function(req, res, cb)
 {
-	console.log("game.call - req.params.func");
+	shlog.info("game.call - req.params.func");
 	var module = req.env.gameModule;
 	
 	if(typeof(module[req.params.func]) == 'undefined') {
