@@ -31,6 +31,16 @@ function channel(name, id)
 	return "notify." + name + "." + id;
 }
 
+function sendWs(ws, error, data) {
+	var level = 'info';
+	if(error !=  0) {
+		level = 'error';
+	}
+	var msg = JSON.stringify(data);
+	shlog.send(level, msg);
+	ws.send(msg);
+}
+
 live.start = function() {
   wss = new WebSocketServer({port: gPort});
 	shlog.info("websocket listening: " + gPort)
@@ -41,6 +51,8 @@ live.start = function() {
 		var wsGames = [];
 	
 	  ws.on('message', function(message) {
+			shlog.recv(message);
+			
 			var req = {};
 			var res = {};
 			
@@ -50,7 +62,8 @@ live.start = function() {
 			// fill in req.session
 			sh.fillSession(req, res, function(error, data) {
 				if(error != 0) {
-					ws.send(JSON.stringify(data));
+					sendWs(ws, error, data);
+//					ws.send(JSON.stringify(data));
 					return;
 				}
 				
@@ -118,7 +131,7 @@ live.start = function() {
 								eventEmitter.removeListener(gameChannel, socketNotify);
 							}
 						}
-						ws.send(JSON.stringify(data));
+						sendWs(ws, error, data);
 						return;
 				});  // end sh.call
 			});  // end sh.fillSession

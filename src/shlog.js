@@ -9,7 +9,9 @@ var gDebug = {
 	"app": {},
 	"admin": {},
 //	"game": {},
-	"live": {},
+//	"live": {},
+	"recv": {},
+//	"send": {},
 }
 
 var winston = require('winston');
@@ -18,7 +20,7 @@ winston.add(winston.transports.Console, { colorize: true, timestamp: false });
 
 shlog.log = function()
 {
-	// SWD disable module filter for prod
+	// SWD likely disable module filter for prod
 	var trace = stackTrace.get();	
 	var callerFn = trace[1].getFileName();
 	var callerName = path.basename(callerFn, ".js");	
@@ -47,6 +49,31 @@ shlog.info = function()
 shlog.error = function()
 {
 	var args = Array.prototype.slice.call(arguments);
-	args.unshift("info");
+	args.unshift("error");
 	this.log.apply(this, args);
+}
+
+shlog.recv = function()
+{
+	var callerName = "recv";
+	var level = "info";
+	var args = Array.prototype.slice.call(arguments);
+	if(typeof(gDebug[callerName]) != 'undefined') {
+		var msg = util.format("%s - %s", callerName, util.format.apply(this, args));
+		winston.log(level, msg);		
+	}
+}
+
+shlog.send = function()
+{
+	var callerName = "send";
+	
+	var args = Array.prototype.slice.call(arguments);
+	var level = args.shift();
+
+	if(typeof(gDebug[callerName]) != 'undefined') {
+		var msg = util.format("%s - %s", callerName, util.format.apply(this, args));
+//		winston.log(level, msg.substr(0, 80));
+		winston.log(level, msg);
+	}	
 }

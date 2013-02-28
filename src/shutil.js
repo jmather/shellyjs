@@ -10,53 +10,6 @@ var shUser = require(global.gBaseDir + '/src/shuser.js');  // used by fill sessi
 
 var shutil = exports;
 
-// SWD cut over to winston categories for prod
-var gDebug = {
-	"app": {},
-}
-
-var winston = require('winston');
-winston.remove(winston.transports.Console);
-winston.add(winston.transports.Console, { colorize: true, timestamp: false });
-
-shutil.log = function()
-{
-	// SWD disable module filter for prod
-	var trace = stackTrace.get();
-	
-	var functionName = trace[1].getFunctionName();
-	var idx = 1;
-	if(functionName == 'shutil.info'
-		 || functionName == 'shutil.debug'
-		 || functionName == 'shutil.error') {
-		idx = 2;
-	}
-	var callerFn = trace[idx].getFileName();
-	var callerName = path.basename(callerFn, ".js");
-	
-	var args = Array.prototype.slice.call(arguments);
-	var level = args.shift();
-	
-	if(typeof(gDebug[callerName]) != 'undefined') {
-		var msg = util.format("%d - %s", process.pid, util.format.apply(this, args));
-		winston.log(level, msg);
-	}
-}
-
-shutil.info = function()
-{
-	var args = Array.prototype.slice.call(arguments);
-	args.unshift("info");
-	this.log.apply(this, args);
-}
-
-shutil.error = function()
-{
-	var args = Array.prototype.slice.call(arguments);
-	args.unshift("info");
-	this.log.apply(this, args);
-}
-
 shutil.event = function(event, data)
 {
 	if (typeof(data) == 'undefined') {
@@ -81,16 +34,16 @@ shutil.error = function(code, message, data)
 
 shutil.fillSession = function(req, res, cb) {
 	if(!session.check(req.params.session)) {
-		cb(1, shutil.event("event.error", {info: 'bad session token'}));
+		cb(1, shutil.error("bad_session", "bad session token"));
 		return;
 	}
 	req.session = {};
 	req.session.uid = req.params.session.split(':')[1];
 	shlog.info("loading user: uid = " + req.session.uid);
 	var user = new shUser();
-	user.loadOrCreate(req.session.uid, function(error, data) {
+	user.load(req.session.uid, function(error, data) {
 		if(error != 0) {
-			cb(1, shutil.event("event.error", {info: "unable to load user: " + req.session.uid}));
+			cb(1, shutil.error("user_load", "unable to load user", {uid: req.session.uid}));
 			return;
 		}
 		shlog.info("user loaded: " + req.session.uid);
