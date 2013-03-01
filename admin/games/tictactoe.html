@@ -38,9 +38,10 @@
     </style>
     <script language="javascript">
         var Env = new Object();
-        Env.baseParams = {session: "1:33:xxxx:0",
-                          gameId: "161"
-                         }
+        Env.baseParams = {
+            session: "1:33:xxxx:0",
+            gameId: 193,
+        }
 
 
 
@@ -65,8 +66,17 @@
             return $.extend({}, obj);
         }
 
+        var gLogLimit = 500;
+        var gLogCount = 0;
         function log(api, type, msg)
         {
+            var $mlog = $("#messageLog");
+            gLogCount++;
+            if (gLogCount > gLogLimit) {
+                // remove first child
+                $mlog.children(":first").remove();
+            }
+
             color = "black";
             bodyColor = "black";
             if(type=="error") {
@@ -82,7 +92,6 @@
             if (typeof(msg) == 'object') {
                 msg = JSON.stringify(msg);
             }
-            var $mlog = $("#messageLog");
             var disp = "<div style='font-size:10px;white-space:nowrap;'>";
             disp += "<span style='color:" + color + ";'>" + api + ": </span>";
             disp += "<span style='color:" + color + ";'>" + type + ": </span>";
