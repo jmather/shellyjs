@@ -75,7 +75,7 @@ shutil.call = function(cmd, req, res, cb)
 	{
 		if(typeof(req.params[key])=='undefined')
 		{
-			cb(2, {cmd: cmd, info: "missing param: " + key});
+			cb(1, shutil.error("missing_param", "missing parameter", {key: key}));
 			return;
 		}
 	}
