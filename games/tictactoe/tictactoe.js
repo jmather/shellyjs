@@ -8,10 +8,10 @@ var tictactoe = exports;
 tictactoe.create = function(req, cb)
 {
 	gameBoard = [
-							 ['','',''],
-							 ['','',''],
-							 ['','','']
-							 ];
+		['','',''],
+		['','',''],
+		['','','']
+	];
 							
 	var state = {};
 	state.gameBoard = gameBoard;  // SWD: change this to just board
@@ -105,7 +105,7 @@ tictactoe.turn = function(req, cb)
 	var win = checkWin(gameBoard);
 	if(win.winner != '') {
 		game.set("status", "over");
-		game.set("whoTurn", 0);
+		game.set("whoTurn", '0');
 		state.winner = uid;
 		state.winnerSet = win.set;
 		game.set("state", state);
@@ -115,8 +115,8 @@ tictactoe.turn = function(req, cb)
 	
 	if(checkFull(gameBoard)) {
 		game.set("status", "over");
-		game.set("whoTurn", 0);
-		state.winner = 0;
+		game.set("whoTurn", '0');
+		state.winner = '0';
 		state.winnerSet = null;		
 		game.set("state", state);
 		cb(0, sh.event('event.game.over', game.getData()));
