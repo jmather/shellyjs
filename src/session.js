@@ -4,39 +4,38 @@ var crypto = require('crypto');
 
 var shlog = require(global.gBaseDir + '/src/shlog.js');
 
-session = exports;
+var session = exports;
 
 var sessionSecret = 'e8017600-764f-11e2-bcfd-0800200c9a66';
 var sessionFormat = 'uid=%s;ts=%s;secret=%s';
 var sessionVersion = 1;
 
-session.create = function(uid) {
-	shlog.info("session.create");
-	
-	var ts = new Date().getTime();
-	
-	var secStr = util.format('uid=%s;ts=%s;secret=%s', uid, ts, sessionSecret);
-	var hash = crypto.createHash('md5').update(secStr).digest("hex");
+session.create = function (uid) {
+  shlog.info("session.create");
 
-	return sessionVersion + ':' + uid + ':' + hash + ':' + ts;
-}
+  var ts = new Date().getTime();
 
-session.check = function(key) {
-	shlog.info('session.check key=' + key);
-	var keyParts = key.split(':');
-	if (keyParts.length != 4)
-	{
-		return false;
-	}	
-	var version = keyParts[0];
-	var uid = keyParts[1];
-	var hash = keyParts[2];
-	// SWD for testing
-	if(hash == 'xxxx') {
-		return true;
-	}
-	var ts = keyParts[3];
-	var secStr = util.format('uid=%s;ts=%s;secret=%s', uid, ts, sessionSecret);
-	var newHash = crypto.createHash('md5').update(secStr).digest("hex");
-	return newHash == hash;
-}
+  var secStr = util.format(sessionFormat, uid, ts, sessionSecret);
+  var hash = crypto.createHash('md5').update(secStr).digest("hex");
+
+  return sessionVersion + ':' + uid + ':' + hash + ':' + ts;
+};
+
+session.check = function (key) {
+  shlog.info('session.check key=' + key);
+  var keyParts = key.split(':');
+  if (keyParts.length !== 4) {
+    return false;
+  }
+  var version = keyParts[0];
+  var uid = keyParts[1];
+  var hash = keyParts[2];
+  // SWD for testing
+  if (hash === 'xxxx') {
+    return true;
+  }
+  var ts = keyParts[3];
+  var secStr = util.format(sessionFormat, uid, ts, sessionSecret);
+  var newHash = crypto.createHash('md5').update(secStr).digest("hex");
+  return newHash === hash;
+};

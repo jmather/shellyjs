@@ -14,13 +14,13 @@ var sh = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
 var shUser = require(global.gBaseDir + '/src/shuser.js');
 
-var admin  = require('../src/admin.js');
+var admin = require('../src/admin.js');
 
-global.live  = require('../src/live.js');
+global.live = require('../src/live.js');
 global.live.start();
-		
+
 var server = restify.createServer({
-	name: "shelly",
+  name: "shelly"
 });
 server.use(restify.acceptParser(server.acceptable));
 //server.use(restify.authorizationParser());
@@ -28,80 +28,69 @@ server.use(restify.acceptParser(server.acceptable));
 //server.use(restify.queryParser());
 //server.use(restify.bodyParser());
 /*
-server.use(restify.throttle({
-  burst: 100,
-  rate: 50,
-  ip: true, // throttle based on source ip address
-  overrides: {
-    '127.0.0.1': {
-      rate: 0, // unlimited
-      burst: 0
-    }
-  }
-}));
-*/
+ server.use(restify.throttle({
+ burst: 100,
+ rate: 50,
+ ip: true, // throttle based on source ip address
+ overrides: {
+ '127.0.0.1': {
+ rate: 0, // unlimited
+ burst: 0
+ }
+ }
+ }));
+ */
 server.use(restify.bodyParser());
 /*
-server.use(
-  function crossOrigin(req,res,next){
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    return next();
-  }
-);
-*/
-server.use(function(req, res, next) {
+ server.use(
+ function crossOrigin(req,res,next){
+ res.header("Access-Control-Allow-Origin", "*");
+ res.header("Access-Control-Allow-Headers", "X-Requested-With");
+ return next();
+ }
+ );
+ */
+server.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	return next();
+  return next();
 });
 
-server.use(function(req, res, next) {
-	shlog.info('session check');
-	var cmd = req.params.cmd;
-	if(cmd == 'reg.login' || cmd == 'reg.create' || cmd == 'reg.check')
-	{
-		return next();
-	}
-	
-	sh.fillSession(req, res, function(error, data) {
-		if(error != 0) {
-			res.send(data);
-			return 0;
-		}
-		return next();
-	});
+server.use(function (req, res, next) {
+  shlog.info('session check');
+  var cmd = req.params.cmd;
+  if (cmd === 'reg.login' || cmd === 'reg.create' || cmd === 'reg.check') {
+    return next();
+  }
+
+  sh.fillSession(req, res, function (error, data) {
+    if (error !== 0) {
+      res.send(data);
+      return 0;
+    }
+    return next();
+  });
 
 });
 
-server.get('/hello', function(req, res, next) {
-	res.send("hello");
-	return next();
+server.get('/hello', function (req, res, next) {
+  res.send("hello");
+  return next();
 });
+
+function respond(req, res, next) {
+  var cmd = req.params.cmd;
+
+  shlog.recv("rest - %s", JSON.stringify(req.params));
+  sh.call(cmd, req, res, function (error, data) {
+    shlog.send(error, "rest - %s", JSON.stringify(data));
+    res.send(data);
+  });
+}
 
 server.post('/api', respond);
 server.post('/api/:version', respond);
 
-server.listen(gPort, function() {
-	shlog.info('%s listening at %s', server.name, server.url);
+server.listen(gPort, function () {
+  shlog.info('%s listening at %s', server.name, server.url);
 });
-
-function errorStr(error, module)
-{
-	var info = '';
-	if(error != 0 && typeof(module.errors) != 'undefined' && typeof(module.errors[error]) != undefined)
-	{
-		info = module.errors[error];
-	}
-	return info;
-}
-
-function respond(req, res, next) {
-	var cmd = req.params.cmd;
-	
-	shlog.recv("rest - %s", JSON.stringify(req.params));
-	sh.call(cmd, req, res, function(error, data) {
-		shlog.send(error, "rest - %s", JSON.stringify(data));
-		res.send(data);
-	});
-}

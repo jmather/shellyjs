@@ -1,6 +1,6 @@
 Common = {
-	fs: require('fs'),
-	db: require('shdb'),
+  fs: require('fs'),
+  db: require('shdb'),
 }
 
 module.exports = Common;
