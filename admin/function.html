@@ -29,7 +29,7 @@
         }
     </style>
     <script language="javascript">
-        var Env = new Object();
+        var Env = {};
         Env = {{{params}});
 
         function formatJson(val) {
@@ -179,7 +179,7 @@
                 $.ajax
                         ({
                             type: "POST",
-                            url: 'http://localhost:5101/api',
+                            url: Env.restUrl,
                             dataType: 'json',
                             async: false,
                             data: input,

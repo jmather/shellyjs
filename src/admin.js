@@ -1,4 +1,5 @@
 var express = require("express");
+var os = require("os");
 var fs = require("fs");
 var path = require("path");
 var engines = require("consolidate");
@@ -9,6 +10,14 @@ var gAdminPort = 5100;
 var adminBase = global.gBaseDir + "/admin";
 var adminStatic = adminBase + "/static";
 var adminGames = adminBase + "/games";
+
+// SWD move to config module
+var gRestUrl = "http://localhost:5101/api";
+var gSocketUrl = "http://localhost:5102/api";
+if (os.hostname() === "ip-10-174-177-87") {
+  gRestUrl = "http://dev2.skool51.com:5101/api";
+  gSocketUrl = "http://dev2.skool51.com:5102/api";
+}
 
 shlog.info("admin directory: " + adminBase);
 shlog.info("admin static directory: " + adminStatic);
@@ -51,6 +60,8 @@ app.get("/testgame.html", function (req, res) {
 
 app.get("/function/:module/:function", function (req, res) {
   var map = {};
+  map.restUrl = gRestUrl;
+  map.socketUrl = gSocketUrl;
   map.module = req.param("module");
   map.function = req.param("function");
   var cmdFile = global.gBaseDir + "/functions/" + map.module + "/" + map.module + ".js";

@@ -15,7 +15,9 @@ var client = redis.createClient();
 // client.select(3, function() { /* ... */ });
 
 client.on("error", function (err) {
-  shlog.info("Error " + err);
+  shlog.error("Error " + err);
+  // big trouble, just get out
+  process.exit(1);
 });
 
 var gKeyTypes = {

@@ -7,12 +7,13 @@ var stackTrace = require("stack-trace");
 var shlog = exports;
 
 var gDebug = {
-  "app": {},
   "admin": {},
-  "live": {}
+  "live": {},
+//  "shdb": {},
 //	"game": {},
 //	"recv": {},
 //	"send": {},
+  "app": {}
 };
 
 var winston = require("winston");
@@ -32,7 +33,7 @@ shlog.log = function () {
   var args = Array.prototype.slice.call(arguments);
   var level = args.shift();
 
-  if (!_.isUndefined(gDebug[callerName])) {
+  if (level === "error" || !_.isUndefined(gDebug[callerName])) {
 //		var msg = util.format("%d - %s", process.pid, util.format.apply(this, args));
     var msg = util.format("%s - %s", callerName, util.format.apply(this, args));
     winston.log(level, msg);
