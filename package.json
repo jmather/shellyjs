@@ -1,0 +1,30 @@
+{
+  "name": "shelly",
+  "version": "0.0.1",
+  "description": "a game server",
+  "author": "Scott Dale <scott@skool51.com>",
+  "dependencies": {
+    "async": "0.2.5",
+    "consolidate": "0.8.0",
+    "express": "3.1.0",
+    "forever": "0.10.0",
+    "hogan.js": "2.0.0",
+    "lodash": "1.0.0",
+    "mustache": "0.7.2",
+    "nano": "3.3.6",
+    "redis": "0.8.2",
+    "restify": "2.1.1",
+    "sha1": "1.0.1",
+    "stack-trace": "0.0.6",
+    "validator": "0.4.24",
+    "winston": "0.6.2",
+    "ws": "0.4.25"
+  },
+  "devDependencies": {
+    "mocha": "1.8.1",
+    "should": "1.2.2",
+    "superagent": "0.12.4",
+    "supertest": "0.5.1"
+  },
+  "engine": "node >= 0.8.18"
+}
