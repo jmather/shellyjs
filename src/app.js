@@ -1,6 +1,7 @@
 // all constants up front for requires
 var gPort = 5101;
-global.gBaseDir = "/Users/scott/git/shelly";
+var path = require("path");
+global.gBaseDir = path.dirname(path.dirname(process.mainModule.filename));
 
 var util = require("util");
 var http = require("http");
