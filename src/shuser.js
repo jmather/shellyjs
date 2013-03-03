@@ -49,6 +49,8 @@ User.prototype.loadOrCreate = function (uid, cb) {
     if (error) {
       // try and create on since we are passed session check
       self.save(cb);
+    } else {
+      cb(0);
     }
   });
 };

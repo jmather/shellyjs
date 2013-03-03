@@ -2,6 +2,7 @@ var express = require("express");
 var os = require("os");
 var fs = require("fs");
 var path = require("path");
+var url = require("url");
 var engines = require("consolidate");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -13,10 +14,10 @@ var adminGames = adminBase + "/games";
 
 // SWD move to config module
 var gRestUrl = "http://localhost:5101/api";
-var gSocketUrl = "http://localhost:5102/api";
+var gSocketUrl = "ws://localhost:5102";
 if (os.hostname() === "ip-10-174-177-87") {
   gRestUrl = "http://dev2.skool51.com:5101/api";
-  gSocketUrl = "http://dev2.skool51.com:5102/api";
+  gSocketUrl = "ws://dev2.skool51.com:5102";
 }
 
 shlog.info("admin directory: " + adminBase);
@@ -27,9 +28,6 @@ var app = express();
 //  return "scott" == user & "foo" == pass;
 //}));
 app.use(express.favicon(adminStatic + "/images/favicon.ico"));
-app.use("/static", express.static(adminStatic));
-app.use("/games", express.static(adminGames));
-
 //app.enable("view cache");  // disable this for dev
 app.set("views", adminBase);
 app.engine("html", engines.hogan);
@@ -50,6 +48,8 @@ app.get("/menu_1.html", function (req, res) {
 app.get("/testgame.html", function (req, res) {
   shlog.info("in testgame");
   var map = {};
+  map.restUrl = gRestUrl;
+  map.socketUrl = gSocketUrl;
   map.module = "game";
   var cmdFile = global.gBaseDir + "/functions/" + map.module + "/" + map.module + ".js";
   delete require.cache[require.resolve(cmdFile)];
@@ -74,8 +74,14 @@ app.get("/function/:module/:function", function (req, res) {
 
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
-  res.render(path.basename(req.url), {});
+  var map = {};
+  map.restUrl = gRestUrl;
+  map.socketUrl = gSocketUrl;
+  res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map)});
 });
+
+app.use("/static", express.static(adminStatic));
+app.use("/games", express.static(adminGames));
 
 var adminServer = app.listen(gAdminPort);
 shlog.info("Admin server started on port %d", adminServer.address().port);

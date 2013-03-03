@@ -27,7 +27,6 @@
         }
     </style>
     <script language="javascript">
-        var Env = new Object();
         var Env = {{{params}}};
 
         function log(msg)
@@ -188,7 +187,7 @@
             $.ajax
                     ({
                         type: "POST",
-                        url: 'http://localhost:5101/api',
+                        url: Env.restUrl,
                         dataType: 'json',
                         async: false,
                         data: input,

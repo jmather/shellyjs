@@ -37,7 +37,7 @@
         }
     </style>
     <script language="javascript">
-        var Env = new Object();
+        var Env = {{{params}}};
         Env.baseParams = {
             session: "1:33:xxxx:0",
             gameId: 193,
@@ -213,7 +213,7 @@
             $.ajax
                     ({
                         type: "POST",
-                        url: 'http://localhost:5101/api',
+                        url: Env.restUrl,
                         dataType: 'json',
                         async: false,
                         data: input,
@@ -227,7 +227,7 @@
                     })
         }
 
-        var url = "ws://localhost:5102";
+        var url = Env.socketUrl;
         var ws = new ReconnectingWebSocket(url);
         ws.onopen = function() {
             console.log("socket: open");
