@@ -39,8 +39,10 @@ function reset(cb) {
     .send(reqData)
     .set('Accept', 'application/json')
     .end(function (res) {
-//			console.log("reset done");
-//			console.log(res.body);
+      if (!res.ok) {
+        cb(res.error, res.text);
+        return;
+      }
       cb();
     });
 }
@@ -56,8 +58,10 @@ function join(cb) {
     .send(reqData)
     .set('Accept', 'application/json')
     .end(function (res) {
-//			console.log("join done");
-//			console.log(res.body);
+      if (!res.ok) {
+        cb(res.error, res.text);
+        return;
+      }
       cb();
     });
 }
@@ -129,7 +133,8 @@ function run() {
     function (cb) { moveUntilEnd(reqTpl1, gMoves, cb); }
   ], function (err, result) {
     if (err) {
-      console.log("error: " + err.toString());
+      console.log("error: " + err.toString(), result);
+      return;
     }
     gMoves = _.clone(gMoveSet);
 
