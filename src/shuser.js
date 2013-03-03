@@ -47,11 +47,9 @@ User.prototype.loadOrCreate = function (uid, cb) {
   var self = this;
   this.load(uid, function (error, value) {
     if (error) {
-      cb(error, value);
-      return;
+      // try and create on since we are passed session check
+      self.save(cb);
     }
-    self.save(cb);
-    cb(0);
   });
 };
 
