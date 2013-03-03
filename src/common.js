@@ -1,7 +1,7 @@
-Common = {
+var Common = {
   fs: require('fs'),
-  db: require('shdb'),
-}
+  db: require('shdb')
+};
 
 module.exports = Common;
 

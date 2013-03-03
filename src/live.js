@@ -7,7 +7,6 @@ var eventEmitter = new events.EventEmitter();
 
 var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
-var shUser = require(global.gBaseDir + '/src/shuser.js');
 var ShGame = require(global.gBaseDir + '/src/shgame.js');
 
 var gPort = 5102;
@@ -102,7 +101,11 @@ live.start = function () {
 
               // must send myself notifs for games existing online users
               var game = new ShGame();
-              game.load(gameId, function (error, data) {
+              game.load(gameId, function (error) {
+                if (error) {
+                  ws.send(JSON.stringify(sh.error("bad_game", "unable to load game", {gameId: gameId})));
+                  return;
+                }
                 var players = game.get("players");
                 _.each(players, function (uid) {
                   if (uid !== ws.uid && !_.isUndefined(gUsers[uid])) {
@@ -126,7 +129,6 @@ live.start = function () {
 
         sh.call(req.params.cmd, req, res, function (error, data) {
           sendWs(ws, error, data);
-          return;
         });  // end sh.call
       });  // end sh.fillSession
     });  // end ws.on-message
@@ -143,12 +145,13 @@ live.start = function () {
       var userChannel = channel("user", this.uid);
       shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
       eventEmitter.removeAllListeners(userChannel, socketNotify);
+      var self = this;
       _.each(ws.games, function (game) {
         var gameChannel = channel("game", game);
-        shlog.info("(" + this.uid + ") socket: close cleanup - " + gameChannel);
+        shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
         eventEmitter.removeListener(gameChannel, socketNotify);
         // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-        global.live.notify(game, sh.event('event.game.user.offline', {uid: this.uid}));
+        global.live.notify(game, sh.event('event.game.user.offline', {uid: self.uid}));
       });
     });
 

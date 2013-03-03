@@ -95,9 +95,18 @@ function move2(tpl, x, y, cb) {
  * @param cb
  */
 function moveUntilEnd(tpl, moves, cb) {
+  if (moves.length === 0) {
+    console.log("error - no more moves left and game did not end.");
+    cb();
+  }
   var idx = _.random(moves.length - 1);
   var newMove = moves.splice(idx, 1);
   move2(tpl, newMove[0][0], newMove[0][1], function (res) {
+    if (res.event === "event.error") {
+      console.log(res);
+      cb();
+      return;
+    }
     // if win stop
     if (res.event === "event.game.over") {
       gStats[res.data.state.winner] += 1;
@@ -119,6 +128,9 @@ function run() {
     function (cb) { join(cb); },
     function (cb) { moveUntilEnd(reqTpl1, gMoves, cb); }
   ], function (err, result) {
+    if (err) {
+      console.log("error: " + err.toString());
+    }
     gMoves = _.clone(gMoveSet);
 
     gRunCount += 1;

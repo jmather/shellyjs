@@ -1,5 +1,6 @@
 // shdb - module to provide key value db access
 var util = require('util');
+var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + '/src/shlog.js');
 
@@ -7,8 +8,8 @@ var gDbScope = "dev:";
 
 var shdb = exports;
 
-var redis = require("redis"),
-  client = redis.createClient();
+var redis = require("redis");
+var client = redis.createClient();
 
 // if you'd like to select database 3, instead of 0 (default), call
 // client.select(3, function() { /* ... */ });
@@ -67,7 +68,10 @@ shdb.kget = function (keyType, params, cb) {
 
 shdb.set = function (key, value, cb) {
   client.set(key, value, function (err, value) {
-    if (typeof (cb) === 'function') {
+    if (err) {
+      shlog.error("error on set", err, value);
+    }
+    if (_.isFunction(cb)) {
       cb(err);
     }
   });
@@ -79,7 +83,10 @@ shdb.kset = function (keyType, params, value, cb) {
   var key = genKey(keyType, params);
   shlog.info('kset: ' + gKeyTypes[keyType].tpl + '->' + key);
   client.set(key, value, function (err, value) {
-    if (typeof (cb) === 'function') {
+    if (err) {
+      shlog.error("error on set", err, value);
+    }
+    if (_.isFunction(cb)) {
       cb(err);
     }
   });

@@ -9,11 +9,10 @@ var shlog = exports;
 var gDebug = {
   "app": {},
   "admin": {},
-  "live": {},
+  "live": {}
 //	"game": {},
 //	"recv": {},
 //	"send": {},
-  "end": {} // used to end cap only
 };
 
 var winston = require('winston');

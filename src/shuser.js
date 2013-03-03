@@ -3,12 +3,11 @@ var events = require('events');
 var _ = require("lodash");
 
 var sh = require(global.gBaseDir + '/src/shutil.js');
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 
 var db = global.db;
 
 function User() {
-  var self = this;
-
   this._dirty = false;
   this._data = {
     currentGames: {}
@@ -40,27 +39,33 @@ User.prototype.load = function (uid, cb) {
       cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
       return;
     }
-    cb(0, self._data);
+    cb(0);
   });
 };
 
 User.prototype.loadOrCreate = function (uid, cb) {
   var self = this;
   this.load(uid, function (error, value) {
-    if (error !== 0) {
-      self.save(cb);
-    } else {
-      cb(0, self._data);
+    if (error) {
+      cb(error, value);
+      return;
     }
+    self.save(cb);
+    cb(0);
   });
 };
 
 User.prototype.save = function (cb) {
+  if (!this._dirty) {
+    shlog.info("ignoring save - object not modified");
+    cb(0);
+    return;
+  }
   var self = this;
   var dataStr = JSON.stringify(this._data);
   db.kset('kUser', this._uid, dataStr, function (err, res) {
     if (err !== null) {
-      cb(1, sh.error("user_save", "unable to save user data", {uid: self._uid}));
+      cb(1, sh.error("user_save", "unable to save user data", {uid: self._uid, err: err, res: res}));
       return;
     }
     cb(0);

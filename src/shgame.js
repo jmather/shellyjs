@@ -3,12 +3,11 @@ var events = require('events');
 var _ = require("lodash");
 
 var sh = require(global.gBaseDir + '/src/shutil.js');
+var shlog = require(global.gBaseDir + '/src/shlog.js');
 
 var db = global.db;
 
 function Game() {
-  var self = this;
-
   var ts = new Date().getTime();
 
   this._dirty = false;
@@ -50,16 +49,21 @@ Game.prototype.load = function (gameId, cb) {
       cb(1, sh.error("game_parse", "unable to parse game data", {gameId: gameId, extra: e.message}));
       return;
     }
-    cb(0, self._data);
+    cb(0);
   });
 };
 
 Game.prototype.save = function (cb) {
+  if (!this._dirty) {
+    shlog.info("ignoring save - object not modified");
+    cb(0);
+    return;
+  }
   var self = this;
   var dataStr = JSON.stringify(this._data);
   db.kset('kGame', this._data.gameId, dataStr, function (err, res) {
-    if (err !== null) {
-      cb(1, sh.error("game_save", "unable to save game data", {gameId: self._data.gameId}));
+    if (err) {
+      cb(1, sh.error("game_save", "unable to save game data", {gameId: self._data.gameId, err: err, res: res}));
       return;
     }
     cb(0);

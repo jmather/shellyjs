@@ -44,7 +44,9 @@ app.get('/test', function (req, res) {
 
 app.get('/menu_1.html', function (req, res) {
   shlog.info("in menu_1");
-  var modulePack = require(global.gBaseDir + '/functions/module/module.js');
+  var cmdFile = global.gBaseDir + "/functions/module/module.js";
+  delete require.cache[require.resolve(cmdFile)];
+  var modulePack = require(cmdFile);
   var map = {};
   map.user = 'Scott';
   modulePack.list(req, res, function (err, data) {

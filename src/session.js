@@ -28,6 +28,9 @@ session.check = function (key) {
     return false;
   }
   var version = keyParts[0];
+  if (version !== "1") {
+    return false;
+  }
   var uid = keyParts[1];
   var hash = keyParts[2];
   // SWD for testing

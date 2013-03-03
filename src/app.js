@@ -5,6 +5,7 @@ global.gBaseDir = '/Users/scott/git/shelly';
 var util = require('util');
 var http = require('http');
 var restify = require('restify');
+var _ = require('lodash');
 
 // do first so any of our modules can use
 global.db = require(global.gBaseDir + '/src/shdb.js');
@@ -12,11 +13,10 @@ global.db = require(global.gBaseDir + '/src/shdb.js');
 var shlog = require(global.gBaseDir + '/src/shlog.js');
 var sh = require(global.gBaseDir + '/src/shutil.js');
 var session = require(global.gBaseDir + '/src/session.js');
-var shUser = require(global.gBaseDir + '/src/shuser.js');
 
-var admin = require('../src/admin.js');
+var admin = require(global.gBaseDir + '/src/admin.js');
 
-global.live = require('../src/live.js');
+global.live = require(global.gBaseDir + "/src/live.js");
 global.live.start();
 
 var server = restify.createServer({
@@ -71,6 +71,7 @@ server.use(function (req, res, next) {
     return next();
   });
 
+  return 0;
 });
 
 server.get('/hello', function (req, res, next) {
@@ -79,6 +80,8 @@ server.get('/hello', function (req, res, next) {
 });
 
 function respond(req, res, next) {
+  _.isFunction(next);  // end of line so never gets called;
+
   var cmd = req.params.cmd;
 
   shlog.recv("rest - %s", JSON.stringify(req.params));

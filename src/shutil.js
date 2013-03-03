@@ -2,7 +2,6 @@ var path = require("path");
 var util = require("util");
 
 var _ = require("lodash");
-var stackTrace = require('stack-trace');
 
 var shlog = require(global.gBaseDir + '/src/shlog.js');
 var session = require(global.gBaseDir + '/src/session.js');  // used by fill session
@@ -39,9 +38,9 @@ shutil.fillSession = function (req, res, cb) {
   req.session.uid = req.params.session.split(':')[1];
   shlog.info("loading user: uid = " + req.session.uid);
   var user = new ShUser();
-  user.load(req.session.uid, function (error, data) {
+  user.loadOrCreate(req.session.uid, function (error, data) {
     if (error !== 0) {
-      cb(1, shutil.error("user_load", "unable to load user", {uid: req.session.uid}));
+      cb(1, shutil.error("user_load", "unable to load user", {uid: req.session.uid, error: error, data: data}));
       return;
     }
     shlog.info("user loaded: " + req.session.uid);
@@ -72,7 +71,6 @@ shutil.call = function (cmd, req, res, cb) {
   _.each(module.functions[funcName].params, function (value, key) {
     if (_.isUndefined(req.params[key])) {
       cb(1, shutil.error("missing_param", "missing parameter", {key: key}));
-      return;
     }
   });
 
