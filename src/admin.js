@@ -2,7 +2,6 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var engines = require("consolidate");
-var hogan = require("hogan.js");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
@@ -22,25 +21,9 @@ app.use(express.favicon(adminStatic + "/images/favicon.ico"));
 app.use("/static", express.static(adminStatic));
 app.use("/games", express.static(adminGames));
 
-app.set("view engine", "html");
-app.set("layout", "layout"); // rendering by default
-app.set("view options", {layout: false});  // SWD turn layouts off - not sure this works with hogan
-//app.set("partials", {head:"head"}); // partials using by default on all pages
 //app.enable("view cache");  // disable this for dev
 app.set("views", adminBase);
 app.engine("html", engines.hogan);
-
-app.get("/test", function (req, res) {
-  var view = {
-    title: "Joe",
-    calc: function () {
-      return 2 + 4;
-    }
-  };
-  var template = hogan.compile("{{title}} spends {{calc}}");
-  var html = template.render(view);
-  res.send(html);
-});
 
 app.get("/menu_1.html", function (req, res) {
   shlog.info("in menu_1");
@@ -55,10 +38,6 @@ app.get("/menu_1.html", function (req, res) {
   });
 });
 
-app.get("/function", function (req, res) {
-  res.send("here");
-});
-
 app.get("/testgame.html", function (req, res) {
   shlog.info("in testgame");
   var map = {};
@@ -71,7 +50,6 @@ app.get("/testgame.html", function (req, res) {
 });
 
 app.get("/function/:module/:function", function (req, res) {
-  console.log("here");
   var map = {};
   map.module = req.param("module");
   map.function = req.param("function");
