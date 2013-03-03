@@ -5,6 +5,7 @@
     <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
     <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src='/static/js/fastclick.js'></script>
 
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
@@ -305,6 +306,10 @@
         $(init);
         function init()
         {
+            window.addEventListener('load', function() {
+                new FastClick(document.body);
+            }, false);
+            
             $("#uid").text(Env.baseParams.session.split(':')[1]);
             $("#gameId").text(Env.baseParams.gameId);
             $("#session").text(Env.baseParams.session);
