@@ -1,8 +1,8 @@
-var _ = require('lodash');
-var crypto = require('crypto');
+var _ = require("lodash");
+var crypto = require("crypto");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var sh = require(global.gBaseDir + '/src/shutil.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var db = global.db;
 
@@ -10,19 +10,19 @@ var object = exports;
 
 object.desc = "generic object store";
 object.functions = {
-  create: {desc: 'get object', params: {className: {dtype: 'string'}, object: {dtype: 'object'}}, security: []},
-  destroy: {desc: 'get object', params: {oid: {dtype: 'string'}}, security: []},
-  get: {desc: 'get object', params: {className: {dtype: 'string'}, oid: {dtype: 'string'}}, security: []},
-  set: {desc: 'set object', params: {className: {dtype: 'string'}, oid: {dtype: 'string'}, object: {dtype: 'object'}}, security: []}
+  create: {desc: "get object", params: {className: {dtype: "string"}, object: {dtype: "object"}}, security: []},
+  destroy: {desc: "get object", params: {oid: {dtype: "string"}}, security: []},
+  get: {desc: "get object", params: {className: {dtype: "string"}, oid: {dtype: "string"}}, security: []},
+  set: {desc: "set object", params: {className: {dtype: "string"}, oid: {dtype: "string"}, object: {dtype: "object"}}, security: []}
 };
 
 object.pre = function (req, res, cb) {
-  shlog.info('object.pre');
+  shlog.info("object.pre");
   var cmd = req.params.cmd;
   var className = req.params.className;
   var oid = req.params.oid;
 
-  if (cmd === 'object.create') {
+  if (cmd === "object.create") {
     cb(0);
     return;
   }
@@ -30,7 +30,7 @@ object.pre = function (req, res, cb) {
   // SWD - eventually check security session.uid has rights to object
 
   req.env.object = null;
-  db.kget('kObject', [className, oid], function (err, value) {
+  db.kget("kObject", [className, oid], function (err, value) {
     if (value === null) {
       cb(1, sh.error("object_get", "unable to get object", {className: className, oid: oid}));
       return;
@@ -41,7 +41,7 @@ object.pre = function (req, res, cb) {
 };
 
 object.post = function (req, res, cb) {
-  shlog.info('object.post');
+  shlog.info("object.post");
   var object = req.env.object;
 
   if (req.env.object === null) {
@@ -52,7 +52,7 @@ object.post = function (req, res, cb) {
   // get the hash by removing the info, re-hashing, and replacing info
   var info = object._info;
   delete object._info;
-  var newHash = crypto.createHash('md5').update(JSON.stringify(object)).digest("hex");
+  var newHash = crypto.createHash("md5").update(JSON.stringify(object)).digest("hex");
   object._info = info;
 
   if (newHash !== info.hash) {
@@ -60,7 +60,7 @@ object.post = function (req, res, cb) {
     object._info.hash = newHash;
     req.env.object._info.lastModified = new Date().getTime();
     var objectStr = JSON.stringify(object);
-    db.kset('kObject', [object._info.className, object._info.oid], objectStr, function (err, res) {
+    db.kset("kObject", [object._info.className, object._info.oid], objectStr, function (err, res) {
       if (err !== null) {
         cb(1, sh.error("object_save", "unable to save object", {err: err.toString(), res: res}));
         return;
@@ -73,11 +73,11 @@ object.post = function (req, res, cb) {
 };
 
 object.create = function (req, res, cb) {
-  shlog.info('object.create');
+  shlog.info("object.create");
   var className = req.params.className;
 
   var object = {};
-  db.nextId('object-' + className, function (error, value) {
+  db.nextId("object-" + className, function (error, value) {
     // create the object
     var ts = new Date().getTime();
     object._info = {
@@ -85,7 +85,7 @@ object.create = function (req, res, cb) {
       className: className,
       created: ts,
       lastModified: ts,
-      hash: ''
+      hash: ""
     };
     object = _.merge(object, req.params.object);
 
@@ -95,7 +95,7 @@ object.create = function (req, res, cb) {
 };
 
 object.destroy = function (req, res, cb) {
-  shlog.info('object.destroy');
+  shlog.info("object.destroy");
   cb(0);
 };
 

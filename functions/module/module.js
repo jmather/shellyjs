@@ -1,25 +1,25 @@
 var fs = require("fs");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 exports.desc = "utility functions for shelly modules";
 exports.functions = {
-  list: {desc: 'list all modules installed', params: {}, security: []},
-  info: {desc: 'get info for a single module', params: {name: {dtype: 'string'}}, security: []}
+  list: {desc: "list all modules installed", params: {}, security: []},
+  info: {desc: "get info for a single module", params: {name: {dtype: "string"}}, security: []}
 };
 
 function getInfo(name) {
   shlog.info("getInfo name=" + name);
-  var funcDir = global.gBaseDir + '/functions';
-  var cmdFile = funcDir + '/' + name + '/' + name + '.js';
+  var funcDir = global.gBaseDir + "/functions";
+  var cmdFile = funcDir + "/" + name + "/" + name + ".js";
 
   var m = {};
   m.error = 0;
   m.path = cmdFile;
   m.name = name;
-  m.author = 'scott';
-  m.desc = 'none';
+  m.author = "scott";
+  m.desc = "none";
   m.functions = {};
 
   var funcModule = null;
@@ -48,12 +48,12 @@ exports.info = function (req, res, cb) {
 
 exports.list = function (req, res, cb) {
   var modules = {};
-  var funcDir = global.gBaseDir + '/functions';
+  var funcDir = global.gBaseDir + "/functions";
   fs.readdir(funcDir, function (err, files) {
     var error = 0;
     var fileCount = files.length;
     files.forEach(function (entry) {
-      var fn = funcDir + '/' + entry;
+      var fn = funcDir + "/" + entry;
       fs.stat(fn, function (err, stat) {
         if (stat.isDirectory()) {
           var m = getInfo(entry);

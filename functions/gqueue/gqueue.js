@@ -1,19 +1,19 @@
-var events = require('events');
+var events = require("events");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var sh = require(global.gBaseDir + '/src/shutil.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var game = require(global.gBaseDir + '/functions/game/game.js');
+var game = require(global.gBaseDir + "/functions/game/game.js");
 
 var gqueue = exports;
 
 gqueue.desc = "game state and control module";
 gqueue.functions = {
-  add: {desc: 'add a game to the queue', params: {gameId: {dtype: 'string'}, data: {dtype: 'object'}}, security: []},
-  remove: {desc: 'remove a game from the list', params: {gameId: {dtype: 'string'}}, security: []},
-  nextAvailable: {desc: 'get the next available game', params: {}, security: []},
-  list: {desc: 'return a list of available games', params: {limit: {dtype: 'int'}}, security: []}
+  add: {desc: "add a game to the queue", params: {gameId: {dtype: "string"}, data: {dtype: "object"}}, security: []},
+  remove: {desc: "remove a game from the list", params: {gameId: {dtype: "string"}}, security: []},
+  nextAvailable: {desc: "get the next available game", params: {}, security: []},
+  list: {desc: "return a list of available games", params: {limit: {dtype: "int"}}, security: []}
 };
 
 // SWD: just init a global game queue for now

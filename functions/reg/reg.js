@@ -1,28 +1,28 @@
-var util = require('util');
-var crypto = require('crypto');
-var check = require('validator').check;
-var sanitize = require('validator').sanitize;
+var util = require("util");
+var crypto = require("crypto");
+var check = require("validator").check;
+var sanitize = require("validator").sanitize;
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var sh = require(global.gBaseDir + '/src/shutil.js');
-var session = require(global.gBaseDir + '/src/session.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
+var session = require(global.gBaseDir + "/src/session.js");
 
 var gDb = global.db;
 
-var passwordSecret = '94d634f9-c273-4d59-9b28-bc26185d656f';
+var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
 var passwordVersion = 1;
 
 exports.desc = "handles user login/logout and new user registration";
 exports.functions = {
-  create: {desc: 'user login', params: {email: {dtype: "string"}, password: {dtype: 'string'}}, security: []},
-  check: {desc: 'check if user exists', params: {email: {dtype: "string"}}, security: []},
-  login: {desc: 'user login', params: {email: {dtype: "string"}, password: {dtype: 'string'}}, security: []},
-  logout: {desc: 'user logout', params: {}, security: []}
+  create: {desc: "user login", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
+  check: {desc: "check if user exists", params: {email: {dtype: "string"}}, security: []},
+  login: {desc: "user login", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
+  logout: {desc: "user logout", params: {}, security: []}
 };
 
 function hashPassword(uid, password) {
-  var secStr = util.format('uid=%s;pw=%s;secret=%s', uid, password, passwordSecret);
-  return passwordVersion + ':' + crypto.createHash('md5').update(secStr).digest("hex");
+  var secStr = util.format("uid=%s;pw=%s;secret=%s", uid, password, passwordSecret);
+  return passwordVersion + ":" + crypto.createHash("md5").update(secStr).digest("hex");
 }
 
 function checkPassword(uid, password, hash) {
@@ -43,7 +43,7 @@ exports.login = function (req, res, cb) {
     return;
   }
 
-  gDb.kget('kEmailMap', email, function (error, value) {
+  gDb.kget("kEmailMap", email, function (error, value) {
     if (value === null) {
       cb(1, sh.error("email_notfound", "email is not registered", {email: email}));
       return;
@@ -78,12 +78,12 @@ exports.create = function (req, res, cb) {
     return;
   }
 
-  gDb.kget('kEmailMap', email, function (error, value) {
+  gDb.kget("kEmailMap", email, function (error, value) {
     if (value !== null) {
       cb(1, sh.error("email_used", "this email is already registered", {email: email}));
       return;
     }
-    global.db.nextId('user', function (error, value) {
+    global.db.nextId("user", function (error, value) {
       // create the user
       out.uid = value;
       out.session = session.create(out.uid);
@@ -92,7 +92,7 @@ exports.create = function (req, res, cb) {
       var ts = new Date().getTime();
       out.created = ts;
       out.lastModified = ts;
-      gDb.kset('kEmailMap', req.params.email, JSON.stringify(out));
+      gDb.kset("kEmailMap", req.params.email, JSON.stringify(out));
       cb(0, out);
     });
   });
@@ -107,7 +107,7 @@ exports.check = function (req, res, cb) {
     return;
   }
 
-  gDb.kget('kEmailMap', email, function (error, value) {
+  gDb.kget("kEmailMap", email, function (error, value) {
     if (value !== null) {
       cb(0, JSON.parse(value));
       return;
