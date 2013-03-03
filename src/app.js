@@ -1,22 +1,27 @@
 // all constants up front for requires
-var gPort = 5101;
 var path = require("path");
 global.gBaseDir = path.dirname(path.dirname(process.mainModule.filename));
+var os = require("os");
+try {
+  global.CONF = require(global.gBaseDir + "/config/" + os.hostname() + ".js");
+} catch (e) {
+  console.error("error: unable to load config file:", os.hostname() + ".js");
+  process.exit(1);
+}
 
 var util = require("util");
 var http = require("http");
 var restify = require("restify");
 var _ = require("lodash");
 
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+shlog.info(global.CONF);
+
 // do first so any of our modules can use
 global.db = require(global.gBaseDir + "/src/shdb.js");
-
-var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var session = require(global.gBaseDir + "/src/session.js");
-
 var admin = require(global.gBaseDir + "/src/admin.js");
-
 global.live = require(global.gBaseDir + "/src/live.js");
 global.live.start();
 
@@ -42,15 +47,7 @@ server.use(restify.acceptParser(server.acceptable));
  }));
  */
 server.use(restify.bodyParser());
-/*
- server.use(
- function crossOrigin(req,res,next){
- res.header("Access-Control-Allow-Origin", "*");
- res.header("Access-Control-Allow-Headers", "X-Requested-With");
- return next();
- }
- );
- */
+
 server.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -95,6 +92,6 @@ function respond(req, res, next) {
 server.post("/api", respond);
 server.post("/api/:version", respond);
 
-server.listen(gPort, function () {
-  shlog.info("%s listening at %s", server.name, server.url);
+server.listen(global.CONF.restPort, function () {
+  shlog.info("rest server listening: %s", global.CONF.restPort);
 });

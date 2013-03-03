@@ -9,8 +9,6 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
-var gPort = 5102;
-
 var live = exports;
 var wss = null;
 
@@ -37,8 +35,8 @@ function sendWs(ws, error, data) {
 }
 
 live.start = function () {
-  wss = new WebSocketServer({port: gPort});
-  shlog.info("socketserver listening: " + gPort);
+  wss = new WebSocketServer({port: global.CONF.socketPort});
+  shlog.info("socketserver listening: " + global.CONF.socketPort);
 
   wss.on("connection", function (ws) {
     shlog.info("socket: connect");

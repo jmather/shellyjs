@@ -7,18 +7,9 @@ var engines = require("consolidate");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
-var gAdminPort = 5100;
 var adminBase = global.gBaseDir + "/admin";
 var adminStatic = adminBase + "/static";
 var adminGames = adminBase + "/games";
-
-// SWD move to config module
-var gRestUrl = "http://localhost:5101/api";
-var gSocketUrl = "ws://localhost:5102";
-if (os.hostname() === "ip-10-174-177-87") {
-  gRestUrl = "http://dev2.skool51.com:5101/api";
-  gSocketUrl = "ws://dev2.skool51.com:5102";
-}
 
 shlog.info("admin directory: " + adminBase);
 shlog.info("admin static directory: " + adminStatic);
@@ -48,8 +39,8 @@ app.get("/menu_1.html", function (req, res) {
 app.get("/testgame.html", function (req, res) {
   shlog.info("in testgame");
   var map = {};
-  map.restUrl = gRestUrl;
-  map.socketUrl = gSocketUrl;
+  map.restUrl = global.CONF.restUrl;
+  map.socketUrl = global.CONF.socketUrl;
   map.module = "game";
   var cmdFile = global.gBaseDir + "/functions/" + map.module + "/" + map.module + ".js";
   delete require.cache[require.resolve(cmdFile)];
@@ -60,8 +51,8 @@ app.get("/testgame.html", function (req, res) {
 
 app.get("/function/:module/:function", function (req, res) {
   var map = {};
-  map.restUrl = gRestUrl;
-  map.socketUrl = gSocketUrl;
+  map.restUrl = global.CONF.restUrl;
+  map.socketUrl = global.CONF.socketUrl;
   map.module = req.param("module");
   map.function = req.param("function");
   var cmdFile = global.gBaseDir + "/functions/" + map.module + "/" + map.module + ".js";
@@ -75,13 +66,13 @@ app.get("/function/:module/:function", function (req, res) {
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var map = {};
-  map.restUrl = gRestUrl;
-  map.socketUrl = gSocketUrl;
+  map.restUrl = global.CONF.restUrl;
+  map.socketUrl = global.CONF.socketUrl;
   res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map)});
 });
 
 app.use("/static", express.static(adminStatic));
 app.use("/games", express.static(adminGames));
 
-var adminServer = app.listen(gAdminPort);
-shlog.info("Admin server started on port %d", adminServer.address().port);
+var adminServer = app.listen(global.CONF.adminPort);
+shlog.info("admin server listening: %d", adminServer.address().port);

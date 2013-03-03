@@ -1,6 +1,7 @@
 {
   "name": "shelly",
   "version": "0.0.{build}",
+  "private": true,
   "description": "a game server",
   "author": "Scott Dale <scott@skool51.com>",
   "dependencies": {
