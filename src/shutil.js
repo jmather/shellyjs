@@ -80,13 +80,13 @@ shutil.call = function (cmd, req, res, cb) {
   }
 
   // ensure we have pre/post functions
-  if (typeof (module.pre) !== "function") {
+  if (!_.isFunction(module.pre)) {
     shlog.info("no pre - using default");
     module.pre = function (req, res, cb) {
       cb(0);
     };
   }
-  if (typeof (module.post) !== "function") {
+  if (!_.isFunction(module.post)) {
     shlog.info("no post - using default");
     module.post = function (req, res, cb) {
       cb(0);

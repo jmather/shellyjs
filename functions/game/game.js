@@ -139,7 +139,7 @@ game.join = function (req, res, cb) {
   }
 
   user.addGame(game);
-  if (typeof (players[uid]) !== "object") {
+  if (!_.isObject(players[uid])) {
     // only notify if new user
     global.live.notify(game.gameId, sh.event("event.game.user.join", {uid: uid}));
   }
