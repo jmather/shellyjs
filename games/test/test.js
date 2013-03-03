@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var sh = require(global.gBaseDir + '/src/shutil.js');
+var _ = require("lodash");
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var test = exports;
 

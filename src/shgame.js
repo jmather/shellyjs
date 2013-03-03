@@ -1,9 +1,9 @@
-var util = require('util');
-var events = require('events');
+var util = require("util");
+var events = require("events");
 var _ = require("lodash");
 
-var sh = require(global.gBaseDir + '/src/shutil.js');
-var shlog = require(global.gBaseDir + '/src/shlog.js');
+var sh = require(global.gBaseDir + "/src/shutil.js");
+var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var db = global.db;
 
@@ -13,11 +13,11 @@ function Game() {
   this._dirty = false;
   this._data = {
     gameId: 0,
-    name: '',
+    name: "",
     ownerId: 0,
     created: ts,
     lastModified: ts,
-    status: 'created',
+    status: "created",
     players: {},
     playerOrder: [],
     whoTurn: 0,
@@ -35,7 +35,7 @@ module.exports = Game;
 
 Game.prototype.load = function (gameId, cb) {
   var self = this;
-  db.kget('kGame', gameId, function (err, value) {
+  db.kget("kGame", gameId, function (err, value) {
     if (value === null) {
       cb(1, sh.error("game_get", "unable to load game data", {gameId: gameId}));
       return;
@@ -61,7 +61,7 @@ Game.prototype.save = function (cb) {
   }
   var self = this;
   var dataStr = JSON.stringify(this._data);
-  db.kset('kGame', this._data.gameId, dataStr, function (err, res) {
+  db.kset("kGame", this._data.gameId, dataStr, function (err, res) {
     if (err) {
       cb(1, sh.error("game_save", "unable to save game data", {gameId: self._data.gameId, err: err, res: res}));
       return;

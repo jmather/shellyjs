@@ -1,9 +1,9 @@
-var util = require('util');
-var events = require('events');
+var util = require("util");
+var events = require("events");
 var _ = require("lodash");
 
-var sh = require(global.gBaseDir + '/src/shutil.js');
-var shlog = require(global.gBaseDir + '/src/shlog.js');
+var sh = require(global.gBaseDir + "/src/shutil.js");
+var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var db = global.db;
 
@@ -27,7 +27,7 @@ User.prototype.load = function (uid, cb) {
   this._uid = uid;
 
   var self = this;
-  db.kget('kUser', uid, function (err, value) {
+  db.kget("kUser", uid, function (err, value) {
     if (value === null) {
       cb(1, sh.error("user_get", "unable to load user data", {uid: uid}));
       return;
@@ -63,7 +63,7 @@ User.prototype.save = function (cb) {
   }
   var self = this;
   var dataStr = JSON.stringify(this._data);
-  db.kset('kUser', this._uid, dataStr, function (err, res) {
+  db.kset("kUser", this._uid, dataStr, function (err, res) {
     if (err !== null) {
       cb(1, sh.error("user_save", "unable to save user data", {uid: self._uid, err: err, res: res}));
       return;
@@ -80,7 +80,7 @@ User.prototype.set = function (key, value) {
   this._dirty = true;
   this._data[key] = value;
   this.save(function () {
-    // SWD: don't care for now
+    // SWD: don"t care for now
   });
 };
 
@@ -98,6 +98,6 @@ User.prototype.addGame = function (game) {
   var ts = new Date().getTime();
   this._data.currentGames[game.get("gameId")] = {name: game.get("name"), lastJoin: ts};
   this.save(function () {
-    // don't care;
+    // don"t care;
   });
 };

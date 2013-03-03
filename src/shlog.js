@@ -2,7 +2,7 @@ var path = require("path");
 var util = require("util");
 var _ = require("lodash");
 
-var stackTrace = require('stack-trace');
+var stackTrace = require("stack-trace");
 
 var shlog = exports;
 
@@ -15,7 +15,7 @@ var gDebug = {
 //	"send": {},
 };
 
-var winston = require('winston');
+var winston = require("winston");
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, { colorize: true, timestamp: false });
 
@@ -24,7 +24,7 @@ shlog.log = function () {
   var trace = stackTrace.get();
   var callerFn = trace[1].getFileName();
   var callerName = path.basename(callerFn, ".js");
-  if (callerName === 'shlog') { // ignore calls from this module
+  if (callerName === "shlog") { // ignore calls from this module
     callerFn = trace[2].getFileName();
     callerName = path.basename(callerFn, ".js");
   }
@@ -66,9 +66,9 @@ shlog.send = function () {
 
   var args = Array.prototype.slice.call(arguments);
   var error = args.shift();
-  var level = 'info';
+  var level = "info";
   if (error !== 0) {
-    level = 'error';
+    level = "error";
   }
 
   if (!_.isUndefined(gDebug[callerName])) {

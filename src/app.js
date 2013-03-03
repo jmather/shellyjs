@@ -1,20 +1,20 @@
 // all constants up front for requires
 var gPort = 5101;
-global.gBaseDir = '/Users/scott/git/shelly';
+global.gBaseDir = "/Users/scott/git/shelly";
 
-var util = require('util');
-var http = require('http');
-var restify = require('restify');
-var _ = require('lodash');
+var util = require("util");
+var http = require("http");
+var restify = require("restify");
+var _ = require("lodash");
 
 // do first so any of our modules can use
-global.db = require(global.gBaseDir + '/src/shdb.js');
+global.db = require(global.gBaseDir + "/src/shdb.js");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var sh = require(global.gBaseDir + '/src/shutil.js');
-var session = require(global.gBaseDir + '/src/session.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
+var session = require(global.gBaseDir + "/src/session.js");
 
-var admin = require(global.gBaseDir + '/src/admin.js');
+var admin = require(global.gBaseDir + "/src/admin.js");
 
 global.live = require(global.gBaseDir + "/src/live.js");
 global.live.start();
@@ -33,7 +33,7 @@ server.use(restify.acceptParser(server.acceptable));
  rate: 50,
  ip: true, // throttle based on source ip address
  overrides: {
- '127.0.0.1': {
+ "127.0.0.1": {
  rate: 0, // unlimited
  burst: 0
  }
@@ -57,9 +57,9 @@ server.use(function (req, res, next) {
 });
 
 server.use(function (req, res, next) {
-  shlog.info('session check');
+  shlog.info("session check");
   var cmd = req.params.cmd;
-  if (cmd === 'reg.login' || cmd === 'reg.create' || cmd === 'reg.check') {
+  if (cmd === "reg.login" || cmd === "reg.create" || cmd === "reg.check") {
     return next();
   }
 
@@ -74,7 +74,7 @@ server.use(function (req, res, next) {
   return 0;
 });
 
-server.get('/hello', function (req, res, next) {
+server.get("/hello", function (req, res, next) {
   res.send("hello");
   return next();
 });
@@ -91,9 +91,9 @@ function respond(req, res, next) {
   });
 }
 
-server.post('/api', respond);
-server.post('/api/:version', respond);
+server.post("/api", respond);
+server.post("/api/:version", respond);
 
 server.listen(gPort, function () {
-  shlog.info('%s listening at %s', server.name, server.url);
+  shlog.info("%s listening at %s", server.name, server.url);
 });

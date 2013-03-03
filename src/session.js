@@ -1,13 +1,13 @@
 // session - module to provide session key generation and checking
-var util = require('util');
-var crypto = require('crypto');
+var util = require("util");
+var crypto = require("crypto");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var session = exports;
 
-var sessionSecret = 'e8017600-764f-11e2-bcfd-0800200c9a66';
-var sessionFormat = 'uid=%s;ts=%s;secret=%s';
+var sessionSecret = "e8017600-764f-11e2-bcfd-0800200c9a66";
+var sessionFormat = "uid=%s;ts=%s;secret=%s";
 var sessionVersion = 1;
 
 session.create = function (uid) {
@@ -16,14 +16,14 @@ session.create = function (uid) {
   var ts = new Date().getTime();
 
   var secStr = util.format(sessionFormat, uid, ts, sessionSecret);
-  var hash = crypto.createHash('md5').update(secStr).digest("hex");
+  var hash = crypto.createHash("md5").update(secStr).digest("hex");
 
-  return sessionVersion + ':' + uid + ':' + hash + ':' + ts;
+  return sessionVersion + ":" + uid + ":" + hash + ":" + ts;
 };
 
 session.check = function (key) {
-  shlog.info('session.check key=' + key);
-  var keyParts = key.split(':');
+  shlog.info("session.check key=" + key);
+  var keyParts = key.split(":");
   if (keyParts.length !== 4) {
     return false;
   }
@@ -34,11 +34,11 @@ session.check = function (key) {
   var uid = keyParts[1];
   var hash = keyParts[2];
   // SWD for testing
-  if (hash === 'xxxx') {
+  if (hash === "xxxx") {
     return true;
   }
   var ts = keyParts[3];
   var secStr = util.format(sessionFormat, uid, ts, sessionSecret);
-  var newHash = crypto.createHash('md5').update(secStr).digest("hex");
+  var newHash = crypto.createHash("md5").update(secStr).digest("hex");
   return newHash === hash;
 };

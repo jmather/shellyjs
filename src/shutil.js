@@ -3,9 +3,9 @@ var util = require("util");
 
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var session = require(global.gBaseDir + '/src/session.js');  // used by fill session
-var ShUser = require(global.gBaseDir + '/src/shuser.js');  // used by fill session
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var session = require(global.gBaseDir + "/src/session.js");  // used by fill session
+var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by fill session
 
 var shutil = exports;
 
@@ -35,7 +35,7 @@ shutil.fillSession = function (req, res, cb) {
     return;
   }
   req.session = {};
-  req.session.uid = req.params.session.split(':')[1];
+  req.session.uid = req.params.session.split(":")[1];
   shlog.info("loading user: uid = " + req.session.uid);
   var user = new ShUser();
   user.loadOrCreate(req.session.uid, function (error, data) {
@@ -50,11 +50,11 @@ shutil.fillSession = function (req, res, cb) {
 };
 
 shutil.call = function (cmd, req, res, cb) {
-  shlog.info('cmd = ' + cmd);
-  var cmdParts = cmd.split('.');
+  shlog.info("cmd = " + cmd);
+  var cmdParts = cmd.split(".");
   var moduleName = cmdParts[0];
   var funcName = cmdParts[1];
-  var cmdFile = global.gBaseDir + '/functions/' + moduleName + '/' + moduleName + '.js';
+  var cmdFile = global.gBaseDir + "/functions/" + moduleName + "/" + moduleName + ".js";
 
   // load module
   // SWD for now clear cache each time - will add server command to reload a module
@@ -80,14 +80,14 @@ shutil.call = function (cmd, req, res, cb) {
   }
 
   // ensure we have pre/post functions
-  if (typeof (module.pre) !== 'function') {
-    shlog.info('no pre - using default');
+  if (typeof (module.pre) !== "function") {
+    shlog.info("no pre - using default");
     module.pre = function (req, res, cb) {
       cb(0);
     };
   }
-  if (typeof (module.post) !== 'function') {
-    shlog.info('no post - using default');
+  if (typeof (module.post) !== "function") {
+    shlog.info("no post - using default");
     module.post = function (req, res, cb) {
       cb(0);
     };

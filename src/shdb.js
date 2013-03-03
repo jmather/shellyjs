@@ -1,8 +1,8 @@
 // shdb - module to provide key value db access
-var util = require('util');
+var util = require("util");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var gDbScope = "dev:";
 
@@ -11,7 +11,7 @@ var shdb = exports;
 var redis = require("redis");
 var client = redis.createClient();
 
-// if you'd like to select database 3, instead of 0 (default), call
+// if you"d like to select database 3, instead of 0 (default), call
 // client.select(3, function() { /* ... */ });
 
 client.on("error", function (err) {
@@ -47,7 +47,7 @@ shdb.get = function (key, cb) {
 
 function genKey(keyType, params) {
   var key = null;
-  if (typeof (params) === 'object') {
+  if (typeof (params) === "object") {
     var paramArray = [gKeyTypes[keyType].tpl].concat(params);
     key = gDbScope + util.format.apply(util.format, paramArray);
   } else {
@@ -60,7 +60,7 @@ shdb.kget = function (keyType, params, cb) {
   // SWD check keyType undefined
 
   var key = genKey(keyType, params);
-  shlog.info('kget: ' + gKeyTypes[keyType].tpl + '->' + key);
+  shlog.info("kget: " + gKeyTypes[keyType].tpl + "->" + key);
   client.get(key, function (err, value) {
     cb(err, value);
   });
@@ -81,7 +81,7 @@ shdb.kset = function (keyType, params, value, cb) {
   // SWD check keyType undefined
 
   var key = genKey(keyType, params);
-  shlog.info('kset: ' + gKeyTypes[keyType].tpl + '->' + key);
+  shlog.info("kset: " + gKeyTypes[keyType].tpl + "->" + key);
   client.set(key, value, function (err, value) {
     if (err) {
       shlog.error("error on set", err, value);
@@ -93,8 +93,8 @@ shdb.kset = function (keyType, params, value, cb) {
 };
 
 shdb.nextId = function (keyType, cb) {
-  var key = gDbScope + 'idgen:' + keyType;
-  shlog.info('shdb.nextId: key = ' + key);
+  var key = gDbScope + "idgen:" + keyType;
+  shlog.info("shdb.nextId: key = " + key);
   client.incrby(key, 1, cb);
 };
 

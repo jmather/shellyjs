@@ -1,13 +1,13 @@
-var request = require('superagent');
-var _ = require('lodash');
-var async = require('async');
+var request = require("superagent");
+var _ = require("lodash");
+var async = require("async");
 
 var host = "http://localhost:5101";
 
 console.log("go");
 
-var reqTpl1 = {session: '1:33:xxxx:0', gameId: "193"};
-var reqTpl2 = {session: '1:44:xxxx:0', gameId: "193"};
+var reqTpl1 = {session: "1:33:xxxx:0", gameId: "193"};
+var reqTpl2 = {session: "1:44:xxxx:0", gameId: "193"};
 
 var gMoveDelay = 200;
 
@@ -25,7 +25,7 @@ var gMoveSet = [
 ];
 
 var gMoves = _.clone(gMoveSet);
-var gStats = {'33': 0, '44': 0, '0': 0};
+var gStats = {"33": 0, "44": 0, "0": 0};
 var gRunCount = 0;
 
 /**
@@ -34,10 +34,10 @@ var gRunCount = 0;
  */
 function reset(cb) {
   var reqData = _.clone(reqTpl1);
-  reqData.cmd = 'game.reset';
-  request.post(host + '/api')
+  reqData.cmd = "game.reset";
+  request.post(host + "/api")
     .send(reqData)
-    .set('Accept', 'application/json')
+    .set("Accept", "application/json")
     .end(function (res) {
       if (!res.ok) {
         cb(res.error, res.text);
@@ -53,10 +53,10 @@ function reset(cb) {
  */
 function join(cb) {
   var reqData = _.clone(reqTpl1);
-  reqData.cmd = 'game.join';
-  request.post(host + '/api')
+  reqData.cmd = "game.join";
+  request.post(host + "/api")
     .send(reqData)
-    .set('Accept', 'application/json')
+    .set("Accept", "application/json")
     .end(function (res) {
       if (!res.ok) {
         cb(res.error, res.text);
@@ -76,11 +76,11 @@ function join(cb) {
 function move2(tpl, x, y, cb) {
   console.log("move:", x, y);
   var reqData = _.clone(tpl);
-  reqData.cmd = 'game.turn';
+  reqData.cmd = "game.turn";
   reqData.move = {x: x, y: y};
-  request.post(host + '/api')
+  request.post(host + "/api")
     .send(reqData)
-    .set('Accept', 'application/json')
+    .set("Accept", "application/json")
     .end(function (res) {
       if (gMoveDelay === 0) {
         cb(res.body);

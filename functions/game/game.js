@@ -1,34 +1,34 @@
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + '/src/shlog.js');
-var sh = require(global.gBaseDir + '/src/shutil.js');
-var ShGame = require(global.gBaseDir + '/src/shgame.js');
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
+var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
 var db = global.db;
 
-var gGameDir = global.gBaseDir + '/games';
+var gGameDir = global.gBaseDir + "/games";
 
 var game = exports;
 
 game.desc = "game state and control module";
 game.functions = {
-  create: {desc: 'create a new game', params: {name: {dtype: 'string'}}, security: []},
-  start: {desc: 'start a game', params: {gameId: {dtype: 'string'}}, security: []},
-  join: {desc: 'join an existing game', params: {gameId: {dtype: 'string'}}, security: []},
-  leave: {desc: 'leave an existing game', params: {gameId: {dtype: 'string'}}, security: []},
-  kick: {desc: 'kick a user out of game and prevent return', params: {gameId: {dtype: 'string'}, kickId: {dtype: 'string'}}, security: []},
-  turn: {desc: 'calling user taking their turn', params: {gameId: {dtype: 'string'}}, security: []},
-  end: {desc: 'end a game', params: {gameId: {dtype: 'string'}, message: {dtype: 'string'}}, security: []},
-  get: {desc: 'get game object', params: {gameId: {dtype: 'string'}}, security: []},
-  set: {desc: 'set game object', params: {gameId: {dtype: 'string'}, game: {dtype: 'object'}}, security: []},
-  reset: {desc: 'reset game for another round', params: {gameId: {dtype: 'string'}}, security: []},
+  create: {desc: "create a new game", params: {name: {dtype: "string"}}, security: []},
+  start: {desc: "start a game", params: {gameId: {dtype: "string"}}, security: []},
+  join: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
+  leave: {desc: "leave an existing game", params: {gameId: {dtype: "string"}}, security: []},
+  kick: {desc: "kick a user out of game and prevent return", params: {gameId: {dtype: "string"}, kickId: {dtype: "string"}}, security: []},
+  turn: {desc: "calling user taking their turn", params: {gameId: {dtype: "string"}}, security: []},
+  end: {desc: "end a game", params: {gameId: {dtype: "string"}, message: {dtype: "string"}}, security: []},
+  get: {desc: "get game object", params: {gameId: {dtype: "string"}}, security: []},
+  set: {desc: "set game object", params: {gameId: {dtype: "string"}, game: {dtype: "object"}}, security: []},
+  reset: {desc: "reset game for another round", params: {gameId: {dtype: "string"}}, security: []},
 
-  list: {desc: 'list all loaded games', params: {}, security: []},
-  call: {desc: 'call a game specific function', params: {gameId: {dtype: 'string'}, func: {dtype: 'string'}, args: {dtype: 'object'}}, security: []}
+  list: {desc: "list all loaded games", params: {}, security: []},
+  call: {desc: "call a game specific function", params: {gameId: {dtype: "string"}, func: {dtype: "string"}, args: {dtype: "object"}}, security: []}
 };
 
 function loadGame(name) {
-  var gameFile = gGameDir + '/' + name + '/' + name + '.js';
+  var gameFile = gGameDir + "/" + name + "/" + name + ".js";
   // SWD for now clear cache each time - will add server command to reload a module
   // SWD should check for all required functions
   delete require.cache[require.resolve(gameFile)];
@@ -36,7 +36,7 @@ function loadGame(name) {
 }
 
 game.pre = function (req, res, cb) {
-  if (req.params.cmd === 'game.create') {
+  if (req.params.cmd === "game.create") {
     var name = req.params.name;
     try {
       shlog.info("game.pre: game.create = " + name);
@@ -91,7 +91,7 @@ game.create = function (req, res, cb) {
     game.set("gameId", data.toString());
     game.set("name", req.params.name);
     game.set("ownerId", uid);
-    game.setPlayer(uid, 'ready');
+    game.setPlayer(uid, "ready");
     game.set("whoTurn", uid);
 
     // add to request environment
@@ -139,13 +139,13 @@ game.join = function (req, res, cb) {
   }
 
   user.addGame(game);
-  if (typeof (players[uid]) !== 'object') {
+  if (typeof (players[uid]) !== "object") {
     // only notify if new user
     global.live.notify(game.gameId, sh.event("event.game.user.join", {uid: uid}));
   }
   game.setPlayer(uid, "ready");
 
-  cb(0, sh.event('event.game.info', game.getData()));
+  cb(0, sh.event("event.game.info", game.getData()));
 };
 
 game.leave = function (req, res, cb) {
@@ -164,7 +164,7 @@ game.kick = function (req, res, cb) {
   var game = req.env.game;
 
   // SWD check user
-  game.players[kickId] = {status: 'kicked'};
+  game.players[kickId] = {status: "kicked"};
   game.setPlayer(kickId, "kicked");
 
   cb(0, sh.event("event.game.leave", game.get("players")));
@@ -176,7 +176,7 @@ game.turn = function (req, res, cb) {
   // fast and loose - muse setData before return or sub call
   var game = req.env.game.getData();
 
-  if (game.status === 'over') {
+  if (game.status === "over") {
     cb(0, sh.event("event.game.over", game));
     return;
   }
