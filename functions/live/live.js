@@ -24,12 +24,20 @@ function sendWs(ws, error, data) {
 }
 
 live.user = function (req, res, cb) {
+  if (_.isUndefined(res.ws)) {
+    cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
+    return;
+  }
+
   cb(1, sh.error("not_implemented"));
 };
 
 live.game = function (req, res, cb) {
-  console.log("really?");
-  console.trace();
+  if (_.isUndefined(res.ws)) {
+    cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
+    return;
+  }
+
   var gameId = req.params.gameId;
   var gameChannel = channel("game", gameId);
 
