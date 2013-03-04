@@ -8,6 +8,7 @@ try {
   console.error("error: unable to load config file:", os.hostname() + ".js");
   process.exit(1);
 }
+global.PACKAGE = require(global.gBaseDir + "/package.json");
 
 var util = require("util");
 var http = require("http");

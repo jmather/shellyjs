@@ -66,6 +66,7 @@ app.get("/function/:module/:function", function (req, res) {
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var map = {};
+  map.version = global.PACKAGE.version;
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
   res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map)});
