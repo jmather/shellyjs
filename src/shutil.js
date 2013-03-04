@@ -68,11 +68,23 @@ shutil.call = function (cmd, req, res, cb) {
   }
 
   // validate params
+  this.paramsOk = true;
   _.each(module.functions[funcName].params, function (value, key) {
     if (_.isUndefined(req.params[key])) {
-      cb(1, shutil.error("missing_param", "missing parameter", {key: key}));
+      this.paramsOk = false;
+      cb(1, shutil.error("param_required", "missing required parameter", {key: key}));
+      return false;
     }
-  });
+    var ptype = typeof req.params[key];
+    if (ptype !== value.dtype) {
+      this.paramsOk = false;
+      cb(1, shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.params[key]}));
+      return false;
+    }
+  }, this);
+  if (!this.paramsOk) {
+    return;
+  }
 
   // init for modules to use to pass data
   if (_.isUndefined(req.env)) {

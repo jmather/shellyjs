@@ -9,21 +9,22 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
-var live = exports;
+var Socket = exports;
 var wss = null;
 
-var gUsers = {};
+global.gUsers = {};
+var gUsers = global.gUsers;
 
 function channel(name, id) {
   return "notify." + name + "." + id;
 }
 
-live.notify = function (gameId, data) {
+Socket.notify = function (gameId, data) {
   shlog.info("notify game: gameId = " + gameId);
   eventEmitter.emit(channel("game", gameId), data);
 };
 
-live.notifyUser = function (uid, data) {
+Socket.notifyUser = function (uid, data) {
   shlog.info("(" + uid + ") notify user");
   eventEmitter.emit(channel("user", uid), data);
 };
@@ -87,7 +88,7 @@ function processCommand(ws, socketNotify, req) {
   }
 }
 
-live.start = function () {
+Socket.start = function () {
   wss = new WebSocketServer({port: global.CONF.socketPort});
   shlog.info("socketserver listening: " + global.CONF.socketPort);
 
@@ -111,7 +112,11 @@ live.start = function () {
       shlog.recv("live - %s", message);
 
       var req = {};
-      var res = {};
+      var res = {
+        ws: ws,
+        eventEmitter: eventEmitter,
+        socketNotify: socketNotify
+      };
 
       // fill in req.params
       req.params = JSON.parse(message);
@@ -127,10 +132,12 @@ live.start = function () {
         gUsers[ws.uid] = {status: "online"};
 
         // live commands are socket only
+/*
         if (req.params.cmd.split(".")[0] === "live") {
           processCommand(ws, socketNotify, req);
           return;
         }
+*/
 
         sh.call(req.params.cmd, req, res, function (error, data) {
           sendWs(ws, error, data);

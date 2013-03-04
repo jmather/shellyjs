@@ -23,7 +23,7 @@ global.db = require(global.gBaseDir + "/src/shdb.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var session = require(global.gBaseDir + "/src/session.js");
 var admin = require(global.gBaseDir + "/src/admin.js");
-global.live = require(global.gBaseDir + "/src/live.js");
+global.live = require(global.gBaseDir + "/src/socket.js");
 global.live.start();
 
 var server = restify.createServer({
