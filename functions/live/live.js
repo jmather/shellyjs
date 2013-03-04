@@ -13,23 +13,22 @@ live.functions = {
   game: {desc: "enable/disable live events for a user in a game", params: {gameId: {dtype: "string"}, status: {dtype: "string"}}, security: []}
 };
 
-function channel(name, id) {
-  return "notify." + name + "." + id;
-}
-
-function sendWs(ws, error, data) {
-  var msg = JSON.stringify(data);
-  shlog.send(error, "live - (%s) %s", ws.uid, msg);
-  ws.send(msg);
-}
-
 live.user = function (req, res, cb) {
   if (_.isUndefined(res.ws)) {
     cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
     return;
   }
+  var eventEmitter = res.eventEmitter;
+  var socketNotify = res.socketNotify;
+  var ws = res.ws;
 
-  cb(1, sh.error("not_implemented"));
+  var userChannel = sh.channel("user", req.session.uid);
+  if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+    shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+    eventEmitter.on(userChannel, socketNotify);
+  }
+
+  cb(0, sh.event("event.live.user", {status: "on", uid: ws.uid}));
 };
 
 live.game = function (req, res, cb) {
@@ -37,13 +36,12 @@ live.game = function (req, res, cb) {
     cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
     return;
   }
-
-  var gameId = req.params.gameId;
-  var gameChannel = channel("game", gameId);
-
   var eventEmitter = res.eventEmitter;
   var socketNotify = res.socketNotify;
   var ws = res.ws;
+
+  var gameId = req.params.gameId;
+  var gameChannel = sh.channel("game", gameId);
 
   if (req.params.status === "on") {
     if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
@@ -56,14 +54,14 @@ live.game = function (req, res, cb) {
       var game = new ShGame();
       game.load(gameId, function (error) {
         if (error) {
-          sendWs(ws, 1, sh.error("bad_game", "unable to load game", {gameId: gameId}));
+          sh.sendWs(ws, 1, sh.error("bad_game", "unable to load game", {gameId: gameId}));
           return;
         }
         var players = game.get("players");
         _.each(_.keys(players), function (uid) {
           if (uid !== ws.uid && !_.isUndefined(global.gUsers[uid])) {
             shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
-            sendWs(ws, 0, sh.event("event.game.user.online", {uid: uid}));
+            sh.sendWs(ws, 0, sh.event("event.game.user.online", {uid: uid}));
           }
         });
       });

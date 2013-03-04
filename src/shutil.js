@@ -9,6 +9,16 @@ var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by fill sessi
 
 var shutil = exports;
 
+shutil.channel = function (name, id) {
+  return "notify." + name + "." + id;
+};
+
+shutil.sendWs = function (ws, error, data) {
+  var msg = JSON.stringify(data);
+  shlog.send(error, "live - (%s) %s", ws.uid, msg);
+  ws.send(msg);
+};
+
 shutil.event = function (event, data) {
   if (_.isUndefined(data)) {
     data = null;
