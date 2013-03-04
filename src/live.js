@@ -34,6 +34,59 @@ function sendWs(ws, error, data) {
   ws.send(msg);
 }
 
+function processCommand(ws, socketNotify, req) {
+  if (req.params.cmd === "live.user") {
+    // hook them into user events
+    var userChannel = channel("user", req.session.uid);
+    if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+      shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+      eventEmitter.on(userChannel, socketNotify);
+    }
+    sendWs(ws, 0, sh.event("event.live.user", {status: "on", uid: ws.uid}));
+    return;
+  }
+  if (req.params.cmd === "live.game") {
+    // hook them into game events
+    // SWD validate params: gameId, status
+    var gameId = req.params.gameId;
+    var gameChannel = channel("game", gameId);
+
+    if (req.params.status === "on") {
+      if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
+        shlog.info("(" + ws.uid + ") add game channel: " + gameChannel, ws.games);
+        global.live.notify(gameId, sh.event("event.game.user.online", {uid: ws.uid}));
+        ws.games.push(gameId);
+        eventEmitter.on(gameChannel, socketNotify);
+
+        // must send myself notifs for games existing online users
+        var game = new ShGame();
+        game.load(gameId, function (error) {
+          if (error) {
+            sendWs(ws, 1, sh.error("bad_game", "unable to load game", {gameId: gameId}));
+            return;
+          }
+          var players = game.get("players");
+          _.each(_.keys(players), function (uid) {
+            if (uid !== ws.uid && !_.isUndefined(gUsers[uid])) {
+              shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
+              sendWs(ws, 0, sh.event("event.game.user.online", {uid: uid}));
+            }
+          });
+        });
+      }
+    } else {
+      shlog.info("(" + ws.uid + ") remove game channel:" + gameChannel, ws.games);
+      var idx = ws.games.indexOf(req.params.gameId);
+      if (idx !== -1) {
+        ws.games.splice(idx, 1);
+      }
+      eventEmitter.removeListener(gameChannel, socketNotify);
+      global.live.notify(gameId, sh.event("event.game.user.offline", {uid: ws.uid}));
+    }
+    sendWs(ws, 0, sh.event("event.live.game", {status: req.params.status, game: gameId}));
+  }
+}
+
 live.start = function () {
   wss = new WebSocketServer({port: global.CONF.socketPort});
   shlog.info("socketserver listening: " + global.CONF.socketPort);
@@ -48,7 +101,7 @@ live.start = function () {
       shlog.info("(" + ws.uid + ") socket: socketNotify");
       if (ws.readyState === 1) {
         // 1 = OPEN - SWD: find this in ws module later
-        ws.send(JSON.stringify(message));
+        sendWs(ws, 0, message);
       } else {
         shlog.info("(" + ws.uid + ") socket: dead socket");
       }
@@ -69,59 +122,13 @@ live.start = function () {
           sendWs(ws, error, data);
           return;
         }
-
-        // valid user
+        // valid user, add to list
         ws.uid = req.session.uid;
         gUsers[ws.uid] = {status: "online"};
 
-        if (req.params.cmd === "live.user") {
-          // hook them into user events
-          var userChannel = channel("user", req.session.uid);
-          if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
-            shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
-            eventEmitter.on(userChannel, socketNotify);
-          }
-          ws.send(JSON.stringify(sh.event("event.live.user", {status: "on", uid: ws.uid})));
-          return;
-        }
-        if (req.params.cmd === "live.game") {
-          // hook them into game events
-          // SWD validate params: gameId, status
-          var gameId = req.params.gameId;
-          var gameChannel = channel("game", gameId);
-
-          if (req.params.status === "on") {
-            if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
-              shlog.info("(" + ws.uid + ") add game channel: " + gameChannel, ws.games);
-              global.live.notify(gameId, sh.event("event.game.user.online", {uid: ws.uid}));
-              ws.games.push(gameId);
-              eventEmitter.on(gameChannel, socketNotify);
-
-              // must send myself notifs for games existing online users
-              var game = new ShGame();
-              game.load(gameId, function (error) {
-                if (error) {
-                  ws.send(JSON.stringify(sh.error("bad_game", "unable to load game", {gameId: gameId})));
-                  return;
-                }
-                var players = game.get("players");
-                _.each(players, function (uid) {
-                  if (uid !== ws.uid && !_.isUndefined(gUsers[uid])) {
-                    ws.send(JSON.stringify(sh.event("event.game.user.online", {uid: uid})));
-                  }
-                });
-              });
-            }
-          } else {
-            shlog.info("(" + ws.uid + ") remove game channel:" + gameChannel, ws.games);
-            var idx = ws.games.indexOf(req.params.gameId);
-            if (idx !== -1) {
-              ws.games.splice(idx, 1);
-            }
-            eventEmitter.removeListener(gameChannel, socketNotify);
-            global.live.notify(gameId, sh.event("event.game.user.offline", {uid: ws.uid}));
-          }
-          ws.send(JSON.stringify(sh.event("event.live.game", {status: req.params.status, game: gameId})));
+        // live commands are socket only
+        if (req.params.cmd.split(".")[0] === "live") {
+          processCommand(ws, socketNotify, req);
           return;
         }
 
