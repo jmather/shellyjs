@@ -33,6 +33,12 @@ Socket.start = function () {
     shlog.info("socket: connect");
     ws.uid = 0;
     ws.games = [];
+    ws.hbTimer = null;
+
+    var heartBeat = function () {
+      sh.sendWs(ws, 0, sh.event("event.hearbeat", {interval: global.CONF.heartBeat}));
+    };
+    ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
 
     // helper functions in valid ws scope
     var socketNotify = function (message) {
@@ -66,7 +72,8 @@ Socket.start = function () {
         }
         // valid user, add to list
         ws.uid = req.session.uid;
-        gUsers[ws.uid] = {status: "online"};
+        gUsers[ws.uid] = {status: "online", last: new Date().getTime()};
+        console.log(ws.uid, gUsers[ws.uid]);
 
         sh.call(req.params.cmd, req, res, function (error, data) {
           sh.sendWs(ws, error, data);
@@ -80,6 +87,8 @@ Socket.start = function () {
 
     ws.on("close", function () {
       shlog.info("(" + this.uid + ") socket: close");
+
+      clearInterval(this.hbTimer);
 
       delete gUsers[this.uid];
 

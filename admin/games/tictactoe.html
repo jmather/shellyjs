@@ -230,7 +230,7 @@
 
         var url = Env.socketUrl;
         var ws = new ReconnectingWebSocket(url);
-        ws.debug = true;
+//        ws.debug = true;
         ws.onopen = function() {
             console.log("socket: open");
             log("socket", "onopen", url);
