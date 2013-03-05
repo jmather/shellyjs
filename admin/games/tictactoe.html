@@ -47,11 +47,14 @@
                     (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
             );
         }
+
         var psess = getURLParameter("session");
         if(psess != 'null')
         {
             Env.baseParams.session = psess;
         }
+
+        Env.baseParams.gameId = $.cookie("shLastGame");
         var pgameId = getURLParameter("gameId");
         if(pgameId != 'null')
         {
@@ -123,6 +126,7 @@
 
         function setState(game)
         {
+            $.cookie("shLastGame", game.gameId);
             hideError();
             var gameBoard = game.state.gameBoard;
             for (var i=0; i<3; i++) {
@@ -167,7 +171,6 @@
                 $("#gameId").text(game.gameId);
                 Env.baseParams.gameId = game.gameId;
             }
-
         }
 
         function processEvent(res, from) {
@@ -185,6 +188,9 @@
                 $("#uid").text(Env.baseParams.session.split(':')[1]);
                 listMyGames();
 
+                if (typeof (Env.baseParams.gameId) !== 'undefined') {
+                    gameInit(Env.baseParams.gameId);
+                }
                 return;
             }
             if(res.event == 'event.error') {
@@ -334,8 +340,6 @@
             window.addEventListener('load', function() {
                 new FastClick(document.body);
             }, false);
-            
-//            $("#gameId").text(Env.baseParams.gameId);
 
             $(".tictac").click(function() {
                 var id = $(this).attr("id");
@@ -346,7 +350,6 @@
 
             $("#gameCreate").click(function() {
                 var data = clone(Env.baseParams);
-                delete data.gameId;
                 data.cmd = "game.create";
                 data.name = "tictactoe";
                 sendRest(data);
@@ -368,7 +371,6 @@
             $("#gameFind").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "gqueue.nextAvailable";
-                delete data.gameId;
                 sendWs(data);
             });
 
