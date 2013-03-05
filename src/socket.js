@@ -70,10 +70,11 @@ Socket.start = function () {
           sh.sendWs(ws, error, data);
           return;
         }
-        // valid user, add to list
-        ws.uid = req.session.uid;
-        gUsers[ws.uid] = {status: "online", last: new Date().getTime()};
-        console.log(ws.uid, gUsers[ws.uid]);
+        // if valid user, add to list, if not we are in reg.* call
+        if (!_.isUndefined(req.session)) {
+          ws.uid = req.session.uid;
+          gUsers[ws.uid] = {status: "online", last: new Date().getTime()};
+        }
 
         sh.call(req.params.cmd, req, res, function (error, data) {
           sh.sendWs(ws, error, data);
@@ -86,9 +87,13 @@ Socket.start = function () {
     });
 
     ws.on("close", function () {
-      shlog.info("(" + this.uid + ") socket: close");
-
       clearInterval(this.hbTimer);
+
+      if (_.isUndefined(this.uid)) {
+        shlog.info("user never had valid session")
+        return;
+      }
+      shlog.info("(" + this.uid + ") socket: close");
 
       delete gUsers[this.uid];
 

@@ -1,6 +1,7 @@
 // session - module to provide session key generation and checking
 var util = require("util");
 var crypto = require("crypto");
+var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
@@ -23,6 +24,9 @@ session.create = function (uid) {
 
 session.check = function (key) {
   shlog.info("session.check key=" + key);
+  if (_.isUndefined(key)) {
+    return false;
+  }
   var keyParts = key.split(":");
   if (keyParts.length !== 4) {
     return false;

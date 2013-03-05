@@ -39,12 +39,7 @@
     </style>
     <script language="javascript">
         var Env = {{{params}}};
-        Env.baseParams = {
-            session: "1:33:xxxx:0",
-            gameId: "193"
-        }
-
-
+        Env.baseParams = {};
 
         // allow for baseParam overrides from url
         function getURLParameter(name) {
@@ -180,6 +175,18 @@
                 log(from, "error", "old message: "+JSON.stringify(res));
                 return;
             }
+            if(res.event == 'reg.anonymous') {
+                if (typeof (Env.baseParams.session) === 'undefined') {
+                    Env.baseParams.session = res.data.session;
+                } else {
+                    log(from, "info", "using existing session: " + Env.baseParams.session);
+                }
+                $("#session").text(Env.baseParams.session);
+                $("#uid").text(Env.baseParams.session.split(':')[1]);
+                listMyGames();
+
+                return;
+            }
             if(res.event == 'event.error') {
                 showError(res.message);
                 log(from, "error", JSON.stringify(res));
@@ -234,8 +241,10 @@
         ws.onopen = function() {
             console.log("socket: open");
             log("socket", "onopen", url);
-            gameInit(Env.baseParams.gameId);
-            listMyGames();
+            var data = {};
+            data.cmd = "reg.anonymous";
+            data.token = Env.shToken;
+            sendWs(data);
         }
         ws.onmessage = function (evt) {
             var received_msg = evt.data;
@@ -254,11 +263,7 @@
         {
             var msg = JSON.stringify(data);
             log("socket", "send", msg);
-            try {
-                ws.send(msg);
-            } catch (e) {
-                console.log(e.toString());
-            }
+            ws.send(msg);
         }
 
         // basic functions
@@ -275,7 +280,7 @@
         {
             var data = clone(Env.baseParams);
             // turn off live events for old game
-            if(gameId != Env.baseParams.gameId) {
+            if(typeof (Env.baseParams.gameId) !== 'undefined' && gameId != Env.baseParams.gameId) {
                 liveInit(Env.baseParams.gameId, "off");
             }
             data.gameId = gameId;
@@ -311,13 +316,21 @@
         $(init);
         function init()
         {
+//            $.removeCookie("shToken");
+            Env.shToken = $.cookie("shToken");
+            if(typeof (Env.shToken) === "undefined") {
+                log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
+                Env.shToken = Env.nextUuid;
+                $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
+            }
+            log("main", "info", "shToken using: " + Env.shToken);
+            $("#token").text(Env.shToken);
+
             window.addEventListener('load', function() {
                 new FastClick(document.body);
             }, false);
             
-            $("#uid").text(Env.baseParams.session.split(':')[1]);
-            $("#gameId").text(Env.baseParams.gameId);
-            $("#session").text(Env.baseParams.session);
+//            $("#gameId").text(Env.baseParams.gameId);
 
             $(".tictac").click(function() {
                 var id = $(this).attr("id");
@@ -390,6 +403,7 @@
         <td valign="top">
             <div>user=<span id="uid"></span></div>
             <div>session=<span id="session"></span></div>
+            <div>token=<span id="token"></span></div>
         </td>
     </tr>
 </table>

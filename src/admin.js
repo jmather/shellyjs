@@ -6,6 +6,7 @@ var url = require("url");
 var engines = require("consolidate");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var adminBase = global.gBaseDir + "/admin";
 var adminStatic = adminBase + "/static";
@@ -69,6 +70,7 @@ app.get("*.html", function (req, res) {
   map.version = global.PACKAGE.version;
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
+  map.nextUuid = sh.uuid();
   res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map)});
 });
 

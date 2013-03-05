@@ -14,6 +14,7 @@ var gDebug = {
 //	"game": {},
 //	"recv": {},
 //	"send": {},
+	"user": {},
   "app": {}
 };
 

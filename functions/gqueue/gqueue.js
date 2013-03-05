@@ -27,7 +27,7 @@ gqueue.add = function (req, res, cb) {
 
   // SWD: this will be too slow, change to hash presence list for data, and check/add/remove from that also
   var found = _.find(global.gq, {gameId: gameId});
-  if (!_.isUndfined(found)) {
+  if (!_.isUndefined(found)) {
     cb(1, sh.error("queue_add", "game already in queue", {gameId: gameId}));
     return;
   }

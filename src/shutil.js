@@ -2,12 +2,17 @@ var path = require("path");
 var util = require("util");
 
 var _ = require("lodash");
+var uuid = require("node-uuid");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var session = require(global.gBaseDir + "/src/session.js");  // used by fill session
 var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by fill session
 
 var shutil = exports;
+
+shutil.uuid = function () {
+  return uuid.v1();
+};
 
 shutil.channel = function (name, id) {
   return "notify." + name + "." + id;
@@ -40,8 +45,22 @@ shutil.error = function (code, message, data) {
 };
 
 shutil.fillSession = function (req, res, cb) {
+  if (_.isUndefined(req.params.cmd)) {
+    cb(1, shutil.error("no_cmd", "missing command data"));
+    return;
+  }
+  var cmd = req.params.cmd;
+  if (cmd === "reg.login" || cmd === "reg.create" || cmd === "reg.check" || cmd === "reg.anonymous") {
+    cb(0);
+    return;
+  }
+
+  if (_.isUndefined(req.params.session)) {
+    cb(1, shutil.error("no_session", "missing session data"));
+    return;
+  }
   if (!session.check(req.params.session)) {
-    cb(1, shutil.error("bad_session", "bad session token"));
+    cb(1, shutil.error("bad_session", "bad session data"));
     return;
   }
   req.session = {};

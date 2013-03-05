@@ -18,7 +18,8 @@
     "stack-trace": "0.0.6",
     "validator": "0.4.24",
     "winston": "0.6.2",
-    "ws": "0.4.25"
+    "ws": "0.4.25",
+    "node-uuid": "1.4.0"
   },
   "devDependencies": {
     "mocha": "1.8.1",

@@ -57,10 +57,6 @@ server.use(function (req, res, next) {
 
 server.use(function (req, res, next) {
   shlog.info("session check");
-  var cmd = req.params.cmd;
-  if (cmd === "reg.login" || cmd === "reg.create" || cmd === "reg.check") {
-    return next();
-  }
 
   sh.fillSession(req, res, function (error, data) {
     if (error !== 0) {

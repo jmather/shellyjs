@@ -94,7 +94,7 @@ User.prototype.setData = function (data) {
 };
 
 User.prototype.addGame = function (game) {
-  // set users current games and ts
+  this._dirty = true;
   var ts = new Date().getTime();
   this._data.currentGames[game.get("gameId")] = {name: game.get("name"), lastJoin: ts};
   this.save(function () {

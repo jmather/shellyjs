@@ -81,7 +81,7 @@ exports.anonymous = function (req, res, cb) {
 
   gDb.kget("kTokenMap", token, function (error, value) {
     if (value !== null) {
-      cb(1, sh.event("reg.anonymous.exists", JSON.parse(value)));
+      cb(1, sh.event("reg.anonymous", JSON.parse(value)));
       return;
     }
     global.db.nextId("user", function (error, value) {
