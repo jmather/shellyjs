@@ -337,6 +337,8 @@
             log("main", "info", "shToken using: " + Env.shToken);
             $("#token").text(Env.shToken);
 
+            $("#version").text(Env.version);
+
             window.addEventListener('load', function() {
                 new FastClick(document.body);
             }, false);
@@ -397,7 +399,7 @@
 <table border="1" style="width:100%;">
     <tr>
         <td style="width:70%;">list games <button id="listMyGames">refresh</button> </td>
-        <td>info</td>
+        <td>info<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
         <td valign="top" style="">
