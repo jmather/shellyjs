@@ -192,6 +192,11 @@
                 log(from, "error", JSON.stringify(res));
                 return;
             }
+            if(res.event == 'event.game.create' || res.event === 'event.game.found') {
+                gameInit(res.data.gameId);
+                setState(res.data);
+                return;
+            }
             if(res.event == 'event.game.info') {
                 setState(res.data);
                 return;

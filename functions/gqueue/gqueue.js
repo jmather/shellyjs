@@ -66,6 +66,8 @@ gqueue.nextAvailable = function (req, res, cb) {
       // check to see if game is really full and valid
       // put the game back in the available queue
       global.gq.unshift(gameInfo);
+    } else {
+      data.event = "event.game.found";
     }
     // data already an event from game.join
     cb(error, data);

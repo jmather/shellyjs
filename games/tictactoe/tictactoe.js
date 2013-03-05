@@ -23,7 +23,7 @@ tictactoe.create = function (req, cb) {
   req.env.game.set("maxPlayers", 2);
   req.env.game.set("state", state);
 
-  cb(0, sh.event("event.game.info", req.env.game.getData()));
+  cb(0, sh.event("event.game.create", req.env.game.getData()));
 };
 
 function checkFull(gb) {

@@ -103,7 +103,7 @@ game.create = function (req, res, cb) {
     req.env.gameModule.create(req, function (error, data) {
       if (error !== 0) {
         if (_.isUndefined(data)) {
-          data = sh.event("event.game.info", game.getData());
+          data = sh.event("event.game.create", game.getData());
         }
       }
       cb(error, data);
