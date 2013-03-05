@@ -14,7 +14,8 @@ var passwordVersion = 1;
 
 exports.desc = "handles user login/logout and new user registration";
 exports.functions = {
-  create: {desc: "user login", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
+  create: {desc: "register a user", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
+  anonymous: {desc: "register an anonymous user", params: {token: {dtype: "string"}}, security: []},
   check: {desc: "check if user exists", params: {email: {dtype: "string"}}, security: []},
   login: {desc: "user login", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
   logout: {desc: "user logout", params: {}, security: []}
@@ -65,6 +66,42 @@ exports.logout = function (req, res, cb) {
   cb(null, {"reg.logout": "foo foo foo"});
 };
 
+exports.anonymous = function (req, res, cb) {
+  var out = {};
+
+  //SWD check reg signature
+
+  var token = sanitize(req.params.token).trim();
+  try {
+    check(token, "token not long enough").len(6);
+  } catch (e) {
+    cb(1, sh.error("params_bad", "token not valid", {info: e.message}));
+    return;
+  }
+
+  gDb.kget("kTokenMap", token, function (error, value) {
+    if (value !== null) {
+      cb(1, sh.event("reg.anonymous.exists", JSON.parse(value)));
+      return;
+    }
+    global.db.nextId("user", function (error, value) {
+      if (error) {
+        cb(1, sh.error("user_id", "unable to generate user id"));
+        return;
+      }
+      // create the user
+      out.uid = value;
+      out.session = session.create(out.uid);
+      out.token = token;
+      var ts = new Date().getTime();
+      out.created = ts;
+      out.lastModified = ts;
+      gDb.kset("kTokenMap", token, JSON.stringify(out));
+      cb(0, sh.event("reg.anonymous", out));
+    });
+  });
+};
+
 exports.create = function (req, res, cb) {
   var out = {};
 
@@ -72,7 +109,7 @@ exports.create = function (req, res, cb) {
   var password = sanitize(req.params.password).trim();
   try {
     check(email, "invalid email").isEmail();
-    check(password, "invalid passwrod").len(6);
+    check(password, "invalid password").len(6);
   } catch (e) {
     cb(1, sh.error("params_bad", "email or password is not valid", {info: e.message}));
     return;
@@ -84,6 +121,10 @@ exports.create = function (req, res, cb) {
       return;
     }
     global.db.nextId("user", function (error, value) {
+      if (error) {
+        cb(1, sh.error("user_id", "unable to generate user id"));
+        return;
+      }
       // create the user
       out.uid = value;
       out.session = session.create(out.uid);
@@ -92,7 +133,7 @@ exports.create = function (req, res, cb) {
       var ts = new Date().getTime();
       out.created = ts;
       out.lastModified = ts;
-      gDb.kset("kEmailMap", req.params.email, JSON.stringify(out));
+      gDb.kset("kEmailMap", email, JSON.stringify(out));
       cb(0, out);
     });
   });

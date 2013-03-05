@@ -22,6 +22,7 @@ client.on("error", function (err) {
 
 var gKeyTypes = {
   kEmailMap: {tpl: "em:%s"},
+  kTokenMap: {tpl: "token:%s"},
   kUser: {tpl: "u:%s"},
   kGame: {tpl: "game:%s"},
   kObject: {tpl: "object:%s:%s"}
@@ -97,7 +98,12 @@ shdb.kset = function (keyType, params, value, cb) {
 shdb.nextId = function (keyType, cb) {
   var key = gDbScope + "idgen:" + keyType;
   shlog.info("shdb.nextId: key = " + key);
-  client.incrby(key, 1, cb);
+  client.incrby(key, 1, function (error, data) {
+    if (!error) {
+      data = data.toString();
+    }
+    cb(error, data);
+  });
 };
 
 shdb.destroy = function () {
