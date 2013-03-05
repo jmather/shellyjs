@@ -124,6 +124,30 @@
             }
         }
 
+        function setPlayers(playerList, whoTurn)
+        {
+            $(".activePlayer").remove();
+            for (playerId in playerList) {
+                var $newGame = $("#playerTemplate").clone();
+                if(playerId === Env.uid) {
+                    $newGame.find("#playerName").text(playerId + " me");
+                    $newGame.find("#playerKick").remove();
+                } else {
+                    $newGame.find("#playerName").text(playerId + " " + playerList[playerId].status);
+                }
+                $newGame.addClass("playerId"+playerId);
+                $newGame.addClass("activePlayer");
+                $newGame.css("display", "block");
+
+                $newGame.find("#playerKick").click(function() {
+                    var playerId = $(this).parent().attr('playerId');
+                });
+
+                $("#playerList").append($newGame);
+            }
+            $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
+        }
+
         function setState(game)
         {
             $.cookie("shLastGame", game.gameId);
@@ -178,6 +202,14 @@
                 log(from, "error", "old message: "+JSON.stringify(res));
                 return;
             }
+            if(res.event == 'event.error') {
+                showError(res.message);
+                log(from, "error", JSON.stringify(res));
+                return;
+            }
+            if(res.event == 'event.heartbeat') {
+                return;
+            }
             if(res.event == 'reg.anonymous') {
                 if (typeof (Env.baseParams.session) === 'undefined') {
                     Env.baseParams.session = res.data.session;
@@ -185,7 +217,8 @@
                     log(from, "info", "using existing session: " + Env.baseParams.session);
                 }
                 $("#session").text(Env.baseParams.session);
-                $("#uid").text(Env.baseParams.session.split(':')[1]);
+                Env.uid = Env.baseParams.session.split(':')[1];
+                $("#uid").text(Env.uid);
                 listMyGames();
 
                 if (typeof (Env.baseParams.gameId) !== 'undefined') {
@@ -193,18 +226,18 @@
                 }
                 return;
             }
-            if(res.event == 'event.error') {
-                showError(res.message);
-                log(from, "error", JSON.stringify(res));
-                return;
-            }
             if(res.event == 'event.game.create' || res.event === 'event.game.found') {
                 gameInit(res.data.gameId);
                 setState(res.data);
                 return;
             }
+            if(res.event == 'event.game.user') {
+                $(".playerId"+res.data.uid).find("#playerName").text(res.data.uid + " " + res.data.status);
+                return;
+            }
             if(res.event == 'event.game.info') {
                 setState(res.data);
+                setPlayers(res.data.players, res.data.whoTurn);
                 return;
             }
             if(res.event == 'event.game.over') {
@@ -216,8 +249,6 @@
                 return;
             }
             if(res.event == 'event.game.user.join'
-                    || res.event == 'event.game.user.online'
-                    || res.event == 'event.game.user.offline'
                     || res.event == 'event.live.game')
             {
                 // ignore for now
@@ -394,25 +425,31 @@
     </script>
 </head>
 <body>
-<p>
-</p>
+<div style="float:left;">session=<span id="session"></span></div>
+<div style="float:right;">token=<span id="token"></span></div>
+<div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:70%;">list games <button id="listMyGames">refresh</button> </td>
-        <td>info<span style="float:right;" id="version"></span></td>
+        <td style="width:300px;">list games <button id="listMyGames">refresh</button></td>
+        <td>open games</td>
+        <td style="width:200px;">players<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
         <td valign="top" style="">
             <div id="gameList" style="height:150;width:100%;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game1</span><button id="myGameJoin">join</button><button id="myGameRemove">remove</button>
+                    <span id="gameName">game0</span><button id="myGameJoin">join</button><button id="myGameRemove">remove</button>
                 </div>
-             </div>
+            </div>
         </td>
         <td valign="top">
-            <div>user=<span id="uid"></span></div>
-            <div>session=<span id="session"></span></div>
-            <div>token=<span id="token"></span></div>
+        </td>
+        <td valign="top">
+            <div id="playerList" style="height:150;width:100%;overflow:scroll;">
+                <div id="playerTemplate" style="display:none;">
+                    <span id="playerName">player0</span><span id="playerTurn"></span>
+                </div>
+            </div>
         </td>
     </tr>
 </table>
@@ -433,6 +470,7 @@
             <div id="x2y2" class="tictac"></div>
         </td>
         <td valign="top" style="width:200px;">
+            <div>user=<span id="uid"></span></div>
             <div>game=<span id="gameId">0</span>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>

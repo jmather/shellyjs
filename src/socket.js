@@ -106,7 +106,7 @@ Socket.start = function () {
         shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
         eventEmitter.removeListener(gameChannel, socketNotify);
         // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-        global.live.notify(game, sh.event("event.game.user.offline", {uid: self.uid}));
+        global.live.notify(game, sh.event("event.game.user", {uid: self.uid, status: "offline"}));
       });
     });
 
