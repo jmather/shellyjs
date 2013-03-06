@@ -1,3 +1,4 @@
+var fs = require("fs");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -36,6 +37,10 @@ function loadGame(name) {
 }
 
 game.pre = function (req, res, cb) {
+  if (req.params.cmd === "game.list") {
+    cb(0);
+    return;
+  }
   if (req.params.cmd === "game.create") {
     var name = req.params.name;
     try {
@@ -245,10 +250,62 @@ game.reset = function (req, res, cb) {
   });
 };
 
+function getInfo(name) {
+  shlog.info("getInfo name=" + name);
+  var cmdFile = gGameDir + "/" + name + "/" + name + ".js";
+
+  var m = {};
+  m.error = 0;
+  m.path = cmdFile;
+  m.name = name;
+  m.author = "scott";
+  m.desc = "none";
+  m.functions = {};
+
+  var funcModule = null;
+  try {
+    delete require.cache[require.resolve(cmdFile)];
+    funcModule = require(cmdFile);
+  } catch (e) {
+    m.error = 100;
+    m.info = "unable to load module";
+    return m;
+  }
+  if (!_.isUndefined(funcModule.desc)) {
+    m.desc = funcModule.desc;
+  }
+  if (!_.isUndefined(funcModule.functions)) {
+    m.functions = funcModule.functions;
+  }
+  return m;
+}
+
 game.list = function (req, res, cb) {
   shlog.info("game.list");
 
-  cb(0, sh.event("not_implemented"));
+  var games = {};
+  var gGameDir = global.gBaseDir + "/games";
+  fs.readdir(gGameDir, function (err, files) {
+    var error = 0;
+    var fileCount = files.length;
+    files.forEach(function (entry) {
+      var fn = gGameDir + "/" + entry;
+      fs.stat(fn, function (err, stat) {
+        if (stat.isDirectory()) {
+          var m = getInfo(entry);
+          if (m.error) {
+            error = 1;
+          }
+          games[m.name] = m;
+        }
+        fileCount -= 1;
+        if (fileCount === 0) {
+          cb(error, games);
+        }
+      });
+    });
+  });
+
 };
 
 game.call = function (req, res, cb) {
