@@ -134,7 +134,7 @@
                     $newGame.find("#playerName").text(playerId + " me");
                     $newGame.find("#playerKick").remove();
                 } else {
-                    $newGame.find("#playerName").text(playerId + " " + playerList[playerId].status);
+                    $newGame.find("#playerName").text(playerId + " offline");
                 }
                 $newGame.addClass("playerId"+playerId);
                 $newGame.addClass("activePlayer");
@@ -240,11 +240,11 @@
                 // turn off live events for old game
                 var newGameId = res.data.gameId;
                 var oldGameId = Env.baseParams.gameId;
-                setState(res.data);
-                console.log(gameId, Env.baseParams.gameId);
                 if(typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
                     liveInit(oldGameId, "off");
+                    Env.players = {};  // reset the player list
                 }
+                setState(res.data);
                 liveInit(newGameId, "on");
                 return;
             }
