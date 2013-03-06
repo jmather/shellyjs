@@ -9,8 +9,13 @@ var live = exports;
 
 live.desc = "game state and control module";
 live.functions = {
+  list: {desc: "list online users", params: {}, security: []},
   user: {desc: "enable/disable live events for a user", params: {status: {dtype: "string"}}, security: []},
   game: {desc: "enable/disable live events for a user in a game", params: {gameId: {dtype: "string"}, status: {dtype: "string"}}, security: []}
+};
+
+live.list = function (req, res, cb) {
+  cb(0, sh.event("event.live.list", global.gUsers));
 };
 
 live.user = function (req, res, cb) {
