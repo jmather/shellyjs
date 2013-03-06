@@ -25,6 +25,13 @@ Socket.notifyUser = function (uid, data) {
   eventEmitter.emit(sh.channel("user", uid), data);
 };
 
+Socket.notifyAll = function (data) {
+  shlog.info("(notify all users");
+  _.forOwn(global.gUsers, function (prop, key) {
+    eventEmitter.emit(sh.channel("user", key), data);
+  });
+};
+
 Socket.start = function () {
   wss = new WebSocketServer({port: global.CONF.socketPort});
   shlog.info("socketserver listening: " + global.CONF.socketPort);
@@ -74,6 +81,12 @@ Socket.start = function () {
         if (!_.isUndefined(req.session)) {
           ws.uid = req.session.uid;
           gUsers[ws.uid] = {status: "online", gameId: 0, last: new Date().getTime()};
+          // hookup the user channel
+          var userChannel = sh.channel("user", ws.uid);
+          if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+            shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+            eventEmitter.on(userChannel, socketNotify);
+          }
         }
 
         sh.call(req.params.cmd, req, res, function (error, data) {
@@ -99,14 +112,14 @@ Socket.start = function () {
 
       var userChannel = sh.channel("user", this.uid);
       shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
-      eventEmitter.removeAllListeners(userChannel, socketNotify);
+      eventEmitter.removeAllListeners(userChannel);
       var self = this;
       _.each(ws.games, function (game) {
         var gameChannel = sh.channel("game", game);
         shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
         eventEmitter.removeListener(gameChannel, socketNotify);
         // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-        global.live.notify(game, sh.event("event.game.user", {uid: self.uid, gameId: game, status: "offline"}));
+        global.socket.notify(game, sh.event("event.game.user", {uid: self.uid, gameId: game, status: "offline"}));
       });
     });
 

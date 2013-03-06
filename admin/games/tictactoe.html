@@ -155,7 +155,8 @@
 
         function setState(game)
         {
-            $.cookie("shLastGame", game.gameId);
+            $.cookie("shLastGame", game.gameId, { expires: 3650, path: '/' });
+
             hideError();
             var gameBoard = game.state.gameBoard;
             for (var i=0; i<3; i++) {
@@ -232,7 +233,7 @@
                 }
                 return;
             }
-            if(res.event == 'event.game.create' || res.event === 'event.game.found') {
+            if(res.event == 'event.game.create' || res.event === 'event.gqueue.found') {
                 gameInit(res.data.gameId);
                 return;
             }

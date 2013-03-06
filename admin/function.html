@@ -130,10 +130,8 @@
                     input[key] = null;
                 } else if (dtype == 'array') {
                     input[key] = null;
-                } else if (dtype == 'int') {
+                } else if (dtype == 'number') {
                     input[key] = 0;
-                } else if (dtype == 'float') {
-                    input[key] = 0.0;
                 } else if (dtype == 'array') {
                     input[key] = [];
                 } else if (dtype == 'string') {
@@ -175,14 +173,13 @@
                 } catch (e) {
                     alert("error parsing input: " + e.message);
                 }
-                console.log(input);
+                console.log(JSON.stringify(input));
                 $.ajax
                         ({
                             type: "POST",
                             url: Env.restUrl,
-                            dataType: 'json',
                             async: false,
-                            data: input,
+                            data: JSON.stringify(input),
                             success: function (data, status) {
                                 outputEdit.set(data);
                             }

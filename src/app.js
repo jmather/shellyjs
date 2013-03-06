@@ -23,8 +23,8 @@ global.db = require(global.gBaseDir + "/src/shdb.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var session = require(global.gBaseDir + "/src/session.js");
 var admin = require(global.gBaseDir + "/src/admin.js");
-global.live = require(global.gBaseDir + "/src/socket.js");
-global.live.start();
+global.socket = require(global.gBaseDir + "/src/socket.js");
+global.socket.start();
 
 var server = restify.createServer({
   name: "shelly"
@@ -52,6 +52,16 @@ server.use(restify.bodyParser());
 server.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  return next();
+});
+
+// we are posting JSON.stringified to avoid any param conversion to strings
+server.use(function (req, res, next) {
+  try {
+    req.params = JSON.parse(req.body);
+  } catch (e) {
+    res.send(sh.error("json_post", "bad json format", {error: e.toString()}));
+  }
   return next();
 });
 

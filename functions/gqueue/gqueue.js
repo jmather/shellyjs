@@ -3,17 +3,18 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
-var game = require(global.gBaseDir + "/functions/game/game.js");
+//var game = require(global.gBaseDir + "/functions/game/game.js");
 
 var gqueue = exports;
 
 gqueue.desc = "game state and control module";
 gqueue.functions = {
-  add: {desc: "add a game to the queue", params: {gameId: {dtype: "string"}, data: {dtype: "object"}}, security: []},
+  add: {desc: "add a game to the queue", params: {gameId: {dtype: "string"}}, security: []},
   remove: {desc: "remove a game from the list", params: {gameId: {dtype: "string"}}, security: []},
   nextAvailable: {desc: "get the next available game", params: {}, security: []},
-  list: {desc: "return a list of available games", params: {limit: {dtype: "int"}}, security: []}
+  list: {desc: "return a list of available games", params: {limit: {dtype: "number"}}, security: []}
 };
 
 // SWD: just init a global game queue for now
@@ -32,25 +33,50 @@ gqueue.add = function (req, res, cb) {
     return;
   }
 
-  var ts = new Date().getTime();
-  var gameInfo = {gameId: gameId, data: data, ts: ts};
-  global.gq.push(gameInfo);
-  cb(0, sh.event("event.gqueue.game.add", gameInfo));
+  var game = new ShGame();
+  game.load(gameId, function (error, data) {
+    if (error !== 0) {
+      cb(error, data);
+      return;
+    }
+
+    var gameRaw = game.getData();
+    if (gameRaw.playerOrder.length === gameRaw.maxPlayers) {
+      cb(1, sh.error("game_full", "game is already full", {gameId: gameId}));
+      return;
+    }
+    var ts = new Date().getTime();
+    var gameInfo = {gameId: gameId,
+      name: gameRaw.name,
+      playerCount: gameRaw.playerOrder.length,
+      minPlayers: gameRaw.minPlayers,
+      maxPlayers: gameRaw.maxPlayers,
+      ts: ts};
+    global.gq.push(gameInfo);
+
+    global.socket.notifyAll(sh.event("gqueue.game.add", gameInfo));
+
+    cb(0, sh.event("event.gqueue.game.add", gameInfo));
+  });
 };
 
 gqueue.remove = function (req, res, cb) {
   var gameId = req.params.gameId;
 
   var gameInfo = null;
-  _.each(global.gq, function (game, idx) {
+  _.forOwn(global.gq, function (game, idx) {
     if (game.gameId === gameId) {
       gameInfo = global.gq.splice(idx, 1);
+      global.socket.notifyAll(sh.event("gqueue.game.remove", gameInfo));
       return false;
     }
-    return true;
   });
 
-  cb(0, sh.event("event.gqueue.game.remove", gameInfo));
+  if (gameInfo === null) {
+    cb(0, sh.error("no_game", "no game to remove", {gameId: gameId}));
+  } else {
+    cb(0, sh.event("event.gqueue.game.remove", gameInfo));
+  }
 };
 
 gqueue.nextAvailable = function (req, res, cb) {
@@ -62,12 +88,14 @@ gqueue.nextAvailable = function (req, res, cb) {
 
   req.params.gameId = gameInfo.gameId;
   sh.call("game.join", req, res, function (error, data) {
+    // SWD - have to check user count and game.change or game.remove
     if (error !== 0) {
       // check to see if game is really full and valid
       // put the game back in the available queue
       global.gq.unshift(gameInfo);
     } else {
-      data.event = "event.game.found";
+      global.socket.notifyAll(sh.event("gqueue.game.remove", gameInfo));
+      data.event = "event.gqueue.found";
     }
     // data already an event from game.join
     cb(error, data);

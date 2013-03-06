@@ -12,4 +12,4 @@ config.adminUrl = "http://" + config.dnsName + ":" + config.adminPort;
 // socket options
 config.socketPort = 5102;
 config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
-config.heartBeat = 30 * 1000;
+config.heartBeat = 300 * 1000;

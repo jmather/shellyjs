@@ -146,7 +146,7 @@ game.join = function (req, res, cb) {
   user.addGame(game);
   if (!_.isObject(players[uid])) {
     // only notify if new user
-    global.live.notify(game.gameId, sh.event("event.game.user.join", {uid: uid}));
+    global.socket.notify(game.gameId, sh.event("event.game.user.join", {uid: uid}));
   }
   game.setPlayer(uid, "ready");
 
@@ -160,7 +160,7 @@ game.leave = function (req, res, cb) {
 //	game.setPlayer(uid, "left");
   game.removePlayer(uid);
 
-  global.live.notify(game.gameId, sh.event("event.game.user.leave", {uid: uid}));
+  global.socket.notify(game.gameId, sh.event("event.game.user.leave", {uid: uid}));
   cb(0, sh.event("event.game.leave", game.get("players")));
 };
 
@@ -204,7 +204,7 @@ game.turn = function (req, res, cb) {
         if (_.isUndefined(data)) {  // fill in the game info if not already by the game
           data = sh.event("event.game.info", game);
         }
-        global.live.notify(gameId, data);  // notify others
+        global.socket.notify(gameId, data);  // notify others
       }
       cb(error, data);
     });
@@ -241,7 +241,7 @@ game.reset = function (req, res, cb) {
   // SWD - should change to gameModule.reset
   req.env.gameModule.create(req, function (error, data) {
     if (error === 0) {
-      global.live.notify(game.gameId, data);
+      global.socket.notify(game.gameId, data);
       if (_.isUndefined(data)) {
         data = sh.event("event.game.info", game);
       }

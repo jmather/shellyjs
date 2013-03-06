@@ -18,6 +18,8 @@ function Game() {
     created: ts,
     lastModified: ts,
     status: "created",
+    minPlayers: 2,
+    maxPlayers: 2,
     players: {},
     playerOrder: [],
     whoTurn: 0,
