@@ -60,7 +60,9 @@ server.use(function (req, res, next) {
   try {
     req.params = JSON.parse(req.body);
   } catch (e) {
+    shlog.error("bad jason format -", e.toString(), req.body);
     res.send(sh.error("json_post", "bad json format", {error: e.toString()}));
+    return;
   }
   return next();
 });

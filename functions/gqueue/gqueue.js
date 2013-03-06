@@ -5,8 +5,6 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
-//var game = require(global.gBaseDir + "/functions/game/game.js");
-
 var gqueue = exports;
 
 gqueue.desc = "game state and control module";
@@ -104,9 +102,10 @@ gqueue.nextAvailable = function (req, res, cb) {
 
 gqueue.list = function (req, res, cb) {
   var limit = req.params.limit;
-  if (limit > 0) {
-    cb(0, global.gq.slice(0, limit));
+  if (global.gq.length > limit) {
+    cb(0, sh.event("event.gqueue.list", global.gq.slice(0, limit)));
     return;
   }
+
   cb(0, sh.event("event.gqueue.list", global.gq));
 };
