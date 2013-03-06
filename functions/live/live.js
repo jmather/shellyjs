@@ -46,7 +46,7 @@ live.game = function (req, res, cb) {
   if (req.params.status === "on") {
     if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
       shlog.info("(" + ws.uid + ") add game channel: " + gameChannel, ws.games);
-      global.live.notify(gameId, sh.event("event.game.user", {uid: ws.uid, status: "online"}));
+      global.live.notify(gameId, sh.event("event.game.user", {uid: ws.uid, gameId: gameId, status: "online"}));
       ws.games.push(gameId);
       eventEmitter.on(gameChannel, socketNotify);
 
@@ -61,7 +61,7 @@ live.game = function (req, res, cb) {
         _.each(_.keys(players), function (uid) {
           if (uid !== ws.uid && !_.isUndefined(global.gUsers[uid])) {
             shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
-            sh.sendWs(ws, 0, sh.event("event.game.user", {uid: uid, status: "online"}));
+            sh.sendWs(ws, 0, sh.event("event.game.user", {uid: uid, gameId: gameId, status: "online"}));
           }
         });
       });
@@ -73,7 +73,7 @@ live.game = function (req, res, cb) {
       ws.games.splice(idx, 1);
     }
     eventEmitter.removeListener(gameChannel, socketNotify);
-    global.live.notify(gameId, sh.event("event.game.user", {uid: ws.uid, status: "offline"}));
+    global.live.notify(gameId, sh.event("event.game.user", {uid: ws.uid, gameId: gameId, status: "offline"}));
   }
 
 //  sendWs(ws, 0, sh.event("event.live.game", {status: req.params.status, game: gameId}));

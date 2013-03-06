@@ -238,12 +238,14 @@
             }
             if(res.event == 'event.game.join') {
                 // turn off live events for old game
+                var newGameId = res.data.gameId;
+                var oldGameId = Env.baseParams.gameId;
                 setState(res.data);
-                var gameId = res.data.gameId;
-                if(typeof (Env.baseParams.gameId) !== 'undefined' && gameId != Env.baseParams.gameId) {
-                    liveInit(Env.baseParams.gameId, "off");
+                console.log(gameId, Env.baseParams.gameId);
+                if(typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
+                    liveInit(oldGameId, "off");
                 }
-                liveInit(gameId, "on");
+                liveInit(newGameId, "on");
                 return;
             }
             if(res.event == 'event.game.user') {
@@ -267,6 +269,7 @@
                 return;
             }
             if(res.event == 'event.game.user.join'
+                    || res.event == 'event.heartbeat'
                     || res.event == 'event.live.game')
             {
                 // ignore for now
