@@ -145,7 +145,7 @@ game.join = function (req, res, cb) {
   }
   game.setPlayer(uid, "ready");
 
-  cb(0, sh.event("event.game.info", game.getData()));
+  cb(0, sh.event("event.game.join", game.getData()));
 };
 
 game.leave = function (req, res, cb) {

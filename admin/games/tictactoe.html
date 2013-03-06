@@ -40,6 +40,7 @@
     <script language="javascript">
         var Env = {{{params}}};
         Env.baseParams = {};
+        Env.players = {};
 
         // allow for baseParam overrides from url
         function getURLParameter(name) {
@@ -143,6 +144,10 @@
                     var playerId = $(this).parent().attr('playerId');
                 });
 
+                if (typeof (Env.players[playerId]) != "undefined") {
+                    $newGame.find("#playerName").text(playerId + " " + Env.players[playerId].status);
+                }
+
                 $("#playerList").append($newGame);
             }
             $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
@@ -195,6 +200,7 @@
                 $("#gameId").text(game.gameId);
                 Env.baseParams.gameId = game.gameId;
             }
+            setPlayers(game.players, game.whoTurn);
         }
 
         function processEvent(res, from) {
@@ -228,16 +234,28 @@
             }
             if(res.event == 'event.game.create' || res.event === 'event.game.found') {
                 gameInit(res.data.gameId);
+                return;
+            }
+            if(res.event == 'event.game.join') {
+                // turn off live events for old game
                 setState(res.data);
+                var gameId = res.data.gameId;
+                if(typeof (Env.baseParams.gameId) !== 'undefined' && gameId != Env.baseParams.gameId) {
+                    liveInit(Env.baseParams.gameId, "off");
+                }
+                liveInit(gameId, "on");
                 return;
             }
             if(res.event == 'event.game.user') {
-                $(".playerId"+res.data.uid).find("#playerName").text(res.data.uid + " " + res.data.status);
+                Env.players[res.data.uid] = res.data;
+                var $playerName = $(".playerId"+res.data.uid).find("#playerName");
+                if ($playerName.size) {
+                    $playerName.text(res.data.uid + " " + res.data.status);
+                }
                 return;
             }
             if(res.event == 'event.game.info') {
                 setState(res.data);
-                setPlayers(res.data.players, res.data.whoTurn);
                 return;
             }
             if(res.event == 'event.game.over') {
@@ -321,14 +339,9 @@
         function gameInit(gameId)
         {
             var data = clone(Env.baseParams);
-            // turn off live events for old game
-            if(typeof (Env.baseParams.gameId) !== 'undefined' && gameId != Env.baseParams.gameId) {
-                liveInit(Env.baseParams.gameId, "off");
-            }
             data.gameId = gameId;
             data.cmd = "game.join";
             sendWs(data);
-            liveInit(gameId, "on");
         }
 
         function listMyGames()
