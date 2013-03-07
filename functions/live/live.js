@@ -33,7 +33,15 @@ live.user = function (req, res, cb) {
     eventEmitter.on(userChannel, socketNotify);
   }
 
-  cb(0, sh.event("event.live.user", {status: "on", uid: ws.uid}));
+  var event = sh.event("event.live.user", {uid: ws.uid, status: "online"});
+  global.socket.notifyAll(event);
+  _.forOwn(global.gUsers, function (info, playerId) {
+    // short cut the emmitter since we have ws
+    var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, status: "online"}));
+    ws.send(e);
+  });
+
+  cb(0, event);
 };
 
 live.game = function (req, res, cb) {

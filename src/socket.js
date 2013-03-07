@@ -103,12 +103,15 @@ Socket.start = function () {
       clearInterval(this.hbTimer);
 
       if (_.isUndefined(this.uid)) {
-        shlog.info("user never had valid session")
+        shlog.info("user never had valid session");
         return;
       }
       shlog.info("(" + this.uid + ") socket: close");
 
       delete gUsers[this.uid];
+
+      // SWD don't send this if they never turned live.user status=on
+      Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, status: "offline" }));
 
       var userChannel = sh.channel("user", this.uid);
       shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
