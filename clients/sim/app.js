@@ -6,8 +6,8 @@ var host = "http://localhost:5101";
 
 console.log("go");
 
-var reqTpl1 = {session: "1:43:xxxx:0", gameId: "249"};
-var reqTpl2 = {session: "1:41:xxxx:0", gameId: "249"};
+var reqTpl1 = {session: "1:43:xxxx:0", gameId: "251"};
+var reqTpl2 = {session: "1:41:xxxx:0", gameId: "251"};
 
 var gMoveDelay = 200;
 
