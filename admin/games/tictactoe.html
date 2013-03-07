@@ -124,6 +124,19 @@
             }
         }
 
+        function removeOpenGame(gameId) {
+            $(".openGameId" + gameId).remove();
+        }
+
+        function updateOpenGame(game) {
+            $currGame = $(".openGameId" + game.gameId);
+            if( game.playerCount >= game.maxPlayers) {
+                removeOpenGame(game.gameId);
+            } else {
+                $currGame.find("#openGameCounts").text(" (" + game.playerCount + " of " + game.maxPlayers + ")");
+            }
+        }
+
         function addOpenGame(game) {
             if ($(".openGameId" + game.gameId).size() > 0) {
                 return;
@@ -244,6 +257,27 @@
             setPlayers(game.players, game.whoTurn);
         }
 
+        function clearState()
+        {
+            $.cookie("shLastGame" + Env.uid, "0", { expires: 3650, path: '/' });
+
+            hideError();
+            for (var i=0; i<3; i++) {
+                for (var j=0; j<3; j++) {
+                    $("#x" + i + "y" + j).text("");
+                    $("#x" + i + "y" + j).css('background', '#ccc');
+                }
+            }
+
+            $("#gameId").text("");
+            $("#gameStatus").text("");
+            $("#whoTurn").text("");
+            $('#gameWinner').text('');
+            $("#gamePlaying").text("");
+
+            $(".activePlayer").remove();
+        }
+
         function processEvent(res, from) {
             if(typeof(res.event) == 'undefined') {
                 log(from, "error", "old message: "+JSON.stringify(res));
@@ -296,9 +330,7 @@
                 return;
             }
             if(res.event == 'event.game.leave') {
-                if (res.data.uid === Env.uid) {
-
-                } else {
+                if (res.data.uid !== Env.uid) {
                     $(".playerId"+res.data.uid).remove();
                 }
                 return;
@@ -339,8 +371,15 @@
                 return;
             }
             if(res.event == 'event.gqueue.game.add') {
-                console.log("game.add");
                 addOpenGame(res.data);
+                return;
+            }
+            if(res.event == 'event.gqueue.game.change') {
+                updateOpenGame(res.data);
+                return;
+            }
+            if(res.event == 'event.gqueue.game.remove') {
+                removeOpenGame(res.data.gameId);
                 return;
             }
             if(res.event == 'event.heartbeat'
@@ -422,7 +461,7 @@
 
         function gameLeave()
         {
-            $.cookie("shLastGame" + Env.uid, "0", { expires: 3650, path: '/' });
+            clearState()
             var data = clone(Env.baseParams);
             data.cmd = "game.leave";
             sendWs(data);
@@ -586,7 +625,7 @@
         </td>
         <td valign="top" style="width:200px;">
             <div>user=<span id="uid"></span></div>
-            <div>game=<span id="gameId">0</span>
+            <div>game=<span id="gameId"></span>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>

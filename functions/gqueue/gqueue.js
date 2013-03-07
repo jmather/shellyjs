@@ -16,9 +16,34 @@ gqueue.functions = {
   list: {desc: "return a list of available games", params: {limit: {dtype: "number"}}, security: []}
 };
 
+function removeGame(gameId) {
+  var idx = global.gq.indexof(gameId);
+  if(idx != -1) {
+    delete global.gq[idx];
+  }
+}
+
+function userJoined(game) {
+  var obj = {};
+  var gameData = game.getData();
+  obj.gameId = gameData.gameId;
+  obj.name = gameData.name;
+  obj.status = gameData.status;
+  obj.playerCount = gameData.playerOrder.length;
+  obj.minPlayers = gameData.minPlayers;
+  obj.maxPlayers = gameData.maxPlayers;
+  obj.players = gameData.players;
+
+  console.log(obj);
+
+  global.socket.notifyAll(sh.event("event.gqueue.game.change", obj));
+}
+
 // SWD: just init a global game queue for now
 if (_.isUndefined(global.gq)) {
   global.gq = [];
+  global.gqueue = {};
+  global.gqueue.userJoined = userJoined;
 }
 
 function fillGame(obj, cb) {
@@ -77,21 +102,7 @@ gqueue.add = function (req, res, cb) {
 
 gqueue.remove = function (req, res, cb) {
   var gameId = req.params.gameId;
-
-  var gameInfo = null;
-  _.forOwn(global.gq, function (game, idx) {
-    if (game.gameId === gameId) {
-      gameInfo = global.gq.splice(idx, 1);
-      global.socket.notifyAll(sh.event("event.gqueue.game.remove", gameInfo));
-      return false;
-    }
-  });
-
-  if (gameInfo === null) {
-    cb(0, sh.error("no_game", "no game to remove", {gameId: gameId}));
-  } else {
-    cb(0, sh.event("event.gqueue.game.remove", gameInfo));
-  }
+  cb(0, sh.event("event.gqueue.game.remove", {gameId: gameId}));
 };
 
 gqueue.nextAvailable = function (req, res, cb) {

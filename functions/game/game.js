@@ -143,12 +143,15 @@ game.join = function (req, res, cb) {
     return;
   }
 
+  var isNew = !_.isObject(players[uid]);
+
   user.addGame(game);
-  if (!_.isObject(players[uid])) {
-    // only notify if new user
-    global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {uid: uid}));
-  }
   game.setPlayer(uid, "ready");
+
+  if (isNew) {
+    global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {gameId: game.get("gameId"), uid: uid}));
+    global.gqueue.userJoined(game);
+  }
 
   cb(0, sh.event("event.game.join", game.getData()));
 };
@@ -161,7 +164,10 @@ game.leave = function (req, res, cb) {
   game.removePlayer(uid);
   user.removeGame(game);
 
-  global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {uid: uid}));
+  global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {gameId: game.get("gameId"), uid: uid}));
+
+  // SWD notify the gqueue also
+
   cb(0, sh.event("event.game.leave", game.get("players")));
 };
 

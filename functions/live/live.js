@@ -86,5 +86,5 @@ live.game = function (req, res, cb) {
   }
 
 //  sendWs(ws, 0, sh.event("event.live.game", {status: req.params.status, game: gameId}));
-  cb(0, sh.event("event.live.game", {status: req.params.status, game: gameId}));
+  cb(0, sh.event("event.live.game", {status: req.params.status, gameId: gameId}));
 };
