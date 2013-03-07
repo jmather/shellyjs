@@ -1,4 +1,5 @@
 var events = require("events");
+var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -20,6 +21,25 @@ if (_.isUndefined(global.gq)) {
   global.gq = [];
 }
 
+function fillGame(obj, cb) {
+  var game = new ShGame();
+  game.load(obj.gameId, function (error, data) {
+    if (error !== 0) {
+      cb(error);
+      return;
+    }
+    var gameData = game.getData();
+    obj.name = gameData.name;
+    obj.status = gameData.status;
+    obj.playerCount = gameData.playerOrder.length;
+    obj.minPlayers = gameData.minPlayers;
+    obj.maxPlayers = gameData.maxPlayers;
+    obj.players = gameData.players;
+
+    cb(0);
+  });
+}
+
 gqueue.add = function (req, res, cb) {
   var gameId = req.params.gameId;
   var data = req.params.data;
@@ -31,28 +51,25 @@ gqueue.add = function (req, res, cb) {
     return;
   }
 
-  var game = new ShGame();
-  game.load(gameId, function (error, data) {
+  var ts = new Date().getTime();
+  var gameInfo = {gameId: gameId, posted: ts};
+  fillGame(gameInfo, function (error) {
     if (error !== 0) {
-      cb(error, data);
-      return;
+      cb(1, sh.error(error));
     }
 
-    var gameRaw = game.getData();
-    if (gameRaw.playerOrder.length === gameRaw.maxPlayers) {
+    if (gameInfo.playerCount === gameInfo.maxPlayers) {
       cb(1, sh.error("game_full", "game is already full", {gameId: gameId}));
       return;
     }
-    var ts = new Date().getTime();
-    var gameInfo = {gameId: gameId,
-      name: gameRaw.name,
-      playerCount: gameRaw.playerOrder.length,
-      minPlayers: gameRaw.minPlayers,
-      maxPlayers: gameRaw.maxPlayers,
-      ts: ts};
+    if (gameInfo.state === "closed") {
+      cb(1, sh.error("game_closed", "game is already closed", {gameId: gameId}));
+      return;
+    }
+
     global.gq.push(gameInfo);
 
-    global.socket.notifyAll(sh.event("gqueue.game.add", gameInfo));
+    global.socket.notifyAll(sh.event("event.gqueue.game.add", gameInfo));
 
     cb(0, sh.event("event.gqueue.game.add", gameInfo));
   });
@@ -65,7 +82,7 @@ gqueue.remove = function (req, res, cb) {
   _.forOwn(global.gq, function (game, idx) {
     if (game.gameId === gameId) {
       gameInfo = global.gq.splice(idx, 1);
-      global.socket.notifyAll(sh.event("gqueue.game.remove", gameInfo));
+      global.socket.notifyAll(sh.event("event.gqueue.game.remove", gameInfo));
       return false;
     }
   });
@@ -102,10 +119,17 @@ gqueue.nextAvailable = function (req, res, cb) {
 
 gqueue.list = function (req, res, cb) {
   var limit = req.params.limit;
-  if (global.gq.length > limit) {
+  if (limit !== 0 && global.gq.length > limit) {
     cb(0, sh.event("event.gqueue.list", global.gq.slice(0, limit)));
     return;
   }
 
-  cb(0, sh.event("event.gqueue.list", global.gq));
+  async.eachSeries(global.gq, fillGame, function (err) {
+    async.filter(global.gq, function (obj, cb) {
+      cb(obj.playerCount < obj.maxPlayers);
+    }, function (result) {
+      global.gq = result;
+      cb(0, sh.event("event.gqueue.list", global.gq));
+    });
+  });
 };

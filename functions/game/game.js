@@ -146,7 +146,7 @@ game.join = function (req, res, cb) {
   user.addGame(game);
   if (!_.isObject(players[uid])) {
     // only notify if new user
-    global.socket.notify(game.gameId, sh.event("event.game.user.join", {uid: uid}));
+    global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {uid: uid}));
   }
   game.setPlayer(uid, "ready");
 
@@ -156,11 +156,12 @@ game.join = function (req, res, cb) {
 game.leave = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
+  var user = req.session.user;
 
-//	game.setPlayer(uid, "left");
   game.removePlayer(uid);
+  user.removeGame(game);
 
-  global.socket.notify(game.gameId, sh.event("event.game.user.leave", {uid: uid}));
+  global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {uid: uid}));
   cb(0, sh.event("event.game.leave", game.get("players")));
 };
 
@@ -188,27 +189,26 @@ game.turn = function (req, res, cb) {
 
   if (game.whoTurn !== uid) {
     cb(1, sh.error("game_noturn", "not your turn", {whoTurn: game.whoTurn}));
-  } else {
-    var nextIndex = game.playerOrder.indexOf(uid) + 1;
-    if (nextIndex === game.playerOrder.length) {
-      nextIndex = 0;
-    }
-    game.whoTurn = game.playerOrder[nextIndex];
-    game.turnsPlayed += 1;
-
-    req.env.game.set(game);
-
-    //SWD make sure turn function is there
-    req.env.gameModule.turn(req, function (error, data) {
-      if (error === 0) {
-        if (_.isUndefined(data)) {  // fill in the game info if not already by the game
-          data = sh.event("event.game.info", game);
-        }
-        global.socket.notify(gameId, data);  // notify others
-      }
-      cb(error, data);
-    });
+    return;
   }
+  var nextIndex = game.playerOrder.indexOf(uid) + 1;
+  if (nextIndex === game.playerOrder.length) {
+    nextIndex = 0;
+  }
+  game.whoTurn = game.playerOrder[nextIndex];
+  game.turnsPlayed += 1;
+  game.status = "playing";  // turn looks valid, game module sets "over"
+
+  //SWD make sure turn function is there
+  req.env.gameModule.turn(req, function (error, data) {
+    if (error === 0) {
+      if (_.isUndefined(data)) {  // fill in the game info if not already by the game
+        data = sh.event("event.game.info", game);
+      }
+      global.socket.notify(gameId, data);  // notify others
+    }
+    cb(error, data);
+  });
 };
 
 game.get = function (req, res, cb) {

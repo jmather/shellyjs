@@ -6,12 +6,12 @@ var host = "http://localhost:5101";
 
 console.log("go");
 
-var reqTpl1 = {session: "1:33:xxxx:0", gameId: "193"};
-var reqTpl2 = {session: "1:44:xxxx:0", gameId: "193"};
+var reqTpl1 = {session: "1:43:xxxx:0", gameId: "249"};
+var reqTpl2 = {session: "1:41:xxxx:0", gameId: "249"};
 
 var gMoveDelay = 200;
 
-var gRuns = 100;
+var gRuns = 10;
 var gMoveSet = [
   [0, 0],
   [0, 1],
@@ -25,7 +25,7 @@ var gMoveSet = [
 ];
 
 var gMoves = _.clone(gMoveSet);
-var gStats = {"33": 0, "44": 0, "0": 0};
+var gStats = {"43": 0, "41": 0, "0": 0};
 var gRunCount = 0;
 
 /**
@@ -117,7 +117,7 @@ function moveUntilEnd(tpl, moves, cb) {
       cb();
       return;
     }
-    var tpl = (res.data.whoTurn === "44" ? reqTpl2 : reqTpl1);
+    var tpl = (res.data.whoTurn === "41" ? reqTpl2 : reqTpl1);
     moveUntilEnd(tpl, moves, cb);
   });
 }

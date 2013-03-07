@@ -39,7 +39,7 @@
     </style>
     <script language="javascript">
         var Env = {{{params}}};
-        Env.baseParams = {};
+        Env.baseParams = { gameId: "0" };
         Env.players = {};
 
         // allow for baseParam overrides from url
@@ -55,7 +55,6 @@
             Env.baseParams.session = psess;
         }
 
-        Env.baseParams.gameId = $.cookie("shLastGame");
         var pgameId = getURLParameter("gameId");
         if(pgameId != 'null')
         {
@@ -125,26 +124,44 @@
             }
         }
 
+        function addOpenGame(game) {
+            if ($(".openGameId" + game.gameId).size() > 0) {
+                return;
+            }
+            var $newGame = $("#openGameTemplate").clone();
+            $newGame.find("#openGameName").text(game.name + "-" + game.gameId);
+            $newGame.find("#openGameCounts").text(" (" + game.playerCount + " of " + game.minPlayers + ")");
+            $newGame.addClass("openGameId" + game.gameId);
+            $newGame.addClass("activeOpenGame");
+            $newGame.attr("gameId", game.gameId);
+            $newGame.css("display", "block");
+
+            if (typeof (game.players[Env.uid]) !== "undefined") {
+                $newGame.find("#openGameJoin").css("display", "none");
+            } else {
+                $newGame.find("#openGameLeave").css("display", "none");
+            }
+
+            $newGame.find("#openGameJoin").click(function() {
+                var gameId = $(this).parent().attr('gameId');
+                gameInit(gameId);
+            });
+
+            $newGame.find("#openGameLeave").click(function() {
+                var gameId = $(this).parent().attr('gameId');
+//                    gameLeave(gameId);
+            });
+
+            $("#openGameList").append($newGame);
+        }
+
         function setOpenGames(gameList)
         {
             $(".activeOpenGame").remove();
             for (var i=0; i<gameList.length; i++)
             {
                 var game = gameList[i];
-                var $newGame = $("#openGameTemplate").clone();
-                $newGame.find("#openGameName").text(game.name + "-" + game.gameId);
-                $newGame.find("#openGameCounts").text(" (" + game.playerCount + " of " + game.minPlayers + ")");
-                $newGame.attr("gameId", game.gameId);
-                $newGame.addClass("activeOpenGame");
-                $newGame.css("display", "block");
-
-                $newGame.find("#openGameJoin").click(function() {
-                    console.log("here");
-                    var gameId = $(this).parent().attr('gameId');
-                    gameInit(gameId);
-                });
-
-                $("#openGameList").append($newGame);
+                addOpenGame(game);
             }
         }
 
@@ -178,8 +195,7 @@
 
         function setState(game)
         {
-            $.removeCookie("shLastGame"); // smoke the old one, SWD remove this after it clears prod
-            $.cookie("shLastGame", game.gameId, { expires: 3650, path: '/' });
+            $.cookie("shLastGame" + Env.uid, game.gameId, { expires: 3650, path: '/' });
 
             hideError();
             var gameBoard = game.state.gameBoard;
@@ -247,13 +263,18 @@
                 } else {
                     log(from, "info", "using existing session: " + Env.baseParams.session);
                 }
+
                 $("#session").text(Env.baseParams.session);
                 Env.uid = Env.baseParams.session.split(':')[1];
                 $("#uid").text(Env.uid);
+
                 listMyGames();
                 listOpenGames();
 
-                if (typeof (Env.baseParams.gameId) !== 'undefined') {
+                if (Env.baseParams.gameId === "0") {
+                    Env.baseParams.gameId = $.cookie("shLastGame" + Env.uid);
+                }
+                if (Env.baseParams.gameId !== "0") {
                     gameInit(Env.baseParams.gameId);
                 }
                 return;
@@ -274,12 +295,31 @@
                 liveInit(newGameId, "on");
                 return;
             }
+            if(res.event == 'event.game.leave') {
+                if (res.data.uid === Env.uid) {
+
+                } else {
+                    $(".playerId"+res.data.uid).remove();
+                }
+                return;
+            }
             if(res.event == 'event.game.user') {
                 Env.players[res.data.uid] = res.data;
                 var $playerName = $(".playerId"+res.data.uid).find("#playerName");
                 if ($playerName.size) {
                     $playerName.text(res.data.uid + " " + res.data.status);
                 }
+                return;
+            }
+            if(res.event == 'event.game.user.leave' ||
+                    res.event == 'event.game.user.join') {
+                if (res.data.uid == Env.uid) {
+                    return;
+                }
+                // add the player, just update for now
+                var data = clone(Env.baseParams);
+                data.cmd = "game.get";
+                sendWs(data);
                 return;
             }
             if(res.event == 'event.game.info') {
@@ -298,8 +338,12 @@
                 setOpenGames(res.data);
                 return;
             }
-            if(res.event == 'event.game.user.join'
-                    || res.event == 'event.heartbeat'
+            if(res.event == 'event.gqueue.game.add') {
+                console.log("game.add");
+                addOpenGame(res.data);
+                return;
+            }
+            if(res.event == 'event.heartbeat'
                     || res.event == 'event.live.game')
             {
                 // ignore for now
@@ -373,6 +417,14 @@
             var data = clone(Env.baseParams);
             data.gameId = gameId;
             data.cmd = "game.join";
+            sendWs(data);
+        }
+
+        function gameLeave()
+        {
+            $.cookie("shLastGame" + Env.uid, "0", { expires: 3650, path: '/' });
+            var data = clone(Env.baseParams);
+            data.cmd = "game.leave";
             sendWs(data);
         }
 
@@ -466,6 +518,10 @@
 //                sendRest(data);
             });
 
+            $("#gameLeave").click(function() {
+                gameLeave();
+            });
+
             $("#listMyGames").click(function() {
                 listMyGames();
             });
@@ -497,7 +553,9 @@
         <td valign="top">
             <div id="openGameList" style="height:150;width:100%;overflow:scroll;">
                 <div id="openGameTemplate" style="display:none;">
-                    <span id="openGameName">open-game-0</span><span id="openGameCounts">(0 of 0)</span><button id="openGameJoin">join</button>
+                    <span id="openGameName">open-game-0</span><span id="openGameCounts">(0 of 0)</span>
+                    <button id="openGameJoin">join</button>
+                    <button id="openGameLeave">leave</button>
                 </div>
             </div>
         </td>
@@ -550,8 +608,7 @@
             <button id="gameInvite">invite</button>
             <button id="gameFind">find game</button>
             <button id="gameUpdate">update</button>
-            <button id="">notify</button>
-            <button id="user1Kick">kick</button>
+            <button id="gameLeave">leave</button>
             <button id="gameReset" style="float:right;">reset</button>
             <button id="test" style="float:right;">test</button>
         </td>

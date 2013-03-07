@@ -101,3 +101,12 @@ User.prototype.addGame = function (game) {
     // don"t care;
   });
 };
+
+User.prototype.removeGame = function (game) {
+  this._dirty = true;
+  var ts = new Date().getTime();
+  delete this._data.currentGames[game.get("gameId")];
+  this.save(function () {
+    // don"t care;
+  });
+};

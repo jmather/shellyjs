@@ -17,7 +17,7 @@ function Game() {
     ownerId: 0,
     created: ts,
     lastModified: ts,
-    status: "created",
+    status: "open",
     minPlayers: 2,
     maxPlayers: 2,
     players: {},
@@ -94,15 +94,16 @@ Game.prototype.setPlayer = function (uid, status) {
   this._dirty = true;
   if (_.isUndefined(this._data.players[uid])) {
     this._data.players[uid] = {status: "ready"};
-    if (this._data.playerOrder.indexOf(uid) === -1) {
-      this._data.playerOrder.push(uid);
-    }
   } else {
     this._data.players[uid].status = status;
+  }
+  if (this._data.playerOrder.indexOf(uid) === -1) {
+    this._data.playerOrder.push(uid);
   }
 };
 
 Game.prototype.removePlayer = function (uid) {
   this._dirty = true;
   delete this._data.players[uid];
+  this._data.playerOrder = _.filter(this._data.playerOrder, function (playerId) { return playerId !== uid; });
 };
