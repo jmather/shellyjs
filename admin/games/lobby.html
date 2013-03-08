@@ -83,8 +83,14 @@
                 $newGame.css("display", "block");
 
                 $newGame.find("#myGameJoin").click(function() {
-                    var gameId = $(this).parent().attr('gameId');
-                    gameInit(gameId);
+                    var addParam = "";
+                    var psess = getURLParameter("session");  // done for testing two users in same browser
+                    if(psess != 'null')
+                    {
+                        addParam = "&session="+psess;
+                    }
+                    var gameId = $(this).parent().attr("gameId");
+                    window.location.href = "/games/tictactoe.html?gameId=" + gameId + addParam;
                 });
                 $newGame.find("#myGameRemove").click(function() {
                     var data = clone(Env.baseParams);
@@ -300,7 +306,7 @@
             });
 
             $("#test").click(function() {
-                ws.close();
+                console.log("test code here");
             });
         }
     </script>
