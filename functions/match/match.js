@@ -22,28 +22,28 @@ match.functions = {
 //  global.matchq.tictactoe = {};
 //}
 
-var matchq = {};
-matchq.tictactoe = {};
-var info = {};
-info.tictactoe = {minPlayers: 2, maxPlayers: 2};
+var gMatchq = {};
+gMatchq.tictactoe = {};
+var gInfo = {};
+gInfo.tictactoe = {minPlayers: 2, maxPlayers: 2};
 
 match.add = function (req, res, cb) {
   var uid = req.session.uid;
   var name = req.params.name;
 
-  if (_.isUndefined(global.matchq[name])) {
+  if (_.isUndefined(gMatchq[name])) {
     cb(1, sh.error("bad_game", "unknown game", {name: name}));
   }
 
-  if (!_.isUndefined(global.matchq[name][uid])) {
+  if (!_.isUndefined(gMatchq[name][uid])) {
     cb(1, sh.error("match_added", "player is already being matched", {uid: uid, name: name}));
     return;
   }
 
-  var keys = Object.keys(global.matchq[name]);
-  if (keys.length + 1 >= info[name].maxPlayers) {
+  var keys = Object.keys(gMatchq[name]);
+  if (keys.length + 1 >= gInfo[name].maxPlayers) {
     req.params.cmd = "game.create";     // change the command, req.param.name is already set
-    req.params.players = keys.slice(0, info[name].maxPlayers);
+    req.params.players = keys.slice(0, gInfo[name].maxPlayers);
     req.params.players.push(uid); // add the current user
 
     sh.call("game.create", req, res, function (error, data) {
@@ -55,7 +55,7 @@ match.add = function (req, res, cb) {
       var matchInfo = {};
       matchInfo.gameId = data.data.gameId;
       _.each(req.params.players, function (playerId) {
-        delete global.matchq[name][playerId];
+        delete gMatchq[name][playerId];
         matchInfo[playerId] = {};
       });
       _.each(req.params.players, function (playerId) {
@@ -70,7 +70,7 @@ match.add = function (req, res, cb) {
   // just add the user
   var ts = new Date().getTime();
   var playerInfo = {uid: uid, posted: ts};
-  global.matchq[name][uid] = playerInfo;
+  gMatchq[name][uid] = playerInfo;
   cb(0, sh.event("event.match.add", playerInfo));
 };
 
@@ -78,18 +78,18 @@ match.remove = function (req, res, cb) {
   var uid = req.session.uid;
   var name = req.params.name;
 
-  delete global.matchq[name][uid];
+  delete gMatchq[name][uid];
   cb(0, sh.event("event.match.remove"));
 };
 
 match.counts = function (req, res, cb) {
   var counts = {};
-  _.forOwn(global.matchq, function (gameq, idx) {
+  _.forOwn(gMatchq, function (gameq, idx) {
     counts[idx] = Object.keys(gameq).length;
   });
   cb(0, sh.event("event.match.counts", counts));
 };
 
 match.list = function (req, res, cb) {
-  cb(0, sh.event("event.match.list", global.matchq));
+  cb(0, sh.event("event.match.list", gMatchq));
 };
