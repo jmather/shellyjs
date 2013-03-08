@@ -6,8 +6,8 @@ var host = "http://localhost:5101";
 
 console.log("go");
 
-var reqTpl1 = {session: "1:43:xxxx:0", gameId: "251"};
-var reqTpl2 = {session: "1:41:xxxx:0", gameId: "251"};
+var reqTpl1 = {session: "1:43:xxxx:0", gameId: "268"};
+var reqTpl2 = {session: "1:41:xxxx:0", gameId: "268"};
 
 var gMoveDelay = 200;
 
@@ -73,7 +73,7 @@ function join(cb) {
  * @param y
  * @param cb
  */
-function move2(tpl, x, y, cb) {
+function move(tpl, x, y, cb) {
   console.log("move:", x, y);
   var reqData = _.clone(tpl);
   reqData.cmd = "game.turn";
@@ -105,11 +105,15 @@ function moveUntilEnd(tpl, moves, cb) {
   }
   var idx = _.random(moves.length - 1);
   var newMove = moves.splice(idx, 1);
-  move2(tpl, newMove[0][0], newMove[0][1], function (res) {
-    if (res.event === "event.error") {
-      console.log(res);
+  move(tpl, newMove[0][0], newMove[0][1], function (res) {
+    if (res.event === "event.error" && res.code !== "game_noturn") {
+      console.log("error", res);
       cb();
       return;
+    }
+    if (res.code === "game_noturn") {
+      // add move back in because it was not our turn
+      moves.push(newMove[0]);
     }
     // if win stop
     if (res.event === "event.game.over") {
