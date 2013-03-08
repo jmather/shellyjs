@@ -43,7 +43,7 @@ Socket.start = function () {
     ws.hbTimer = null;
 
     var heartBeat = function () {
-      sh.sendWs(ws, 0, sh.event("event.hearbeat", {interval: global.CONF.heartBeat}));
+      sh.sendWs(ws, 0, sh.event("event.heartbeat", {interval: global.CONF.heartBeat}));
     };
     ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
 
