@@ -42,6 +42,10 @@ match.add = function (req, res, cb) {
   var keys = Object.keys(global.matchq[name]);
   if (keys.length >= 2) {
     req.params.cmd = "game.create";     // change the command, name is already set
+    // pull any two users for now - SWD might have to order this to be more fair
+    var uid1 = keys[0];
+    var uid2 = keys[1];
+    req.params.players = [uid1, uid2];
     sh.call("game.create", req, res, function (error, data) {
       if (error) {
         delete global.matchq[name][uid];        // pull the user out, so they can try again
@@ -49,9 +53,6 @@ match.add = function (req, res, cb) {
         return;
       }
 
-      // pull any two users for now - SWD might have to order this to be more fair
-      var uid1 = keys[0];
-      var uid2 = keys[1];
       delete global.matchq[name][uid1];
       delete global.matchq[name][uid2];
       var obj = {};

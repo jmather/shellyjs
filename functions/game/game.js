@@ -1,5 +1,6 @@
 var fs = require("fs");
 var _ = require("lodash");
+var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
@@ -88,6 +89,27 @@ game.post = function (req, rs, cb) {
   req.env.game.save(cb);
 };
 
+function addPlayers(players, game, cb) {
+  async.each(players, function (playerId, cb) {
+    var player = new ShUser();
+    player.load(playerId, function (error, data) {
+      if (error) {
+        cb(data);
+        return;
+      }
+      player.addGame(game);
+      cb();
+    });
+  }, function (error) {
+    if (error) {
+      console.log("loaded all users", error);
+      cb(1, error);
+      return;
+    }
+    cb(0);
+  });
+}
+
 game.create = function (req, res, cb) {
   var uid = req.session.uid;
 
@@ -104,16 +126,27 @@ game.create = function (req, res, cb) {
     req.env.game = game;
 
     req.session.user.addGame(game);
+    if (!_.isUndefined(req.params.players)) {
+      addPlayers(req.params.players, game, function (error, data) {
+        // SWD ignore any errors for now
+        if (error) {
+          shlog.error("add_players", "unable to add a player", data);
+        }
+      });
+    }
 
     // SWD make sure init is there
+    if (_.isUndefined(req.env.gameModule.create)) {
+      cb(0, sh.event("event.game.create", game.getData()));
+      return;
+    }
     req.env.gameModule.create(req, function (error, data) {
-      if (error !== 0) {
-        if (_.isUndefined(data)) {
-          data = sh.event("event.game.create", game.getData());
-        }
+      if (!error && _.isUndefined(data)) {
+        data = sh.event("event.game.create", game.getData());
       }
       cb(error, data);
     });
+
   });
 };
 
