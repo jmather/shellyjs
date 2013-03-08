@@ -26,6 +26,15 @@ tictactoe.create = function (req, cb) {
   cb(0, sh.event("event.game.create", req.env.game.getData()));
 };
 
+tictactoe.reset = function (req, cb) {
+  this.create(req, function(error, data) {
+    if(error === 0) {
+      data.event = "event.game.reset";
+    }
+    cb(error, data);
+  });
+};
+
 function checkFull(gb) {
   var res = true;
   for (var i = 0; i < 3; i++) {

@@ -78,15 +78,18 @@
 
             color = "black";
             bodyColor = "black";
-            if(type=="error") {
-                color = "red"
-                bodyColor = "red";
-            }
             if(api=="rest") {
                 color = "blue";
             }
             if(api=="socket") {
                 color = "green";
+            }
+            if(api=="unknown-event") {
+                color = "green";
+            }
+            if(type=="error" || type=="unknown-event") {
+                color = "red"
+                bodyColor = "red";
             }
             if (typeof(msg) == 'object') {
                 msg = JSON.stringify(msg);
@@ -121,60 +124,6 @@
                 });
 
                 $("#gameList").append($newGame);
-            }
-        }
-
-        function removeOpenGame(gameId) {
-            $(".openGameId" + gameId).remove();
-        }
-
-        function updateOpenGame(game) {
-            $currGame = $(".openGameId" + game.gameId);
-            if( game.playerCount >= game.maxPlayers) {
-                removeOpenGame(game.gameId);
-            } else {
-                $currGame.find("#openGameCounts").text(" (" + game.playerCount + " of " + game.maxPlayers + ")");
-            }
-        }
-
-        function addOpenGame(game) {
-            if ($(".openGameId" + game.gameId).size() > 0) {
-                return;
-            }
-            var $newGame = $("#openGameTemplate").clone();
-            $newGame.find("#openGameName").text(game.name + "-" + game.gameId);
-            $newGame.find("#openGameCounts").text(" (" + game.playerCount + " of " + game.minPlayers + ")");
-            $newGame.addClass("openGameId" + game.gameId);
-            $newGame.addClass("activeOpenGame");
-            $newGame.attr("gameId", game.gameId);
-            $newGame.css("display", "block");
-
-            if (typeof (game.players[Env.uid]) !== "undefined") {
-                $newGame.find("#openGameJoin").css("display", "none");
-            } else {
-                $newGame.find("#openGameLeave").css("display", "none");
-            }
-
-            $newGame.find("#openGameJoin").click(function() {
-                var gameId = $(this).parent().attr('gameId');
-                gameInit(gameId);
-            });
-
-            $newGame.find("#openGameLeave").click(function() {
-                var gameId = $(this).parent().attr('gameId');
-//                    gameLeave(gameId);
-            });
-
-            $("#openGameList").append($newGame);
-        }
-
-        function setOpenGames(gameList)
-        {
-            $(".activeOpenGame").remove();
-            for (var i=0; i<gameList.length; i++)
-            {
-                var game = gameList[i];
-                addOpenGame(game);
             }
         }
 
@@ -303,7 +252,6 @@
                 $("#uid").text(Env.uid);
 
                 listMyGames();
-                listOpenGames();
 
                 if (Env.baseParams.gameId === "0") {
                     Env.baseParams.gameId = $.cookie("shLastGame" + Env.uid);
@@ -311,10 +259,6 @@
                 if (Env.baseParams.gameId !== "0") {
                     gameInit(Env.baseParams.gameId);
                 }
-                return;
-            }
-            if(res.event == 'event.game.create' || res.event === 'event.gqueue.found') {
-                gameInit(res.data.gameId);
                 return;
             }
             if(res.event == 'event.game.join') {
@@ -327,12 +271,6 @@
                 }
                 setState(res.data);
                 liveInit(newGameId, "on");
-                return;
-            }
-            if(res.event == 'event.game.leave') {
-                if (res.data.uid !== Env.uid) {
-                    $(".playerId"+res.data.uid).remove();
-                }
                 return;
             }
             if(res.event == 'event.game.user') {
@@ -354,7 +292,8 @@
                 sendWs(data);
                 return;
             }
-            if(res.event == 'event.game.info') {
+            if(res.event == 'event.game.info'
+                    || res.event == 'event.game.reset') {
                 setState(res.data);
                 return;
             }
@@ -366,23 +305,8 @@
                 setMyGames(res.data);
                 return;
             }
-            if(res.event == 'event.gqueue.list') {
-                setOpenGames(res.data);
-                return;
-            }
-            if(res.event == 'event.gqueue.game.add') {
-                addOpenGame(res.data);
-                return;
-            }
-            if(res.event == 'event.gqueue.game.change') {
-                updateOpenGame(res.data);
-                return;
-            }
-            if(res.event == 'event.gqueue.game.remove') {
-                removeOpenGame(res.data.gameId);
-                return;
-            }
             if(res.event == 'event.heartbeat'
+                    || res.event == 'event.live.user'
                     || res.event == 'event.live.game')
             {
                 // ignore for now
@@ -459,26 +383,10 @@
             sendWs(data);
         }
 
-        function gameLeave()
-        {
-            clearState()
-            var data = clone(Env.baseParams);
-            data.cmd = "game.leave";
-            sendWs(data);
-        }
-
         function listMyGames()
         {
             var data = clone(Env.baseParams);
             data.cmd = "user.games";
-            sendWs(data);
-        }
-
-        function listOpenGames()
-        {
-            var data = clone(Env.baseParams);
-            data.cmd = "gqueue.list";
-            data.limit = 10;
             sendWs(data);
         }
 
@@ -524,41 +432,26 @@
                 turn(x, y);
             });
 
-            $("#gameCreate").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "game.create";
-                data.name = "tictactoe";
-                sendRest(data);
-            });
-
-            $("#gameReset").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "game.reset";
-                sendRest(data);
-            });
-
-            $("#gameInvite").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "gqueue.add";
-                data.data = {display: "fun game"};
-                sendRest(data);
-            });
-
-            $("#gameFind").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "gqueue.nextAvailable";
-                sendWs(data);
+            $("#gameLobby").click(function() {
+                var addParam = "";
+                var psess = getURLParameter("session");  // done for testing two users in same browser
+                if(psess != 'null')
+                {
+                    addParam = "?session="+psess;
+                }
+                window.location.href = "/games/lobby.html" + addParam;
             });
 
             $("#gameUpdate").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "game.get";
                 sendWs(data);
-//                sendRest(data);
             });
 
-            $("#gameLeave").click(function() {
-                gameLeave();
+            $("#gameReset").click(function() {
+                var data = clone(Env.baseParams);
+                data.cmd = "game.reset";
+                sendRest(data);
             });
 
             $("#listMyGames").click(function() {
@@ -578,25 +471,18 @@
 <table border="1" style="width:100%;">
     <tr>
         <td style="width:300px;">my games <button id="listMyGames">refresh</button></td>
-        <td>open games</td>
+        <td></td>
         <td style="width:200px;">players<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
         <td valign="top" style="">
             <div id="gameList" style="height:150;width:100%;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game-0</span><button id="myGameJoin">join</button><button id="myGameRemove">remove</button>
+                    <span id="gameName">game-0</span><button id="myGameJoin">play</button><button id="myGameRemove">remove</button>
                 </div>
             </div>
         </td>
         <td valign="top">
-            <div id="openGameList" style="height:150;width:100%;overflow:scroll;">
-                <div id="openGameTemplate" style="display:none;">
-                    <span id="openGameName">open-game-0</span><span id="openGameCounts">(0 of 0)</span>
-                    <button id="openGameJoin">join</button>
-                    <button id="openGameLeave">leave</button>
-                </div>
-            </div>
         </td>
         <td valign="top">
             <div id="playerList" style="height:150;width:100%;overflow:scroll;">
@@ -643,11 +529,8 @@
     </tr>
     <tr>
         <td>
-            <button id="gameCreate">create</button>
-            <button id="gameInvite">invite</button>
-            <button id="gameFind">find game</button>
+            <button id="gameLobby">lobby</button>
             <button id="gameUpdate">update</button>
-            <button id="gameLeave">leave</button>
             <button id="gameReset" style="float:right;">reset</button>
             <button id="test" style="float:right;">test</button>
         </td>

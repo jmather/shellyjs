@@ -17,10 +17,15 @@ match.functions = {
 };
 
 // SWD: just init a global game queue for now
-if (_.isUndefined(global.matchq)) {
-  global.matchq = {};
-  global.matchq.tictactoe = {};
-}
+//if (_.isUndefined(global.matchq)) {
+//  global.matchq = {};
+//  global.matchq.tictactoe = {};
+//}
+
+var matchq = {};
+matchq.tictactoe = {};
+var info = {};
+info.tictactoe = {minPlayers: 2, maxPlayers: 2};
 
 match.add = function (req, res, cb) {
   var uid = req.session.uid;
@@ -35,37 +40,38 @@ match.add = function (req, res, cb) {
     return;
   }
 
-  var ts = new Date().getTime();
-  var playerInfo = {uid: uid, posted: ts};
-  global.matchq[name][uid] = playerInfo;
-
   var keys = Object.keys(global.matchq[name]);
-  if (keys.length >= 2) {
-    req.params.cmd = "game.create";     // change the command, name is already set
-    // pull any two users for now - SWD might have to order this to be more fair
-    var uid1 = keys[0];
-    var uid2 = keys[1];
-    req.params.players = [uid1, uid2];
+  if (keys.length + 1 >= info[name].maxPlayers) {
+    req.params.cmd = "game.create";     // change the command, req.param.name is already set
+    req.params.players = keys.slice(0, info[name].maxPlayers);
+    req.params.players.push(uid); // add the current user
+
     sh.call("game.create", req, res, function (error, data) {
       if (error) {
-        delete global.matchq[name][uid];        // pull the user out, so they can try again
         cb(error, data);
         return;
       }
 
-      delete global.matchq[name][uid1];
-      delete global.matchq[name][uid2];
-      var obj = {};
-      obj.gameId = data.data.gameId;
-      // just allow users to join - SWD should set the players though
-      obj[uid1] = {};
-      obj[uid2] = {};
-      global.socket.notifyUser(uid1, sh.event("event.match.made", obj));
-      global.socket.notifyUser(uid2, sh.event("event.match.made", obj));
+      var matchInfo = {};
+      matchInfo.gameId = data.data.gameId;
+      _.each(req.params.players, function (playerId) {
+        delete global.matchq[name][playerId];
+        matchInfo[playerId] = {};
+      });
+      _.each(req.params.players, function (playerId) {
+        global.socket.notifyUser(playerId, sh.event("event.match.made", matchInfo));
+      });
 
-      cb(0, sh.event("event.match.add", playerInfo));
+      cb(0, sh.event("event.match", matchInfo));
+      return;
     });
   }
+
+  // just add the user
+  var ts = new Date().getTime();
+  var playerInfo = {uid: uid, posted: ts};
+  global.matchq[name][uid] = playerInfo;
+  cb(0, sh.event("event.match.add", playerInfo));
 };
 
 match.remove = function (req, res, cb) {

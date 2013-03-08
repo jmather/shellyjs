@@ -125,8 +125,9 @@ game.create = function (req, res, cb) {
     // add to request environment
     req.env.game = game;
 
-    req.session.user.addGame(game);
-    if (!_.isUndefined(req.params.players)) {
+    if (_.isUndefined(req.params.players)) {
+      req.session.user.addGame(game);
+    } else {
       addPlayers(req.params.players, game, function (error, data) {
         // SWD ignore any errors for now
         if (error) {
@@ -277,12 +278,15 @@ game.reset = function (req, res, cb) {
 
   req.env.game.setData(game);
 
-  // SWD - should change to gameModule.reset
-  req.env.gameModule.create(req, function (error, data) {
+  if(_.isUndefined(req.env.gameModule)) {
+    cb(1, sh.error("game_reset", "this game has no reset"));
+    return;
+  }
+  req.env.gameModule.reset(req, function (error, data) {
     if (error === 0) {
       global.socket.notify(game.gameId, data);
       if (_.isUndefined(data)) {
-        data = sh.event("event.game.info", game);
+        data = sh.event("event.game.reset", game);
       }
     }
     cb(error, data);
