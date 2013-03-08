@@ -10,8 +10,8 @@ var match = exports;
 
 match.desc = "match players to the desired game and start them in it";
 match.functions = {
-  add: {desc: "add caller to the game matcher", params: {gameName: {dtype: "string"}}, security: []},
-  remove: {desc: "remove caller from the game matcher", params: {gameName: {dtype: "string"}}, security: []},
+  add: {desc: "add caller to the game matcher", params: {name: {dtype: "string"}}, security: []},
+  remove: {desc: "remove caller from the game matcher", params: {name: {dtype: "string"}}, security: []},
   counts: {desc: "list the match counts for all games", params: {}, security: []},
   list: {desc: "list the match players for all games", params: {}, security: []}
 };
@@ -24,45 +24,54 @@ if (_.isUndefined(global.matchq)) {
 
 match.add = function (req, res, cb) {
   var uid = req.session.uid;
-  var gameName = req.params.gameName;
+  var name = req.params.name;
 
-  if (_.isUndefined(global.matchq[gameName])) {
-    cb(1, sh.error("bad_game", "unknown game", {gameName: gameName}));
+  if (_.isUndefined(global.matchq[name])) {
+    cb(1, sh.error("bad_game", "unknown game", {name: name}));
   }
 
-  if (!_.isUndefined(global.matchq[gameName][uid])) {
-    cb(1, sh.error("match_added", "player is already being matched", {uid: uid, gameName: gameName}));
+  if (!_.isUndefined(global.matchq[name][uid])) {
+    cb(1, sh.error("match_added", "player is already being matched", {uid: uid, name: name}));
     return;
   }
 
   var ts = new Date().getTime();
   var playerInfo = {uid: uid, posted: ts};
-  global.matchq[gameName][uid] = playerInfo;
+  global.matchq[name][uid] = playerInfo;
 
-  var keys = Object.keys(global.matchq[gameName]);
+  var keys = Object.keys(global.matchq[name]);
   if (keys.length >= 2) {
-    // pull any two users for now - SWD might have to order this to be more fair
-    var uid1 = keys[0];
-    var uid2 = keys[1];
-    delete global.matchq[gameName][uid1];
-    delete global.matchq[gameName][uid2];
-    var obj = {};
-    obj.gameId = "00";
-    obj[uid1] = {};
-    obj[uid2] = {};
-    global.socket.notifyUser(uid1, sh.event("event.match.made", obj));
-    global.socket.notifyUser(uid2, sh.event("event.match.made", obj));
+    req.params.cmd = "game.create";     // change the command, name is already set
+    sh.call("game.create", req, res, function (error, data) {
+      if (error) {
+        delete global.matchq[name][uid];        // pull the user out, so they can try again
+        cb(error, data);
+        return;
+      }
+
+      // pull any two users for now - SWD might have to order this to be more fair
+      var uid1 = keys[0];
+      var uid2 = keys[1];
+      delete global.matchq[name][uid1];
+      delete global.matchq[name][uid2];
+      var obj = {};
+      obj.gameId = data.data.gameId;
+      // just allow users to join - SWD should set the players though
+      obj[uid1] = {};
+      obj[uid2] = {};
+      global.socket.notifyUser(uid1, sh.event("event.match.made", obj));
+      global.socket.notifyUser(uid2, sh.event("event.match.made", obj));
+
+      cb(0, sh.event("event.match.add", playerInfo));
+    });
   }
-
-
-  cb(0, sh.event("event.match.add", playerInfo));
 };
 
 match.remove = function (req, res, cb) {
   var uid = req.session.uid;
-  var gameName = req.params.gameName;
+  var name = req.params.name;
 
-  delete global.matchq[gameName][uid];
+  delete global.matchq[name][uid];
   cb(0, sh.event("event.match.remove"));
 };
 

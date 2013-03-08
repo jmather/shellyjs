@@ -34,8 +34,6 @@ function userJoined(game) {
   obj.maxPlayers = gameData.maxPlayers;
   obj.players = gameData.players;
 
-  console.log(obj);
-
   global.socket.notifyAll(sh.event("event.gqueue.game.change", obj));
 }
 

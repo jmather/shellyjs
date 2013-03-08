@@ -172,7 +172,7 @@
 
                 liveInit("on");
                 listMyGames();
-                setInterval(listMatchCounts, 5000);
+                listMatchCounts();
                 return;
             }
             if(res.event == 'event.user.games') {
@@ -189,6 +189,19 @@
             }
             if(res.event == 'event.match.counts') {
                 setMatchCounts(res.data);
+                return;
+            }
+            if(res.event == 'event.match.made') {
+                var addParam = "";
+                var psess = getURLParameter("session");  // done for testing two users in same browser
+                if(psess != 'null')
+                {
+                    addParam = "&session="+psess;
+                }
+                window.location.href = "/games/tictactoe.html?gameId=" + res.data.gameId + addParam;
+                return;
+            }
+            if(res.event == 'event.match.add') {
                 return;
             }
             log(from, "unknown-event", JSON.stringify(res));
@@ -278,7 +291,7 @@
             $("#gameTicTacToe").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "match.add";
-                data.gameName = "tictactoe";
+                data.name = "tictactoe";
                 sendWs(data);
             });
 

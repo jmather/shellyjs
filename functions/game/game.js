@@ -4,6 +4,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
+var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by create when pre-populating users
 
 var db = global.db;
 
