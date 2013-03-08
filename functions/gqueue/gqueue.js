@@ -18,7 +18,7 @@ gqueue.functions = {
 
 function removeGame(gameId) {
   var idx = global.gq.indexof(gameId);
-  if(idx != -1) {
+  if (idx !== -1) {
     delete global.gq[idx];
   }
 }

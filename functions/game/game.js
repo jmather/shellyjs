@@ -151,7 +151,6 @@ game.join = function (req, res, cb) {
 
   if (isNew) {
     global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {gameId: game.get("gameId"), uid: uid}));
-    global.gqueue.userJoined(game);
   }
 
   cb(0, sh.event("event.game.join", game.getData()));
