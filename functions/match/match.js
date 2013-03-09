@@ -45,7 +45,7 @@ match.add = function (req, res, cb) {
     req.params.players = keys.slice(0, global.matchInfo[name].maxPlayers);
     req.params.players.push(uid); // add the current user
 
-    sh.call("game.create", req, res, function (error, data) {
+    sh.call(req, res, function (error, data) {
       if (error) {
         cb(error, data);
         return;

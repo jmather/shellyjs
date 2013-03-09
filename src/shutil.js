@@ -78,9 +78,14 @@ shutil.fillSession = function (req, res, cb) {
   });
 };
 
-shutil.call = function (cmd, req, res, cb) {
+shutil.call = function (req, res, cb) {
+  var cmd = req.params.cmd;
   shlog.info("cmd = " + cmd);
   var cmdParts = cmd.split(".");
+  if (cmdParts.length < 2) {
+    cb(1, shutil.error("module_call", "invalid command", {cmd: cmd}));
+    return;
+  }
   var moduleName = cmdParts[0];
   var funcName = cmdParts[1];
   var cmdFile = global.gBaseDir + "/functions/" + moduleName + "/" + moduleName + ".js";
@@ -92,7 +97,13 @@ shutil.call = function (cmd, req, res, cb) {
     delete require.cache[require.resolve(cmdFile)];
     module = require(cmdFile);
   } catch (e) {
-    cb(1, shutil.error("module_require", "unable to load module", {name: moduleName, info: e.message}));
+    cb(1, shutil.error("module_require", "unable to load module", {module: moduleName, info: e.message}));
+    return;
+  }
+
+  // check function
+  if (_.isUndefined(module.functions[funcName])) {
+    cb(1, shutil.error("module_function", "function does not exist", {module: moduleName, function: funcName}));
     return;
   }
 

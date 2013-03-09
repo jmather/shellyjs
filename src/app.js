@@ -87,12 +87,12 @@ server.get("/hello", function (req, res, next) {
 });
 
 function respond(req, res, next) {
-  _.isFunction(next);  // end of line so never gets called;
+  _.isFunction(next);  // jslint fix - end of line so never gets called;
 
   var cmd = req.params.cmd;
 
   shlog.recv("rest - %s", JSON.stringify(req.params));
-  sh.call(cmd, req, res, function (error, data) {
+  sh.call(req, res, function (error, data) {
     shlog.send(error, "rest - %s", JSON.stringify(data));
     res.send(data);
   });

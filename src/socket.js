@@ -89,7 +89,7 @@ Socket.start = function () {
           }
         }
 
-        sh.call(req.params.cmd, req, res, function (error, data) {
+        sh.call(req, res, function (error, data) {
           sh.sendWs(ws, error, data);
         });  // end sh.call
       });  // end sh.fillSession
