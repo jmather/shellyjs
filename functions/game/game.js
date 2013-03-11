@@ -280,9 +280,7 @@ game.reset = function (req, res, cb) {
   game.status = "playing";
   game.winner = null;
 
-  req.env.game.setData(game);
-
-  if(_.isUndefined(req.env.gameModule)) {
+  if (_.isUndefined(req.env.gameModule)) {
     cb(1, sh.error("game_reset", "this game has no reset"));
     return;
   }

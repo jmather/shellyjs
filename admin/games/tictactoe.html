@@ -21,14 +21,15 @@
             border-style:solid;
             border-color:#bbb #888 #666 #aaa;
             border-width:3px 4px 4px 3px;
-            width:4em;
-            height:2em;
+            width:90px;
+            height:50px;
             background:#ccc;
             color:#333;
-            line-height:2;
+            line-height:50px;
             text-align:center;
             text-decoration:none;
             font-weight:900;
+            font-size:xx-large;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -khtml-user-select: none;
@@ -472,10 +473,6 @@
                 sendRest(data);
             });
 
-            $("#listMyGames").click(function() {
-                listMyGames();
-            });
-
             $("#test").click(function() {
                 console.log("test code");
             });
@@ -488,9 +485,8 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:320px;">my games <button id="listMyGames">refresh</button></td>
-        <td></td>
-        <td style="width:200px;">players<span style="float:right;" id="version"></span></td>
+        <td style="width:320px;">all my games</td>
+        <td><span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
         <td valign="top" style="">
@@ -502,21 +498,19 @@
                 </div>
             </div>
         </td>
-        <td valign="top">
-        </td>
-        <td valign="top">
-            <div id="playerList" style="height:150;width:100%;overflow:scroll;">
-                <div id="playerTemplate" style="display:none;">
-                    <span id="playerName">player-0</span><span id="playerTurn"></span>
-                </div>
-            </div>
+        <td>
         </td>
     </tr>
 </table>
 
 <table border="1" width="100%">
     <tr>
-        <td style="width:215px;">
+        <td>game</td>
+        <td>info</td>
+        <td>players</td>
+    </tr>
+    <tr>
+        <td style="width:295px;">
             <div id="x0y0" class="tictac"></div>
             <div id="x1y0" class="tictac"></div>
             <div id="x2y0" class="tictac"></div>
@@ -530,18 +524,24 @@
             <div id="x2y2" class="tictac"></div>
         </td>
         <td valign="top" style="width:200px;">
-            <div>user=<span id="uid"></span></div>
             <div>game=<span id="gameId"></span>
+            <div>user=<span id="uid"></span></div>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>
             <div>playing: <span id="gamePlaying"></span></div>
         </td>
-        <td>
-            <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
+        <td valign="top">
+            <div id="playerList" style="width:100%;overflow:scroll;">
+                <div id="playerTemplate" style="display:none;">
+                    <span id="playerName">player-0</span><span id="playerTurn"></span>
+                </div>
+            </div>
         </td>
     </tr>
 </table>
+
+<div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
 <table border="1" style="width:100%;">
     <tr>
