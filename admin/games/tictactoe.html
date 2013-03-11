@@ -102,14 +102,27 @@
             $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
         }
 
+        function setWhoTurn($turnSpan, whoTurn)
+        {
+            if(whoTurn === "0") {
+                $turnSpan.text("over");
+            } else if (whoTurn === Env.uid) {
+                $turnSpan.text("your turn");
+            } else {
+                $turnSpan.text(whoTurn + "'s turn");
+            }
+        }
+
         function setMyGames(gameList)
         {
             $(".activeGame").remove();
             for (gameId in gameList) {
                 var $newGame = $("#gameTemplate").clone();
                 $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
-                $newGame.attr("gameId", gameId);
+                setWhoTurn($newGame.find("#gameTurn"), gameList[gameId].whoTurn);
+                $newGame.addClass("myGameId" + gameId);
                 $newGame.addClass("activeGame");
+                $newGame.attr("gameId", gameId);
                 $newGame.css("display", "block");
 
                 $newGame.find("#myGameJoin").click(function() {
@@ -279,6 +292,11 @@
                 if ($playerName.size) {
                     $playerName.text(res.data.uid + " " + res.data.status);
                 }
+                return;
+            }
+            if(res.event == 'event.game.turn.next') {
+                $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
+                setWhoTurn($turnSpan, res.data.whoTurn);
                 return;
             }
             if(res.event == 'event.game.user.leave' ||
@@ -470,7 +488,7 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:300px;">my games <button id="listMyGames">refresh</button></td>
+        <td style="width:320px;">my games <button id="listMyGames">refresh</button></td>
         <td></td>
         <td style="width:200px;">players<span style="float:right;" id="version"></span></td>
     </tr>
@@ -478,7 +496,9 @@
         <td valign="top" style="">
             <div id="gameList" style="height:150;width:100%;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game-0</span><button id="myGameJoin">play</button><button id="myGameRemove">remove</button>
+                    <span id="gameName">game-0</span>
+                    (<span id="gameTurn">?</span>)
+                    <button id="myGameJoin">play</button><button id="myGameRemove">remove</button>
                 </div>
             </div>
         </td>

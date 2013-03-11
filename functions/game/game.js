@@ -244,7 +244,12 @@ game.turn = function (req, res, cb) {
       if (_.isUndefined(data)) {  // fill in the game info if not already by the game
         data = sh.event("event.game.info", game);
       }
-      global.socket.notify(gameId, data);  // notify others
+      // notify others listening to game
+      global.socket.notify(gameId, data);
+      // notify any player of turn change
+      _.forEach(game.playerOrder, function (playerId) {
+        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: gameId, whoTurn: game.whoTurn}));
+      });
     }
     cb(error, data);
   });
@@ -283,7 +288,13 @@ game.reset = function (req, res, cb) {
   }
   req.env.gameModule.reset(req, function (error, data) {
     if (error === 0) {
+      // notify game listeners
       global.socket.notify(game.gameId, data);
+      // notify users playing
+      _.forEach(game.playerOrder, function (playerId) {
+        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.gameId, whoTurn: game.whoTurn}));
+      });
+
       if (_.isUndefined(data)) {
         data = sh.event("event.game.reset", game);
       }

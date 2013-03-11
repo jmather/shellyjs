@@ -75,21 +75,27 @@
             $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
         }
 
+        function setWhoTurn($turnSpan, whoTurn)
+        {
+            if(whoTurn === "0") {
+                $turnSpan.text("over");
+            } else if (whoTurn === Env.uid) {
+                $turnSpan.text("your turn");
+            } else {
+                $turnSpan.text(whoTurn + "'s turn");
+            }
+        }
+
         function setMyGames(gameList)
         {
             $(".activeGame").remove();
             for (gameId in gameList) {
                 var $newGame = $("#gameTemplate").clone();
                 $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
-                if(gameList[gameId].whoTurn === Env.uid) {
-                    $newGame.find("#gameTurn").text("your turn");
-                } else if(gameList[gameId].whoTurn === "0") {
-                    $newGame.find("#gameTurn").text("over");
-                } else {
-                    $newGame.find("#gameTurn").text(gameList[gameId].whoTurn + "'s turn");
-                }
-                $newGame.attr("gameId", gameId);
+                setWhoTurn($newGame.find("#gameTurn"), gameList[gameId].whoTurn);
+                $newGame.addClass("myGameId" + gameId);
                 $newGame.addClass("activeGame");
+                $newGame.attr("gameId", gameId);
                 $newGame.css("display", "block");
 
                 $newGame.find("#myGameJoin").click(function() {
@@ -183,6 +189,11 @@
             }
             if(res.event == 'event.user.games') {
                 setMyGames(res.data);
+                return;
+            }
+            if(res.event == 'event.game.turn.next') {
+                $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
+                setWhoTurn($turnSpan, res.data.whoTurn);
                 return;
             }
             if(res.event == 'event.live.user') {

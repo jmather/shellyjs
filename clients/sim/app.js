@@ -9,7 +9,7 @@ console.log("go");
 var reqTpl1 = {session: "1:43:xxxx:0", gameId: "268"};
 var reqTpl2 = {session: "1:41:xxxx:0", gameId: "268"};
 
-var gMoveDelay = 200;
+var gMoveDelay = 500;
 
 var gRuns = 10;
 var gMoveSet = [
