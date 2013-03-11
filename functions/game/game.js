@@ -102,7 +102,6 @@ function addPlayers(players, game, cb) {
     });
   }, function (error) {
     if (error) {
-      console.log("loaded all users", error);
       cb(1, error);
       return;
     }

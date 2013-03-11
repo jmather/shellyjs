@@ -1,7 +1,9 @@
 var _ = require("lodash");
+var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
 var db = global.db;
 
@@ -42,8 +44,38 @@ user.set = function (req, res, cb) {
   cb(0, req.session.user.getData());
 };
 
+function fillGames(gameList, cb) {
+  gameIds = Object.keys(gameList);
+  async.each(gameIds, function (gameId, lcb) {
+    var game = new ShGame();
+    game.load(gameId, function (error, data) {
+      if (error) {
+        lcb(data);
+        return;
+      }
+      gameList[gameId].whoTurn = game.get("whoTurn");
+      console.log(gameList[gameId]);
+      lcb();
+    });
+  }, function (error) {
+    if (error) {
+      cb(1, error);
+      return;
+    }
+    cb(0, gameList);
+  });
+}
+
 user.games = function (req, res, cb) {
-  cb(0, sh.event("event.user.games", req.session.user.get("currentGames")));
+  var currentGames = req.session.user.get("currentGames");
+
+  fillGames(currentGames, function (error, data) {
+    if (!error) {
+      cb(0, sh.event("event.user.games", data));
+    } else {
+      cb(error, data);
+    }
+  });
 };
 
 user.gameRemove = function (req, res, cb) {

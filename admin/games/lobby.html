@@ -1,7 +1,10 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Lobby</title>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
     <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
     <script src="/static/js/reconnecting-websocket.js"></script>
@@ -78,6 +81,13 @@
             for (gameId in gameList) {
                 var $newGame = $("#gameTemplate").clone();
                 $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
+                if(gameList[gameId].whoTurn === Env.uid) {
+                    $newGame.find("#gameTurn").text("your turn");
+                } else if(gameList[gameId].whoTurn === "0") {
+                    $newGame.find("#gameTurn").text("over");
+                } else {
+                    $newGame.find("#gameTurn").text(gameList[gameId].whoTurn + "'s turn");
+                }
                 $newGame.attr("gameId", gameId);
                 $newGame.addClass("activeGame");
                 $newGame.css("display", "block");
@@ -140,16 +150,6 @@
             });
 
             $("#playerList").append($newGame);
-        }
-
-        function setOpenGames(gameList)
-        {
-            $(".activeOpenGame").remove();
-            for (var i=0; i<gameList.length; i++)
-            {
-                var game = gameList[i];
-                addOpenGame(game);
-            }
         }
 
         function processEvent(res, from) {
@@ -299,6 +299,7 @@
                 data.cmd = "match.add";
                 data.name = "tictactoe";
                 sendWs(data);
+                $("#dialog").dialog();
             });
 
             $("#listMyGames").click(function() {
@@ -317,7 +318,7 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:300px;">my games <button id="listMyGames">refresh</button></td>
+        <td style="width:320px;">my games <button id="listMyGames">refresh</button></td>
         <td>players waiting</td>
         <td style="width:200px;">players<span style="float:right;" id="version"></span></td>
     </tr>
@@ -325,7 +326,11 @@
         <td valign="top" style="">
             <div id="gameList" style="height:150;width:100%;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game-0</span><button id="myGameJoin">play</button><button id="myGameRemove">remove</button>
+                    <span id="gameName">game-0</span>
+                    (<span id="gameTurn">?</span>)
+                    <button style="float:right;" id="myGameRemove">remove</button>
+                    <button style="float:right;" id="myGameJoin">play</button>
+                    <div style="clear:both"></div>
                 </div>
             </div>
         </td>
@@ -372,6 +377,17 @@
 
 <div style="margin: 10px 0px;"><b>Message Log</b></div>
 <div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
+
+<style>
+.waitOptionDiv {
+    margin: 10px;
+}
+</style>
+<div id="dialog" style="display:none" title="Ready to Play">
+    <div class="waitOptionDiv">waiting for user to join you...</div>
+    <div class="waitOptionDiv">Or give us your email and we'll notify you.</div>
+    <div class="waitOptionDiv">Or come back later.</div>
+</div>
 
 </body>
 </html>
