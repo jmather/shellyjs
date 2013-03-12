@@ -18,6 +18,9 @@
             font-size:10pt;
             margin:30px;
         }
+        button {
+            font-size: 12pt;
+        }
     </style>
     <script language="javascript">
         var Env = {{{params}}};
@@ -312,14 +315,6 @@
                 sendWs(data);
                 $("#dialog").dialog();
             });
-
-            $("#listMyGames").click(function() {
-                listMyGames();
-            });
-
-            $("#test").click(function() {
-                console.log("test code here");
-            });
         }
     </script>
 </head>
@@ -329,23 +324,12 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:320px;">my games <button id="listMyGames">refresh</button></td>
         <td>players waiting</td>
-        <td style="width:200px;">players<span style="float:right;" id="version"></span></td>
+        <td style="width:200px;">online<span style="float:right;" id="version"></span></td>
+        <td style="width:350px;">Games Your Playing<div style="float:right">user=<span id="uid"></span></div></td>
     </tr>
     <tr>
         <td valign="top" style="">
-            <div id="gameList" style="height:150;width:100%;overflow:scroll;">
-                <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game-0</span>
-                    (<span id="gameTurn">?</span>)
-                    <button style="float:right;" id="myGameRemove">remove</button>
-                    <button style="float:right;" id="myGameJoin">play</button>
-                    <div style="clear:both"></div>
-                </div>
-            </div>
-        </td>
-        <td valign="top">
             <div id="matchList" style="height:150;width:100%;overflow:scroll;">
                 <div id="matchTemplate" style="display:none;">
                     <span id="matchName">player-0</span>
@@ -360,28 +344,29 @@
                 </div>
             </div>
         </td>
+        <td valign="top">
+            <div id="gameList" style="height:150;width:100%;overflow:scroll;">
+                <div id="gameTemplate" style="display:none;">
+                    <span id="gameName">game-0</span>
+                    (<span id="gameTurn">?</span>)
+                    <button style="float:right;" id="myGameRemove">remove</button>
+                    <button style="float:right;" id="myGameJoin">play</button>
+                    <div style="clear:both"></div>
+                </div>
+            </div>
+        </td>
     </tr>
 </table>
 
-<table border="1" width="100%">
-    <tr>
-        <td style="width:215px;">
-            <div>user=<span id="uid"></span></div>
-        </td>
-        <td>
-            <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
-        </td>
-    </tr>
-</table>
+<div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:50%;">controls</td>
+        <td style="width:50%;">Games</td>
     </tr>
     <tr>
         <td>
             <button id="gameTicTacToe">tictactoe</button>
-            <button id="test" style="float:right;">test</button>
         </td>
     </tr>
 </table>

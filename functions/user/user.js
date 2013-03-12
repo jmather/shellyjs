@@ -54,7 +54,6 @@ function fillGames(gameList, cb) {
         return;
       }
       gameList[gameId].whoTurn = game.get("whoTurn");
-      console.log(gameList[gameId]);
       lcb();
     });
   }, function (error) {

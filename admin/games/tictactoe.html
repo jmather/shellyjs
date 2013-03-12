@@ -15,6 +15,9 @@
             font-size:10pt;
             margin:30px;
         }
+        button {
+            font-size: 12pt;
+        }
         .tictac{
             display:block;
             float:left;
@@ -472,10 +475,6 @@
                 data.cmd = "game.reset";
                 sendRest(data);
             });
-
-            $("#test").click(function() {
-                console.log("test code");
-            });
         }
     </script>
 </head>
@@ -485,12 +484,17 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:320px;">all my games</td>
-        <td><span style="float:right;" id="version"></span></td>
+        <td style="width:400px">Controls</td>
+        <td>Games Your Playing<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
-        <td valign="top" style="">
-            <div id="gameList" style="height:150;width:100%;overflow:scroll;">
+        <td valign="top">
+            <button id="gameLobby">goto lobby</button>
+            <button id="gameUpdate">refresh game</button>
+            <button id="gameReset" style="float:right;">reset game</button>
+        </td>
+        <td valign="top">
+            <div id="gameList" style="height:150;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
                     <span id="gameName">game-0</span>
                     (<span id="gameTurn">?</span>)
@@ -498,14 +502,12 @@
                 </div>
             </div>
         </td>
-        <td>
-        </td>
     </tr>
 </table>
 
 <table border="1" width="100%">
     <tr>
-        <td>game</td>
+        <td>game - <span id="gameId"></span><div style="float:right">user=<span id="uid"></span></div></td>
         <td>info</td>
         <td>players</td>
     </tr>
@@ -524,8 +526,6 @@
             <div id="x2y2" class="tictac"></div>
         </td>
         <td valign="top" style="width:200px;">
-            <div>game=<span id="gameId"></span>
-            <div>user=<span id="uid"></span></div>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>
@@ -542,20 +542,6 @@
 </table>
 
 <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
-
-<table border="1" style="width:100%;">
-    <tr>
-        <td style="width:50%;">controls</td>
-    </tr>
-    <tr>
-        <td>
-            <button id="gameLobby">lobby</button>
-            <button id="gameUpdate">update</button>
-            <button id="gameReset" style="float:right;">reset</button>
-            <button id="test" style="float:right;">test</button>
-        </td>
-    </tr>
-</table>
 
 <div style="margin: 10px 0px;"><b>Message Log</b></div>
 <div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
