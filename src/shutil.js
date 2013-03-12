@@ -116,9 +116,12 @@ shutil.call = function (req, res, cb) {
       return false;
     }
     var ptype = typeof req.params[key];
+    if (_.isArray(req.params[key])) {
+      ptype = "array";
+    }
     if (ptype !== value.dtype) {
       this.paramsOk = false;
-      cb(1, shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.params[key]}));
+      cb(1, shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.params[key], type: ptype}));
       return false;
     }
   }, this);

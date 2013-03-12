@@ -4,6 +4,7 @@ var async = require("async");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
+var ShUser = require(global.gBaseDir + "/src/shuser.js");
 
 var db = global.db;
 
@@ -13,6 +14,7 @@ user.desc = "utility functions for shelly modules";
 user.functions = {
   get: {desc: "get user object", params: {}, security: []},
   set: {desc: "set user object", params: {user: {dtype: "object"}}, security: []},
+  profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []},
   games: {desc: "list games user is playing", params: {}, security: []},
   gameRemove: {desc: "remove a game from the playing list", params: {gameId: {dtype: "string"}}, security: []}
 };
@@ -51,8 +53,37 @@ user.set = function (req, res, cb) {
   cb(0, sh.event("event.user.get", req.session.user.getData()));
 };
 
+function fillProfiles(userIds, profiles, cb) {
+  async.each(userIds, function (userId, lcb) {
+    var user = new ShUser();
+    user.load(userId, function (error, data) {
+      profiles[userId] = {};
+      profiles[userId].name = user.get("name");
+      lcb();
+    });
+  }, function (error) {
+    if (error) {
+      cb(1, error);
+      return;
+    }
+    cb(0, profiles);
+  });
+}
+
+user.profiles = function (req, res, cb) {
+  var userIds = req.params.users;
+  var profiles = {};
+  fillProfiles(userIds, profiles, function(error, data) {
+    if (!error) {
+      cb(0, sh.event("event.user.profiles", data));
+    } else {
+      cb(error, data);
+    }
+  });
+};
+
 function fillGames(gameList, cb) {
-  gameIds = Object.keys(gameList);
+  var gameIds = Object.keys(gameList);
   async.each(gameIds, function (gameId, lcb) {
     var game = new ShGame();
     game.load(gameId, function (error, data) {

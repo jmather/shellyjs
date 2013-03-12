@@ -93,6 +93,9 @@ function respond(req, res, next) {
 
   shlog.recv("rest - %s", JSON.stringify(req.params));
   sh.call(req, res, function (error, data) {
+    if (error) {
+      shlog.error(error, data);
+    }
     shlog.send(error, "rest - %s", JSON.stringify(data));
     res.send(data);
   });

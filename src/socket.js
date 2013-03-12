@@ -90,6 +90,9 @@ Socket.start = function () {
         }
 
         sh.call(req, res, function (error, data) {
+          if (error) {
+            shlog.error(error, data);
+          }
           sh.sendWs(ws, error, data);
         });  // end sh.call
       });  // end sh.fillSession
