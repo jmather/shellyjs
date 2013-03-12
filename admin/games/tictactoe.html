@@ -283,6 +283,11 @@
             if(res.event == 'event.heartbeat') {
                 return;
             }
+            if ( typeof(res.cb) !== "undefined") {
+                console.log("calling:", res.cb, res.data);
+                window["setState"](res.data);
+                return;
+            }
             if(res.event == 'reg.anonymous') {
                 if (typeof (Env.baseParams.session) === 'undefined') {
                     Env.baseParams.session = res.data.session;
@@ -511,6 +516,7 @@
             $("#gameReset").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "game.reset";
+                data.cb = "gameInfo";
                 sendRest(data);
             });
         }

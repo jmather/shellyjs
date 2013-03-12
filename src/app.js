@@ -97,6 +97,7 @@ function respond(req, res, next) {
       shlog.error(error, data);
     }
     shlog.send(error, "rest - %s", JSON.stringify(data));
+    data.cb = req.params.cb;
     res.send(data);
   });
 }

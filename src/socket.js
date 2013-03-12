@@ -93,6 +93,7 @@ Socket.start = function () {
           if (error) {
             shlog.error(error, data);
           }
+          data.cb = req.params.cb;
           sh.sendWs(ws, error, data);
         });  // end sh.call
       });  // end sh.fillSession
