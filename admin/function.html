@@ -127,13 +127,11 @@
                     continue;
                 }
                 if(dtype == 'object') {
-                    input[key] = null;
-                } else if (dtype == 'array') {
-                    input[key] = null;
-                } else if (dtype == 'number') {
-                    input[key] = 0;
+                    input[key] = {};
                 } else if (dtype == 'array') {
                     input[key] = [];
+                } else if (dtype == 'number') {
+                    input[key] = 0;
                 } else if (dtype == 'string') {
                     input[key] = '';
                 }

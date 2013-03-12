@@ -45,6 +45,8 @@
         var Env = {{{params}}};
         Env.baseParams = { gameId: "0" };
         Env.players = {};
+        Env.users = {};
+
 
         // allow for baseParam overrides from url
         function getURLParameter(name) {
@@ -108,22 +110,29 @@
 
         function setWhoTurn($turnSpan, whoTurn)
         {
+            $turnSpan.removeClass("playerName" + whoTurn);
             if(whoTurn === "0") {
                 $turnSpan.text("over");
             } else if (whoTurn === Env.uid) {
                 $turnSpan.text("your turn");
             } else {
+                $turnSpan.addClass("playerName" + whoTurn);
                 $turnSpan.text(whoTurn + "'s turn");
             }
         }
 
         function setMyGames(gameList)
         {
+            var users = [];
             $(".activeGame").remove();
             for (gameId in gameList) {
                 var $newGame = $("#gameTemplate").clone();
                 $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
-                setWhoTurn($newGame.find("#gameTurn"), gameList[gameId].whoTurn);
+                var whoTurn = gameList[gameId].whoTurn;
+                setWhoTurn($newGame.find("#gameTurn"), whoTurn);
+                if(whoTurn !== "0") {
+                    users.push(gameList[gameId].whoTurn);
+                }
                 $newGame.addClass("myGameId" + gameId);
                 $newGame.addClass("activeGame");
                 $newGame.attr("gameId", gameId);
@@ -142,6 +151,7 @@
 
                 $("#gameList").append($newGame);
             }
+            getProfiles(users);
         }
 
         function setPlayers(playerList, whoTurn)
@@ -150,9 +160,10 @@
             for (playerId in playerList) {
                 var $newGame = $("#playerTemplate").clone();
                 if(playerId === Env.uid) {
-                    $newGame.find("#playerName").text(playerId + " me");
+                    $newGame.find("#playerName").text("me");
                     $newGame.find("#playerKick").remove();
                 } else {
+                    $newGame.find("#playerName").addClass("playerName" + playerId);
                     $newGame.find("#playerName").text(playerId + " offline");
                 }
                 $newGame.addClass("playerId"+playerId);
@@ -244,6 +255,21 @@
             $(".activePlayer").remove();
         }
 
+        function getUserName(uid) {
+            if( typeof (Env.users[uid]) !== "undefined") {
+                return Env.users[uid].name;
+            }
+            return "player" + uid;
+        }
+
+        function updateUsers(data) {
+            $.extend(Env.users, data);
+            for (uid in data) {
+                $(".playerName" + uid).text(data[uid].name);
+                console.log(uid, data[uid].name);
+            }
+        }
+
         function processEvent(res, from) {
             if(typeof(res.event) == 'undefined') {
                 log(from, "error", "old message: "+JSON.stringify(res));
@@ -291,10 +317,11 @@
                 return;
             }
             if(res.event == 'event.game.user') {
+                console.log("here");
                 Env.players[res.data.uid] = res.data;
                 var $playerName = $(".playerId"+res.data.uid).find("#playerName");
                 if ($playerName.size) {
-                    $playerName.text(res.data.uid + " " + res.data.status);
+                    $playerName.text(getUserName(res.data.uid) + " " + res.data.status);
                 }
                 return;
             }
@@ -321,6 +348,10 @@
             }
             if(res.event == 'event.game.over') {
                 setState(res.data);
+                return;
+            }
+            if(res.event == 'event.user.profiles') {
+                updateUsers(res.data);
                 return;
             }
             if(res.event == 'event.user.games') {
@@ -388,6 +419,13 @@
         }
 
         // basic functions
+        function getProfiles(users) {
+            var data = clone(Env.baseParams);
+            data.cmd = "user.profiles";
+            data.users = users;
+            sendWs(data);
+        }
+
         function liveInit(gameId, status)
         {
             var data = clone(Env.baseParams);
