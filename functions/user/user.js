@@ -11,8 +11,8 @@ var user = exports;
 
 user.desc = "utility functions for shelly modules";
 user.functions = {
-  get: {desc: "get user object", params: {uid: {dtype: "string"}}, security: []},
-  set: {desc: "set user object", params: {uid: {dtype: "string"}, user: {dtype: "object"}}, security: []},
+  get: {desc: "get user object", params: {}, security: []},
+  set: {desc: "set user object", params: {user: {dtype: "object"}}, security: []},
   games: {desc: "list games user is playing", params: {}, security: []},
   gameRemove: {desc: "remove a game from the playing list", params: {gameId: {dtype: "string"}}, security: []}
 };
@@ -27,13 +27,20 @@ user.pre = function (req, res, cb) {
 
 user.post = function (req, res, cb) {
   shlog.info("user.post");
+
+  if (_.isObject(req.session.user)) {
+    req.session.user.save(function (error, data) {
+      // ingore
+    });
+  }
+
   // SWD: work out pre/post user save later, for now save on every set
   cb(0);
 };
 
 user.get = function (req, res, cb) {
   shlog.info(req.env.user);
-  cb(0, req.session.user.getData());
+  cb(0, sh.event("event.user.get", req.session.user.getData()));
 };
 
 user.set = function (req, res, cb) {
@@ -41,7 +48,7 @@ user.set = function (req, res, cb) {
 
   req.session.user.setData(newUser);
 
-  cb(0, req.session.user.getData());
+  cb(0, sh.event("event.user.get", req.session.user.getData()));
 };
 
 function fillGames(gameList, cb) {

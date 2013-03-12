@@ -10,6 +10,8 @@ var db = global.db;
 function User() {
   this._dirty = false;
   this._data = {
+    uid: 0,
+    name: "",
     currentGames: {}
   };
 
@@ -34,7 +36,11 @@ User.prototype.load = function (uid, cb) {
     }
     try {
       var savedData = JSON.parse(value);
+      self._data.uid = uid;
       self._data = _.merge(self._data, savedData);
+      if (self._data.name.length === 0) {
+        self._data.name = "player" + self._data.uid;
+      }
     } catch (e) {
       cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
       return;

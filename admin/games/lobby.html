@@ -89,6 +89,10 @@
             }
         }
 
+        function setMyInfo(info) {
+            $("#userName").text(info.name);
+        }
+
         function setMyGames(gameList)
         {
             $(".activeGame").remove();
@@ -185,9 +189,14 @@
                 Env.uid = Env.baseParams.session.split(':')[1];
                 $("#uid").text(Env.uid);
 
+                getUser(Env.uid);
                 liveInit("on");
                 listMyGames();
                 listMatchCounts();
+                return;
+            }
+            if(res.event == 'event.user.get') {
+                setMyInfo(res.data);
                 return;
             }
             if(res.event == 'event.user.games') {
@@ -259,6 +268,12 @@
         }
 
         // basic functions
+        function getUser(uid) {
+            var data = clone(Env.baseParams);
+            data.cmd = "user.get";
+            data.uid = uid;
+            sendWs(data);
+        }
         function liveInit(status)
         {
             var data = clone(Env.baseParams);
@@ -315,6 +330,15 @@
                 sendWs(data);
                 $("#dialog").dialog();
             });
+            $("#setUserInfo").click(function() {
+                var name = prompt("Please enter a nick name.", "")
+                if (name!=null && name!="") {
+                    var data = clone(Env.baseParams);
+                    data.cmd = "user.set";
+                    data.user = {name: name};
+                    sendWs(data);
+                }
+            });
         }
     </script>
 </head>
@@ -324,9 +348,9 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td>players waiting</td>
-        <td style="width:200px;">online<span style="float:right;" id="version"></span></td>
-        <td style="width:350px;">Games Your Playing<div style="float:right">user=<span id="uid"></span></div></td>
+        <td>Hello <span id="userName"></span> (<span id="uid"></span>) <button id="setUserInfo" style="float:right">set</button></td>
+        <td style="width:200px;">online</td>
+        <td style="width:350px;">Games Your Playing<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
         <td valign="top" style="">
