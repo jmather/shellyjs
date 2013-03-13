@@ -266,7 +266,6 @@
             $.extend(Env.users, data);
             for (uid in data) {
                 $(".playerName" + uid).text(data[uid].name);
-                console.log(uid, data[uid].name);
             }
         }
 
@@ -275,17 +274,17 @@
                 log(from, "error", "old message: "+JSON.stringify(res));
                 return;
             }
+            if(res.event == 'event.heartbeat') {
+                return;
+            }
             if(res.event == 'event.error') {
                 showError(res.message);
                 log(from, "error", JSON.stringify(res));
                 return;
             }
-            if(res.event == 'event.heartbeat') {
-                return;
-            }
             if ( typeof(res.cb) !== "undefined") {
-                console.log("calling:", res.cb, res.data);
-                window["setState"](res.data);
+                console.log("handler:", res.cb, res.data);
+                window[res.cb](res.data);
                 return;
             }
             if(res.event == 'reg.anonymous') {
@@ -516,7 +515,6 @@
             $("#gameReset").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "game.reset";
-                data.cb = "gameInfo";
                 sendRest(data);
             });
         }

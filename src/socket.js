@@ -80,12 +80,16 @@ Socket.start = function () {
         // if valid user, add to list, if not we are in reg.* call
         if (!_.isUndefined(req.session)) {
           ws.uid = req.session.uid;
-          gUsers[ws.uid] = {status: "online", gameId: 0, last: new Date().getTime()};
-          // hookup the user channel
-          var userChannel = sh.channel("user", ws.uid);
-          if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
-            shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
-            eventEmitter.on(userChannel, socketNotify);
+
+          // if socket not registered in gUsers, do it
+          if (_.isUndefined(gUsers[ws.uid])) {
+            gUsers[ws.uid] = {status: "online", gameId: 0, liveUser: "off", last: new Date().getTime()};
+            // hookup the user channel
+            var userChannel = sh.channel("user", ws.uid);
+            if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+              shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+              eventEmitter.on(userChannel, socketNotify);
+            }
           }
         }
 
@@ -107,15 +111,17 @@ Socket.start = function () {
       clearInterval(this.hbTimer);
 
       if (_.isUndefined(this.uid)) {
-        shlog.info("user never had valid session");
+        shlog.info("socket: close - socket never had valid user session");
         return;
       }
       shlog.info("(" + this.uid + ") socket: close");
 
+      var userConn = gUsers[this.uid];
       delete gUsers[this.uid];
 
-      // SWD don't send this if they never turned live.user status=on
-      Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, status: "offline" }));
+      if (userConn.liveUser == "on") {
+        Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, status: "offline" }));
+      }
 
       var userChannel = sh.channel("user", this.uid);
       shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);

@@ -27,14 +27,20 @@ live.user = function (req, res, cb) {
   var socketNotify = res.socketNotify;
   var ws = res.ws;
 
+  // allows socket close to notify off
+  global.gUsers[req.session.uid].liveUser = "on";
+  console.log(global.gUsers[req.session.uid]);
+
   var userChannel = sh.channel("user", ws.uid);
   if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
     shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
     eventEmitter.on(userChannel, socketNotify);
   }
 
+  // notify all users that I'm online
   var event = sh.event("event.live.user", {uid: ws.uid, status: "online"});
   global.socket.notifyAll(event);
+  // notify myself of all users online
   _.forOwn(global.gUsers, function (info, playerId) {
     // short cut the emmitter since we have ws
     var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, status: "online"}));
