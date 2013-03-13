@@ -374,6 +374,18 @@
                     sendWs(data);
                 }
             });
+            $("#liveHide").click(function() {
+                var data = clone(Env.baseParams);
+                data.cmd = "live.user";
+                data.status = "off";
+                sendWs(data);
+            });
+            $("#liveShow").click(function() {
+                var data = clone(Env.baseParams);
+                data.cmd = "live.user";
+                data.status = "on";
+                sendWs(data);
+            });
         }
     </script>
 </head>
@@ -426,6 +438,8 @@
     <tr>
         <td>
             <button id="gameTicTacToe">tictactoe</button>
+            <button id="liveHide" style="float:right">offline</button>
+            <button id="liveShow" style="float:right">online</button>
         </td>
     </tr>
 </table>

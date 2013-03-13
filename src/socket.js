@@ -97,8 +97,10 @@ Socket.start = function () {
           if (error) {
             shlog.error(error, data);
           }
-          data.cb = req.params.cb;
-          sh.sendWs(ws, error, data);
+          if(data !== null && !_.isUndefined(data)) {
+            data.cb = req.params.cb;
+            sh.sendWs(ws, error, data);
+          }
         });  // end sh.call
       });  // end sh.fillSession
     });  // end ws.on-message

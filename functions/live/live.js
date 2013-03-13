@@ -23,31 +23,49 @@ live.user = function (req, res, cb) {
     cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
     return;
   }
+  var status = req.params.status;
+
   var eventEmitter = res.eventEmitter;
   var socketNotify = res.socketNotify;
   var ws = res.ws;
 
+  /*
+  if(global.gUsers[ws.uid].liveUser === status) {
+    cb(0);
+    return;
+  }
+  */
+
   // allows socket close to notify off
-  global.gUsers[req.session.uid].liveUser = "on";
-  console.log(global.gUsers[req.session.uid]);
+  global.gUsers[ws.uid].liveUser = status;
 
   var userChannel = sh.channel("user", ws.uid);
-  if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
-    shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
-    eventEmitter.on(userChannel, socketNotify);
+  if (status === "on") {
+    if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+      shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+      eventEmitter.on(userChannel, socketNotify);
+    }
+  } else {
+    shlog.info("(" + ws.uid + ") remove user channel: " + userChannel);
+    eventEmitter.removeAllListeners(userChannel);
   }
 
   // notify all users that I'm online
-  var event = sh.event("event.live.user", {uid: ws.uid, status: "online"});
+  var onoffLine = (status === "on" ? "online" : "offline");
+  var event = sh.event("event.live.user", {uid: ws.uid, status: onoffLine});
   global.socket.notifyAll(event);
-  // notify myself of all users online
-  _.forOwn(global.gUsers, function (info, playerId) {
-    // short cut the emmitter since we have ws
-    var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, status: "online"}));
-    ws.send(e);
-  });
+  if (status === "on") {
+    // notify myself of all users online
+    _.forOwn(global.gUsers, function (info, playerId) {
+      if(playerId !== ws.uid) {
+        // short cut the emmitter since we have ws
+        var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, status: "online"}));
+        ws.send(e);
+      }
+    });
+  }
 
-  cb(0, event);
+  cb(0);
 };
 
 live.game = function (req, res, cb) {
