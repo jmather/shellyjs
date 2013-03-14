@@ -109,7 +109,7 @@
             $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
         }
 
-        function setWhoTurn($turnSpan, whoTurn)
+        function setWhoTurn($turnSpan, whoTurn, profile)
         {
             $turnSpan.removeClass("playerName" + whoTurn);
             if(whoTurn === "0") {
@@ -118,22 +118,18 @@
                 $turnSpan.text("your turn");
             } else {
                 $turnSpan.addClass("playerName" + whoTurn);
-                $turnSpan.text(getUserName(whoTurn));
+                $turnSpan.text(profile.name);
             }
         }
 
         function setMyGames(gameList)
         {
-            var users = [];
             $(".activeGame").remove();
             for (gameId in gameList) {
                 var $newGame = $("#gameTemplate").clone();
                 $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
-                var whoTurn = gameList[gameId].whoTurn;
-                setWhoTurn($newGame.find("#gameTurn"), whoTurn);
-                if(whoTurn !== "0") {
-                    users.push(gameList[gameId].whoTurn);
-                }
+                var game = gameList[gameId];
+                setWhoTurn($newGame.find("#gameTurn"), game.whoTurn, game.players[game.whoTurn]);
                 $newGame.addClass("myGameId" + gameId);
                 $newGame.addClass("activeGame");
                 $newGame.attr("gameId", gameId);
@@ -164,7 +160,7 @@
                     $newGame.find("#playerKick").remove();
                 } else {
                     $newGame.find("#playerName").addClass("playerName" + playerId);
-                    $newGame.find("#playerName").text(playerId + " offline");
+                    $newGame.find("#playerName").text(playerList[playerId].name + " offline");
                 }
                 $newGame.addClass("playerId"+playerId);
                 $newGame.addClass("activePlayer");
@@ -197,14 +193,14 @@
             }
 
             $("#gameStatus").text(game.status);
-            var whoTurn = game.whoTurn;
             if (game.whoTurn == $("#uid").text()) {
-                whoTurn = "yours";
+                $("#whoTurn").text("yours");
+                turnDipl = "yours";
+            } else if(game.whoTurn == 0) {
+                $("#whoTurn").text("no ones");
+            } else {
+                $("#whoTurn").text(game.players[game.whoTurn].name);
             }
-            if(game.whoTurn == 0) {
-                whoTurn = "no ones";
-            }
-            $("#whoTurn").text(whoTurn);
 
             if(game.status == 'over') {
                 showError("game over");
@@ -253,32 +249,6 @@
             $("#gamePlaying").text("");
 
             $(".activePlayer").remove();
-        }
-
-        function getUserName(uid) {
-            if( typeof (Env.users[uid]) !== "undefined") {
-                return Env.users[uid].name;
-            }
-            if (gPendingGets.indexOf(uid) == -1) {
-                gPendingGets.push(uid);
-                setTimeout(pendingGets, 100);
-            }
-            return "player" + uid;
-        }
-
-        function pendingGets() {
-            if (gPendingGets.length === 0) {
-                return;
-            }
-            getProfiles(gPendingGets);
-            gPendingGets = [];
-        }
-
-        function updateUsers(data) {
-            $.extend(Env.users, data);
-            for (uid in data) {
-                $(".playerName" + uid).text(data[uid].name);
-            }
         }
 
         function processEvent(res, from) {
@@ -336,13 +306,13 @@
                 Env.players[res.data.uid] = res.data;
                 var $playerName = $(".playerId"+res.data.uid).find("#playerName");
                 if ($playerName.size) {
-                    $playerName.text(getUserName(res.data.uid) + " " + res.data.status);
+                    $playerName.text(res.data.name + " " + res.data.status);
                 }
                 return;
             }
             if(res.event == 'event.game.turn.next') {
                 $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
-                setWhoTurn($turnSpan, res.data.whoTurn);
+                setWhoTurn($turnSpan, res.data.whoTurn, res.data);
                 return;
             }
             if(res.event == 'event.game.user.leave' ||
@@ -434,13 +404,6 @@
         }
 
         // basic functions
-        function getProfiles(users) {
-            var data = clone(Env.baseParams);
-            data.cmd = "user.profiles";
-            data.users = users;
-            sendWs(data);
-        }
-
         function liveInit(gameId, status)
         {
             var data = clone(Env.baseParams);

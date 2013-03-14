@@ -254,7 +254,11 @@ game.turn = function (req, res, cb) {
       global.socket.notify(gameId, data);
       // notify any player of turn change
       _.forEach(game.playerOrder, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: gameId, whoTurn: game.whoTurn}));
+        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: gameId,
+          whoTurn: game.whoTurn,
+          name: game.players[game.whoTurn].name,
+          pic: ""
+        }));
       });
     }
     // already sent on the socket notify

@@ -74,6 +74,7 @@ function fillGames(gameList, cb) {
         return;
       }
       gameList[gameId].whoTurn = game.get("whoTurn");
+      gameList[gameId].players = game.get("players");
       lcb();
     });
   }, function (error) {

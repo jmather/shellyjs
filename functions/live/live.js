@@ -52,14 +52,14 @@ live.user = function (req, res, cb) {
 
   // notify all users that I'm online
   var onoffLine = (status === "on" ? "online" : "offline");
-  var event = sh.event("event.live.user", {uid: ws.uid, status: onoffLine});
+  var event = sh.event("event.live.user", {uid: ws.uid, name: req.session.user.get("name"), pic: "",  status: onoffLine});
   global.socket.notifyAll(event);
   if (status === "on") {
     // notify myself of all users online
     _.forOwn(global.gUsers, function (info, playerId) {
       if(playerId !== ws.uid) {
         // short cut the emmitter since we have ws
-        var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, status: "online"}));
+        var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, name: info.name, pic: "", status: "online"}));
         ws.send(e);
       }
     });
@@ -84,7 +84,11 @@ live.game = function (req, res, cb) {
     global.gUsers[ws.uid].gameId = gameId;  // set my current game
     if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
       shlog.info("(" + ws.uid + ") add game channel: " + gameChannel, ws.games);
-      global.socket.notify(gameId, sh.event("event.game.user", {uid: ws.uid, gameId: gameId, status: "online"}));
+      global.socket.notify(gameId, sh.event("event.game.user", {uid: ws.uid,
+        name: req.session.user.get("name"),
+        pic: "",
+        gameId: gameId,
+        status: "online"}));
       ws.games.push(gameId);
       eventEmitter.on(gameChannel, socketNotify);
 
@@ -101,7 +105,12 @@ live.game = function (req, res, cb) {
             // are they playing current game
             if (global.gUsers[uid].gameId === gameId) {
               shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
-              sh.sendWs(ws, 0, sh.event("event.game.user", {uid: uid, gameId: gameId, status: "online"}));
+              var userConn = global.gUsers[uid];
+              sh.sendWs(ws, 0, sh.event("event.game.user", {uid: uid,
+                name: userConn.name,
+                pic: "",
+                gameId: gameId,
+                status: "online"}));
             }
           }
         });

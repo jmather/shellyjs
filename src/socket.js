@@ -83,7 +83,7 @@ Socket.start = function () {
 
           // if socket not registered in gUsers, do it
           if (_.isUndefined(gUsers[ws.uid])) {
-            gUsers[ws.uid] = {status: "online", gameId: 0, liveUser: "off", last: new Date().getTime()};
+            gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", gameId: 0, liveUser: "off", last: new Date().getTime()};
             // hookup the user channel
             var userChannel = sh.channel("user", ws.uid);
             if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
@@ -122,7 +122,7 @@ Socket.start = function () {
       delete gUsers[this.uid];
 
       if (userConn.liveUser == "on") {
-        Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, status: "offline" }));
+        Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
       }
 
       var userChannel = sh.channel("user", this.uid);
@@ -134,7 +134,7 @@ Socket.start = function () {
         shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
         eventEmitter.removeListener(gameChannel, socketNotify);
         // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-        global.socket.notify(game, sh.event("event.game.user", {uid: self.uid, gameId: game, status: "offline"}));
+        global.socket.notify(game, sh.event("event.game.user", {uid: self.uid, name: userConn.name, pic: "", gameId: game, status: "offline"}));
       });
     });
 
