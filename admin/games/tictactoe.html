@@ -46,6 +46,7 @@
         Env.baseParams = { gameId: "0" };
         Env.players = {};
         Env.users = {};
+        var gPendingGets = [];
 
 
         // allow for baseParam overrides from url
@@ -117,7 +118,7 @@
                 $turnSpan.text("your turn");
             } else {
                 $turnSpan.addClass("playerName" + whoTurn);
-                $turnSpan.text(whoTurn + "'s turn");
+                $turnSpan.text(getUserName(whoTurn));
             }
         }
 
@@ -151,7 +152,6 @@
 
                 $("#gameList").append($newGame);
             }
-            getProfiles(users);
         }
 
         function setPlayers(playerList, whoTurn)
@@ -259,7 +259,20 @@
             if( typeof (Env.users[uid]) !== "undefined") {
                 return Env.users[uid].name;
             }
+            if (gPendingGets.indexOf(uid) == -1) {
+                gPendingGets.push(uid);
+                setTimeout(pendingGets, 100);
+            }
             return "player" + uid;
+        }
+
+        function pendingGets() {
+            if (gPendingGets.length === 0) {
+                console.log("done already")
+                return;
+            }
+            getProfiles(gPendingGets);
+            gPendingGets = [];
         }
 
         function updateUsers(data) {
@@ -515,7 +528,7 @@
             $("#gameReset").click(function() {
                 var data = clone(Env.baseParams);
                 data.cmd = "game.reset";
-                sendRest(data);
+                sendWs(data);
             });
         }
     </script>

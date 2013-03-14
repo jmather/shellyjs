@@ -251,6 +251,11 @@ game.turn = function (req, res, cb) {
         global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: gameId, whoTurn: game.whoTurn}));
       });
     }
+    // already sent on the socket notify
+    if (_.isObject(res.ws)) {
+      cb(0);
+      return;
+    }
     cb(error, data);
   });
 };
@@ -284,18 +289,20 @@ game.reset = function (req, res, cb) {
     cb(1, sh.error("game_reset", "this game has no reset"));
     return;
   }
+
   req.env.gameModule.reset(req, function (error, data) {
     if (error === 0) {
-      // notify game listeners
+      // notify live.game listeners
       global.socket.notify(game.gameId, data);
-      // notify users playing
+      // notify live.users that are in this game
       _.forEach(game.playerOrder, function (playerId) {
         global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.gameId, whoTurn: game.whoTurn}));
       });
-
-      if (_.isUndefined(data)) {
-        data = sh.event("event.game.reset", game);
-      }
+    }
+    // already sent on the socket notify
+    if (_.isObject(res.ws)) {
+      cb(0);
+      return;
     }
     cb(error, data);
   });

@@ -26,6 +26,7 @@
         var Env = {{{params}}};
         Env.baseParams = { };
         Env.users = {};
+        var gPendingGets = [];
 
         // allow for baseParam overrides from url
         function getURLParameter(name) {
@@ -87,7 +88,7 @@
                 $turnSpan.text("your turn");
             } else {
                 $turnSpan.addClass("playerName" + whoTurn);
-                $turnSpan.text(whoTurn + "'s turn");
+                $turnSpan.text(getUserName(whoTurn));
             }
         }
 
@@ -131,7 +132,6 @@
 
                 $("#gameList").append($newGame);
             }
-            getProfiles(users);
         }
 
         function setMatchCounts(matchList)
@@ -177,7 +177,20 @@
             if( typeof (Env.users[uid]) !== "undefined") {
                 return Env.users[uid].name;
             }
+            if (gPendingGets.indexOf(uid) == -1) {
+                gPendingGets.push(uid);
+                setTimeout(pendingGets, 100);
+            }
             return "player" + uid;
+        }
+
+        function pendingGets() {
+            if (gPendingGets.length === 0) {
+                console.log("done already")
+                return;
+            }
+            getProfiles(gPendingGets);
+            gPendingGets = [];
         }
 
         function updateUsers(data) {
