@@ -2,6 +2,7 @@ var path = require("path");
 var util = require("util");
 
 var _ = require("lodash");
+var async = require("async");
 var uuid = require("node-uuid");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -173,5 +174,42 @@ shutil.call = function (req, res, cb) {
         }
       });
     });
+  });
+};
+
+// takes array of uids
+shutil.fillProfiles = function (userIds, cb) {
+  var profiles = {};
+  async.each(userIds, function (userId, lcb) {
+    var user = new ShUser();
+    user.load(userId, function (error, data) {
+      profiles[userId] = {};
+      profiles[userId].name = user.get("name");
+      lcb();
+    });
+  }, function (error) {
+    if (error) {
+      cb(1, error);
+      return;
+    }
+    cb(0, profiles);
+  });
+};
+
+// takes object of objects with uids of keys
+shutil.extendProfiles = function (profiles, cb) {
+  var userIds = Object.keys(profiles);
+  async.each(userIds, function (userId, lcb) {
+    var user = new ShUser();
+    user.load(userId, function (error, data) {
+      profiles[userId].name = user.get("name");
+      lcb();
+    });
+  }, function (error) {
+    if (error) {
+      cb(1, error);
+      return;
+    }
+    cb(0, profiles);
   });
 };

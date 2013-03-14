@@ -53,27 +53,9 @@ user.set = function (req, res, cb) {
   cb(0, sh.event("event.user.get", req.session.user.getData()));
 };
 
-function fillProfiles(userIds, profiles, cb) {
-  async.each(userIds, function (userId, lcb) {
-    var user = new ShUser();
-    user.load(userId, function (error, data) {
-      profiles[userId] = {};
-      profiles[userId].name = user.get("name");
-      lcb();
-    });
-  }, function (error) {
-    if (error) {
-      cb(1, error);
-      return;
-    }
-    cb(0, profiles);
-  });
-}
-
 user.profiles = function (req, res, cb) {
   var userIds = req.params.users;
-  var profiles = {};
-  fillProfiles(userIds, profiles, function(error, data) {
+  sh.fillProfiles(userIds, function (error, data) {
     if (!error) {
       cb(0, sh.event("event.user.profiles", data));
     } else {

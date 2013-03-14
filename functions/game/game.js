@@ -186,7 +186,13 @@ game.join = function (req, res, cb) {
     global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {gameId: game.get("gameId"), uid: uid}));
   }
 
-  cb(0, sh.event("event.game.join", game.getData()));
+  sh.extendProfiles(game.get("players"), function (error, data) {
+    if (error) {
+      cb(1, sh.error("user_info", "unable to load users for this game", data));
+      return;
+    }
+    cb(0, sh.event("event.game.join", game.getData()));
+  });
 };
 
 game.leave = function (req, res, cb) {

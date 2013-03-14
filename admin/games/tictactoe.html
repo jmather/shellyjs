@@ -268,7 +268,6 @@
 
         function pendingGets() {
             if (gPendingGets.length === 0) {
-                console.log("done already")
                 return;
             }
             getProfiles(gPendingGets);
@@ -334,7 +333,6 @@
                 return;
             }
             if(res.event == 'event.game.user') {
-                console.log("here");
                 Env.players[res.data.uid] = res.data;
                 var $playerName = $(".playerId"+res.data.uid).find("#playerName");
                 if ($playerName.size) {
