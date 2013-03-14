@@ -302,7 +302,7 @@
                 liveInit(newGameId, "on");
                 return;
             }
-            if(res.event == 'event.game.user') {
+            if(res.event == 'event.live.game.user') {
                 Env.players[res.data.uid] = res.data;
                 var $playerName = $(".playerId"+res.data.uid).find("#playerName");
                 if ($playerName.size) {
@@ -313,17 +313,6 @@
             if(res.event == 'event.game.turn.next') {
                 $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
                 setWhoTurn($turnSpan, res.data.whoTurn, res.data);
-                return;
-            }
-            if(res.event == 'event.game.user.leave' ||
-                    res.event == 'event.game.user.join') {
-                if (res.data.uid == Env.uid) {
-                    return;
-                }
-                // add the player, just update for now
-                var data = clone(Env.baseParams);
-                data.cmd = "game.get";
-                sendWs(data);
                 return;
             }
             if(res.event == 'event.game.info'

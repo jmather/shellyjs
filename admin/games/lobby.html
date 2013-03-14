@@ -207,7 +207,7 @@
             }
             if(res.event == 'event.game.turn.next') {
                 $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
-                setWhoTurn($turnSpan, res.data.whoTurn);
+                setWhoTurn($turnSpan, res.data.whoTurn, res.data);
                 return;
             }
             if(res.event == 'event.live.user') {

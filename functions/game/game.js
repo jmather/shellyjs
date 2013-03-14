@@ -256,7 +256,7 @@ game.turn = function (req, res, cb) {
       _.forEach(game.playerOrder, function (playerId) {
         global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: gameId,
           whoTurn: game.whoTurn,
-          name: game.players[game.whoTurn].name,
+          name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
           pic: ""
         }));
       });
