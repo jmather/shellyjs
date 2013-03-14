@@ -21,7 +21,7 @@ shutil.channel = function (name, id) {
 
 shutil.sendWs = function (ws, error, data) {
   var msg = JSON.stringify(data);
-  shlog.send(error, "live - (%s) %s", ws.uid, msg);
+  shlog.send(error, "live uid:%s len:%d data:%s", ws.uid, msg.length, msg);
   ws.send(msg);
 };
 
