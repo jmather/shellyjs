@@ -77,6 +77,16 @@ function addUser(user) {
     $("#playerList").append($newGame);
 }
 
+function gameInit(gameId) {
+    var addParam = "";
+    var psess = getURLParameter("session");  // done for testing two users in same browser
+    if(psess != 'null')
+    {
+        addParam = "&session="+psess;
+    }
+    window.location.href = "/games/tictactoe.html?gameId=" + gameId + addParam;
+}
+
 function processEvent(res, from) {
     if (typeof(res.event) == 'undefined') {
         log(from, "error", "old message: " + JSON.stringify(res));

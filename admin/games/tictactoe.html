@@ -94,8 +94,11 @@ function setPlayers(playerList, whoTurn) {
 
 function setState(game) {
     $.cookie("shLastGame" + Env.uid, game.gameId, { expires: 3650, path: '/' });
-
     hideError();
+
+    $("#uid").text(Env.uid);
+    $("#userName").text(game.players[Env.uid].name);
+
     var gameBoard = game.state.gameBoard;
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < 3; j++) {
@@ -128,16 +131,16 @@ function setState(game) {
         }
     }
 
-    if (game.state.xes == $("#uid").text()) {
+    if (game.state.xes == Env.uid) {
         $("#gamePlaying").text("X's");
     } else {
         $("#gamePlaying").text("O's")
     }
 
-    if (typeof(game.gameId) != 'undefined') {
+//    if (typeof(game.gameId) != 'undefined') {
         $("#gameId").text(game.gameId);
         Env.baseParams.gameId = game.gameId;
-    }
+//    }
     setPlayers(game.players, game.whoTurn);
 }
 
@@ -390,7 +393,10 @@ function init() {
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td>Controls</td>
+        <td>
+            <div style="float:left">Hello <span id="userName"></span> (<span id="uid"></span>)</div>
+            <div style="float:right">game = <span id="gameId"></span></div>
+        </td>
         <td>Games Your Playing<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
@@ -414,10 +420,7 @@ function init() {
 
 <table border="1" width="100%">
     <tr>
-        <td>game - <span id="gameId"></span>
-
-            <div style="float:right">user=<span id="uid"></span></div>
-        </td>
+        <td>game board</td>
         <td>info</td>
         <td>players</td>
     </tr>
