@@ -1,361 +1,252 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Lobby</title>
-    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-    <script src="/static/js/jquery-1.7.1.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet"
+      type="text/css"/>
+<script src="/static/js/jquery-1.7.1.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
-    <script src="/static/js/jquery.cookie.js"></script>
-    <script src="/static/js/ba-debug.js"></script>
-    <script src="/static/js/reconnecting-websocket.js"></script>
-    <script src='/static/js/fastclick.js'></script>
+<script src="/static/js/jquery.cookie.js"></script>
+<script src="/static/js/ba-debug.js"></script>
+<script src="/static/js/reconnecting-websocket.js"></script>
+<script src='/static/js/fastclick.js'></script>
+<script src='common.js'></script>
 
-    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
-    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
-    <style type="text/css">
-        body {
-            font-family:verdana,arial,sans-serif;
-            font-size:10pt;
-            margin:30px;
-        }
-        button {
-            font-size: 12pt;
-        }
-    </style>
-    <script language="javascript">
-        var Env = {{{params}}};
-        Env.baseParams = { };
+<link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+<script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+<style type="text/css">
+    body {
+        font-family: verdana, arial, sans-serif;
+        font-size: 10pt;
+        margin: 30px;
+    }
 
-        // allow for baseParam overrides from url
-        function getURLParameter(name) {
-            return decodeURI(
-                    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-            );
-        }
+    button {
+        font-size: 12pt;
+    }
+</style>
+<script language="javascript">
+var Env = {{{params}}};
+Env.baseParams = { };
 
-        var psess = getURLParameter("session");
-        if(psess != 'null')
-        {
-            Env.baseParams.session = psess;
-        }
+// allow for baseParam overrides from url
+var psess = getURLParameter("session");
+if (psess != 'null') {
+    Env.baseParams.session = psess;
+}
 
-        function clone(obj) {
-            return $.extend({}, obj);
-        }
+function setMatchCounts(matchList) {
+    $(".activeMatch").remove();
+    for (gameName in matchList) {
+        console.log(gameName);
+        var $newGame = $("#matchTemplate").clone();
+        $newGame.find("#matchName").text(gameName + " = " + matchList[gameName]);
+        $newGame.attr("gameName", gameName);
+        $newGame.addClass("activeMatch");
+        $newGame.css("display", "block");
 
-        var gLogLimit = 500;
-        var gLogCount = 0;
-        function log(api, type, msg)
-        {
-            var $mlog = $("#messageLog");
-            gLogCount++;
-            if (gLogCount > gLogLimit) {
-                // remove first child
-                $mlog.children(":first").remove();
-            }
+        $("#matchList").append($newGame);
+    }
+}
 
-            color = "black";
-            bodyColor = "black";
-            if(type=="error") {
-                color = "red"
-                bodyColor = "red";
-            }
-            if(api=="rest") {
-                color = "blue";
-            }
-            if(api=="socket") {
-                color = "green";
-            }
-            if (typeof(msg) == 'object') {
-                msg = JSON.stringify(msg);
-            }
-            var disp = "<div style='font-size:10px;white-space:nowrap;'>";
-            disp += "<span style='color:" + color + ";'>" + api + ": </span>";
-            disp += "<span style='color:" + color + ";'>" + type + ": </span>";
-            disp += "<span style='color:" + bodyColor + ";'>" + msg + "</span>";
-            disp += "</div>";
-            $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
-        }
+function removeUser(uid) {
+    $(".playerId" + uid).remove();
+}
 
-        function setWhoTurn($turnSpan, whoTurn, profile)
-        {
-            $turnSpan.removeClass("playerName" + whoTurn);
-            if(whoTurn === "0") {
-                $turnSpan.text("over");
-            } else if (whoTurn === Env.uid) {
-                $turnSpan.text("your turn");
-            } else {
-                $turnSpan.addClass("playerName" + whoTurn);
-                $turnSpan.text(profile.name);
-            }
-        }
+function addUser(user) {
+    if ($(".playerId" + user.uid).size() > 0) {
+        return;
+    }
+    var $newGame = $("#playerTemplate").clone();
+    $newGame.find("#playerName").text(user.name);
+    $newGame.find("#playerName").addClass("playerName" + user.uid);
+    $newGame.addClass("playerId" + user.uid);
+    $newGame.addClass("activePlayer");
+    $newGame.attr("uid", user.uid);
+    $newGame.css("display", "block");
 
-        function setMyInfo(info) {
-            $("#userName").text(info.name);
-        }
+    if (user.uid === Env.uid) {
+        $("#userName").text(user.name);
+    }
 
-        function setMyGames(gameList)
-        {
-            $(".activeGame").remove();
-            for (gameId in gameList) {
-                var game = gameList[gameId];
-                var $newGame = $("#gameTemplate").clone();
-                $newGame.find("#gameName").text(game.name + "-" + gameId);
-                setWhoTurn($newGame.find("#gameTurn"), game.whoTurn, game.players[game.whoTurn]);
-                $newGame.addClass("myGameId" + gameId);
-                $newGame.addClass("activeGame");
-                $newGame.attr("gameId", gameId);
-                $newGame.css("display", "block");
-
-                $newGame.find("#myGameJoin").click(function() {
-                    var addParam = "";
-                    var psess = getURLParameter("session");  // done for testing two users in same browser
-                    if(psess != 'null')
-                    {
-                        addParam = "&session="+psess;
-                    }
-                    var gameId = $(this).parent().attr("gameId");
-                    window.location.href = "/games/tictactoe.html?gameId=" + gameId + addParam;
-                });
-                $newGame.find("#myGameRemove").click(function() {
-                    var data = clone(Env.baseParams);
-                    data.cmd = "user.gameRemove";
-                    data.gameId = $(this).parent().attr("gameId");
-                    sendWs(data);
-                });
-
-                $("#gameList").append($newGame);
-            }
-        }
-
-        function setMatchCounts(matchList)
-        {
-            $(".activeMatch").remove();
-            for (gameName in matchList) {
-                console.log(gameName);
-                var $newGame = $("#matchTemplate").clone();
-                $newGame.find("#matchName").text(gameName + " = " + matchList[gameName]);
-                $newGame.attr("gameName", gameName);
-                $newGame.addClass("activeMatch");
-                $newGame.css("display", "block");
-
-                $("#matchList").append($newGame);
-            }
-        }
-
-        function removePlayer(uid) {
-            $(".playerId" + uid).remove();
-        }
-
-        function addPlayer(user) {
-            if ($(".playerId" + user.uid).size() > 0) {
-                return;
-            }
-            var $newGame = $("#playerTemplate").clone();
-            $newGame.find("#playerName").text(user.name);
-            $newGame.find("#playerName").addClass("playerName" + user.uid);
-            $newGame.addClass("playerId" + user.uid);
-            $newGame.addClass("activePlayer");
-            $newGame.attr("uid", user.uid);
-            $newGame.css("display", "block");
-
-            $newGame.find("#playerOffer").click(function() {
-                alert("not implemented");
+    $newGame.find("#playerOffer").click(function () {
+        alert("not implemented");
 //                var gameId = $(this).parent().attr('gameId');
-            });
+    });
 
-            $("#playerList").append($newGame);
+    $("#playerList").append($newGame);
+}
+
+function processEvent(res, from) {
+    if (typeof(res.event) == 'undefined') {
+        log(from, "error", "old message: " + JSON.stringify(res));
+        return;
+    }
+    if (res.event == 'event.error') {
+        showError(res.message);
+        log(from, "error", JSON.stringify(res));
+        return;
+    }
+    if (res.event == 'event.heartbeat') {
+        return;
+    }
+    if (res.event == 'reg.anonymous') {
+        if (typeof (Env.baseParams.session) === 'undefined') {
+            Env.baseParams.session = res.data.session;
+        } else {
+            log(from, "info", "using existing session: " + Env.baseParams.session);
         }
 
-        function processEvent(res, from) {
-            if(typeof(res.event) == 'undefined') {
-                log(from, "error", "old message: "+JSON.stringify(res));
-                return;
-            }
-            if(res.event == 'event.error') {
-                showError(res.message);
-                log(from, "error", JSON.stringify(res));
-                return;
-            }
-            if(res.event == 'event.heartbeat') {
-                return;
-            }
-            if(res.event == 'reg.anonymous') {
-                if (typeof (Env.baseParams.session) === 'undefined') {
-                    Env.baseParams.session = res.data.session;
-                } else {
-                    log(from, "info", "using existing session: " + Env.baseParams.session);
-                }
+        $("#session").text(Env.baseParams.session);
+        Env.uid = Env.baseParams.session.split(':')[1];
+        $("#uid").text(Env.uid);
 
-                $("#session").text(Env.baseParams.session);
-                Env.uid = Env.baseParams.session.split(':')[1];
-                $("#uid").text(Env.uid);
-
-                getUser(Env.uid);
-                liveInit("on");
-                listMyGames();
-                listMatchCounts();
-                return;
-            }
-            if(res.event == 'event.user.get') {
-                setMyInfo(res.data);
-                return;
-            }
-            if(res.event == 'event.user.games') {
-                setMyGames(res.data);
-                return;
-            }
-            if(res.event == 'event.game.turn.next') {
-                $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
-                setWhoTurn($turnSpan, res.data.whoTurn, res.data);
-                return;
-            }
-            if(res.event == 'event.live.user') {
-                if (res.data.status === "online") {
-                    addPlayer(res.data);
-                } else {
-                    removePlayer(res.data.uid);
-                }
-                return;
-            }
-            if(res.event == 'event.match.counts') {
-                setMatchCounts(res.data);
-                return;
-            }
-            if(res.event == 'event.match.made') {
-                var addParam = "";
-                var psess = getURLParameter("session");  // done for testing two users in same browser
-                if(psess != 'null')
-                {
-                    addParam = "&session="+psess;
-                }
-                window.location.href = "/games/tictactoe.html?gameId=" + res.data.gameId + addParam;
-                return;
-            }
-            if(res.event == 'event.match.add') {
-                return;
-            }
-            log(from, "unknown-event", JSON.stringify(res));
+        liveInit("on");
+        listMyGames();
+        listMatchCounts();
+        return;
+    }
+    if (res.event == 'event.user.games') {
+        setMyGames(res.data);
+        return;
+    }
+    if (res.event == 'event.game.turn.next') {
+        setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
+        return;
+    }
+    if (res.event == 'event.live.user') {
+        if (res.data.status === "online") {
+            addUser(res.data);
+        } else {
+            removeUser(res.data.uid);
         }
+        return;
+    }
+    if (res.event == 'event.match.counts') {
+        setMatchCounts(res.data);
+        return;
+    }
+    if (res.event == 'event.match.made') {
+        var addParam = "";
+        var psess = getURLParameter("session");  // done for testing two users in same browser
+        if (psess != 'null') {
+            addParam = "&session=" + psess;
+        }
+        window.location.href = "/games/tictactoe.html?gameId=" + res.data.gameId + addParam;
+        return;
+    }
+    if (res.event == 'event.match.add') {
+        return;
+    }
+    log(from, "unknown-event", JSON.stringify(res));
+}
 
-        var url = Env.socketUrl;
-        var ws = new ReconnectingWebSocket(url);
+var url = Env.socketUrl;
+var ws = new ReconnectingWebSocket(url);
 //        ws.debug = true;
-        ws.onopen = function() {
-            console.log("socket: open");
-            log("socket", "onopen", url);
-            var data = {};
-            data.cmd = "reg.anonymous";
-            data.token = Env.shToken;
-            sendWs(data);
-        }
-        ws.onmessage = function (evt) {
-            var received_msg = evt.data;
-            log("socket", "onmessage", evt.data);
-            var msg = JSON.parse(evt.data);
-            processEvent(msg, "socket");
-        }
-        ws.onclose = function(evt) {
-            console.log("socket: close");
-        }
-        ws.onerror = function(evt) {
-            log("socket", "error", JSON.stringify(evt));
-        }
+ws.onopen = function () {
+    console.log("socket: open");
+    log("socket", "onopen", url);
+    var data = {};
+    data.cmd = "reg.anonymous";
+    data.token = Env.shToken;
+    sendWs(data);
+}
+ws.onmessage = function (evt) {
+    var received_msg = evt.data;
+    log("socket", "onmessage", evt.data);
+    var msg = JSON.parse(evt.data);
+    processEvent(msg, "socket");
+}
+ws.onclose = function (evt) {
+    console.log("socket: close");
+}
+ws.onerror = function (evt) {
+    log("socket", "error", JSON.stringify(evt));
+}
 
-        function sendWs(data)
-        {
-            var msg = JSON.stringify(data);
-            log("socket", "send", msg);
-            ws.send(msg);
-        }
+function sendWs(data) {
+    var msg = JSON.stringify(data);
+    log("socket", "send", msg);
+    ws.send(msg);
+}
 
-        // basic functions
-        function getUser(uid) {
+// basic functions
+function liveInit(status) {
+    var data = clone(Env.baseParams);
+    data.cmd = "live.user";
+    data.status = status;
+    sendWs(data);
+}
+
+function listMyGames() {
+    var data = clone(Env.baseParams);
+    data.cmd = "user.games";
+    sendWs(data);
+}
+
+function listMatchCounts() {
+    var data = clone(Env.baseParams);
+    data.cmd = "match.counts";
+    sendWs(data);
+}
+
+function showError(msg) {
+    $("#errorMessage").css("display", "block");
+    $("#errorMessage").text(msg);
+}
+
+function hideError() {
+    $("#errorMessage").css("display", "none");
+}
+
+$(init);
+function init() {
+    Env.shToken = $.cookie("shToken");
+    if (typeof (Env.shToken) === "undefined") {
+        log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
+        Env.shToken = Env.nextUuid;
+        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
+    }
+    log("main", "info", "shToken using: " + Env.shToken);
+    $("#token").text(Env.shToken);
+
+    $("#version").text(Env.version);
+
+    window.addEventListener('load', function () {
+        new FastClick(document.body);
+    }, false);
+
+    $("#gameTicTacToe").click(function () {
+        var data = clone(Env.baseParams);
+        data.cmd = "match.add";
+        data.name = "tictactoe";
+        sendWs(data);
+        $("#dialog").dialog();
+    });
+    $("#setUserInfo").click(function () {
+        var name = prompt("Please enter a nick name.", "")
+        if (name != null && name != "") {
             var data = clone(Env.baseParams);
-            data.cmd = "user.get";
-            data.uid = uid;
+            data.cmd = "user.set";
+            data.user = {name: name};
             sendWs(data);
         }
-
-        function liveInit(status)
-        {
-            var data = clone(Env.baseParams);
-            data.cmd = "live.user";
-            data.status = status;
-            sendWs(data);
-        }
-
-        function listMyGames()
-        {
-            var data = clone(Env.baseParams);
-            data.cmd = "user.games";
-            sendWs(data);
-        }
-
-        function listMatchCounts()
-        {
-            var data = clone(Env.baseParams);
-            data.cmd = "match.counts";
-            sendWs(data);
-        }
-
-        function showError(msg) {
-            $("#errorMessage").css("display", "block");
-            $("#errorMessage").text(msg);
-        }
-
-        function hideError() {
-            $("#errorMessage").css("display", "none");
-        }
-
-        $(init);
-        function init()
-        {
-            Env.shToken = $.cookie("shToken");
-            if(typeof (Env.shToken) === "undefined") {
-                log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
-                Env.shToken = Env.nextUuid;
-                $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
-            }
-            log("main", "info", "shToken using: " + Env.shToken);
-            $("#token").text(Env.shToken);
-
-            $("#version").text(Env.version);
-
-            window.addEventListener('load', function() {
-                new FastClick(document.body);
-            }, false);
-
-            $("#gameTicTacToe").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "match.add";
-                data.name = "tictactoe";
-                sendWs(data);
-                $("#dialog").dialog();
-            });
-            $("#setUserInfo").click(function() {
-                var name = prompt("Please enter a nick name.", "")
-                if (name!=null && name!="") {
-                    var data = clone(Env.baseParams);
-                    data.cmd = "user.set";
-                    data.user = {name: name};
-                    sendWs(data);
-                }
-            });
-            $("#liveHide").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "live.user";
-                data.status = "off";
-                sendWs(data);
-            });
-            $("#liveShow").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "live.user";
-                data.status = "on";
-                sendWs(data);
-            });
-        }
-    </script>
+    });
+    $("#liveHide").click(function () {
+        var data = clone(Env.baseParams);
+        data.cmd = "live.user";
+        data.status = "off";
+        sendWs(data);
+    });
+    $("#liveShow").click(function () {
+        var data = clone(Env.baseParams);
+        data.cmd = "live.user";
+        data.status = "on";
+        sendWs(data);
+    });
+}
+</script>
 </head>
 <body>
 <div style="float:left;">session=<span id="session"></span></div>
@@ -363,28 +254,31 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td>Hello <span id="userName"></span> (<span id="uid"></span>) <button id="setUserInfo" style="float:right">set</button></td>
-        <td style="width:200px;">online</td>
-        <td style="width:350px;">Games Your Playing<span style="float:right;" id="version"></span></td>
+        <td>Hello <span id="userName"></span> (<span id="uid"></span>)
+            <button id="setUserInfo" style="float:right">set</button>
+        </td>
+        <td>online</td>
+        <td>Games Your Playing<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
-        <td valign="top" style="">
-            <div id="matchList" style="height:150;width:100%;overflow:scroll;">
+        <td valign="top">
+            <div id="matchList" style="height:150;overflow:scroll;">
                 <div id="matchTemplate" style="display:none;">
                     <span id="matchName">player-0</span>
                 </div>
             </div>
         </td>
         <td valign="top">
-            <div id="playerList" style="height:150;width:100%;overflow:scroll;">
+            <div id="playerList" style="height:150;overflow:scroll;">
                 <div id="playerTemplate" style="display:none;">
                     <span id="playerName">open-game-0</span>
-                    <button id="playerOffer">offer</button>
+                    <button id="playerOffer" style="float:right">offer</button>
+                    <div style="clear:both"></div>
                 </div>
             </div>
         </td>
         <td valign="top">
-            <div id="gameList" style="height:150;width:100%;overflow:scroll;">
+            <div id="gameList" style="height:150;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
                     <span id="gameName">game-0</span>
                     (<span id="gameTurn">?</span>)
@@ -416,9 +310,9 @@
 <div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
 
 <style>
-.waitOptionDiv {
-    margin: 10px;
-}
+    .waitOptionDiv {
+        margin: 10px;
+    }
 </style>
 <div id="dialog" style="display:none" title="Ready to Play">
     <div class="waitOptionDiv">waiting for user to join you...</div>

@@ -1,487 +1,388 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Tic Tac Toe</title>
-    <script src="/static/js/jquery-1.7.1.min.js"></script>
-    <script src="/static/js/jquery.cookie.js"></script>
-    <script src="/static/js/ba-debug.js"></script>
-    <script src="/static/js/reconnecting-websocket.js"></script>
-    <script src='/static/js/fastclick.js'></script>
+<script src="/static/js/jquery-1.7.1.min.js"></script>
+<script src="/static/js/jquery.cookie.js"></script>
+<script src="/static/js/ba-debug.js"></script>
+<script src="/static/js/reconnecting-websocket.js"></script>
+<script src='/static/js/fastclick.js'></script>
+<script src='common.js'></script>
 
-    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
-    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
-    <style type="text/css">
-        body {
-            font-family:verdana,arial,sans-serif;
-            font-size:10pt;
-            margin:30px;
+<link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+<script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+<style type="text/css">
+    body {
+        font-family: verdana, arial, sans-serif;
+        font-size: 10pt;
+        margin: 30px;
+    }
+
+    button {
+        font-size: 12pt;
+    }
+
+    .tictac {
+        display: block;
+        float: left;
+        border-style: solid;
+        border-color: #bbb #888 #666 #aaa;
+        border-width: 3px 4px 4px 3px;
+        width: 90px;
+        height: 50px;
+        background: #ccc;
+        color: #333;
+        line-height: 50px;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 900;
+        font-size: xx-large;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+</style>
+<script language="javascript">
+var Env = {{{params}}};
+
+Env.baseParams = { gameId: "0" };
+Env.players = {};
+Env.users = {};
+var gPendingGets = [];
+
+
+// allow for baseParam overrides from url
+var psess = getURLParameter("session");
+if (psess != 'null') {
+    Env.baseParams.session = psess;
+}
+
+var pgameId = getURLParameter("gameId");
+if (pgameId != 'null') {
+    Env.baseParams.gameId = pgameId.toString();
+}
+
+function setPlayers(playerList, whoTurn) {
+    $(".activePlayer").remove();
+    for (playerId in playerList) {
+        var $newGame = $("#playerTemplate").clone();
+        if (playerId === Env.uid) {
+            $newGame.find("#playerName").text("me");
+            $newGame.find("#playerKick").remove();
+        } else {
+            $newGame.find("#playerName").addClass("playerName" + playerId);
+            $newGame.find("#playerName").text(playerList[playerId].name + " offline");
         }
-        button {
-            font-size: 12pt;
-        }
-        .tictac{
-            display:block;
-            float:left;
-            border-style:solid;
-            border-color:#bbb #888 #666 #aaa;
-            border-width:3px 4px 4px 3px;
-            width:90px;
-            height:50px;
-            background:#ccc;
-            color:#333;
-            line-height:50px;
-            text-align:center;
-            text-decoration:none;
-            font-weight:900;
-            font-size:xx-large;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-    </style>
-    <script language="javascript">
-        var Env = {{{params}}};
-        Env.baseParams = { gameId: "0" };
-        Env.players = {};
-        Env.users = {};
-        var gPendingGets = [];
+        $newGame.addClass("playerId" + playerId);
+        $newGame.addClass("activePlayer");
+        $newGame.css("display", "block");
 
+        $newGame.find("#playerKick").click(function () {
+            var playerId = $(this).parent().attr('playerId');
+        });
 
-        // allow for baseParam overrides from url
-        function getURLParameter(name) {
-            return decodeURI(
-                    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-            );
-        }
-
-        var psess = getURLParameter("session");
-        if(psess != 'null')
-        {
-            Env.baseParams.session = psess;
-        }
-
-        var pgameId = getURLParameter("gameId");
-        if(pgameId != 'null')
-        {
-            Env.baseParams.gameId = pgameId.toString();
-        }
-
-        function clone(obj) {
-            return $.extend({}, obj);
-        }
-
-        var gLogLimit = 500;
-        var gLogCount = 0;
-        function log(api, type, msg)
-        {
-            var $mlog = $("#messageLog");
-            gLogCount++;
-            if (gLogCount > gLogLimit) {
-                // remove first child
-                $mlog.children(":first").remove();
-            }
-
-            color = "black";
-            bodyColor = "black";
-            if(api=="rest") {
-                color = "blue";
-            }
-            if(api=="socket") {
-                color = "green";
-            }
-            if(api=="unknown-event") {
-                color = "green";
-            }
-            if(type=="error" || type=="unknown-event") {
-                color = "red"
-                bodyColor = "red";
-            }
-            if (typeof(msg) == 'object') {
-                msg = JSON.stringify(msg);
-            }
-            var disp = "<div style='font-size:10px;white-space:nowrap;'>";
-            disp += "<span style='color:" + color + ";'>" + api + ": </span>";
-            disp += "<span style='color:" + color + ";'>" + type + ": </span>";
-            disp += "<span style='color:" + bodyColor + ";'>" + msg + "</span>";
-            disp += "</div>";
-            $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
+        if (typeof (Env.players[playerId]) != "undefined") {
+            $newGame.find("#playerName").text(playerId + " " + Env.players[playerId].status);
         }
 
-        function setWhoTurn($turnSpan, whoTurn, profile)
-        {
-            $turnSpan.removeClass("playerName" + whoTurn);
-            if(whoTurn === "0") {
-                $turnSpan.text("over");
-            } else if (whoTurn === Env.uid) {
-                $turnSpan.text("your turn");
-            } else {
-                $turnSpan.addClass("playerName" + whoTurn);
-                $turnSpan.text(profile.name);
-            }
+        $("#playerList").append($newGame);
+    }
+    $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
+}
+
+function setState(game) {
+    $.cookie("shLastGame" + Env.uid, game.gameId, { expires: 3650, path: '/' });
+
+    hideError();
+    var gameBoard = game.state.gameBoard;
+    for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+            $("#x" + i + "y" + j).text(gameBoard[i][j]);
+            $("#x" + i + "y" + j).css('background', '#ccc');
+        }
+    }
+
+    $("#gameStatus").text(game.status);
+    if (game.whoTurn == $("#uid").text()) {
+        $("#whoTurn").text("yours");
+        turnDipl = "yours";
+    } else if (game.whoTurn == 0) {
+        $("#whoTurn").text("no ones");
+    } else {
+        $("#whoTurn").text(game.players[game.whoTurn].name);
+    }
+
+    if (game.status == 'over') {
+        showError("game over");
+        $('#gameWinner').text(game.state.winner);
+    } else {
+        $('#gameWinner').text('');
+    }
+
+    var winnerSet = game.state.winnerSet;
+    if (winnerSet != null) {
+        for (var i = 0; i < winnerSet.length; i++) {
+            $("#" + winnerSet[i]).css("background", "green");
+        }
+    }
+
+    if (game.state.xes == $("#uid").text()) {
+        $("#gamePlaying").text("X's");
+    } else {
+        $("#gamePlaying").text("O's")
+    }
+
+    if (typeof(game.gameId) != 'undefined') {
+        $("#gameId").text(game.gameId);
+        Env.baseParams.gameId = game.gameId;
+    }
+    setPlayers(game.players, game.whoTurn);
+}
+
+function clearState() {
+    $.cookie("shLastGame" + Env.uid, "0", { expires: 3650, path: '/' });
+
+    hideError();
+    for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+            $("#x" + i + "y" + j).text("");
+            $("#x" + i + "y" + j).css('background', '#ccc');
+        }
+    }
+
+    $("#gameId").text("");
+    $("#gameStatus").text("");
+    $("#whoTurn").text("");
+    $('#gameWinner').text('');
+    $("#gamePlaying").text("");
+
+    $(".activePlayer").remove();
+}
+
+function processEvent(res, from) {
+    if (typeof(res.event) == 'undefined') {
+        log(from, "error", "old message: " + JSON.stringify(res));
+        return;
+    }
+    if (res.event == 'event.heartbeat') {
+        return;
+    }
+    if (res.event == 'event.error') {
+        showError(res.message);
+        log(from, "error", JSON.stringify(res));
+        return;
+    }
+    if (typeof(res.cb) !== "undefined") {
+        console.log("handler:", res.cb, res.data);
+        window[res.cb](res.data);
+        return;
+    }
+    if (res.event == 'reg.anonymous') {
+        if (typeof (Env.baseParams.session) === 'undefined') {
+            Env.baseParams.session = res.data.session;
+        } else {
+            log(from, "info", "using existing session: " + Env.baseParams.session);
         }
 
-        function setMyGames(gameList)
-        {
-            $(".activeGame").remove();
-            for (gameId in gameList) {
-                var $newGame = $("#gameTemplate").clone();
-                $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
-                var game = gameList[gameId];
-                setWhoTurn($newGame.find("#gameTurn"), game.whoTurn, game.players[game.whoTurn]);
-                $newGame.addClass("myGameId" + gameId);
-                $newGame.addClass("activeGame");
-                $newGame.attr("gameId", gameId);
-                $newGame.css("display", "block");
+        $("#session").text(Env.baseParams.session);
+        Env.uid = Env.baseParams.session.split(':')[1];
+        $("#uid").text(Env.uid);
 
-                $newGame.find("#myGameJoin").click(function() {
-                    var gameId = $(this).parent().attr('gameId');
-                    gameInit(gameId);
-                });
-                $newGame.find("#myGameRemove").click(function() {
-                    var data = clone(Env.baseParams);
-                    data.cmd = "user.gameRemove";
-                    data.gameId = $(this).parent().attr("gameId");
-                    sendWs(data);
-                });
+        listMyGames();
 
-                $("#gameList").append($newGame);
-            }
+        if (Env.baseParams.gameId === "0") {
+            Env.baseParams.gameId = $.cookie("shLastGame" + Env.uid);
         }
+        if (Env.baseParams.gameId !== "0") {
+            gameInit(Env.baseParams.gameId);
+        }
+        return;
+    }
+    if (res.event == 'event.game.join') {
+        // turn off live events for old game
+        var newGameId = res.data.gameId;
+        var oldGameId = Env.baseParams.gameId;
+        if (typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
+            liveInit(oldGameId, "off");
+            Env.players = {};  // reset the player list
+        }
+        setState(res.data);
+        liveInit(newGameId, "on");
+        return;
+    }
+    if (res.event == 'event.live.game.user') {
+        Env.players[res.data.uid] = res.data;
+        var $playerName = $(".playerId" + res.data.uid).find("#playerName");
+        if ($playerName.size) {
+            $playerName.text(res.data.name + " " + res.data.status);
+        }
+        return;
+    }
+    if (res.event == 'event.game.turn.next') {
+        setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
+        return;
+    }
+    if (res.event == 'event.game.info'
+            || res.event == 'event.game.reset') {
+        setState(res.data);
+        return;
+    }
+    if (res.event == 'event.game.over') {
+        setState(res.data);
+        return;
+    }
+    if (res.event == 'event.user.profiles') {
+        updateUsers(res.data);
+        return;
+    }
+    if (res.event == 'event.user.games') {
+        setMyGames(res.data);
+        return;
+    }
+    if (res.event == 'event.heartbeat'
+            || res.event == 'event.live.user'
+            || res.event == 'event.live.game') {
+        // ignore for now
+        return;
+    }
+    log(from, "unknown-event", JSON.stringify(res));
+}
 
-        function setPlayers(playerList, whoTurn)
-        {
-            $(".activePlayer").remove();
-            for (playerId in playerList) {
-                var $newGame = $("#playerTemplate").clone();
-                if(playerId === Env.uid) {
-                    $newGame.find("#playerName").text("me");
-                    $newGame.find("#playerKick").remove();
-                } else {
-                    $newGame.find("#playerName").addClass("playerName" + playerId);
-                    $newGame.find("#playerName").text(playerList[playerId].name + " offline");
+function sendRest(input) {
+    log("rest", "send", input);
+    $.ajax
+            ({
+                type: "POST",
+                url: Env.restUrl,
+                async: false,
+                data: JSON.stringify(input),
+                success: function (res, status) {
+                    log("rest", "recv", res);
+                    processEvent(res, "rest");
+                },
+                error: function (xhr, status, error) {
+                    log("rest", "error", xhr.responseText);
                 }
-                $newGame.addClass("playerId"+playerId);
-                $newGame.addClass("activePlayer");
-                $newGame.css("display", "block");
+            })
+}
 
-                $newGame.find("#playerKick").click(function() {
-                    var playerId = $(this).parent().attr('playerId');
-                });
-
-                if (typeof (Env.players[playerId]) != "undefined") {
-                    $newGame.find("#playerName").text(playerId + " " + Env.players[playerId].status);
-                }
-
-                $("#playerList").append($newGame);
-            }
-            $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
-        }
-
-        function setState(game)
-        {
-            $.cookie("shLastGame" + Env.uid, game.gameId, { expires: 3650, path: '/' });
-
-            hideError();
-            var gameBoard = game.state.gameBoard;
-            for (var i=0; i<3; i++) {
-                for (var j=0; j<3; j++) {
-                    $("#x" + i + "y" + j).text(gameBoard[i][j]);
-                    $("#x" + i + "y" + j).css('background', '#ccc');
-                }
-            }
-
-            $("#gameStatus").text(game.status);
-            if (game.whoTurn == $("#uid").text()) {
-                $("#whoTurn").text("yours");
-                turnDipl = "yours";
-            } else if(game.whoTurn == 0) {
-                $("#whoTurn").text("no ones");
-            } else {
-                $("#whoTurn").text(game.players[game.whoTurn].name);
-            }
-
-            if(game.status == 'over') {
-                showError("game over");
-                $('#gameWinner').text(game.state.winner);
-            } else {
-                $('#gameWinner').text('');
-            }
-
-            var winnerSet = game.state.winnerSet;
-            if (winnerSet != null) {
-                for(var i=0; i<winnerSet.length; i++) {
-                    $("#"+winnerSet[i]).css("background", "green");
-                }
-            }
-
-            if(game.state.xes == $("#uid").text())
-            {
-                $("#gamePlaying").text("X's");
-            } else {
-                $("#gamePlaying").text("O's")
-            }
-
-            if(typeof(game.gameId) != 'undefined') {
-                $("#gameId").text(game.gameId);
-                Env.baseParams.gameId = game.gameId;
-            }
-            setPlayers(game.players, game.whoTurn);
-        }
-
-        function clearState()
-        {
-            $.cookie("shLastGame" + Env.uid, "0", { expires: 3650, path: '/' });
-
-            hideError();
-            for (var i=0; i<3; i++) {
-                for (var j=0; j<3; j++) {
-                    $("#x" + i + "y" + j).text("");
-                    $("#x" + i + "y" + j).css('background', '#ccc');
-                }
-            }
-
-            $("#gameId").text("");
-            $("#gameStatus").text("");
-            $("#whoTurn").text("");
-            $('#gameWinner').text('');
-            $("#gamePlaying").text("");
-
-            $(".activePlayer").remove();
-        }
-
-        function processEvent(res, from) {
-            if(typeof(res.event) == 'undefined') {
-                log(from, "error", "old message: "+JSON.stringify(res));
-                return;
-            }
-            if(res.event == 'event.heartbeat') {
-                return;
-            }
-            if(res.event == 'event.error') {
-                showError(res.message);
-                log(from, "error", JSON.stringify(res));
-                return;
-            }
-            if ( typeof(res.cb) !== "undefined") {
-                console.log("handler:", res.cb, res.data);
-                window[res.cb](res.data);
-                return;
-            }
-            if(res.event == 'reg.anonymous') {
-                if (typeof (Env.baseParams.session) === 'undefined') {
-                    Env.baseParams.session = res.data.session;
-                } else {
-                    log(from, "info", "using existing session: " + Env.baseParams.session);
-                }
-
-                $("#session").text(Env.baseParams.session);
-                Env.uid = Env.baseParams.session.split(':')[1];
-                $("#uid").text(Env.uid);
-
-                listMyGames();
-
-                if (Env.baseParams.gameId === "0") {
-                    Env.baseParams.gameId = $.cookie("shLastGame" + Env.uid);
-                }
-                if (Env.baseParams.gameId !== "0") {
-                    gameInit(Env.baseParams.gameId);
-                }
-                return;
-            }
-            if(res.event == 'event.game.join') {
-                // turn off live events for old game
-                var newGameId = res.data.gameId;
-                var oldGameId = Env.baseParams.gameId;
-                if(typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
-                    liveInit(oldGameId, "off");
-                    Env.players = {};  // reset the player list
-                }
-                setState(res.data);
-                liveInit(newGameId, "on");
-                return;
-            }
-            if(res.event == 'event.live.game.user') {
-                Env.players[res.data.uid] = res.data;
-                var $playerName = $(".playerId"+res.data.uid).find("#playerName");
-                if ($playerName.size) {
-                    $playerName.text(res.data.name + " " + res.data.status);
-                }
-                return;
-            }
-            if(res.event == 'event.game.turn.next') {
-                $turnSpan = $(".myGameId" + res.data.gameId).find("#gameTurn");
-                setWhoTurn($turnSpan, res.data.whoTurn, res.data);
-                return;
-            }
-            if(res.event == 'event.game.info'
-                    || res.event == 'event.game.reset') {
-                setState(res.data);
-                return;
-            }
-            if(res.event == 'event.game.over') {
-                setState(res.data);
-                return;
-            }
-            if(res.event == 'event.user.profiles') {
-                updateUsers(res.data);
-                return;
-            }
-            if(res.event == 'event.user.games') {
-                setMyGames(res.data);
-                return;
-            }
-            if(res.event == 'event.heartbeat'
-                    || res.event == 'event.live.user'
-                    || res.event == 'event.live.game')
-            {
-                // ignore for now
-                return;
-            }
-            log(from, "unknown-event", JSON.stringify(res));
-        }
-
-        function sendRest(input)
-        {
-            log("rest", "send", input);
-            $.ajax
-                    ({
-                        type: "POST",
-                        url: Env.restUrl,
-                        async: false,
-                        data: JSON.stringify(input),
-                        success: function (res, status) {
-                            log("rest", "recv", res);
-                            processEvent(res, "rest");
-                        },
-                        error: function (xhr, status, error) {
-                            log("rest", "error", xhr.responseText);
-                        }
-                    })
-        }
-
-        var url = Env.socketUrl;
-        var ws = new ReconnectingWebSocket(url);
+var url = Env.socketUrl;
+var ws = new ReconnectingWebSocket(url);
 //        ws.debug = true;
-        ws.onopen = function() {
-            console.log("socket: open");
-            log("socket", "onopen", url);
-            var data = {};
-            data.cmd = "reg.anonymous";
-            data.token = Env.shToken;
-            sendWs(data);
-        }
-        ws.onmessage = function (evt) {
-            var received_msg = evt.data;
-            log("socket", "onmessage", evt.data);
-            var msg = JSON.parse(evt.data);
-            processEvent(msg, "socket");
-        }
-        ws.onclose = function(evt) {
-            console.log("socket: close");
-        }
-        ws.onerror = function(evt) {
-            log("socket", "error", JSON.stringify(evt));
-        }
+ws.onopen = function () {
+    console.log("socket: open");
+    log("socket", "onopen", url);
+    var data = {};
+    data.cmd = "reg.anonymous";
+    data.token = Env.shToken;
+    sendWs(data);
+}
+ws.onmessage = function (evt) {
+    var received_msg = evt.data;
+    log("socket", "onmessage", evt.data);
+    var msg = JSON.parse(evt.data);
+    processEvent(msg, "socket");
+}
+ws.onclose = function (evt) {
+    console.log("socket: close");
+}
+ws.onerror = function (evt) {
+    log("socket", "error", JSON.stringify(evt));
+}
 
-        function sendWs(data)
-        {
-            var msg = JSON.stringify(data);
-            log("socket", "send", msg);
-            ws.send(msg);
-        }
+function sendWs(data) {
+    var msg = JSON.stringify(data);
+    log("socket", "send", msg);
+    ws.send(msg);
+}
 
-        // basic functions
-        function liveInit(gameId, status)
-        {
-            var data = clone(Env.baseParams);
-            data.gameId = gameId;
-            data.cmd = "live.game";
-            data.status = status;
-            sendWs(data);
-        }
+// basic functions
+function liveInit(gameId, status) {
+    var data = clone(Env.baseParams);
+    data.gameId = gameId;
+    data.cmd = "live.game";
+    data.status = status;
+    sendWs(data);
+}
 
-        function gameInit(gameId)
-        {
-            var data = clone(Env.baseParams);
-            data.gameId = gameId;
-            data.cmd = "game.join";
-            sendWs(data);
-        }
+function gameInit(gameId) {
+    var data = clone(Env.baseParams);
+    data.gameId = gameId;
+    data.cmd = "game.join";
+    sendWs(data);
+}
 
-        function listMyGames()
-        {
-            var data = clone(Env.baseParams);
-            data.cmd = "user.games";
-            sendWs(data);
-        }
+function listMyGames() {
+    var data = clone(Env.baseParams);
+    data.cmd = "user.games";
+    sendWs(data);
+}
 
-        function turn(x, y) {
-            var data = clone(Env.baseParams);
-            data.cmd = "game.turn";
-            data.move = {x:x, y:y};
+function turn(x, y) {
+    var data = clone(Env.baseParams);
+    data.cmd = "game.turn";
+    data.move = {x: x, y: y};
 //            sendRest(data);
-            sendWs(data);
+    sendWs(data);
+}
+
+function showError(msg) {
+    $("#errorMessage").css("display", "block");
+    $("#errorMessage").text(msg);
+}
+
+function hideError() {
+    $("#errorMessage").css("display", "none");
+}
+
+$(init);
+function init() {
+    Env.shToken = $.cookie("shToken");
+    if (typeof (Env.shToken) === "undefined") {
+        log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
+        Env.shToken = Env.nextUuid;
+        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
+    }
+    log("main", "info", "shToken using: " + Env.shToken);
+    $("#token").text(Env.shToken);
+
+    $("#version").text(Env.version);
+
+    window.addEventListener('load', function () {
+        new FastClick(document.body);
+    }, false);
+
+    $(".tictac").click(function () {
+        var id = $(this).attr("id");
+        var x = id.slice(1, 2);
+        var y = id.slice(3, 4);
+        turn(x, y);
+    });
+
+    $("#gameLobby").click(function () {
+        var addParam = "";
+        var psess = getURLParameter("session");  // done for testing two users in same browser
+        if (psess != 'null') {
+            addParam = "?session=" + psess;
         }
+        window.location.href = "/games/lobby.html" + addParam;
+    });
 
-        function showError(msg) {
-            $("#errorMessage").css("display", "block");
-            $("#errorMessage").text(msg);
-        }
+    $("#gameUpdate").click(function () {
+        var data = clone(Env.baseParams);
+        data.cmd = "game.get";
+        sendWs(data);
+    });
 
-        function hideError() {
-            $("#errorMessage").css("display", "none");
-        }
-
-        $(init);
-        function init()
-        {
-            Env.shToken = $.cookie("shToken");
-            if(typeof (Env.shToken) === "undefined") {
-                log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
-                Env.shToken = Env.nextUuid;
-                $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
-            }
-            log("main", "info", "shToken using: " + Env.shToken);
-            $("#token").text(Env.shToken);
-
-            $("#version").text(Env.version);
-
-            window.addEventListener('load', function() {
-                new FastClick(document.body);
-            }, false);
-
-            $(".tictac").click(function() {
-                var id = $(this).attr("id");
-                var x = id.slice(1,2);
-                var y = id.slice(3,4);
-                turn(x, y);
-            });
-
-            $("#gameLobby").click(function() {
-                var addParam = "";
-                var psess = getURLParameter("session");  // done for testing two users in same browser
-                if(psess != 'null')
-                {
-                    addParam = "?session="+psess;
-                }
-                window.location.href = "/games/lobby.html" + addParam;
-            });
-
-            $("#gameUpdate").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "game.get";
-                sendWs(data);
-            });
-
-            $("#gameReset").click(function() {
-                var data = clone(Env.baseParams);
-                data.cmd = "game.reset";
-                sendWs(data);
-            });
-        }
-    </script>
+    $("#gameReset").click(function () {
+        var data = clone(Env.baseParams);
+        data.cmd = "game.reset";
+        sendWs(data);
+    });
+}
+</script>
 </head>
 <body>
 <div style="float:left;">session=<span id="session"></span></div>
@@ -489,14 +390,13 @@
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:400px">Controls</td>
+        <td>Controls</td>
         <td>Games Your Playing<span style="float:right;" id="version"></span></td>
     </tr>
     <tr>
         <td valign="top">
             <button id="gameLobby">goto lobby</button>
-            <button id="gameUpdate">refresh game</button>
-            <button id="gameReset" style="float:right;">reset game</button>
+            <button id="gameReset" style="float:right">reset game</button>
         </td>
         <td valign="top">
             <div id="gameList" style="height:150;overflow:scroll;">
@@ -514,7 +414,10 @@
 
 <table border="1" width="100%">
     <tr>
-        <td>game - <span id="gameId"></span><div style="float:right">user=<span id="uid"></span></div></td>
+        <td>game - <span id="gameId"></span>
+
+            <div style="float:right">user=<span id="uid"></span></div>
+        </td>
         <td>info</td>
         <td>players</td>
     </tr>
