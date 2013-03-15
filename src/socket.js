@@ -97,7 +97,7 @@ Socket.start = function () {
           if (error) {
             shlog.error(error, data);
           }
-          if(data !== null && !_.isUndefined(data)) {
+          if (data !== null && !_.isUndefined(data)) {
             data.cb = req.params.cb;
             sh.sendWs(ws, error, data);
           }
@@ -121,7 +121,7 @@ Socket.start = function () {
       var userConn = gUsers[this.uid];
       delete gUsers[this.uid];
 
-      if (userConn.liveUser == "on") {
+      if (userConn.liveUser === "on") {
         Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
       }
 

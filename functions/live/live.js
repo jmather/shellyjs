@@ -57,7 +57,7 @@ live.user = function (req, res, cb) {
   if (status === "on") {
     // notify myself of all users online
     _.forOwn(global.gUsers, function (info, playerId) {
-      if(playerId !== ws.uid) {
+      if (playerId !== ws.uid) {
         // short cut the emmitter since we have ws
         var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, name: info.name, pic: "", status: "online"}));
         ws.send(e);

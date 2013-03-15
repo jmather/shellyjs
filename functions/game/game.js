@@ -258,7 +258,7 @@ game.turn = function (req, res, cb) {
           whoTurn: game.whoTurn,
           name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
           pic: ""
-        }));
+          }));
       });
     }
     // already sent on the socket notify
