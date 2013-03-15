@@ -50,12 +50,12 @@ function setWhoTurn(gameId, whoTurn, profile) {
     $turnSpan.text("over");
   } else if (whoTurn === Env.uid) {
     $turnSpan.text("your turn");
-    $gamePlaying.remove();
+    $gamePlaying.detach();
     $gamePlaying.prependTo("#gameList");
   } else {
     $turnSpan.addClass("playerName" + whoTurn);
     $turnSpan.text(profile.name + "'s turn");
-    $gamePlaying.remove();
+    $gamePlaying.detach();
     $gamePlaying.appendTo("#gameList");
   }
 }
@@ -73,6 +73,7 @@ function setMyGames(gameList) {
 
     $newGame.find("#myGameJoin").click(function () {
       var gameId = $(this).parent().attr('gameId');
+      console.log("init");
       gameInit(gameId);
     });
     $newGame.find("#myGameRemove").click(function () {
