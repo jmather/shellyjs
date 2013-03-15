@@ -97,7 +97,7 @@ function setState(game) {
     hideError();
 
     $("#uid").text(Env.uid);
-    $("#userName").text(game.players[Env.uid].name);
+    $("#currentUserName").text(game.players[Env.uid].name);
 
     var gameBoard = game.state.gameBoard;
     for (var i = 0; i < 3; i++) {
@@ -394,7 +394,7 @@ function init() {
 <table border="1" style="width:100%;">
     <tr>
         <td>
-            <div style="float:left">Hello <span id="userName"></span> (<span id="uid"></span>)</div>
+            <div style="float:left">Hello <span id="currentUserName"></span> (<span id="uid"></span>)</div>
             <div style="float:right">game = <span id="gameId"></span></div>
         </td>
         <td>Games Your Playing<span style="float:right;" id="version"></span></td>

@@ -49,31 +49,31 @@ function setMatchCounts(matchList) {
 }
 
 function removeUser(uid) {
-    $(".playerId" + uid).remove();
+    $(".userId" + uid).remove();
 }
 
 function addUser(user) {
-    if ($(".playerId" + user.uid).size() > 0) {
+    if ($(".userId" + user.uid).size() > 0) {
         return;
     }
-    var $newGame = $("#playerTemplate").clone();
-    $newGame.find("#playerName").text(user.name);
-    $newGame.find("#playerName").addClass("playerName" + user.uid);
-    $newGame.addClass("playerId" + user.uid);
-    $newGame.addClass("activePlayer");
+    var $newGame = $("#userTemplate").clone();
+    $newGame.find("#userName").text(user.name);
+    $newGame.find("#userName").addClass("playerName" + user.uid);
+    $newGame.addClass("userId" + user.uid);
+    $newGame.addClass("activeUser");
     $newGame.attr("uid", user.uid);
     $newGame.css("display", "block");
 
     if (user.uid === Env.uid) {
-        $("#userName").text(user.name);
+        $("#currentUserName").text(user.name);
     }
 
-    $newGame.find("#playerOffer").click(function () {
+    $newGame.find("#userOffer").click(function () {
         alert("not implemented");
 //                var gameId = $(this).parent().attr('gameId');
     });
 
-    $("#playerList").append($newGame);
+    $("#userList").append($newGame);
 }
 
 function gameInit(gameId) {
@@ -243,6 +243,7 @@ function init() {
         }
     });
     $("#liveHide").click(function () {
+        $(".activePlayer").remove();
         var data = clone(Env.baseParams);
         data.cmd = "live.user";
         data.status = "off";
@@ -263,7 +264,7 @@ function init() {
 <div style="clear:both"></div>
 <table border="1" style="width:100%;">
     <tr>
-        <td>Hello <span id="userName"></span> (<span id="uid"></span>)
+        <td>Hello <span id="currentUserName"></span> (<span id="uid"></span>)
             <button id="setUserInfo" style="float:right">set</button>
         </td>
         <td>online</td>
@@ -278,10 +279,10 @@ function init() {
             </div>
         </td>
         <td valign="top">
-            <div id="playerList" style="height:150;overflow:scroll;">
-                <div id="playerTemplate" style="display:none;">
-                    <span id="playerName">open-game-0</span>
-                    <button id="playerOffer" style="float:right">offer</button>
+            <div id="userList" style="height:150;overflow:scroll;">
+                <div id="userTemplate" style="display:none;">
+                    <span id="userName">open-game-0</span>
+                    <button id="userOffer" style="float:right">offer</button>
                     <div style="clear:both"></div>
                 </div>
             </div>
