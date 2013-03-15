@@ -38,7 +38,6 @@ if (psess != 'null') {
 function setMatchCounts(matchList) {
     $(".activeMatch").remove();
     for (gameName in matchList) {
-        console.log(gameName);
         var $newGame = $("#matchTemplate").clone();
         $newGame.find("#matchName").text(gameName + " = " + matchList[gameName]);
         $newGame.attr("gameName", gameName);

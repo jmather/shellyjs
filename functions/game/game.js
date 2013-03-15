@@ -311,7 +311,11 @@ game.reset = function (req, res, cb) {
       global.socket.notify(game.gameId, data);
       // notify live.users that are in this game
       _.forEach(game.playerOrder, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.gameId, whoTurn: game.whoTurn}));
+        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.gameId,
+          whoTurn: game.whoTurn,
+          name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
+          pic: ""
+          }));
       });
     }
     // already sent on the socket notify
