@@ -20,6 +20,7 @@ tictactoe.create = function (req, cb) {
   state.winnerSet = null;
   state.xes = req.session.uid;
 
+  req.env.game.set("minPlayers", 2);
   req.env.game.set("maxPlayers", 2);
   req.env.game.set("state", state);
 
@@ -27,8 +28,8 @@ tictactoe.create = function (req, cb) {
 };
 
 tictactoe.reset = function (req, cb) {
-  this.create(req, function(error, data) {
-    if(error === 0) {
+  this.create(req, function (error, data) {
+    if (error === 0) {
       data.event = "event.game.reset";
     }
     cb(error, data);
@@ -39,7 +40,7 @@ function checkFull(gb) {
   var res = true;
   for (var i = 0; i < 3; i++) {
     for (var j = 0; j < 3; j++) {
-      if (gb[i][j] == "") {
+      if (gb[i][j] === "") {
         return false;
       }
     }
@@ -91,11 +92,6 @@ tictactoe.turn = function (req, cb) {
   var game = req.env.game;
   var state = req.env.game.get("state");
   var gameBoard = state.gameBoard;
-
-  if (Object.keys(game.get("players")).length < 2) {
-    cb(2, sh.error("players_missing", "not enough players in game", {required: 2, playerCount: Object.keys(game.get("players")).length}));
-    return;
-  }
 
   if (gameBoard[move.x][move.y] != "") {
     cb(2, sh.error("move_bad", "this square has been taken"));

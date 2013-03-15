@@ -227,6 +227,11 @@ game.turn = function (req, res, cb) {
   // fast and loose - muse setData before return or sub call
   var game = req.env.game.getData();
 
+  if (Object.keys(game.players).length < game.minPlayers) {
+    cb(2, sh.error("players_missing", "not enough players in game", {required: game.minPlayers, playerCount: Object.keys(game.players).length}));
+    return;
+  }
+
   if (game.status === "over") {
     cb(0, sh.event("event.game.over", game));
     return;
