@@ -28,7 +28,9 @@ Socket.notifyUser = function (uid, data) {
 Socket.notifyAll = function (data) {
   shlog.info("(notify all users");
   _.forOwn(global.gUsers, function (prop, key) {
-    eventEmitter.emit(sh.channel("user", key), data);
+    if (prop.liveUser === "on") {
+      eventEmitter.emit(sh.channel("user", key), data);
+    }
   });
 };
 

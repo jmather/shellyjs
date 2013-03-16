@@ -11,7 +11,8 @@ live.desc = "game state and control module";
 live.functions = {
   list: {desc: "list online users", params: {}, security: []},
   user: {desc: "enable/disable live events for a user", params: {status: {dtype: "string"}}, security: []},
-  game: {desc: "enable/disable live events for a user in a game", params: {gameId: {dtype: "string"}, status: {dtype: "string"}}, security: []}
+  game: {desc: "enable/disable live events for a user in a game", params: {gameId: {dtype: "string"}, status: {dtype: "string"}}, security: []},
+  message: {desc: "send a message to all online users", params: {message: {dtype: "string"}}, security: []}
 };
 
 live.list = function (req, res, cb) {
@@ -57,7 +58,7 @@ live.user = function (req, res, cb) {
   if (status === "on") {
     // notify myself of all users online
     _.forOwn(global.gUsers, function (info, playerId) {
-      if (playerId !== ws.uid) {
+      if (playerId !== ws.uid && info.liveUser === "on") {
         // short cut the emmitter since we have ws
         var e = JSON.stringify(sh.event("event.live.user", {uid: playerId, name: info.name, pic: "", status: "online"}));
         ws.send(e);
@@ -129,3 +130,16 @@ live.game = function (req, res, cb) {
 //  sendWs(ws, 0, sh.event("event.live.game", {status: req.params.status, game: gameId}));
   cb(0, sh.event("event.live.game", {status: req.params.status, gameId: gameId}));
 };
+
+live.message = function (req, res, cb) {
+  var msg = req.params.message;
+
+  var event = sh.event("event.live.message", {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: msg});
+  global.socket.notifyAll(event);
+
+  if (_.isUndefined(res.ws)) {
+    cb(0, sh.event("event.live.message", {status: "sent"}));
+  } else {
+    cb(0);
+  }
+}
