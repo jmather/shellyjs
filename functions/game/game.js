@@ -118,7 +118,6 @@ game.create = function (req, res, cb) {
     game.set("gameId", data.toString());
     game.set("name", req.params.name);
     game.set("ownerId", uid);
-    game.setPlayer(uid, "ready");
     game.set("whoTurn", uid);
 
     // add to request environment
@@ -126,7 +125,11 @@ game.create = function (req, res, cb) {
 
     if (_.isUndefined(req.params.players)) {
       req.session.user.addGame(game);
+      game.setPlayer(uid, "ready");
     } else {
+      _.each(req.params.players, function (playerId) {
+        game.setPlayer(playerId, "ready");
+      });
       addPlayers(req.params.players, game, function (error, data) {
         // SWD ignore any errors for now
         if (error) {
