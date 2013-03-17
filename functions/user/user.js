@@ -105,5 +105,5 @@ user.gameRemove = function (req, res, cb) {
   delete currentGames[gameId];
   user.set(currentGames);
 
-  cb(0, sh.event("event.user.games", currentGames));
+  cb(0, sh.event("event.user.gameRemove", {gameId: gameId}));
 };

@@ -26,7 +26,7 @@ Socket.notifyUser = function (uid, data) {
 };
 
 Socket.notifyAll = function (data) {
-  shlog.info("(notify all users");
+  shlog.info("notify all users");
   _.forOwn(global.gUsers, function (prop, key) {
     if (prop.liveUser === "on") {
       eventEmitter.emit(sh.channel("user", key), data);
@@ -114,7 +114,7 @@ Socket.start = function () {
     ws.on("close", function () {
       clearInterval(this.hbTimer);
 
-      if (_.isUndefined(this.uid)) {
+      if (_.isUndefined(this.uid) || this.uid === 0) {
         shlog.info("socket: close - socket never had valid user session");
         return;
       }

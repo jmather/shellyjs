@@ -38,9 +38,6 @@ User.prototype.load = function (uid, cb) {
       var savedData = JSON.parse(value);
       self._data.uid = uid;
       self._data = _.merge(self._data, savedData);
-      if (self._data.name.length === 0) {
-        self._data.name = "player" + self._data.uid;
-      }
     } catch (e) {
       cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
       return;
@@ -53,6 +50,8 @@ User.prototype.loadOrCreate = function (uid, cb) {
   var self = this;
   this.load(uid, function (error, value) {
     if (error) {
+      self._data.uid = uid;
+      self._data.name = "player" + uid;
       // try and create on since we are passed session check
       self.save(cb);
     } else {

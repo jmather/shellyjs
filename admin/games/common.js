@@ -76,7 +76,8 @@ function setMyGames(gameList) {
       console.log("init");
       gameInit(gameId);
     });
-    $newGame.find("#myGameRemove").click(function () {
+    $newGame.find("#myGameRemove").click(function (event) {
+      $(event.target).parent().remove();
       var data = clone(Env.baseParams);
       data.cmd = "user.gameRemove";
       data.gameId = $(this).parent().attr("gameId");
@@ -86,4 +87,34 @@ function setMyGames(gameList) {
     $("#gameList").append($newGame);
     setWhoTurn(gameId, game.whoTurn, game.players[game.whoTurn]);
   }
+}
+
+/*
+ * JavaScript Pretty Date
+ * Copyright (c) 2011 John Resig (ejohn.org)
+ * Licensed under the MIT and GPL licenses.
+ */
+
+// Takes an ISO time and returns a string representing how
+// long ago the date represents.
+function prettyDate(time){
+//  console.log(new Date(time));
+//  var date = new Date((time || "").replace(/-/g,"/").replace(/[TZ]/g," ")),
+  var date = new Date(time),
+    diff = (((new Date()).getTime() - date.getTime()) / 1000),
+    day_diff = Math.floor(diff / 86400);
+
+  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
+    return;
+
+  return day_diff == 0 && (
+    diff < 2 && "1 second ago" ||
+    diff < 60 && Math.round(diff) + " seconds ago" ||
+      diff < 120 && "1 minute ago" ||
+      diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+      diff < 7200 && "1 hour ago" ||
+      diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
+    day_diff == 1 && "Yesterday" ||
+    day_diff < 7 && day_diff + " days ago" ||
+    day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
 }

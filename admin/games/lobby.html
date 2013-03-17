@@ -35,11 +35,12 @@ if (psess != 'null') {
     Env.baseParams.session = psess;
 }
 
-function setMatchCounts(matchList) {
+function setMatchInfo(matchList) {
     $(".activeMatch").remove();
     for (gameName in matchList) {
         var $newGame = $("#matchTemplate").clone();
-        $newGame.find("#matchName").text(gameName + " = " + matchList[gameName]);
+        $newGame.find("#matchName").text(gameName);
+        $newGame.find("#matchTime").text(prettyDate(matchList[gameName].lastCreated));
         $newGame.attr("gameName", gameName);
         $newGame.addClass("activeMatch");
         $newGame.css("display", "block");
@@ -131,8 +132,8 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == 'event.match.counts') {
-        setMatchCounts(res.data);
+    if (res.event == 'event.match.stats') {
+        setMatchInfo(res.data);
         return;
     }
     if (res.event == 'event.match.made') {
@@ -196,7 +197,7 @@ function listMyGames() {
 
 function listMatchCounts() {
     var data = clone(Env.baseParams);
-    data.cmd = "match.counts";
+    data.cmd = "match.stats";
     sendWs(data);
 }
 
@@ -274,7 +275,8 @@ function init() {
         <td valign="top">
             <div id="matchList" style="height:150;overflow:scroll;">
                 <div id="matchTemplate" style="display:none;">
-                    <span id="matchName">player-0</span>
+                    <span id="matchName">game0</span> =
+                    <span id="matchTime">time</span>
                 </div>
             </div>
         </td>
@@ -309,7 +311,7 @@ function init() {
     </tr>
     <tr>
         <td>
-            <button id="gameTicTacToe">tictactoe</button>
+            <button id="gameTicTacToe">Play TicTacToe</button>
             <button id="liveHide" style="float:right">offline</button>
             <button id="liveShow" style="float:right">online</button>
         </td>

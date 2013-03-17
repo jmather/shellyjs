@@ -12,7 +12,7 @@ match.desc = "match players to the desired game and start them in it";
 match.functions = {
   add: {desc: "add caller to the game matcher", params: {name: {dtype: "string"}}, security: []},
   remove: {desc: "remove caller from the game matcher", params: {name: {dtype: "string"}}, security: []},
-  counts: {desc: "list the match counts for all games", params: {}, security: []},
+  stats: {desc: "list the match stats for all games", params: {}, security: []},
   list: {desc: "list the match players for all games", params: {}, security: []}
 };
 
@@ -23,7 +23,7 @@ if (_.isUndefined(global.matchq)) {
 }
 if (_.isUndefined(global.matchInfo)) {
   global.matchInfo = {};
-  global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2};
+  global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0};
 }
 
 match.add = function (req, res, cb) {
@@ -44,6 +44,9 @@ match.add = function (req, res, cb) {
     req.params.cmd = "game.create";     // change the command, req.param.name is already set
     req.params.players = keys.slice(0, global.matchInfo[name].maxPlayers);
     req.params.players.push(uid); // add the current user
+
+    global.matchInfo[name].lastCreated = new Date().getTime();
+    global.matchInfo[name].created += 1;
 
     sh.call(req, res, function (error, data) {
       if (error) {
@@ -81,12 +84,13 @@ match.remove = function (req, res, cb) {
   cb(0, sh.event("event.match.remove"));
 };
 
-match.counts = function (req, res, cb) {
+match.stats = function (req, res, cb) {
   var counts = {};
   _.forOwn(global.matchq, function (gameq, idx) {
-    counts[idx] = Object.keys(gameq).length;
+//    counts[idx] = Object.keys(gameq).length;
+    global.matchInfo[idx].waiting = Object.keys(gameq).length;
   });
-  cb(0, sh.event("event.match.counts", counts));
+  cb(0, sh.event("event.match.stats", global.matchInfo));
 };
 
 match.list = function (req, res, cb) {
