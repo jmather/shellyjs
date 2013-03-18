@@ -42,6 +42,15 @@ function log(api, type, msg) {
   $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
 }
 
+function showError(msg) {
+  $("#errorMessage").css("display", "block");
+  $("#errorMessage").text(msg);
+}
+
+function hideError() {
+  $("#errorMessage").css("display", "none");
+}
+
 function setWhoTurn(gameId, whoTurn, profile) {
   $gamePlaying = $(".myGameId" + gameId);
   $turnSpan = $gamePlaying.find("#gameTurn");
@@ -105,6 +114,42 @@ function sendRest(input) {
         log("rest", "error", xhr.responseText);
       }
     })
+}
+
+var ws = new ReconnectingWebSocket();
+//        ws.debug = true;
+ws.onopen = function () {
+  console.log("socket: open");
+  log("socket", "onopen", Env.socketUrl);
+  var data = {};
+  data.cmd = "reg.anonymous";
+  data.token = Env.shToken;
+  sendWs(data);
+}
+ws.onmessage = function (evt) {
+  var received_msg = evt.data;
+  log("socket", "onmessage", evt.data);
+  var msg = JSON.parse(evt.data);
+  processEvent(msg, "socket");
+}
+ws.onclose = function (evt) {
+  console.log("socket: close");
+}
+ws.onerror = function (evt) {
+  log("socket", "error", JSON.stringify(evt));
+}
+
+// assumes global ws object
+function sendWs(data) {
+  var msg = JSON.stringify(data);
+  log("socket", "send", msg);
+  ws.send(msg);
+}
+
+function sendCmd(cmd, data) {
+  var obj = $.extend(Env.baseParams, data);
+  obj.cmd = cmd;
+  sendWs(obj);
 }
 
 /*

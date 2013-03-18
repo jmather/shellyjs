@@ -111,9 +111,9 @@ function processEvent(res, from) {
         Env.uid = Env.baseParams.session.split(':')[1];
         $("#uid").text(Env.uid);
 
-        liveInit("on");
-        listMyGames();
-        listMatchCounts();
+        sendCmd("live.user", {status: "on"});
+        sendCmd("user.games");
+        sendCmd("match.stats");
         return;
     }
     if (res.event == 'event.user.games') {
@@ -151,65 +151,6 @@ function processEvent(res, from) {
     log(from, "unknown-event", JSON.stringify(res));
 }
 
-var url = Env.socketUrl;
-var ws = new ReconnectingWebSocket(url);
-//        ws.debug = true;
-ws.onopen = function () {
-    console.log("socket: open");
-    log("socket", "onopen", url);
-    var data = {};
-    data.cmd = "reg.anonymous";
-    data.token = Env.shToken;
-    sendWs(data);
-}
-ws.onmessage = function (evt) {
-    var received_msg = evt.data;
-    log("socket", "onmessage", evt.data);
-    var msg = JSON.parse(evt.data);
-    processEvent(msg, "socket");
-}
-ws.onclose = function (evt) {
-    console.log("socket: close");
-}
-ws.onerror = function (evt) {
-    log("socket", "error", JSON.stringify(evt));
-}
-
-function sendWs(data) {
-    var msg = JSON.stringify(data);
-    log("socket", "send", msg);
-    ws.send(msg);
-}
-
-// basic functions
-function liveInit(status) {
-    var data = clone(Env.baseParams);
-    data.cmd = "live.user";
-    data.status = status;
-    sendWs(data);
-}
-
-function listMyGames() {
-    var data = clone(Env.baseParams);
-    data.cmd = "user.games";
-    sendWs(data);
-}
-
-function listMatchCounts() {
-    var data = clone(Env.baseParams);
-    data.cmd = "match.stats";
-    sendWs(data);
-}
-
-function showError(msg) {
-    $("#errorMessage").css("display", "block");
-    $("#errorMessage").text(msg);
-}
-
-function hideError() {
-    $("#errorMessage").css("display", "none");
-}
-
 $(init);
 function init() {
     Env.shToken = $.cookie("shToken");
@@ -228,34 +169,24 @@ function init() {
     }, false);
 
     $("#gameTicTacToe").click(function () {
-        var data = clone(Env.baseParams);
-        data.cmd = "match.add";
-        data.name = "tictactoe";
-        sendWs(data);
+        sendCmd("match.add", {name: "tictactoe"});
         $("#dialog").dialog();
     });
     $("#setUserInfo").click(function () {
         var name = prompt("Please enter a nick name.", "")
         if (name != null && name != "") {
-            var data = clone(Env.baseParams);
-            data.cmd = "user.set";
-            data.user = {name: name};
-            sendWs(data);
+            sendCmd("user.set", {user: {name: name}});
+            $("#currentUserName").text(name);
         }
     });
     $("#liveHide").click(function () {
-        $(".activePlayer").remove();
-        var data = clone(Env.baseParams);
-        data.cmd = "live.user";
-        data.status = "off";
-        sendWs(data);
+        sendCmd("live.user", {status: "off"});
     });
     $("#liveShow").click(function () {
-        var data = clone(Env.baseParams);
-        data.cmd = "live.user";
-        data.status = "on";
-        sendWs(data);
+        sendCmd("live.user", {status: "on"});
     });
+
+    ws.connect(Env.socketUrl);
 }
 </script>
 </head>
