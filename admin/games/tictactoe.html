@@ -161,6 +161,10 @@ function clearState() {
     $(".activePlayer").remove();
 }
 
+function gameInit(gameId) {
+    sendCmd("game.join", {gameId: gameId});
+}
+
 function processEvent(res, from) {
     if (typeof(res.event) == 'undefined') {
         log(from, "error", "old message: " + JSON.stringify(res));
