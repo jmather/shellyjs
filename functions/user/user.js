@@ -15,8 +15,6 @@ user.functions = {
   get: {desc: "get user object", params: {}, security: []},
   set: {desc: "set user object", params: {user: {dtype: "object"}}, security: []},
   profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []},
-  games: {desc: "list games user is playing", params: {}, security: []},
-  gameRemove: {desc: "remove a game from the playing list", params: {gameId: {dtype: "string"}}, security: []}
 };
 
 user.pre = function (req, res, cb) {
@@ -62,48 +60,4 @@ user.profiles = function (req, res, cb) {
       cb(error, data);
     }
   });
-};
-
-function fillGames(gameList, cb) {
-  var gameIds = Object.keys(gameList);
-  async.each(gameIds, function (gameId, lcb) {
-    var game = new ShGame();
-    game.load(gameId, function (error, data) {
-      if (error) {
-        lcb(data);
-        return;
-      }
-      gameList[gameId].whoTurn = game.get("whoTurn");
-      gameList[gameId].players = game.get("players");
-      lcb();
-    });
-  }, function (error) {
-    if (error) {
-      cb(1, error);
-      return;
-    }
-    cb(0, gameList);
-  });
-}
-
-user.games = function (req, res, cb) {
-  var currentGames = req.session.user.get("currentGames");
-
-  fillGames(currentGames, function (error, data) {
-    if (!error) {
-      cb(0, sh.event("event.user.games", data));
-    } else {
-      cb(error, data);
-    }
-  });
-};
-
-user.gameRemove = function (req, res, cb) {
-  var gameId = req.params.gameId;
-  var user = req.session.user;
-  var currentGames = user.get("currentGames");
-  delete currentGames[gameId];
-  user.set(currentGames);
-
-  cb(0, sh.event("event.user.gameRemove", {gameId: gameId}));
 };

@@ -112,11 +112,11 @@ function processEvent(res, from) {
         $("#uid").text(Env.uid);
 
         sendCmd("live.user", {status: "on"});
-        sendCmd("user.games");
+        sendCmd("game.playing");
         sendCmd("match.stats");
         return;
     }
-    if (res.event == 'event.user.games') {
+    if (res.event == 'event.game.playing') {
         setMyGames(res.data);
         return;
     }

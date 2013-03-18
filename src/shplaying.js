@@ -7,7 +7,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var db = global.db;
 
-function User() {
+function Playing() {
   this._dirty = false;
   this._data = {
     uid: 0,
@@ -22,16 +22,16 @@ function User() {
  * Inherits from EventEmitter.
  */
 
-util.inherits(User, events.EventEmitter);
-module.exports = User;
+util.inherits(Playing, events.EventEmitter);
+module.exports = Playing;
 
-User.prototype.load = function (uid, cb) {
+Playing.prototype.load = function (uid, cb) {
   this._uid = uid;
 
   var self = this;
-  db.kget("kUser", uid, function (err, value) {
+  db.kget("kPlaying", uid, function (err, value) {
     if (value === null) {
-      cb(1, sh.error("user_get", "unable to load user data", {uid: uid}));
+      cb(1, sh.error("playing_get", "unable to load playing data", {uid: uid}));
       return;
     }
     try {
@@ -39,14 +39,14 @@ User.prototype.load = function (uid, cb) {
       self._data.uid = uid;
       self._data = _.merge(self._data, savedData);
     } catch (e) {
-      cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
+      cb(1, sh.error("playing_parse", "unable to parse playing data", {uid: uid, extra: e.message}));
       return;
     }
     cb(0);
   });
 };
 
-User.prototype.loadOrCreate = function (uid, cb) {
+Playing.prototype.loadOrCreate = function (uid, cb) {
   var self = this;
   this.load(uid, function (error, value) {
     if (error) {
@@ -60,7 +60,7 @@ User.prototype.loadOrCreate = function (uid, cb) {
   });
 };
 
-User.prototype.save = function (cb) {
+Playing.prototype.save = function (cb) {
   if (!this._dirty) {
     shlog.info("ignoring save - object not modified");
     cb(0);
@@ -68,20 +68,20 @@ User.prototype.save = function (cb) {
   }
   var self = this;
   var dataStr = JSON.stringify(this._data);
-  db.kset("kUser", this._uid, dataStr, function (err, res) {
+  db.kset("kPlaying", this._uid, dataStr, function (err, res) {
     if (err !== null) {
-      cb(1, sh.error("user_save", "unable to save user data", {uid: self._uid, err: err, res: res}));
+      cb(1, sh.error("playing_save", "unable to save playing data", {uid: self._uid, err: err, res: res}));
       return;
     }
     cb(0);
   });
 };
 
-User.prototype.get = function (key) {
+Playing.prototype.get = function (key) {
   return this._data[key];
 };
 
-User.prototype.set = function (key, value) {
+Playing.prototype.set = function (key, value) {
   this._dirty = true;
   this._data[key] = value;
   this.save(function () {
@@ -89,11 +89,29 @@ User.prototype.set = function (key, value) {
   });
 };
 
-User.prototype.getData = function () {
+Playing.prototype.getData = function () {
   return this._data;
 };
 
-User.prototype.setData = function (data) {
+Playing.prototype.setData = function (data) {
   this._dirty = true;
   this._data = _.merge(this._data, data);
+};
+
+Playing.prototype.addGame = function (game) {
+  this._dirty = true;
+  var ts = new Date().getTime();
+  this._data.currentGames[game.get("gameId")] = {name: game.get("name"), lastJoin: ts};
+  this.save(function () {
+    // don"t care;
+  });
+};
+
+Playing.prototype.removeGame = function (game) {
+  this._dirty = true;
+  var ts = new Date().getTime();
+  delete this._data.currentGames[game.get("gameId")];
+  this.save(function () {
+    // don"t care;
+  });
 };

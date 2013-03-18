@@ -37,7 +37,7 @@ function waitForGame() {
 
 ws.on('open', function () {
   sendCmd("live.user", {status: "on"});
-  sendCmd("user.games");
+  sendCmd("game.playing");
   gWaitInt = setInterval(waitForGame, 5000);
 });
 
@@ -79,7 +79,7 @@ ws.on('message', function (message) {
         makeMove(msg.data);
       }, 1000);
     }
-  } else if (msg.event === "event.user.games") {
+  } else if (msg.event === "event.game.playing") {
     _.each(msg.data, function (gameInfo, gameId) {
       sendCmd("live.game", {gameId: gameId, status: "on"});
       if(gameInfo.whoTurn === gUid) {

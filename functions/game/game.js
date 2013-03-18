@@ -6,6 +6,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
 var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by create when pre-populating users
+var ShPlaying = require(global.gBaseDir + "/src/shplaying.js");  // used by create when pre-populating users
 
 var db = global.db;
 
@@ -27,7 +28,9 @@ game.functions = {
   reset: {desc: "reset game for another round", params: {gameId: {dtype: "string"}}, security: []},
 
   list: {desc: "list all loaded games", params: {}, security: []},
-  call: {desc: "call a game specific function", params: {gameId: {dtype: "string"}, func: {dtype: "string"}, args: {dtype: "object"}}, security: []}
+  call: {desc: "call a game specific function", params: {gameId: {dtype: "string"}, func: {dtype: "string"}, args: {dtype: "object"}}, security: []},
+
+  playing: {desc: "list all games user is currently playing", params: {}, security: []}
 };
 
 function loadGame(name) {
@@ -39,7 +42,8 @@ function loadGame(name) {
 }
 
 game.pre = function (req, res, cb) {
-  if (req.params.cmd === "game.list") {
+  if (req.params.cmd === "game.list"
+      || req.params.cmd === "game.playing") {
     cb(0);
     return;
   }
@@ -69,7 +73,7 @@ game.pre = function (req, res, cb) {
       shlog.info("game.pre: setting game:" + gameName + " = " + gameId);
       req.env.gameModule = loadGame(gameName);
     } catch (e) {
-      cb(1, sh.error("game_require", "unable to laod game module", {name: gameName, message: e.message}));
+      cb(1, sh.error("game_require", "unable to load game module", {name: gameName, message: e.message}));
       return;
     }
 
@@ -89,17 +93,25 @@ game.post = function (req, rs, cb) {
   req.env.game.save(cb);
 };
 
+function addGamePlaying(uid, game) {
+  var playing = new ShPlaying();
+  playing.loadOrCreate(uid, function (error, data) {
+    playing.addGame(game);
+  });
+}
+
+function removeGamePlaying(uid, game) {
+  var playing = new ShPlaying();
+  playing.loadOrCreate(uid, function (error, data) {
+    playing.removeGame(game);
+  });
+}
+
 function addPlayers(players, game, cb) {
   async.each(players, function (playerId, cb) {
-    var player = new ShUser();
-    player.load(playerId, function (error, data) {
-      if (error) {
-        cb(data);
-        return;
-      }
-      player.addGame(game);
-      cb();
-    });
+    addGamePlaying(playerId, game);
+    // ignore any errors
+    cb();
   }, function (error) {
     if (error) {
       cb(1, error);
@@ -124,7 +136,7 @@ game.create = function (req, res, cb) {
     req.env.game = game;
 
     if (_.isUndefined(req.params.players)) {
-      req.session.user.addGame(game);
+      addGamePlaying(uid, game);
       game.setPlayer(uid, "ready");
     } else {
       _.each(req.params.players, function (playerId) {
@@ -182,7 +194,7 @@ game.join = function (req, res, cb) {
 
   var isNew = !_.isObject(players[uid]);
 
-  user.addGame(game);
+  addGamePlaying(uid, game);
   game.setPlayer(uid, "ready");
 
   if (isNew) {
@@ -398,4 +410,47 @@ game.call = function (req, res, cb) {
   }
 
   req.env.gameModule[req.params.func](req, cb);
+};
+
+/////////////// Playing functions
+
+function fillGames(gameList, cb) {
+  var gameIds = Object.keys(gameList);
+  async.each(gameIds, function (gameId, lcb) {
+    var game = new ShGame();
+    game.load(gameId, function (error, data) {
+      if (error) {
+        lcb(data);
+        return;
+      }
+      gameList[gameId].whoTurn = game.get("whoTurn");
+      gameList[gameId].players = game.get("players");
+      lcb();
+    });
+  }, function (error) {
+    if (error) {
+      cb(1, error);
+      return;
+    }
+    cb(0, gameList);
+  });
+}
+
+game.playing = function (req, res, cb) {
+  var uid = req.session.uid;
+
+  var playing = new ShPlaying();
+  playing.loadOrCreate(uid, function (error, data) {
+    if (error) {
+      cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
+      return;
+    }
+    fillGames(playing.getData().currentGames, function (error, data) {
+      if (!error) {
+        cb(0, sh.event("event.game.playing", data));
+      } else {
+        cb(error, data);
+      }
+    });
+  });
 };

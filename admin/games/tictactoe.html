@@ -194,7 +194,7 @@ function processEvent(res, from) {
         Env.uid = Env.baseParams.session.split(':')[1];
         $("#uid").text(Env.uid);
 
-        sendCmd("user.games")
+        sendCmd("game.playing")
 
         if (Env.baseParams.gameId === "0") {
             Env.baseParams.gameId = $.cookie("shLastGame" + Env.uid);
@@ -234,7 +234,7 @@ function processEvent(res, from) {
         setState(res.data);
         return;
     }
-    if (res.event == 'event.user.games') {
+    if (res.event == 'event.game.playing') {
         setMyGames(res.data);
         return;
     }
