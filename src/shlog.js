@@ -10,7 +10,7 @@ var gDebug = {
   "admin": {},
   "live": {},
 //  "shutil": {},
-  "socket": {},
+//  "socket": {},
 //  "game": {},
 //  "shdb": {},
 //	"game": {},

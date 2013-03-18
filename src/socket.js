@@ -85,7 +85,7 @@ Socket.start = function () {
 
           // if socket not registered in gUsers, do it
           if (_.isUndefined(gUsers[ws.uid])) {
-            gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", gameId: 0, liveUser: "off", last: new Date().getTime()};
+            gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", liveUser: "off", last: new Date().getTime()};
             // hookup the user channel
             var userChannel = sh.channel("user", ws.uid);
             if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {

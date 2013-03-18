@@ -82,7 +82,6 @@ live.game = function (req, res, cb) {
   var gameChannel = sh.channel("game", gameId);
 
   if (req.params.status === "on") {
-    global.gUsers[ws.uid].gameId = gameId;  // set my current game
     if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
       shlog.info("(" + ws.uid + ") add game channel: " + gameChannel, ws.games);
       global.socket.notify(gameId, sh.event("event.live.game.user", {uid: ws.uid,
@@ -104,15 +103,13 @@ live.game = function (req, res, cb) {
         _.each(_.keys(players), function (uid) {
           if (uid !== ws.uid && !_.isUndefined(global.gUsers[uid])) {
             // are they playing current game
-            if (global.gUsers[uid].gameId === gameId) {
-              shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
-              var userConn = global.gUsers[uid];
-              sh.sendWs(ws, 0, sh.event("event.live.game.user", {uid: uid,
-                name: userConn.name,
-                pic: "",
-                gameId: gameId,
-                status: "online"}));
-            }
+            shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
+            var userConn = global.gUsers[uid];
+            sh.sendWs(ws, 0, sh.event("event.live.game.user", {uid: uid,
+              name: userConn.name,
+              pic: "",
+              gameId: gameId,
+              status: "online"}));
           }
         });
       });
@@ -142,4 +139,4 @@ live.message = function (req, res, cb) {
   } else {
     cb(0);
   }
-}
+};
