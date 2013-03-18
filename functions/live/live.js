@@ -30,33 +30,24 @@ live.user = function (req, res, cb) {
   var socketNotify = res.socketNotify;
   var ws = res.ws;
 
-  /*
-  if(global.gUsers[ws.uid].liveUser === status) {
-    cb(0);
-    return;
-  }
-  */
-
-  // allows socket close to notify off
-  global.gUsers[ws.uid].liveUser = status;
-
+  // add the user channel
   var userChannel = sh.channel("user", ws.uid);
   if (status === "on") {
     if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
       shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
       eventEmitter.on(userChannel, socketNotify);
     }
-  } else {
-    shlog.info("(" + ws.uid + ") remove user channel: " + userChannel);
-    eventEmitter.removeAllListeners(userChannel);
+    // allows socket close to notify off, and filter in notifyAll, turn on now so notifyAll will send
+    global.gUsers[ws.uid].liveUser = "on";
   }
 
-  // notify all users that I'm online
+  // notify all users that I'm on/offline, including me
   var onoffLine = (status === "on" ? "online" : "offline");
   var event = sh.event("event.live.user", {uid: ws.uid, name: req.session.user.get("name"), pic: "",  status: onoffLine});
   global.socket.notifyAll(event);
+
+  // notify myself of all users online
   if (status === "on") {
-    // notify myself of all users online
     _.forOwn(global.gUsers, function (info, playerId) {
       if (playerId !== ws.uid && info.liveUser === "on") {
         // short cut the emmitter since we have ws
@@ -64,6 +55,14 @@ live.user = function (req, res, cb) {
         ws.send(e);
       }
     });
+  }
+
+  // remove my channel
+  if (status === "off") {
+    shlog.info("(" + ws.uid + ") remove user channel: " + userChannel);
+    eventEmitter.removeAllListeners(userChannel);
+    // turn off now so notifyAll will send above
+    global.gUsers[ws.uid].liveUser = "off";
   }
 
   cb(0);
@@ -102,7 +101,6 @@ live.game = function (req, res, cb) {
         var players = game.get("players");
         _.each(_.keys(players), function (uid) {
           if (uid !== ws.uid && !_.isUndefined(global.gUsers[uid])) {
-            // are they playing current game
             shlog.info("notify self (%s) of player: %s online", ws.uid, uid);
             var userConn = global.gUsers[uid];
             sh.sendWs(ws, 0, sh.event("event.live.game.user", {uid: uid,
@@ -124,8 +122,7 @@ live.game = function (req, res, cb) {
     global.socket.notify(gameId, sh.event("event.live.game.user", {uid: ws.uid, gameId: gameId, status: "offline"}));
   }
 
-//  sendWs(ws, 0, sh.event("event.live.game", {status: req.params.status, game: gameId}));
-  cb(0, sh.event("event.live.game", {status: req.params.status, gameId: gameId}));
+  cb(0);
 };
 
 live.message = function (req, res, cb) {

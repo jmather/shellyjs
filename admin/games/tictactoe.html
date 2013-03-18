@@ -234,11 +234,6 @@ function processEvent(res, from) {
         setMyGames(res.data);
         return;
     }
-    if (res.event == 'event.live.user'
-            || res.event == 'event.live.game') {
-        // ignore for now
-        return;
-    }
     log(from, "unknown-event", JSON.stringify(res));
 }
 
