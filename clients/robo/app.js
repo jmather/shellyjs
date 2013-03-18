@@ -41,6 +41,15 @@ ws.on('open', function () {
   gWaitInt = setInterval(waitForGame, 5000);
 });
 
+ws.on('close', function () {
+  console.log("socket closed");
+  clearInterval(gWaitInt);
+});
+
+ws.on('error', function (error) {
+  console.log(error);
+});
+
 function makeMove(game) {
   for (var i=0; i<3; i++) {
     for (var j=0; j<3; j++) {
@@ -57,7 +66,6 @@ ws.on('message', function (message) {
   var msg = JSON.parse(message);
   if (msg.event === "event.match.stats") {
     if (msg.data["tictactoe"].waiting > 0) {
-//      clearInterval(gWaitInt);
       sendCmd("match.add", {name: "tictactoe"});
     }
   } else if (msg.event === "event.match.made") {
