@@ -37,6 +37,7 @@ function waitForGame() {
 
 ws.on('open', function () {
   sendCmd("live.user", {status: "on"});
+  sendCmd("user.games");
   gWaitInt = setInterval(waitForGame, 5000);
 });
 
@@ -61,10 +62,22 @@ ws.on('message', function (message) {
     }
   } else if (msg.event === "event.match.made") {
     sendCmd("game.join", {gameId: msg.data.gameId});
-  } else if (msg.event === "event.game.info" || msg.event === "event.game.join") {
+    sendCmd("live.game", {gameId: msg.data.gameId, status: "on"});
+  } else if (msg.event === "event.game.info"
+    || msg.event === "event.game.reset"
+    || msg.event === "event.game.join") {
     if (msg.data.whoTurn === gUid) {
-      makeMove(msg.data);
+      setTimeout(function () {
+        makeMove(msg.data);
+      }, 1000);
     }
+  } else if (msg.event === "event.user.games") {
+    _.each(msg.data, function (gameInfo, gameId) {
+      sendCmd("live.game", {gameId: gameId, status: "on"});
+      if(gameInfo.whoTurn === gUid) {
+        sendCmd("game.get", {gameId: gameId});  // trigger a move base on gameBoard
+      }
+    });
   } else if (msg.event === "event.game.turn.next") {
     if (msg.data.whoTurn === gUid) {
       sendCmd("game.get", {gameId: msg.data.gameId});  // trigger a move base on gameBoard

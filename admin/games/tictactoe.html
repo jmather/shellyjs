@@ -73,7 +73,7 @@ function setPlayers(playerList, whoTurn) {
             $newGame.find("#playerKick").remove();
         } else {
             $newGame.find("#playerName").addClass("playerName" + playerId);
-            $newGame.find("#playerName").text(playerList[playerId].name + " offline");
+            $newGame.find("#playerName").text(playerList[playerId].name);
         }
         $newGame.addClass("playerId" + playerId);
         $newGame.addClass("activePlayer");
@@ -84,7 +84,7 @@ function setPlayers(playerList, whoTurn) {
         });
 
         if (typeof (Env.players[playerId]) != "undefined") {
-            $newGame.find("#playerName").text(playerId + " " + Env.players[playerId].status);
+            $newGame.find("#playerStatus").text(Env.players[playerId].status);
         }
 
         $("#playerList").append($newGame);
@@ -217,9 +217,9 @@ function processEvent(res, from) {
     }
     if (res.event == 'event.live.game.user') {
         Env.players[res.data.uid] = res.data;
-        var $playerName = $(".playerId" + res.data.uid).find("#playerName");
-        if ($playerName.size) {
-            $playerName.text(res.data.name + " " + res.data.status);
+        var $playerStatus = $(".playerId" + res.data.uid).find("#playerStatus");
+        if ($playerStatus.size) {
+            $playerStatus.text(res.data.status);
         }
         return;
     }
@@ -234,10 +234,6 @@ function processEvent(res, from) {
     }
     if (res.event == 'event.game.over') {
         setState(res.data);
-        return;
-    }
-    if (res.event == 'event.user.profiles') {
-        updateUsers(res.data);
         return;
     }
     if (res.event == 'event.user.games') {
@@ -447,7 +443,7 @@ function init() {
         <td valign="top">
             <div id="playerList" style="width:100%;overflow:scroll;">
                 <div id="playerTemplate" style="display:none;">
-                    <span id="playerName">player-0</span><span id="playerTurn"></span>
+                    <span id="playerName">player-0</span> <span id="playerStatus">offline</span> </span> <span id="playerTurn"></span>
                 </div>
             </div>
         </td>
