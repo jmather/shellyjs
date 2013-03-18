@@ -14,7 +14,7 @@ user.desc = "utility functions for shelly modules";
 user.functions = {
   get: {desc: "get user object", params: {}, security: []},
   set: {desc: "set user object", params: {user: {dtype: "object"}}, security: []},
-  profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []},
+  profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []}
 };
 
 user.pre = function (req, res, cb) {
