@@ -49,9 +49,6 @@ var Env = {{{params}}};
 
 Env.baseParams = { gameId: "0" };
 Env.players = {};
-Env.users = {};
-var gPendingGets = [];
-
 
 // allow for baseParam overrides from url
 var psess = getURLParameter("session");
@@ -71,6 +68,7 @@ function setPlayers(playerList, whoTurn) {
         if (playerId === Env.uid) {
             $newGame.find("#playerName").text("me");
             $newGame.find("#playerKick").remove();
+            $newGame.find("#playerStatus").remove();
         } else {
             $newGame.find("#playerName").addClass("playerName" + playerId);
             $newGame.find("#playerName").text(playerList[playerId].name);
@@ -79,13 +77,13 @@ function setPlayers(playerList, whoTurn) {
         $newGame.addClass("activePlayer");
         $newGame.css("display", "block");
 
-        $newGame.find("#playerKick").click(function () {
-            var playerId = $(this).parent().attr('playerId');
-        });
-
         if (typeof (Env.players[playerId]) != "undefined") {
             $newGame.find("#playerStatus").text(Env.players[playerId].status);
         }
+
+        $newGame.find("#playerKick").click(function () {
+            var playerId = $(this).parent().attr('playerId');
+        });
 
         $("#playerList").append($newGame);
     }
@@ -137,10 +135,9 @@ function setState(game) {
         $("#gamePlaying").text("O's")
     }
 
-//    if (typeof(game.gameId) != 'undefined') {
-        $("#gameId").text(game.gameId);
-        Env.baseParams.gameId = game.gameId;
-//    }
+    $("#gameId").text(game.gameId);
+    Env.baseParams.gameId = game.gameId;
+
     setPlayers(game.players, game.whoTurn);
 }
 
@@ -193,13 +190,13 @@ function processEvent(res, from) {
         Env.uid = Env.baseParams.session.split(':')[1];
         $("#uid").text(Env.uid);
 
-        listMyGames();
+        sendCmd("user.games")
 
         if (Env.baseParams.gameId === "0") {
             Env.baseParams.gameId = $.cookie("shLastGame" + Env.uid);
         }
         if (Env.baseParams.gameId !== "0") {
-            gameInit(Env.baseParams.gameId);
+            sendCmd("game.join", {gameId: Env.baseParams.gameId})
         }
         return;
     }
@@ -208,11 +205,11 @@ function processEvent(res, from) {
         var newGameId = res.data.gameId;
         var oldGameId = Env.baseParams.gameId;
         if (typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
-            liveInit(oldGameId, "off");
+            sendCmd("live.game", {gameId: oldGameId, status: "off"})
             Env.players = {};  // reset the player list
         }
         setState(res.data);
-        liveInit(newGameId, "on");
+        sendCmd("live.game", {gameId: newGameId, status: "on"})
         return;
     }
     if (res.event == 'event.live.game.user') {
@@ -228,11 +225,8 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == 'event.game.info'
+            || res.event == 'event.game.over'
             || res.event == 'event.game.reset') {
-        setState(res.data);
-        return;
-    }
-    if (res.event == 'event.game.over') {
         setState(res.data);
         return;
     }
@@ -240,31 +234,12 @@ function processEvent(res, from) {
         setMyGames(res.data);
         return;
     }
-    if (res.event == 'event.heartbeat'
-            || res.event == 'event.live.user'
+    if (res.event == 'event.live.user'
             || res.event == 'event.live.game') {
         // ignore for now
         return;
     }
     log(from, "unknown-event", JSON.stringify(res));
-}
-
-function sendRest(input) {
-    log("rest", "send", input);
-    $.ajax
-            ({
-                type: "POST",
-                url: Env.restUrl,
-                async: false,
-                data: JSON.stringify(input),
-                success: function (res, status) {
-                    log("rest", "recv", res);
-                    processEvent(res, "rest");
-                },
-                error: function (xhr, status, error) {
-                    log("rest", "error", xhr.responseText);
-                }
-            })
 }
 
 var url = Env.socketUrl;
@@ -297,34 +272,10 @@ function sendWs(data) {
     ws.send(msg);
 }
 
-// basic functions
-function liveInit(gameId, status) {
-    var data = clone(Env.baseParams);
-    data.gameId = gameId;
-    data.cmd = "live.game";
-    data.status = status;
-    sendWs(data);
-}
-
-function gameInit(gameId) {
-    var data = clone(Env.baseParams);
-    data.gameId = gameId;
-    data.cmd = "game.join";
-    sendWs(data);
-}
-
-function listMyGames() {
-    var data = clone(Env.baseParams);
-    data.cmd = "user.games";
-    sendWs(data);
-}
-
-function turn(x, y) {
-    var data = clone(Env.baseParams);
-    data.cmd = "game.turn";
-    data.move = {x: x, y: y};
-//            sendRest(data);
-    sendWs(data);
+function sendCmd(cmd, data) {
+    var obj = $.extend(Env.baseParams, data);
+    obj.cmd = cmd;
+    sendWs(obj);
 }
 
 function showError(msg) {
@@ -357,7 +308,7 @@ function init() {
         var id = $(this).attr("id");
         var x = id.slice(1, 2);
         var y = id.slice(3, 4);
-        turn(x, y);
+        sendCmd("game.turn", {move: {x: x, y: y}})
     });
 
     $("#gameLobby").click(function () {
@@ -370,15 +321,11 @@ function init() {
     });
 
     $("#gameUpdate").click(function () {
-        var data = clone(Env.baseParams);
-        data.cmd = "game.get";
-        sendWs(data);
+        sendCmd("game.get")
     });
 
     $("#gameReset").click(function () {
-        var data = clone(Env.baseParams);
-        data.cmd = "game.reset";
-        sendWs(data);
+        sendCmd("game.reset")
     });
 }
 </script>

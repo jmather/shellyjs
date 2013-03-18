@@ -89,6 +89,24 @@ function setMyGames(gameList) {
   }
 }
 
+function sendRest(input) {
+  log("rest", "send", input);
+  $.ajax
+    ({
+      type: "POST",
+      url: Env.restUrl,
+      async: false,
+      data: JSON.stringify(input),
+      success: function (res, status) {
+        log("rest", "recv", res);
+        processEvent(res, "rest");
+      },
+      error: function (xhr, status, error) {
+        log("rest", "error", xhr.responseText);
+      }
+    })
+}
+
 /*
  * JavaScript Pretty Date
  * Copyright (c) 2011 John Resig (ejohn.org)
