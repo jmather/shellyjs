@@ -107,7 +107,7 @@ function removeGamePlaying(uid, game) {
   });
 }
 
-function addPlayers(players, game, cb) {
+function addGamePlayingMulti(players, game, cb) {
   async.each(players, function (playerId, cb) {
     addGamePlaying(playerId, game);
     // ignore any errors
@@ -142,7 +142,7 @@ game.create = function (req, res, cb) {
       _.each(req.params.players, function (playerId) {
         game.setPlayer(playerId, "ready");
       });
-      addPlayers(req.params.players, game, function (error, data) {
+      addGamePlayingMulti(req.params.players, game, function (error, data) {
         // SWD ignore any errors for now
         if (error) {
           shlog.error("add_players", "unable to add a player", data);
