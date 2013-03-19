@@ -99,8 +99,8 @@ function respond(req, res, next) {
     shlog.send(error, "rest - %s", JSON.stringify(data));
     if (data !== null && !_.isUndefined(data)) {
       data.cb = req.params.cb;
-      res.send(data);
     }
+    res.send(data);
   });
 }
 

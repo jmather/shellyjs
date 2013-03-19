@@ -36,11 +36,11 @@ exports.login = function (req, res, cb) {
 
   var email = sanitize(req.params.email).trim();
   var password = sanitize(req.params.password).trim();
-  shlog.info(email);
+  shlog.info("login attempt:", email);
   try {
     check(email, 102).isEmail();
   } catch (e) {
-    cb(e.message);
+    cb(1, sh.error("bad_email", "email is not correct format"));
     return;
   }
 
@@ -49,13 +49,16 @@ exports.login = function (req, res, cb) {
       cb(1, sh.error("email_notfound", "email is not registered", {email: email}));
       return;
     }
-    out = JSON.parse(value);
+    var emailMap = JSON.parse(value);
+    emailMap.uid = emailMap.uid.toString();  // SWD some old data that has numbers
 
     // check password
-    if (checkPassword(out.uid, password, out.password)) {
-      out.session = session.create(out.uid);
-      out.check = session.check(out.session);
-      cb(0, out);
+    if (checkPassword(emailMap.uid, password, emailMap.password)) {
+      shlog.info("login success:", email);
+      var out = {};
+      out.email = email;
+      out.session = session.create(emailMap.uid);
+      cb(0, sh.event("reg.login", out));
       return;
     }
     cb(1, sh.error("password_bad", "incorrect password", {email: email}));
@@ -67,7 +70,6 @@ exports.logout = function (req, res, cb) {
 };
 
 exports.anonymous = function (req, res, cb) {
-  var out = {};
 
   //SWD check reg signature
 
@@ -82,7 +84,11 @@ exports.anonymous = function (req, res, cb) {
   gDb.kget("kTokenMap", token, function (error, value) {
     if (value !== null) {
       // SWD protect the json parse
-      cb(0, sh.event("reg.anonymous", JSON.parse(value)));
+      var tokenMap = JSON.parse(value);
+      var out = {};
+      out.uid = tokenMap.uid;
+      out.session = session.create(tokenMap.uid);
+      cb(0, sh.event("reg.anonymous", out));
       return;
     }
     global.db.nextId("user", function (error, value) {
@@ -91,28 +97,27 @@ exports.anonymous = function (req, res, cb) {
         return;
       }
       // create the user
-      out.uid = value;
-      out.session = session.create(out.uid);
-      out.token = token;
-      var ts = new Date().getTime();
-      out.created = ts;
-      out.lastModified = ts;
-      gDb.kset("kTokenMap", token, JSON.stringify(out));
+      var tokenMap = {};
+      tokenMap.uid = value;
+      tokenMap.token = token;
+      tokenMap.created = new Date().getTime();
+      gDb.kset("kTokenMap", token, JSON.stringify(tokenMap));
+      var out = {};
+      out.uid = tokenMap.uid;
+      out.session = session.create(tokenMap.uid);
       cb(0, sh.event("reg.anonymous", out));
     });
   });
 };
 
 exports.create = function (req, res, cb) {
-  var out = {};
-
   var email = sanitize(req.params.email).trim();
   var password = sanitize(req.params.password).trim();
   try {
-    check(email, "invalid email").isEmail();
-    check(password, "invalid password").len(6);
+    check(email, "invalid email address").isEmail();
+    check(password, "password too short").len(6);
   } catch (e) {
-    cb(1, sh.error("params_bad", "email or password is not valid", {info: e.message}));
+    cb(1, sh.error("params_bad", e.message, {info: e.message}));
     return;
   }
 
@@ -127,15 +132,16 @@ exports.create = function (req, res, cb) {
         return;
       }
       // create the user
-      out.uid = value;
-      out.session = session.create(out.uid);
-      out.email = email;
-      out.password = hashPassword(out.uid, password);
-      var ts = new Date().getTime();
-      out.created = ts;
-      out.lastModified = ts;
-      gDb.kset("kEmailMap", email, JSON.stringify(out));
-      cb(0, out);
+      var emailMap = {};
+      emailMap.uid = value;
+      emailMap.email = email;
+      emailMap.password = hashPassword(emailMap.uid, password);
+      emailMap.created = new Date().getTime();
+      gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+      var out = {};
+      out.uid = emailMap.uid;
+      out.session = session.create(emailMap.uid);
+      cb(0, sh.event("reg.create", out));
     });
   });
 };

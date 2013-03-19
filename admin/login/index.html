@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Shelly Login</title>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="/static/images/iphone-icon.png" />
+	<link rel="apple-touch-icon" href="/static/images/iphone-icon.png" />
+	<link rel="stylesheet" href="/static/jsm/jquery.mobile-1.1.1.min.css" />
+	<script src="/static/jsm/jquery-1.7.1.min.js"></script>
+	<script src="/static/jsm/jquery.mobile-1.1.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+
+	<script src="/static/js/ba-debug.js"></script>
+	
+	<script type="text/javascript" src="script.js"></script>
+		
+<script>
+
+var Env = {{{params}}};
+
+$("#loginPage").live('pageinit',function() {
+	debug.info("pageinit");
+	loginMode();
+	// pageInit gets called on each show
+	$('#signInBtn').click(function(e) {
+		signIn();
+		e.preventDefault();
+		return false;
+	});
+});
+
+</script>
+
+<style>
+body{
+    font-family:Arial, Helvetica, sans-serif; 
+    font-size:13px;
+}
+.info, .success, .warning, .error, .validation .loading {
+    border: 1px solid;
+    margin: 10px 0px;
+    padding:15px 10px 15px 50px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+		display: none;
+}
+.info {
+    color: #00529B;
+    background-color: #BDE5F8;
+    background-image: url('/static/images/toolbar/info.png');
+}
+.success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    background-image:url('/static/images/toolbar/success.png');
+}
+.warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+    background-image: url('/static/images/toolbar/warning.png');
+}
+.error {
+    color: #D8000C;
+    background-color: #FFBABA;
+    background-image: url('/static/images/toolbar/error.png');
+}
+
+#registerConfig {
+	display: none;
+}
+
+label.ui-input-text {
+	font-size:14px;
+}
+input.ui-input-text {
+	font-size:12px;
+}
+
+.ui-content {
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+
+</head>
+<body>
+
+
+<div data-role="page" id="loginPage">
+
+	<div data-role="header">
+		<h1 id="headerText" style="margin:0.6em 10% 0.8em;" >Shelly Login</h1>
+	</div><!-- /header -->
+
+	<div data-role="content" style="text-align:center; font-size: 20px;">
+		<div id="registerTextDiv">New user? <a href="javascript:registerMode();">click to register</a>.</div>
+		<div id="loginTextDiv" >Existing user? <a href="javascript:loginMode();">click to login</a>.</div>
+	</div>
+	
+	<div data-role="content" id="messageDiv" style="display:none; padding:0 15px;">
+		<div id="signInLoading" class="loading"></div>
+		<div id="signInInfo" class="info">Info message</div>
+		<div id="signInError" class="error">Error message</div>
+	</div>
+	
+	<div data-role="content">
+		<div id="signInForm" class="ui-body ui-body-b">
+			<label for="email">User:</label>
+			<input type="email" id="email" name="email"/>
+			<label for="pass">Password:</label>
+			<input type="password" id="pass" name="pass"/>
+			<div id="registerConfig">
+				<label for="pass">Password Verify:</label>
+				<input type="password" id="passVerify" name="passVerify"/>
+			</div>
+			<input type="hidden" id="cmd" name="cmd" value=""/>
+			<input type="hidden" id="target" name="target" value="mobile"/>
+			
+			<input id="signInBtn" type="button" value="Go" />
+			<img id="signInLoading" style="visibility: hidden" src="/static/jsm/images/ajax-loader.gif" alt="working.." />
+		</div>
+	</div><!-- /content -->
+	
+<div class="success">Successful operation message</div>
+<div class="warning">Warning message</div>
+
+</div><!-- /page -->
+
+
+</body>
+</html>

@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 var url = require("url");
 var engines = require("consolidate");
+var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
@@ -11,6 +12,7 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 var adminBase = global.gBaseDir + "/admin";
 var adminStatic = adminBase + "/static";
 var adminGames = adminBase + "/games";
+var adminLogin = adminBase + "/login";
 
 shlog.info("admin directory: " + adminBase);
 shlog.info("admin static directory: " + adminStatic);
@@ -24,13 +26,56 @@ app.use(express.favicon(adminStatic + "/images/favicon.ico"));
 app.set("views", adminBase);
 app.engine("html", engines.hogan);
 
+app.use("/static", express.static(adminStatic));  // must be here so static files don't go through session check
+
+app.use(express.cookieParser());
+app.use(function (req, res, next) {
+  if (req.path.substring(0, 7) === "/login/") {
+    return next();
+  }
+
+  shlog.info("session check", req.path);
+
+  // SWD little clunky to deal with express vs restify diffs
+  req.params = {};
+  req.params.cmd = "admin.page";
+  if (_.isUndefined(req.cookies.ShSession)) {
+    shlog.info("redirect - no session");
+    res.redirect("/login/index.html");
+    return 0;
+  }
+  req.params.session = req.cookies.ShSession;
+//  req.params.session = "1:41:xxxx:0";
+
+  sh.fillSession(req, res, function (error, data) {
+    if (error !== 0) {
+//      res.send(data);
+      shlog.info("redirect - bad session");
+      res.redirect("/login/index.html");
+      return 0;
+    }
+    return next();
+  });
+
+  return 0;
+});
+
+app.get("/login/*.html", function (req, res) {
+  shlog.info("in login", req.url);
+  var map = {};
+  map.restUrl = global.CONF.restUrl;
+  map.socketUrl = global.CONF.socketUrl;
+  res.render(req.url.substring(1), {params: JSON.stringify(map)});
+  return 0;
+});
+
 app.get("/menu_1.html", function (req, res) {
   shlog.info("in menu_1");
   var cmdFile = global.gBaseDir + "/functions/module/module.js";
   delete require.cache[require.resolve(cmdFile)];
   var modulePack = require(cmdFile);
   var map = {};
-  map.user = "Scott";
+  map.user = req.session.user.getData();
   modulePack.list(req, res, function (err, data) {
     map.modules = JSON.stringify(data);
     res.render(path.basename(req.url), map);
@@ -71,11 +116,12 @@ app.get("*.html", function (req, res) {
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();
+  map.user = req.session.user.getData();
   res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map)});
 });
 
-app.use("/static", express.static(adminStatic));
-app.use("/games", express.static(adminGames));
+app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
+app.use("/games", express.static(adminGames));  // catch all for any other game files
 
 var adminServer = app.listen(global.CONF.adminPort);
 shlog.info("admin server listening: %d", adminServer.address().port);

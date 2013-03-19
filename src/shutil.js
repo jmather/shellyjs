@@ -55,7 +55,6 @@ shutil.fillSession = function (req, res, cb) {
     cb(0);
     return;
   }
-
   if (_.isUndefined(req.params.session)) {
     cb(1, shutil.error("no_session", "missing session data"));
     return;
