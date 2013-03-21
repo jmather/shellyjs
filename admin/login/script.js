@@ -34,6 +34,7 @@ function doLogin() {
     type: "POST",
     url: Env.restUrl,
     async: false,
+    dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
@@ -66,6 +67,7 @@ function doRegister() {
     type: "POST",
     url: Env.restUrl,
     async: false,
+    dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
@@ -92,6 +94,7 @@ function doAnonymous() {
     type: "POST",
     url: Env.restUrl,
     async: false,
+    dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
