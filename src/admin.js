@@ -87,19 +87,6 @@ app.get("/core.html", function (req, res) {
   });
 });
 
-app.get("/menu_1.html", function (req, res) {
-  shlog.info("in menu_1");
-  var cmdFile = global.gBaseDir + "/functions/module/module.js";
-  delete require.cache[require.resolve(cmdFile)];
-  var modulePack = require(cmdFile);
-  var map = {};
-  map.user = req.session.user.getData();
-  modulePack.list(req, res, function (err, data) {
-    map.modules = JSON.stringify(data);
-    res.render(path.basename(req.url), map);
-  });
-});
-
 app.get("/testgame.html", function (req, res) {
   shlog.info("in testgame");
   var map = {};

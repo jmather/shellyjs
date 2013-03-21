@@ -1,22 +1,86 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>Shelly Admin</title>
+    <meta charset="utf-8">
+    <title>accordion demo</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <style>
+        body {
+            margin-top: 0;
+            margin-right: 0;
+            font-family: Courier;
+            background-color: #d3d3d3;
+        }
+        .ui-widget {
+            font-family: Courier;
+        }
+        .coreAccordion {
+            width: 125px;
+            font-size: 14px;
+        }
+        .setFunctionDiv:hover {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        #inputEditor {
+            width: 600px;
+            height: 125px;
+            margin-left: 5px;
+        }
+        #outputEditor {
+            width: 600px;
+            height: 400px;
+            margin-left: 5px;
+        }
+
+        div.jsoneditor {
+            border: 1px solid #8da95f;
+        }
+
+        .jsoneditor .menu {
+            background-color: #8da95f;
+            background-color: hsla(83, 30.0813%, 65%, 1.0000);
+            border-bottom: 1px solid #8da95f;
+        }
+        .jsoneditor .menu button {
+            border: 1px solid #8da95f;
+            background-color: hsla(83, 30.0813%, 80%, 1.0000);
+        }
+    </style>
+    <script>
+        var Env = {};
+        Env.params = {{{params}}};
+
+        $(init);
+        function init() {
+        }
+    </script>
+
 </head>
+<body>
+<ul id=shMenu>
+    <li><a href="/index.html">System Info</a></li>
+    <li><a href="/core.html">Core Modules</a></li>
+    <li><a href="">Users</a></li>
+    <li><a href="">Test Game</a></li>
+    <li><a href="">Logout</a></li>
+</ul>
+<div class="shHeaderDiv">
+    <div class="topDiv">
+        <div class="topBarDiv"></div>
+        <div class="title">
+            Shelly Admin - Core Modules
+        </div>
+    </div>
+    <div class="bottomBarDiv"></div>
+</div>
 
-<frameset rows="40,*,40" frameborder="0" border="0" framespacing="0">
-  <frame name="topNav" src="top_nav.html">
-<frameset cols="120,*" frameborder="0" border="0" framespacing="0">
-	<frame name="menu" src="menu_1.html" marginheight="0" marginwidth="0" scrolling="auto" noresize>
-	<frame name="content" src="content.html" marginheight="0" marginwidth="0" scrolling="auto" noresize>
-<!--	<frame name="related" src="related.html" marginheight="0" marginwidth="0" scrolling="auto" noresize> -->
-</frameset>
-
-  <frame name="footer" src="footer.html">
-
-<noframes>
-<p>This section (everything between the 'noframes' tags) will only be displayed if the users' browser doesn't support frames. You can provide a link to a non-frames version of the website here. Feel free to use HTML tags within this section.</p>
-</noframes>
-
-</frameset>
+</body>
 </html>
