@@ -121,10 +121,13 @@ Socket.start = function () {
       shlog.info("(" + this.uid + ") socket: close");
 
       var userConn = gUsers[this.uid];
-      delete gUsers[this.uid];
-
-      if (userConn.liveUser === "on") {
-        Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
+      if (_.isUndefined(userConn)) {
+        shlog.error("socket: uid set, but user not in map", userConn);
+      } else {
+        delete gUsers[this.uid];
+        if (userConn.liveUser === "on") {
+          Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
+        }
       }
 
       var userChannel = sh.channel("user", this.uid);
