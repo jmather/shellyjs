@@ -27,7 +27,7 @@
 </style>
 <script language="javascript">
 var Env = {{{params}}};
-Env.baseParams = { };
+Env.baseParams = {};
 
 // allow for baseParam overrides from url
 var psess = getURLParameter("session");
@@ -185,12 +185,19 @@ function init() {
     $("#liveShow").click(function () {
         sendCmd("live.user", {status: "on"});
     });
+    $("#logoutBtn").click(function () {
+        window.location.href = "/login/logout.html";
+    });
 
     ws.connect(Env.socketUrl);
 }
 </script>
 </head>
 <body>
+<div>
+    <button id="logoutBtn" style="float:right">logout</button>
+</div>
+<div style="clear:both"></div>
 <div style="float:left;">session=<span id="session"></span></div>
 <div style="float:right;">token=<span id="token"></span></div>
 <div style="clear:both"></div>
