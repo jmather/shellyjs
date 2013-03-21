@@ -82,6 +82,32 @@ function doRegister() {
   })
 }
 
+function doAnonymous() {
+  var data = {cmd: "reg.anonymous",
+    token: Env.shToken
+  }
+  console.log(data);
+
+  $.ajax ({
+    type: "POST",
+    url: Env.restUrl,
+    async: false,
+    data: JSON.stringify(data),
+    success: function (res, status) {
+      debug.info(res);
+      if (res.event === "event.error") {
+        error(res.message);
+      } else {
+        $.cookie("ShSession", res.data.session, {path: '/', expires: 365});
+        window.location.href = "/index.html";
+      }
+    },
+    error: function (xhr, status, err) {
+      error(err);
+    }
+  })
+}
+
 function signIn()
 {
 	hideshow('signInLoading',true);
@@ -102,9 +128,10 @@ function registerMode()
 	hideshow("loginTextDiv", true);
 	hideshow("registerTextDiv", false);
 	hideshow("registerConfig", true);
+  hideshow('anonymousDiv', false);
 	$("#headerText").text("Shelly Registration");
-	$("#signinSubmit").text("register").button("refresh");
-	$("#cmd").attr("value", "register");
+  $("#signInBtn").text("register").button("refresh");
+  $("#cmd").attr("value", "register");
 }
 
 function loginMode()
@@ -113,8 +140,9 @@ function loginMode()
 	hideshow("loginTextDiv", false);
 	hideshow("registerTextDiv", true);
 	hideshow("registerConfig", false);
+  hideshow('anonymousDiv', true);
 	$("#headerText").text("Shelly Login");
-	$("#signinSubmit").text("login").button("refresh");
+  $("#signInBtn").text("login").button("refresh");
 	$("#cmd").attr("value", "login");
 }
 

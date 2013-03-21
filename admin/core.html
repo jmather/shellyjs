@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>accordion demo</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+    <style>
+        .coreAccordion {
+            width: 125px;
+            font-size: 14px;
+        }
+        .setFunctionDiv:hover {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        #inputEditor {
+            width: 600px;
+            height: 125px;
+            margin-left: 5px;
+        }
+        #outputEditor {
+            width: 600px;
+            height: 400px;
+            margin-left: 5px;
+        }
+    </style>
+    <script>
+        var Env = {};
+        Env.params = {{{params}}};
+        Env.modules = {{{modules}}};
+        var gInputEdit = null;
+        var gOutputEdit = null;
+        var gLastModule = "game";
+        var gLastFunction = "create";
+
+        function createModule(name, m)
+        {
+            debug.info("create module:", name, m);
+
+            // create the module
+            var $section = $("#accordion").append('<h3><a href="#">' + name + '</a></h3>');
+            var $functionDiv = $("<div></div>");
+            // list the functions
+            for (fkey in m.functions) {
+                $functionDiv.append("<div class='setFunctionDiv' module='" + name + "' function='" + fkey + "'>" + fkey + "</div>");
+//                        $functionLink.text(fkey);
+//                        $functionLink.attr("href", "function/"+mkey+"/"+fkey);
+//                        $newFunction.css("display", "block");
+//                        $newModule.append($newFunction);
+            }
+            $section.append($functionDiv);
+        }
+        function initParams(module, func)
+        {
+            console.log(module, func);
+            var cmd = module + "." + func;
+            var input = {cmd:cmd};
+            if (cmd!='reg.login' && cmd!='reg.check' && cmd!='reg.create')
+            {
+                input.session = Env.params.session;
+            }
+
+            $('#moduleName').text(module);
+            $('#functionName').text(func);
+            var funcInfo = Env.modules[module].functions[func];
+            $('#functionDescription').text(funcInfo.desc);
+            var paramInfo = "";
+            console.log(funcInfo);
+            for (key in funcInfo.params)
+            {
+                var dtype = funcInfo.params[key].dtype;
+                paramInfo += key + "=" + dtype;
+                if(typeof(funcInfo.params[key].options) != 'undefined')
+                {
+                    paramInfo += "(" + funcInfo.params[key].options + ")";
+                }
+                paramInfo += "<br>";
+
+//                if(typeof(dParams[key]) != 'undefined') {
+//                    input[key] = dParams[key];
+//                    continue;
+//                }
+                if(dtype == 'object') {
+                    input[key] = {};
+                } else if (dtype == 'array') {
+                    input[key] = [];
+                } else if (dtype == 'number') {
+                    input[key] = 0;
+                } else if (dtype == 'string') {
+                    input[key] = '';
+                }
+            }
+            if(paramInfo.length==0)
+            {
+                paramInfo = "(none)";
+            }
+            $('#functionParams').html(paramInfo);
+            gInputEdit.set(input);
+            gOutputEdit.set();
+        }
+
+        $(init);
+        function init() {
+            for (mkey in Env.modules) {
+                createModule(mkey, Env.modules[mkey]);
+            }
+            $("#accordion").accordion({heightStyle: "content", collapsible: true });
+
+            var inputContainer = document.getElementById("inputEditor");
+            gInputEdit = new jsoneditor.JSONFormatter(inputContainer);
+            var outputContainer = document.getElementById("outputEditor");
+            gOutputEdit = new jsoneditor.JSONFormatter(outputContainer);
+
+            initParams(gLastModule, gLastFunction);
+
+            $('.setFunctionDiv').click(function(event) {
+                gLastModule = $(this).attr("module");
+                gLastFunction = $(this).attr("function");
+                console.log(gLastModule, gLastFunction);
+                initParams(gLastModule, gLastFunction);
+                event.stopPropagation();
+                return false;
+            });
+
+            $('#callFunction').click(function() {
+                try {
+                    var input = gInputEdit.get();
+                } catch (e) {
+                    alert("error parsing input: " + e.message);
+                }
+                console.log(JSON.stringify(input));
+                $.ajax({
+                    type: "POST",
+                    url: Env.params.restUrl,
+                    async: false,
+                    data: JSON.stringify(input),
+                    success: function (data, status) {
+                        gOutputEdit.set(data);
+                    }
+                })
+            });
+            $('#resetFunction').click(function() {
+                initParams(gLastModule, gLastFunction)
+            });
+
+
+        }
+    </script>
+</head>
+<body>
+<div id="accordion" class="coreAccordion" style="float:left">
+</div>
+<div style="float:left;">
+<table border="0">
+    <tr>
+        <td class="nameCell">module:</td><td><span id="moduleName">{module_name}</span>.<span id="functionName">{function_name}</span></td>
+    </tr>
+    <tr>
+        <td class="nameCell" style="vertical-align: text-top;">params:</td><td><div id="functionParams">{function_params}</div></td>
+    </tr>
+    <tr>
+        <td class="nameCell">description:</td><td><div id="functionDescription">{function_description}</div></td>
+    </tr>
+    <tr>
+    </tr>
+    <tr>
+    </tr>
+</table>
+<div id="inputEditor"></div>
+<div>
+    <td><button id="callFunction">call function</button></td>
+    <td><button id="resetFunction" style="float:right;">reset</button></td>
+</div>
+<div id="outputEditor"></div>
+</div>
+</body>
+</html>

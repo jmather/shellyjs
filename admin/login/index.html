@@ -20,14 +20,27 @@
 var Env = {{{params}}};
 
 $("#loginPage").live('pageinit',function() {
+    Env.shToken = $.cookie("shToken");
+    if (typeof (Env.shToken) === "undefined") {
+        debug.info("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
+        Env.shToken = Env.nextUuid;
+        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
+    }
+    debug.info("main", "info", "shToken using: " + Env.shToken);
+
 	debug.info("pageinit");
 	loginMode();
 	// pageInit gets called on each show
-	$('#signInBtn').click(function(e) {
-		signIn();
-		e.preventDefault();
-		return false;
-	});
+    $('#signInBtn').click(function(e) {
+        signIn();
+        e.preventDefault();
+        return false;
+    });
+    $('#anonymousBtn').click(function(e) {
+        doAnonymous();
+        e.preventDefault();
+        return false;
+    });
 });
 
 </script>
@@ -117,9 +130,12 @@ input.ui-input-text {
 			</div>
 			<input type="hidden" id="cmd" name="cmd" value=""/>
 			<input type="hidden" id="target" name="target" value="mobile"/>
-			
-			<input id="signInBtn" type="button" value="Go" />
-			<img id="signInLoading" style="visibility: hidden" src="/static/jsm/images/ajax-loader.gif" alt="working.." />
+
+            <input id="signInBtn" type="button" value="login" />
+            <div id="anonymousDiv">
+                <input id="anonymousBtn" type="button" value="anonymous" />
+            </div>
+            <img id="signInLoading" style="display:none" src="/static/jsm/images/ajax-loader.gif" alt="working.." />
 		</div>
 	</div><!-- /content -->
 	

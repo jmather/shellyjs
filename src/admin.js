@@ -45,11 +45,12 @@ app.use(function (req, res, next) {
     return 0;
   }
   req.params.session = req.cookies.ShSession;
+  // SWD req.params is reset when routes fire
+  shlog.info("found cookie ShSession: ", req.cookies.ShSession);
 //  req.params.session = "1:41:xxxx:0";
 
   sh.fillSession(req, res, function (error, data) {
-    if (error !== 0) {
-//      res.send(data);
+    if (error) {
       shlog.info("redirect - bad session");
       res.redirect("/login/index.html");
       return 0;
@@ -65,8 +66,25 @@ app.get("/login/*.html", function (req, res) {
   var map = {};
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
+  map.nextUuid = sh.uuid();
   res.render(req.url.substring(1), {params: JSON.stringify(map)});
   return 0;
+});
+
+app.get("/core.html", function (req, res) {
+  shlog.info("in: " + req.url);
+  var cmdFile = global.gBaseDir + "/functions/module/module.js";
+  delete require.cache[require.resolve(cmdFile)];
+  var modulePack = require(cmdFile);
+  var map = {};
+  map.version = global.PACKAGE.version;
+  map.restUrl = global.CONF.restUrl;
+  map.socketUrl = global.CONF.socketUrl;
+  map.user = req.session.user.getData();
+  map.session = req.cookies.ShSession;
+  modulePack.list(req, res, function (err, data) {
+    res.render(path.basename(req.url), {params: JSON.stringify(map), modules: JSON.stringify(data)});
+  });
 });
 
 app.get("/menu_1.html", function (req, res) {
