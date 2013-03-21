@@ -83,7 +83,8 @@ app.get("/core.html", function (req, res) {
   map.user = req.session.user.getData();
   map.session = req.cookies.ShSession;
   modulePack.list(req, res, function (err, data) {
-    res.render(path.basename(req.url), {params: JSON.stringify(map), modules: JSON.stringify(data)});
+    res.render(path.basename(req.url), {params: JSON.stringify(map), modules: JSON.stringify(data),
+        partials: {header: 'header'}});
   });
 });
 
@@ -100,20 +101,6 @@ app.get("/testgame.html", function (req, res) {
   res.render("testgame.html", {params: JSON.stringify(map)});
 });
 
-app.get("/function/:module/:function", function (req, res) {
-  var map = {};
-  map.restUrl = global.CONF.restUrl;
-  map.socketUrl = global.CONF.socketUrl;
-  map.module = req.param("module");
-  map.function = req.param("function");
-  var cmdFile = global.gBaseDir + "/functions/" + map.module + "/" + map.module + ".js";
-  delete require.cache[require.resolve(cmdFile)];
-  var modulePack = require(cmdFile);
-  map.functions = modulePack.functions;
-  map.desc = modulePack.desc;
-  res.render("function.html", {params: JSON.stringify(map)});
-});
-
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var map = {};
@@ -122,7 +109,8 @@ app.get("*.html", function (req, res) {
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();
   map.user = req.session.user.getData();
-  res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map)});
+  res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map),
+    partials: {header: 'header'}});
 });
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
