@@ -130,6 +130,8 @@
 
         $(init);
         function init() {
+            $("#shAdminSubTitle").text("Core Modules");
+
             for (mkey in Env.modules) {
                 createModule(mkey, Env.modules[mkey]);
             }

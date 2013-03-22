@@ -84,3 +84,10 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
     height: 2px;
     background-color: #000000
 }
+
+.shVersion {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    font-size: 12px;
+}
