@@ -88,19 +88,6 @@ app.get("/core.html", function (req, res) {
   });
 });
 
-app.get("/testgame.html", function (req, res) {
-  shlog.info("in testgame");
-  var map = {};
-  map.restUrl = global.CONF.restUrl;
-  map.socketUrl = global.CONF.socketUrl;
-  map.module = "game";
-  var cmdFile = global.gBaseDir + "/functions/" + map.module + "/" + map.module + ".js";
-  delete require.cache[require.resolve(cmdFile)];
-  var modulePack = require(cmdFile);
-  map.functions = modulePack.functions;
-  res.render("testgame.html", {params: JSON.stringify(map)});
-});
-
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var map = {};
