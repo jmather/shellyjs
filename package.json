@@ -1,12 +1,12 @@
 {
   "name": "shelly",
-  "version": "0.0.{build}",
+  "version": "0.0.0000",
   "private": true,
   "description": "a game server",
   "author": "Scott Dale <scott@skool51.com>",
   "dependencies": {
     "async": "0.2.5",
-    "consolidate": "0.8.0",
+    "consolidate": "git://github.com/manuelbieh/consolidate.js.git#master",
     "express": "3.1.0",
     "hogan.js": "2.0.0",
     "lodash": "1.0.0",

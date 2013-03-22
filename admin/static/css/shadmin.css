@@ -73,6 +73,13 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
     padding-right: 10px;
 }
 
+.shHeaderDiv .userInfo {
+    position: absolute;
+    font-size: 14px;
+    right: 7px;
+    bottom: 4px;
+}
+
 .shHeaderDiv .bottomBarDiv {
     height: 2px;
     background-color: #000000

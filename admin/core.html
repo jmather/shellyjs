@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>accordion demo</title>
+    <title>Shelly - Core</title>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
@@ -55,9 +55,8 @@
         }
     </style>
     <script>
-        var Env = {};
-        Env.params = {{{params}}};
-        Env.modules = {{{modules}}};
+        var Env = {{{EnvJson}}};
+//        Env.modules = {{{modulesJson}}};
         var gInputEdit = null;
         var gOutputEdit = null;
         var gLastModule = "game";
@@ -87,7 +86,7 @@
             var input = {cmd:cmd};
             if (cmd!='reg.login' && cmd!='reg.check' && cmd!='reg.create')
             {
-                input.session = Env.params.session;
+                input.session = Env.session;
             }
 
             $('#moduleName').text(module);
@@ -161,7 +160,7 @@
                 console.log(JSON.stringify(input));
                 $.ajax({
                     type: "POST",
-                    url: Env.params.restUrl,
+                    url: Env.restUrl,
                     async: false,
                     dataType: "json",
                     data: JSON.stringify(input),

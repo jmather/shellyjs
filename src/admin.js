@@ -83,7 +83,8 @@ app.get("/core.html", function (req, res) {
   map.user = req.session.user.getData();
   map.session = req.cookies.ShSession;
   modulePack.list(req, res, function (err, data) {
-    res.render(path.basename(req.url), {params: JSON.stringify(map), modules: JSON.stringify(data),
+    map.modules = data;
+    res.render(path.basename(req.url), {Env: map, EnvJson: JSON.stringify(map),
         partials: {header: 'header'}});
   });
 });
@@ -96,7 +97,7 @@ app.get("*.html", function (req, res) {
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();
   map.user = req.session.user.getData();
-  res.render(url.parse(req.url).pathname.substring(1), {params: JSON.stringify(map),
+  res.render(url.parse(req.url).pathname.substring(1), {Env: map, EnvJson: JSON.stringify(map),
     partials: {header: 'header'}});
 });
 
