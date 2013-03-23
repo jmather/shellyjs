@@ -1,26 +1,23 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Lobby</title>
-<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet"
-      type="text/css"/>
-<script src="/static/js/jquery-1.7.1.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet"
+          type="text/css"/>
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
-<script src="/static/js/jquery.cookie.js"></script>
-<script src="/static/js/ba-debug.js"></script>
-<script src="/static/js/reconnecting-websocket.js"></script>
-<script src='/static/js/fastclick.js'></script>
-<script src='common.js'></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+    <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src='/static/js/fastclick.js'></script>
+    <script src='common.js'></script>
 
-<link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
-<script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
+    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 <style type="text/css">
-    body {
-        font-family: verdana, arial, sans-serif;
-        font-size: 10pt;
-        margin: 30px;
-    }
-
     button {
         font-size: 12pt;
     }
@@ -28,12 +25,6 @@
 <script language="javascript">
 var Env = {{{EnvJson}}};
 Env.baseParams = {};
-
-// allow for baseParam overrides from url
-var psess = getURLParameter("session");
-if (psess != 'null') {
-    Env.baseParams.session = psess;
-}
 
 function setMatchInfo(matchList) {
     $(".activeMatch").remove();
@@ -78,13 +69,7 @@ function addUser(user) {
 }
 
 function gameInit(gameId) {
-    var addParam = "";
-    var psess = getURLParameter("session");  // done for testing two users in same browser
-    if(psess != 'null')
-    {
-        addParam = "&session="+psess;
-    }
-    window.location.href = "/games/tictactoe.html?gameId=" + gameId + addParam;
+    window.location.href = "/games/tictactoe.html?gameId=" + gameId;
 }
 
 function processEvent(res, from) {
@@ -98,22 +83,6 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == 'event.heartbeat') {
-        return;
-    }
-    if (res.event == 'reg.anonymous') {
-        if (typeof (Env.baseParams.session) === 'undefined') {
-            Env.baseParams.session = res.data.session;
-        } else {
-            log(from, "info", "using existing session: " + Env.baseParams.session);
-        }
-
-        $("#session").text(Env.baseParams.session);
-        Env.uid = Env.baseParams.session.split(':')[1];
-        $("#uid").text(Env.uid);
-
-        sendCmd("live.user", {status: "on"});
-        sendCmd("game.playing");
-        sendCmd("match.stats");
         return;
     }
     if (res.event == 'event.game.playing') {
@@ -151,8 +120,18 @@ function processEvent(res, from) {
     log(from, "unknown-event", JSON.stringify(res));
 }
 
+function shellyInit() {
+    sendCmd("live.user", {status: "on"});
+    sendCmd("game.playing");
+    sendCmd("match.stats");
+}
+
 $(init);
 function init() {
+    $("#shSystem").text("Example");
+    $("#shSubTitle").text("Lobby");
+    $("#uid").text(Env.user.uid);
+
     Env.shToken = $.cookie("shToken");
     if (typeof (Env.shToken) === "undefined") {
         log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
@@ -161,6 +140,7 @@ function init() {
     }
     log("main", "info", "shToken using: " + Env.shToken);
     $("#token").text(Env.shToken);
+    $("#session").text(Env.session);
 
     $("#version").text(Env.version);
 
@@ -194,13 +174,8 @@ function init() {
 </script>
 </head>
 <body>
-<div>
-    <button id="logoutBtn" style="float:right">logout</button>
-</div>
-<div style="clear:both"></div>
-<div style="float:left;">session=<span id="session"></span></div>
-<div style="float:right;">token=<span id="token"></span></div>
-<div style="clear:both"></div>
+{{> header}}
+{{> gameNav}}
 <table border="1" style="width:100%;">
     <tr>
         <td>Hello <span id="currentUserName"></span> (<span id="uid"></span>)
@@ -255,7 +230,6 @@ function init() {
         </td>
     </tr>
 </table>
-
 <div style="margin: 10px 0px;"><b>Message Log</b></div>
 <div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
 
@@ -269,6 +243,9 @@ function init() {
     <div class="waitOptionDiv">Or give us your email and we'll notify you.</div>
     <div class="waitOptionDiv">Or come back later.</div>
 </div>
-
+<div style="position: absolute; bottom: 0px; left: 0px; font-size: 14px">
+    <div>session=<span id="session"></span></div>
+    <div">token=<span id="token"></span></div>
+</div>
 </body>
 </html>

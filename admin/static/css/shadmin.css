@@ -1,3 +1,11 @@
+body {
+    margin-top: 0;
+    margin-right: 0;
+    font-family: Courier;
+    background-color: #d3d3d3;
+}
+
+
 /**************** admin fixed nav menu */
 #shMenu {
     position: fixed;

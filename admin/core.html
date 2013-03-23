@@ -11,12 +11,6 @@
     <script src="/static/js/ba-debug.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <style>
-        body {
-            margin-top: 0;
-            margin-right: 0;
-            font-family: Courier;
-            background-color: #d3d3d3;
-        }
         .ui-widget {
             font-family: Courier;
         }
@@ -130,7 +124,8 @@
 
         $(init);
         function init() {
-            $("#shAdminSubTitle").text("Core Modules");
+            $("#shSystem").text("Admin");
+            $("#shSubTitle").text("Core Modules");
 
             for (mkey in Env.modules) {
                 createModule(mkey, Env.modules[mkey]);
@@ -182,6 +177,7 @@
 </head>
 <body>
 {{< header}}
+{{< adminNav}}
 
 <div id="accordion" class="coreAccordion" style="float:left">
 </div>

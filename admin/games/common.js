@@ -88,7 +88,7 @@ function setMyGames(gameList) {
     $newGame.find("#myGameRemove").click(function (event) {
       $(event.target).parent().remove();
       var data = clone(Env.baseParams);
-      data.cmd = "user.gameRemove";
+      data.cmd = "game.leave";
       data.gameId = $(this).parent().attr("gameId");
       sendWs(data);
     });
@@ -121,10 +121,7 @@ var ws = new ReconnectingWebSocket();
 ws.onopen = function () {
   console.log("socket: open");
   log("socket", "onopen", Env.socketUrl);
-  var data = {};
-  data.cmd = "reg.anonymous";
-  data.token = Env.shToken;
-  sendWs(data);
+  shellyInit();
 }
 ws.onmessage = function (evt) {
   var received_msg = evt.data;
@@ -147,8 +144,10 @@ function sendWs(data) {
 }
 
 function sendCmd(cmd, data) {
-  var obj = $.extend(Env.baseParams, data);
+  var obj = {};
+  obj.session = Env.session;
   obj.cmd = cmd;
+  var obj = $.extend(obj, data);
   sendWs(obj);
 }
 

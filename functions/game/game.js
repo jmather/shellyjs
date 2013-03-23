@@ -213,14 +213,17 @@ game.join = function (req, res, cb) {
 game.leave = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
-  var user = req.session.user;
 
-  game.removePlayer(uid);
-  user.removeGame(game);
+  var playing = new ShPlaying();
+  playing.loadOrCreate(uid, function (error, data) {
+    if (error) {
+      cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
+      return;
+    }
+    playing.removeGame(game);
+  });
 
   global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {gameId: game.get("gameId"), uid: uid}));
-
-  // SWD notify the gqueue also
 
   cb(0, sh.event("event.game.leave", game.get("players")));
 };
