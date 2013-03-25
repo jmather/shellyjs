@@ -82,7 +82,6 @@ function setMyGames(gameList) {
 
     $newGame.find("#myGameJoin").click(function () {
       var gameId = $(this).parent().attr('gameId');
-      console.log("init");
       gameInit(gameId);
     });
     $newGame.find("#myGameRemove").click(function (event) {
@@ -118,8 +117,7 @@ function sendRest(input) {
 
 var ws = new ReconnectingWebSocket();
 //        ws.debug = true;
-ws.onopen = function () {
-  console.log("socket: open");
+ws.onopen = function (evt) {
   log("socket", "onopen", Env.socketUrl);
   shellyInit();
 }
@@ -130,7 +128,7 @@ ws.onmessage = function (evt) {
   processEvent(msg, "socket");
 }
 ws.onclose = function (evt) {
-  console.log("socket: close");
+  log("socket", "onclose", JSON.stringify(evt));
 }
 ws.onerror = function (evt) {
   log("socket", "error", JSON.stringify(evt));

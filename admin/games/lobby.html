@@ -56,10 +56,6 @@ function addUser(user) {
     $newGame.attr("uid", user.uid);
     $newGame.css("display", "block");
 
-    if (user.uid === Env.uid) {
-        $("#currentUserName").text(user.name);
-    }
-
     $newGame.find("#userOffer").click(function () {
         alert("not implemented");
 //                var gameId = $(this).parent().attr('gameId');
@@ -106,12 +102,7 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == 'event.match.made') {
-        var addParam = "";
-        var psess = getURLParameter("session");  // done for testing two users in same browser
-        if (psess != 'null') {
-            addParam = "&session=" + psess;
-        }
-        window.location.href = "/games/tictactoe.html?gameId=" + res.data.gameId + addParam;
+        window.location.href = "/games/tictactoe.html?gameId=" + res.data.gameId;
         return;
     }
     if (res.event == 'event.match.add') {
@@ -130,19 +121,9 @@ $(init);
 function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("Lobby");
+
     $("#uid").text(Env.user.uid);
-
-    Env.shToken = $.cookie("shToken");
-    if (typeof (Env.shToken) === "undefined") {
-        log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
-        Env.shToken = Env.nextUuid;
-        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
-    }
-    log("main", "info", "shToken using: " + Env.shToken);
-    $("#token").text(Env.shToken);
     $("#session").text(Env.session);
-
-    $("#version").text(Env.version);
 
     window.addEventListener('load', function () {
         new FastClick(document.body);
@@ -176,25 +157,14 @@ function init() {
 <body>
 {{> header}}
 {{> gameNav}}
-<table border="1" style="width:100%;">
+<table border="1">
     <tr>
-        <td>Hello <span id="currentUserName"></span> (<span id="uid"></span>)
-            <button id="setUserInfo" style="float:right">set</button>
-        </td>
         <td>Users in Lobby</td>
-        <td>Games Your Playing<span style="float:right;" id="version"></span></td>
+        <td>Games Your Playing</td>
     </tr>
     <tr>
         <td valign="top">
-            <div id="matchList" style="height:150;overflow:scroll;">
-                <div id="matchTemplate" style="display:none;">
-                    <span id="matchName">game0</span> =
-                    <span id="matchTime">time</span>
-                </div>
-            </div>
-        </td>
-        <td valign="top">
-            <div id="userList" style="height:150;overflow:scroll;">
+            <div id="userList" style="width: 300px;height:150;overflow:scroll;">
                 <div id="userTemplate" style="display:none;">
                     <span id="userName">open-game-0</span>
                     <button id="userOffer" style="float:right">offer</button>
@@ -203,7 +173,7 @@ function init() {
             </div>
         </td>
         <td valign="top">
-            <div id="gameList" style="height:150;overflow:scroll;">
+            <div id="gameList" style="width:400px;height:150;overflow:scroll;">
                 <div id="gameTemplate" style="display:none;">
                     <span id="gameName">game-0</span>
                     (<span id="gameTurn">?</span>)
@@ -220,13 +190,21 @@ function init() {
 
 <table border="1" style="width:100%;">
     <tr>
-        <td style="width:50%;">Games</td>
-    </tr>
-    <tr>
         <td>
             <button id="gameTicTacToe">Play TicTacToe</button>
             <button id="liveHide" style="float:right">offline</button>
             <button id="liveShow" style="float:right">online</button>
+            <button id="setUserInfo" style="float:right">set name</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="matchList" style="height:150;overflow:scroll;">
+                <div id="matchTemplate" style="display:none;">
+                    <span id="matchName">game0</span> =
+                    <span id="matchTime">time</span>
+                </div>
+            </div>
         </td>
     </tr>
 </table>
@@ -245,7 +223,6 @@ function init() {
 </div>
 <div style="position: absolute; bottom: 0px; left: 0px; font-size: 14px">
     <div>session=<span id="session"></span></div>
-    <div">token=<span id="token"></span></div>
 </div>
 </body>
 </html>

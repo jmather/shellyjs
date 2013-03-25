@@ -228,16 +228,7 @@ function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("TicTacToe");
 
-    Env.shToken = $.cookie("shToken");
-    if (typeof (Env.shToken) === "undefined") {
-        log("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
-        Env.shToken = Env.nextUuid;
-        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
-    }
-    log("main", "info", "shToken using: " + Env.shToken);
-    $("#token").text(Env.shToken);
-
-    $("#version").text(Env.version);
+    $("#session").text(Env.session);
 
     window.addEventListener('load', function () {
         new FastClick(document.body);
@@ -250,21 +241,8 @@ function init() {
         sendCmd("game.turn", {gameId: Env.gameId, move: {x: x, y: y}})
     });
 
-    $("#gameLobby").click(function () {
-        var addParam = "";
-        var psess = getURLParameter("session");  // done for testing two users in same browser
-        if (psess != 'null') {
-            addParam = "?session=" + psess;
-        }
-        window.location.href = "/games/lobby.html" + addParam;
-    });
-
-    $("#gameUpdate").click(function () {
-        sendCmd("game.get")
-    });
-
     $("#gameReset").click(function () {
-        sendCmd("game.reset")
+        sendCmd("game.reset", {gameId: Env.gameId});
     });
 
     ws.connect(Env.socketUrl);
@@ -318,12 +296,11 @@ function init() {
             <div style="float:left">Hello <span id="currentUserName"></span> (<span id="uid"></span>)</div>
             <div style="float:right">game = <span id="gameId"></span></div>
         </td>
-        <td>Games Your Playing<span style="float:right;" id="version"></span></td>
+        <td>Other Games</span></td>
     </tr>
     <tr>
         <td valign="top">
-            <button id="gameLobby">goto lobby</button>
-            <button id="gameReset" style="float:right">reset game</button>
+            <button id="gameReset">reset game</button>
         </td>
         <td valign="top">
             <div id="gameList" style="height:150;overflow:scroll;">
@@ -343,7 +320,6 @@ function init() {
 
 <div style="position: absolute; bottom: 0px; left: 0px; font-size: 14px">
     <div>session=<span id="session"></span></div>
-    <div">token=<span id="token"></span></div>
 </div>
 
 </body>
