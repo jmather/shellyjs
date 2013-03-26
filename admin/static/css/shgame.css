@@ -28,3 +28,7 @@ body {
     overflow:scroll;
     font-size: 14px;
 }
+
+#messageLog {
+    height: 200px;
+}
