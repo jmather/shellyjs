@@ -1,7 +1,10 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Tic Tac Toe</title>
-<script src="/static/js/jquery-1.7.1.min.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+
 <script src="/static/js/jquery.cookie.js"></script>
 <script src="/static/js/ba-debug.js"></script>
 <script src="/static/js/reconnecting-websocket.js"></script>
@@ -16,20 +19,25 @@
 
 <style type="text/css">
     button {
-        font-size: 12pt;
+        font-size: 8pt;
     }
     .gameBoardDiv {
         width: 291px;
         float:left;
     }
-
     .gameInfoDiv {
         width: 200px;
     }
     .gamePlayersDiv {
         width: 200px;
     }
-
+    .gameListDiv {
+        float: left;
+        width: 300px;
+    }
+    #gameList {
+        height: 100px;
+    }
     .tictac {
         display: block;
         float: left;
@@ -287,6 +295,7 @@ function init() {
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>
             <div>playing: <span id="gamePlaying"></span></div>
+            <button id="gameReset" style="float:right">reset</button>
         </div>
     </div>
     <div class="gamePlayersDiv gameBoxDiv">
@@ -302,25 +311,24 @@ function init() {
 </div>
 <div style="clear: both;"></div>
 
-<div class="gameBoardDiv gameBoxDiv" style="width: 400px;">
+<div class="gameListDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv" style="">Other Games</div>
-    <div class="gameBoxInnerDiv">
-        <div id="gameList" class="gameBoxInnerDiv">
-            <div id="gameTemplate" style="display:none;">
-                <span id="gameName">game-0</span>
-                (<span id="gameTurn">?</span>)
-                <button id="myGameRemove" style="float:right">remove</button>
-                <button id="myGameJoin" style="float:right">play</button>
-                <div style="clear:both"></div>
-            </div>
+    <div id="gameList" class="gameBoxInnerDiv">
+        <div id="gameTemplate" style="display:none;">
+            <span id="gameName">game-0</span>
+            (<span id="gameTurn">?</span>)
+            <button id="myGameRemove" style="float:right">remove</button>
+            <button id="myGameJoin" style="float:right">play</button>
+            <div style="clear:both"></div>
         </div>
     </div>
 </div>
 <div style="clear: both;"></div>
 
-<button id="gameReset">reset game</button>
-<div style="margin: 10px 0px;"><b>Message Log</b></div>
-<div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
+ <div class="messageLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
+    <div id="messageLog" class="gameBoxDiv" readonly></div>
+</div>
 
 <div style="position: absolute; bottom: 0px; left: 0px; font-size: 14px">
     <div>session=<span id="session"></span></div>

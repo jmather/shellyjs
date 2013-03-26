@@ -5,6 +5,10 @@ body {
     background-color: #d3d3d3;
 }
 
+button {
+    font-size: 8pt;
+}
+
 
 /**************** admin fixed nav menu */
 #shMenu {
