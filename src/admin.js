@@ -85,7 +85,7 @@ app.get("/core.html", function (req, res) {
   modulePack.list(req, res, function (err, data) {
     map.modules = data;
     res.render(path.basename(req.url), {Env: map, EnvJson: JSON.stringify(map),
-      partials: {header: 'header', adminNav: 'adminnav'}});
+      partials: {header: "header", footer: "footer", adminNav: "adminnav", gameNav: "gamenav"}});
   });
 });
 
@@ -99,7 +99,7 @@ app.get("*.html", function (req, res) {
   map.user = req.session.user.getData();
   map.session = req.cookies.ShSession;
   res.render(url.parse(req.url).pathname.substring(1), {Env: map, EnvJson: JSON.stringify(map),
-    partials: {header: 'header', adminNav: 'adminnav', gameNav: 'gamenav'}});
+    partials: {header: "header", footer: "footer", adminNav: "adminnav", gameNav: "gamenav"}});
 });
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js

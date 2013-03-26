@@ -1,0 +1,72 @@
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+<title>Lobby</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+    <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src='/static/js/fastclick.js'></script>
+    <script src='common.js'></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
+
+    <script language="javascript">
+var Env = {{{EnvJson}}};
+Env.baseParams = {};
+
+$(init);
+function init() {
+    $("#shSystem").text("Example");
+    $("#shSubTitle").text("Profile");
+
+    window.addEventListener('load', function () {
+        new FastClick(document.body);
+    }, false);
+
+    $("#setUserInfo").click(function () {
+        var name = prompt("Please enter a nick name.", "")
+        if (name != null && name != "") {
+            var res = sendRestCmd("user.set", {user: {name: name}}, function (error, data) {
+                if(!error) {
+                    $("#shUserNameSpan").text(data.data.name);
+                }
+            });
+        }
+    });
+}
+</script>
+    <style>
+        .profileInfoDiv {
+            width: 400px;
+        }
+        #playNowList {
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+{{> header}}
+{{> gameNav}}
+
+<div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
+
+<div class="profileInfoDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Profile Information</div>
+    <div id="playNowList" class="gameBoxInnerDiv">
+        <button id="setUserInfo" style="float:right">set name</button>
+    </div>
+</div>
+<div style="clear:both"></div>
+
+<div class="messageLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
+    <div id="messageLog" class="gameBoxInnerDiv" readonly></div>
+</div>
+
+{{> footer}}
+</body>
+</html>

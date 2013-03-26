@@ -97,24 +97,6 @@ function setMyGames(gameList) {
   }
 }
 
-function sendRest(input) {
-  log("rest", "send", input);
-  $.ajax
-    ({
-      type: "POST",
-      url: Env.restUrl,
-      async: false,
-      data: JSON.stringify(input),
-      success: function (res, status) {
-        log("rest", "recv", res);
-        processEvent(res, "rest");
-      },
-      error: function (xhr, status, error) {
-        log("rest", "error", xhr.responseText);
-      }
-    })
-}
-
 var ws = new ReconnectingWebSocket();
 //        ws.debug = true;
 ws.onopen = function (evt) {
@@ -146,7 +128,35 @@ function sendCmd(cmd, data) {
   obj.session = Env.session;
   obj.cmd = cmd;
   var obj = $.extend(obj, data);
-  sendWs(obj);
+  try {
+    sendWs(obj);
+  } catch(e) {
+    log("socket", "error", e.toString())
+  }
+}
+
+function sendRestCmd(cmd, data, cb) {
+  var obj = {};
+  obj.session = Env.session;
+  obj.cmd = cmd;
+  var obj = $.extend(obj, data);
+  log("rest", "send", obj);
+  $.ajax
+    ({
+      type: "POST",
+      url: Env.restUrl,
+      async: true,
+      dataType: "json",
+      data: JSON.stringify(obj),
+      success: function (res, status) {
+        log("rest", "recv", res);
+        cb(0, res);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        log("rest", "error", textStatus);
+        cb(1, textStatus);
+      }
+    })
 }
 
 /*

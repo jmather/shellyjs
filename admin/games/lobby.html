@@ -11,9 +11,6 @@
     <script src='/static/js/fastclick.js'></script>
     <script src='common.js'></script>
 
-    <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
-    <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
-
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
@@ -116,9 +113,6 @@ $(init);
 function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("Lobby");
-
-    $("#uid").text(Env.user.uid);
-    $("#session").text(Env.session);
 
     window.addEventListener('load', function () {
         new FastClick(document.body);
@@ -225,7 +219,7 @@ function init() {
 
 <div class="messageLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
-<div id="messageLog" class="gameBoxInnerDiv" readonly></div>
+    <div id="messageLog" class="gameBoxInnerDiv" readonly></div>
 </div>
 
 <style>
@@ -239,9 +233,6 @@ function init() {
     <div class="waitOptionDiv">Or come back later.</div>
 </div>
 
-<div style="position: absolute; bottom: 0px; left: 0px; font-size: 14px">
-    <div>session=<span id="session"></span></div>
-</div>
-
+{{> footer}}
 </body>
 </html>
