@@ -8,12 +8,14 @@ body {
 
 /**************** admin fixed nav menu */
 #shMenu {
-    position: fixed;
-    right: 0;
+    position: static;
+    float: right;
+    margin: 0 0 0 0;
+/*    right: 0;
     top: 75px;
     width: 8em;
     margin: -2.5em 0 0 0;
-    z-index: 5;
+    z-index: 5; */
     background: hsla(357, 95%, 30%, 0.7);
     color: white;
     font-weight: bold;
@@ -42,8 +44,10 @@ body {
 }
 
 /* Make menu absolute, not fixed, on IE 5 & 6 */
+/*
 #shMenu { position: absolute }
 *>#shMenu { position: fixed }
+*/
 
 p.stb { text-indent: 0; margin-top: 0.83em }
 p.mtb { text-indent: 0; margin-top: 2.17em }
@@ -90,7 +94,8 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
 
 .shHeaderDiv .bottomBarDiv {
     height: 2px;
-    background-color: #000000
+    background-color: #000000;
+    margin-bottom: 7px;
 }
 
 .shVersion {

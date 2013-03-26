@@ -11,3 +11,20 @@ body {
 .shHeaderDiv .topBarDiv {
     background-color: #8da95f;
 }
+
+/**************** game box layouts */
+.gameBoxDiv {
+    margin-top: 7px;
+    margin-right: 5px;
+}
+.gameBoxHeaderDiv {
+    background: hsla(83, 30.0813%, 65%, 1.0000);
+    border: 1px solid #8da95f;
+    width: 100%;
+}
+.gameBoxInnerDiv {
+    border: 1px solid #8da95f;
+    width: 100%;
+    overflow:scroll;
+    font-size: 14px;
+}

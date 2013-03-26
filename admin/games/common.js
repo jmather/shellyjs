@@ -57,13 +57,13 @@ function setWhoTurn(gameId, whoTurn, profile) {
   $turnSpan.removeClass("playerName" + whoTurn);
   if (whoTurn === "0") {
     $turnSpan.text("over");
-  } else if (whoTurn === Env.uid) {
-    $turnSpan.text("your turn");
+  } else if (whoTurn === Env.user.uid) {
+    $turnSpan.text("yours");
     $gamePlaying.detach();
     $gamePlaying.prependTo("#gameList");
   } else {
     $turnSpan.addClass("playerName" + whoTurn);
-    $turnSpan.text(profile.name + "'s turn");
+    $turnSpan.text(profile.name + "'s");
     $gamePlaying.detach();
     $gamePlaying.appendTo("#gameList");
   }

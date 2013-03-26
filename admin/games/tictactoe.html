@@ -18,6 +18,17 @@
     button {
         font-size: 12pt;
     }
+    .gameBoardDiv {
+        width: 291px;
+        float:left;
+    }
+
+    .gameInfoDiv {
+        width: 200px;
+    }
+    .gamePlayersDiv {
+        width: 200px;
+    }
 
     .tictac {
         display: block;
@@ -86,9 +97,6 @@ function setState(game) {
     $.cookie("shLastGame" + Env.user.uid, game.gameId, { expires: 3650, path: '/' });
     hideError();
 
-    $("#uid").text(Env.user.uid);
-    $("#currentUserName").text(game.players[Env.user.uid].name);
-
     var gameBoard = game.state.gameBoard;
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < 3; j++) {
@@ -98,7 +106,7 @@ function setState(game) {
     }
 
     $("#gameStatus").text(game.status);
-    if (game.whoTurn == $("#uid").text()) {
+    if (game.whoTurn == Env.user.uid) {
         $("#whoTurn").text("yours");
         turnDipl = "yours";
     } else if (game.whoTurn == 0) {
@@ -252,69 +260,65 @@ function init() {
 <body>
 {{> header}}
 {{> gameNav}}
-<table border="0" width="100%">
-    <tr>
-        <td>game board</td>
-        <td>info</td>
-        <td>players</td>
-    </tr>
-    <tr>
-        <td style="width:295px;">
-            <div id="x0y0" class="tictac"></div>
-            <div id="x1y0" class="tictac"></div>
-            <div id="x2y0" class="tictac"></div>
-            <div style="clear:both;"/>
-            <div id="x0y1" class="tictac"></div>
-            <div id="x1y1" class="tictac"></div>
-            <div id="x2y1" class="tictac"></div>
-            <div style="clear:both;"/>
-            <div id="x0y2" class="tictac"></div>
-            <div id="x1y2" class="tictac"></div>
-            <div id="x2y2" class="tictac"></div>
-        </td>
-        <td valign="top" style="width:200px;">
+
+<div class="gameBoardDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv" style="">Game Board</div>
+    <div>
+        <div id="x0y0" class="tictac"></div>
+        <div id="x1y0" class="tictac"></div>
+        <div id="x2y0" class="tictac"></div>
+        <div id="x0y1" class="tictac"></div>
+        <div id="x1y1" class="tictac"></div>
+        <div id="x2y1" class="tictac"></div>
+        <div id="x0y2" class="tictac"></div>
+        <div id="x1y2" class="tictac"></div>
+        <div id="x2y2" class="tictac"></div>
+    </div>
+    <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
+</div>
+
+
+<div style="float:left;">
+    <div class="gameInfoDiv gameBoxDiv">
+        <div class="gameBoxHeaderDiv" style="">Game Info</div>
+        <div class="gameBoxInnerDiv">
+            <div>game id: <span id="gameId"></span></div>
             <div>status: <span id="gameStatus"></span></div>
             <div>whose turn: <span id="whoTurn"></span></div>
             <div>winner: <span id="gameWinner"></span></div>
             <div>playing: <span id="gamePlaying"></span></div>
-        </td>
-        <td valign="top">
+        </div>
+    </div>
+    <div class="gamePlayersDiv gameBoxDiv">
+        <div class="gameBoxHeaderDiv" style="">Game Players</div>
+        <div class="gameBoxInnerDiv">
             <div id="playerList" style="width:100%;overflow:scroll;">
                 <div id="playerTemplate" style="display:none;">
                     <span id="playerName">player-0</span> <span id="playerStatus">offline</span> </span> <span id="playerTurn"></span>
                 </div>
             </div>
-        </td>
-    </tr>
-</table>
+        </div>
+    </div>
+</div>
+<div style="clear: both;"></div>
 
-<div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
-
-<table border="1" style="width:100%;">
-    <tr>
-        <td>
-            <div style="float:left">Hello <span id="currentUserName"></span> (<span id="uid"></span>)</div>
-            <div style="float:right">game = <span id="gameId"></span></div>
-        </td>
-        <td>Other Games</span></td>
-    </tr>
-    <tr>
-        <td valign="top">
-            <button id="gameReset">reset game</button>
-        </td>
-        <td valign="top">
-            <div id="gameList" style="height:150;overflow:scroll;">
-                <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game-0</span>
-                    (<span id="gameTurn">?</span>)
-                    <button id="myGameRemove" style="float:right">remove</button>
-                    <button id="myGameJoin" style="float:right">play</button>
-                    <div style="clear:both"></div>
-                </div>
+<div class="gameBoardDiv gameBoxDiv" style="width: 400px;">
+    <div class="gameBoxHeaderDiv" style="">Other Games</div>
+    <div class="gameBoxInnerDiv">
+        <div id="gameList" class="gameBoxInnerDiv">
+            <div id="gameTemplate" style="display:none;">
+                <span id="gameName">game-0</span>
+                (<span id="gameTurn">?</span>)
+                <button id="myGameRemove" style="float:right">remove</button>
+                <button id="myGameJoin" style="float:right">play</button>
+                <div style="clear:both"></div>
             </div>
-        </td>
-    </tr>
-</table>
+        </div>
+    </div>
+</div>
+<div style="clear: both;"></div>
+
+<button id="gameReset">reset game</button>
 <div style="margin: 10px 0px;"><b>Message Log</b></div>
 <div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
 

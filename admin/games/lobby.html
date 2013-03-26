@@ -1,10 +1,9 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Lobby</title>
-    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet"
-          type="text/css"/>
-    <script src="/static/js/jquery-1.7.1.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 
     <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
@@ -17,12 +16,8 @@
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
-<style type="text/css">
-    button {
-        font-size: 12pt;
-    }
-</style>
-<script language="javascript">
+
+    <script language="javascript">
 var Env = {{{EnvJson}}};
 Env.baseParams = {};
 
@@ -153,63 +148,85 @@ function init() {
     ws.connect(Env.socketUrl);
 }
 </script>
+    <style>
+        .playAnyoneDiv {
+            width: 300px;
+        }
+        .lobbyUsersDiv {
+            width: 300px;
+        }
+        #userList {
+            height: 150px;
+        }
+        .gameListDiv {
+            float: left;
+            width: 300px;
+        }
+        #gameList {
+            height: 150px;
+        }
+        #messageLog {
+            height: 200px;
+        }
+    </style>
 </head>
 <body>
 {{> header}}
 {{> gameNav}}
-<table border="1">
-    <tr>
-        <td>Users in Lobby</td>
-        <td>Games Your Playing</td>
-    </tr>
-    <tr>
-        <td valign="top">
-            <div id="userList" style="width: 300px;height:150;overflow:scroll;">
-                <div id="userTemplate" style="display:none;">
-                    <span id="userName">open-game-0</span>
-                    <button id="userOffer" style="float:right">offer</button>
-                    <div style="clear:both"></div>
-                </div>
-            </div>
-        </td>
-        <td valign="top">
-            <div id="gameList" style="width:400px;height:150;overflow:scroll;">
-                <div id="gameTemplate" style="display:none;">
-                    <span id="gameName">game-0</span>
-                    (<span id="gameTurn">?</span>)
-                    <button style="float:right;" id="myGameRemove">remove</button>
-                    <button style="float:right;" id="myGameJoin">play</button>
-                    <div style="clear:both"></div>
-                </div>
-            </div>
-        </td>
-    </tr>
-</table>
 
 <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
-<table border="1" style="width:100%;">
-    <tr>
-        <td>
-            <button id="gameTicTacToe">Play TicTacToe</button>
+<div style="float:left; margin-bottom: 5px;">
+    <div class="playAnyoneDiv gameBoxDiv">
+        <div class="gameBoxHeaderDiv">Play Anyone Now</div>
+        <div id="playNowList" class="gameBoxInnerDiv">
+            <button id="gameTicTacToe">TicTacToe</button>
             <button id="liveHide" style="float:right">offline</button>
             <button id="liveShow" style="float:right">online</button>
             <button id="setUserInfo" style="float:right">set name</button>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div id="matchList" style="height:150;overflow:scroll;">
-                <div id="matchTemplate" style="display:none;">
-                    <span id="matchName">game0</span> =
-                    <span id="matchTime">time</span>
-                </div>
+        </div>
+    </div>
+    <div class="lobbyUsersDiv gameBoxDiv">
+        <div class="gameBoxHeaderDiv">Users in Lobby</div>
+        <div id="userList" class="gameBoxInnerDiv">
+            <div id="userTemplate" style="display:none;">
+                <span id="userName">open-game-0</span>
+                <button id="userOffer" style="float:right">offer</button>
+                <div style="clear:both"></div>
             </div>
-        </td>
-    </tr>
-</table>
-<div style="margin: 10px 0px;"><b>Message Log</b></div>
-<div id="messageLog" readonly style="height:200;width:100%;overflow:scroll;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="gameListDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Recent Games</div>
+    <div id="gameList" class="gameBoxInnerDiv">
+        <div id="gameTemplate" style="display:none;">
+            <span id="gameName">game-0</span>
+            (<span id="gameTurn">?</span>)
+            <button style="float:right;" id="myGameRemove">remove</button>
+            <button style="float:right;" id="myGameJoin">play</button>
+            <div style="clear:both"></div>
+        </div>
+    </div>
+</div>
+
+<div style="clear:both"></div>
+
+<div class="matchListDiv" style="display:none;">
+    <div class="gameBoxHeaderDiv">Game Activity</div>
+    <div id="matchList" class="gameBoxInnerDiv">
+        <div id="matchTemplate" style="display:none;">
+            <span id="matchName">game0</span> =
+            <span id="matchTime">time</span>
+        </div>
+    </div>
+</div>
+
+<div class="messageLogDiv">
+    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
+    <div id="messageLog" class="gameBoxDiv" readonly></div>
+</div>
 
 <style>
     .waitOptionDiv {
@@ -221,8 +238,10 @@ function init() {
     <div class="waitOptionDiv">Or give us your email and we'll notify you.</div>
     <div class="waitOptionDiv">Or come back later.</div>
 </div>
+
 <div style="position: absolute; bottom: 0px; left: 0px; font-size: 14px">
     <div>session=<span id="session"></span></div>
 </div>
+
 </body>
 </html>
