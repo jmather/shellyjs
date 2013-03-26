@@ -25,7 +25,7 @@ body {
 .gameBoxInnerDiv {
     border: 1px solid #8da95f;
     width: 100%;
-    overflow:scroll;
+    overflow:auto;
     font-size: 14px;
 }
 
