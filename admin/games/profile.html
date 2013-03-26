@@ -18,6 +18,25 @@
 var Env = {{{EnvJson}}};
 Env.baseParams = {};
 
+function resetProfileSpans() {
+    var saveData = {};
+    $(".profileEditSpan").replaceWith(function () {
+        var editId = $(this).attr("id");
+        var value = $(this).val();
+        saveData[editId] = value;
+        Env.user[editId] = value;
+        $span = $("<span/>");
+        $span.attr("id", editId);
+        $span.addClass("profileEditSpan");
+        $span.text(Env.user[editId]);
+        return $span;
+    });
+    $("#editProfile").css("display", "block");
+    $("#saveProfile").css("display", "none");
+    $("#cancelProfile").css("display", "none");
+    return saveData;
+}
+
 $(init);
 function init() {
     $("#shSystem").text("Example");
@@ -27,24 +46,51 @@ function init() {
         new FastClick(document.body);
     }, false);
 
-    $("#setUserInfo").click(function () {
-        var name = prompt("Please enter a nick name.", "")
-        if (name != null && name != "") {
-            var res = sendRestCmd("user.set", {user: {name: name}}, function (error, data) {
-                if(!error) {
-                    $("#shUserNameSpan").text(data.data.name);
-                }
-            });
-        }
+    $("#saveProfile").css("display", "none");
+    $("#cancelProfile").css("display", "none");
+
+    $("#editProfile").click(function () {
+        $(".profileEditSpan").replaceWith(function () {
+            var editId = $(this).attr("id");
+            $input = $("<input/>");
+            $input.attr("id", editId);
+            $input.addClass("profileEditSpan");
+            $input.val(Env.user[editId]);
+            return $input;
+        });
+        $("#editProfile").css("display", "none");
+        $("#saveProfile").css("display", "block");
+        $("#cancelProfile").css("display", "block");
+    });
+
+    $("#cancelProfile").click(function () {
+        resetProfileSpans();
+    });
+
+    $("#saveProfile").click(function () {
+        var saveData = resetProfileSpans();
+        console.log(saveData);
+        var res = sendRestCmd("user.set", {user: saveData}, function (error, data) {
+            if(!error) {
+                $("#shUserNameSpan").text(data.data.name);
+            }
+        });
     });
 }
 </script>
     <style>
-        .profileInfoDiv {
-            width: 400px;
+        .anonymousDiv {
+            width: 500px;
         }
-        #playNowList {
-            height: 300px;
+        .profileInfoDiv {
+            width: 500px;
+        }
+        #profileContent {
+            height: 200px;
+        }
+
+        .userTd {
+            text-align: right;
         }
     </style>
 </head>
@@ -54,10 +100,28 @@ function init() {
 
 <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
+<div class="gameBoxDiv anonymousDiv" style="float:left;">
+    <div class="gameBoxHeaderDiv">Account Status</div>
+    <div class="gameBoxInnerDiv">
+        <p>You are currently using an anonymous account.</p>
+        <p>Your information will not transfer to other devices and may be lost if you clear your cookies.</p>
+        <p>Please register below to avoid these issues.</p>
+        <button id="registerNow" style="float:right">register</button>
+    </div>
+</div>
+
 <div class="profileInfoDiv gameBoxDiv" style="float:left;">
     <div class="gameBoxHeaderDiv">Profile Information</div>
-    <div id="playNowList" class="gameBoxInnerDiv">
-        <button id="setUserInfo" style="float:right">set name</button>
+    <div id="profileContent" class="gameBoxInnerDiv">
+        <table>
+            <tr><td class="userTd">user id:</td><td><span id="uid">{{Env.user.uid}}</span></td></tr>
+            <tr><td class="userTd">email:</td><td><span id="email">{{Env.user.email}}</span></td></tr>
+            <tr><td class="userTd">name:</td><td><span id="name" class="profileEditSpan">{{Env.user.name}}</span></td></tr>
+            <tr><td class="userTd">token:</td><td><span id="token">{{Env.token}}</span></td></tr>
+        </table>
+        <button id="saveProfile" style="float:right">save</button>
+        <button id="editProfile" style="float:right">edit</button>
+        <button id="cancelProfile" style="float:right">cancel</button>
     </div>
 </div>
 <div style="clear:both"></div>

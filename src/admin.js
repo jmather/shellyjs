@@ -39,14 +39,14 @@ app.use(function (req, res, next) {
   // SWD little clunky to deal with express vs restify diffs
   req.params = {};
   req.params.cmd = "admin.page";
-  if (_.isUndefined(req.cookies.ShSession)) {
+  if (_.isUndefined(req.cookies.shSession)) {
     shlog.info("redirect - no session");
     res.redirect("/login/index.html");
     return 0;
   }
-  req.params.session = req.cookies.ShSession;
-  // SWD req.params is reset when routes fire
-  shlog.info("found cookie ShSession: ", req.cookies.ShSession);
+  req.params.session = req.cookies.shSession;
+  // SWD req.params is reset when rutes fire
+  shlog.info("found cookie shSession: ", req.cookies.shSession);
 //  req.params.session = "1:41:xxxx:0";
 
   sh.fillSession(req, res, function (error, data) {
@@ -81,7 +81,7 @@ app.get("/core.html", function (req, res) {
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
   map.user = req.session.user.getData();
-  map.session = req.cookies.ShSession;
+  map.session = req.cookies.shSession;
   modulePack.list(req, res, function (err, data) {
     map.modules = data;
     res.render(path.basename(req.url), {Env: map, EnvJson: JSON.stringify(map),
@@ -97,7 +97,8 @@ app.get("*.html", function (req, res) {
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();
   map.user = req.session.user.getData();
-  map.session = req.cookies.ShSession;
+  map.session = req.cookies.shSession;
+  map.token = req.cookies.shToken;
   res.render(url.parse(req.url).pathname.substring(1), {Env: map, EnvJson: JSON.stringify(map),
     partials: {header: "header", footer: "footer", adminNav: "adminnav", gameNav: "gamenav"}});
 });
