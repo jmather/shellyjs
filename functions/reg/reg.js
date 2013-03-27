@@ -95,7 +95,15 @@ exports.anonymous = function (req, res, cb) {
       var out = {};
       out.uid = tokenMap.uid;
       out.session = session.create(tokenMap.uid);
-      cb(0, sh.event("reg.anonymous", out));
+      // check if uid has upgraded account
+      sh.getUser(tokenMap.uid, function (error, user) {
+        if (user !== null && user.get("email").length) {
+          cb(1, sh.error("user_upgraded", "user had upgraded account and must login"));
+          return;
+        }
+        cb(0, sh.event("reg.anonymous", out));
+        return;
+      });
       return;
     }
     global.db.nextId("user", function (error, value) {
@@ -160,6 +168,7 @@ exports.upgrade = function (req, res, cb) {
   });
 };
 
+// SWD for testing only
 exports.downgrade = function (req, res, cb) {
   gDb.kdelete("kEmailMap", req.session.user.get("email"));
   req.session.user.set("email", "");

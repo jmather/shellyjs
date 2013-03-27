@@ -30,7 +30,7 @@
     }
     .gameListDiv {
         float: left;
-        width: 300px;
+        width: 325px;
     }
     #gameList {
         height: 100px;
@@ -174,7 +174,10 @@ function shellyInit() {
     sendCmd("game.playing");
 
     if (Env.gameId === "0") {
-        Env.gameId = $.cookie("shLastGame" + Env.user.uid);
+        var lastGame = $.cookie("shLastGame" + Env.user.uid);
+        if (typeof (lastGame) === "string") {
+            Env.gameId = lastGame;
+        }
     }
     if (Env.gameId !== "0") {
         sendCmd("game.join", {gameId: Env.gameId})

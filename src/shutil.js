@@ -213,6 +213,13 @@ shutil.extendProfiles = function (profiles, cb) {
   });
 };
 
+shutil.getUser = function (uid, cb) {
+  var user = new ShUser();
+  user.load(uid, function (error, data) {
+    cb(error, user);
+  });
+};
+
 shutil.userEmail = function (uid, email) {
   var name = "player" + uid;
   var parts = email.split("@");
