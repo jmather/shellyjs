@@ -58,6 +58,8 @@ exports.login = function (req, res, cb) {
       var out = {};
       out.email = email;
       out.session = session.create(emailMap.uid);
+      // push email into user object
+      sh.userEmail(emailMap.uid, email);
       cb(0, sh.event("reg.login", out));
       return;
     }

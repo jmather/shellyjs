@@ -212,3 +212,22 @@ shutil.extendProfiles = function (profiles, cb) {
     cb(0, profiles);
   });
 };
+
+shutil.userEmail = function (uid, email) {
+  var name = "player" + uid;
+  var parts = email.split("@");
+  if (_.isString(parts[0])) {
+    name = parts[0];
+  }
+  var user = new ShUser();
+  user.loadOrCreate(uid, function (error, data) {
+    if (!error) {
+      if (user.get("email").length === 0) {
+        user.set("email", email);
+      }
+      if (user.get("name").length === 0) {
+        user.set("name", name);
+      }
+    }
+  });
+}

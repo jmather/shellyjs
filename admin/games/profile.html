@@ -16,7 +16,6 @@
 
     <script language="javascript">
 var Env = {{{EnvJson}}};
-Env.baseParams = {};
 
 function resetProfileSpans() {
     var saveData = {};
@@ -45,6 +44,12 @@ function init() {
     window.addEventListener('load', function () {
         new FastClick(document.body);
     }, false);
+
+    if (typeof (Env.user.email) !== "undefined" && Env.user.email.length > 0) {
+        $(".anonymousDiv").css("display", "none");
+    } else {
+        $("#emailRow").css("display", "none");
+    }
 
     $("#saveProfile").css("display", "none");
     $("#cancelProfile").css("display", "none");
@@ -101,7 +106,7 @@ function init() {
 <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
 <div class="gameBoxDiv anonymousDiv" style="float:left;">
-    <div class="gameBoxHeaderDiv">Account Status</div>
+    <div class="gameBoxHeaderDiv">Anonymous Account</div>
     <div class="gameBoxInnerDiv">
         <p>You are currently using an anonymous account.</p>
         <p>Your information will not transfer to other devices and may be lost if you clear your cookies.</p>
@@ -115,8 +120,10 @@ function init() {
     <div id="profileContent" class="gameBoxInnerDiv">
         <table>
             <tr><td class="userTd">user id:</td><td><span id="uid">{{Env.user.uid}}</span></td></tr>
-            <tr><td class="userTd">email:</td><td><span id="email">{{Env.user.email}}</span></td></tr>
+            <tr id="emailRow"><td class="userTd">email:</td><td><span id="email">{{Env.user.email}}</span></td></tr>
             <tr><td class="userTd">name:</td><td><span id="name" class="profileEditSpan">{{Env.user.name}}</span></td></tr>
+            <tr><td class="userTd">gender:</td><td><span id="gender" class="profileEditSpan">{{Env.user.gender}}</span></td></tr>
+            <tr><td class="userTd">age:</td><td><span id="age" class="profileEditSpan">{{Env.user.age}}</span></td></tr>
             <tr><td class="userTd">token:</td><td><span id="token">{{Env.token}}</span></td></tr>
         </table>
         <button id="saveProfile" style="float:right">save</button>

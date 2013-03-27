@@ -16,7 +16,6 @@
 
     <script language="javascript">
 var Env = {{{EnvJson}}};
-Env.baseParams = {};
 
 function setMatchInfo(matchList) {
     $(".activeMatch").remove();
@@ -122,21 +121,16 @@ function init() {
         sendCmd("match.add", {name: "tictactoe"});
         $("#dialog").dialog();
     });
-    $("#setUserInfo").click(function () {
-        var name = prompt("Please enter a nick name.", "")
-        if (name != null && name != "") {
-            sendCmd("user.set", {user: {name: name}});
-            $("#currentUserName").text(name);
+    $("#liveToggle").click(function () {
+        if ($(this).attr("status") == "on") {
+            $(this).text("go online");
+            $(this).attr("status", "off");
+            sendCmd("live.user", {status: "off"});
+        } else {
+            $(this).text("go offline");
+            $(this).attr("status", "on");
+            sendCmd("live.user", {status: "on"});
         }
-    });
-    $("#liveHide").click(function () {
-        sendCmd("live.user", {status: "off"});
-    });
-    $("#liveShow").click(function () {
-        sendCmd("live.user", {status: "on"});
-    });
-    $("#logoutBtn").click(function () {
-        window.location.href = "/login/logout.html";
     });
 
     ws.connect(Env.socketUrl);
@@ -162,6 +156,9 @@ function init() {
         #messageLog {
             height: 200px;
         }
+        #liveToggle {
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
@@ -175,13 +172,12 @@ function init() {
         <div class="gameBoxHeaderDiv">Play Anyone Now</div>
         <div id="playNowList" class="gameBoxInnerDiv">
             <button id="gameTicTacToe">TicTacToe</button>
-            <button id="liveHide" style="float:right">offline</button>
-            <button id="liveShow" style="float:right">online</button>
-            <button id="setUserInfo" style="float:right">set name</button>
         </div>
     </div>
     <div class="lobbyUsersDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv">Users in Lobby</div>
+        <div class="gameBoxHeaderDiv">Users in Lobby
+            <button id="liveToggle" style="float:right" status="on">go offline</button>
+        </div>
         <div id="userList" class="gameBoxInnerDiv">
             <div id="userTemplate" style="display:none;">
                 <span id="userName">open-game-0</span>

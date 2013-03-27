@@ -10,9 +10,11 @@ var db = global.db;
 function User() {
   this._dirty = false;
   this._data = {
-    uid: 0,
+    uid: "0",
     name: "",
-    currentGames: {}
+    email: "",
+    age: "0",
+    gender: ""
   };
 
   this._uid = 0;
