@@ -16,6 +16,11 @@ exports.desc = "handles user login/logout and new user registration";
 exports.functions = {
   create: {desc: "register a user", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
   anonymous: {desc: "register an anonymous user", params: {token: {dtype: "string"}}, security: []},
+  upgrade: {desc: "upgrade a user id from anonymous to registered", params: {
+    email: {dtype: "string"},
+    password: {dtype: "string"}
+  }, security: []},
+  downgrade: {desc: "testing only - remove email from user object", params: {}, security: []},
   check: {desc: "check if user exists", params: {email: {dtype: "string"}}, security: []},
   login: {desc: "user login", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
   logout: {desc: "user logout", params: {}, security: []}
@@ -110,6 +115,55 @@ exports.anonymous = function (req, res, cb) {
       cb(0, sh.event("reg.anonymous", out));
     });
   });
+};
+
+exports.upgrade = function (req, res, cb) {
+  var email = sanitize(req.params.email).trim();
+  var password = sanitize(req.params.password).trim();
+  try {
+    check(email, "invalid email address").isEmail();
+    check(password, "password too short").len(6);
+  } catch (e) {
+    cb(1, sh.error("params_bad", e.message, {info: e.message}));
+    return;
+  }
+
+  // make sure the email is not already set
+  var userRaw = req.session.user.getData();
+  if (userRaw.email.length > 0) {
+    cb(1, sh.error("email_set", "email is already set for this user", {uid: userRaw.uid, email: userRaw.email}));
+    return;
+  }
+
+  // make sure the email is not in use by someone else
+  var emailMap = {};
+  gDb.kget("kEmailMap", email, function (error, value) {
+    if (value !== null) {
+      emailMap = JSON.parse(value);
+      if (emailMap.uid === userRaw.uid) {
+        // just set it as something must have gone wrong before
+        // SWD - still need to work out user dirty/save
+        req.session.user.set("email", email);
+        cb(0, sh.event("reg.upgrade", userRaw));
+      }
+      cb(1, sh.error("email_in_use", "email is already used by another user", {uid: userRaw.uid, email: email}));
+      return;
+    }
+    // create the email map
+    req.session.user.set("email", email);
+    emailMap.uid = userRaw.uid;
+    emailMap.email = email;
+    emailMap.password = hashPassword(emailMap.uid, password);
+    emailMap.created = new Date().getTime();
+    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+    cb(0, sh.event("reg.upgrade", userRaw));
+  });
+};
+
+exports.downgrade = function (req, res, cb) {
+  gDb.kdelete("kEmailMap", req.session.user.get("email"));
+  req.session.user.set("email", "");
+  cb(0, sh.event("reg.downgrade", {status: "ok"}));
 };
 
 exports.create = function (req, res, cb) {

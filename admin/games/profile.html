@@ -1,4 +1,5 @@
-<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Lobby</title>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
@@ -36,6 +37,21 @@ function resetProfileSpans() {
     return saveData;
 }
 
+function updateProfile(user) {
+    if(typeof (user) === "object") {
+        Env.user = user;
+    }
+
+    if (typeof (Env.user.email) !== "undefined" && Env.user.email.length > 0) {
+        $(".anonymousDiv").css("display", "none");
+        $("#emailRow").css("display", "");
+    } else {
+        $(".anonymousDiv").css("display", "block");
+        $("#emailRow").css("display", "none");
+    }
+    $("#email").text(Env.user.email);
+}
+
 $(init);
 function init() {
     $("#shSystem").text("Example");
@@ -45,11 +61,7 @@ function init() {
         new FastClick(document.body);
     }, false);
 
-    if (typeof (Env.user.email) !== "undefined" && Env.user.email.length > 0) {
-        $(".anonymousDiv").css("display", "none");
-    } else {
-        $("#emailRow").css("display", "none");
-    }
+    updateProfile();
 
     $("#saveProfile").css("display", "none");
     $("#cancelProfile").css("display", "none");
@@ -81,6 +93,29 @@ function init() {
             }
         });
     });
+
+    $("#registerNow").click(function () {
+        hideError();
+
+        var regData = {};
+        regData.email = $("#regEmail").val();
+        regData.password = $("#regPassword").val();
+        if (regData.password !== $("#regPasswordVerify").val()) {
+            showError("passwords do not match");
+            return;
+        }
+        console.log(regData);
+        var res = sendRestCmd("reg.upgrade", regData, function (error, data) {
+            if(!error) {
+                console.log(data);
+                if (data.event === "event.error") {
+                    showError(data.message);
+                } else {
+                    updateProfile(data.data);
+                }
+            }
+        });
+    });
 }
 </script>
     <style>
@@ -106,11 +141,16 @@ function init() {
 <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
 <div class="gameBoxDiv anonymousDiv" style="float:left;">
-    <div class="gameBoxHeaderDiv">Anonymous Account</div>
+    <div class="gameBoxHeaderDiv">Upgrade Account</div>
     <div class="gameBoxInnerDiv">
         <p>You are currently using an anonymous account.</p>
-        <p>Your information will not transfer to other devices and may be lost if you clear your cookies.</p>
-        <p>Please register below to avoid these issues.</p>
+        <p>Your information will not transfer to other devices and may be lost if you reset your browser or device.</p>
+        <p>Please register below to preserve your data and play from any device.</p>
+        <table>
+            <tr><td class="userTd">email:</td></td><td><input type="text" id="regEmail"></input></td></tr>
+            <tr><td class="userTd">password:</td></td><td><input type="text" id="regPassword"></input></td></tr>
+            <tr><td class="userId">verify password:</td></td><td><input type="text" id="regPasswordVerify"></input></td></tr>
+        </table>
         <button id="registerNow" style="float:right">register</button>
     </div>
 </div>

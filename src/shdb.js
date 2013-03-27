@@ -96,6 +96,21 @@ shdb.kset = function (keyType, params, value, cb) {
   });
 };
 
+shdb.kdelete = function (keyType, params, value, cb) {
+  // SWD check keyType undefined
+
+  var key = genKey(keyType, params);
+  shlog.info("kremove: " + gKeyTypes[keyType].tpl + "->" + key);
+  client.del(key, function (err, value) {
+    if (err) {
+      shlog.error("error on remove", err, value);
+    }
+    if (_.isFunction(cb)) {
+      cb(err);
+    }
+  });
+};
+
 shdb.nextId = function (keyType, cb) {
   var key = gDbScope + "idgen:" + keyType;
   shlog.info("shdb.nextId: key = " + key);
