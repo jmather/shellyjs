@@ -36,7 +36,7 @@ function init() {
         return false;
     });
     $('#registerBtn').click(function(e) {
-        doLogin();
+        doRegister();
         e.preventDefault();
         return false;
     });
@@ -111,16 +111,13 @@ button {
                     <td>Password Verify:</td><td><input type="password" id="passVerify" name="passVerify"/></td>
                 </tr>
             </table>
-<!--            <input type="hidden" id="cmd" name="cmd" value=""/>
-			<input type="hidden" id="target" name="target" value="mobile"/>
- -->
             <div class="loginConfig">
                 <button id="loginBtn">Login</button><br/>
                 <button id="anonymousBtn">anonymous</button>
             </div>
             <div class="registerConfig"><button id="registerBtn" class="regiserConfig">Register</button></div>
 
-            <img id="signInLoading" style="display:none" src="/static/jsm/images/ajax-loader.gif" alt="working.." />
+            <div id="signInLoading" style="display: none"><img src="/static/jsm/images/ajax-loader.gif" alt="working.." /></div>
 		</div>
 	</div><!-- /content -->
 	

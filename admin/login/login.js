@@ -24,7 +24,7 @@ function deleteCookie(name) {
 }
 
 function doLogin() {
-  hideshow('signInLoading',true);
+  $("#signInLoading").css("display","block");
   hideAllMessages();
 
   var data = {cmd: "reg.login",
@@ -41,6 +41,7 @@ function doLogin() {
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
+      $("#signInLoading").css("display","none");
       if (res.event === "event.error") {
         error(res.message);
       } else {
@@ -55,7 +56,7 @@ function doLogin() {
 }
 
 function doRegister() {
-  hideshow('signInLoading',true);
+  $("#signInLoading").css("display","block");
   hideAllMessages();
 
   if ($("#pass").val() !== $("#passVerify").val()) {
@@ -77,6 +78,7 @@ function doRegister() {
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
+      $("#signInLoading").css("display","none");
       if (res.event === "event.error") {
         error(res.message);
       } else {
@@ -91,7 +93,7 @@ function doRegister() {
 }
 
 function doAnonymous() {
-  hideshow('signInLoading',true);
+  $("#signInLoading").css("display","block");
   hideAllMessages();
 
   var data = {cmd: "reg.anonymous",
@@ -107,6 +109,7 @@ function doAnonymous() {
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
+      $("#signInLoading").css("display","none");
       if (res.event === "event.error") {
         error(res.message);
       } else {
@@ -127,12 +130,6 @@ function registerMode()
   $(".loginConfig").css("display", "none");
   $(".registerConfig").css("display", "block");
   $(".registerRow").css("display", "");
-//  hideshow("loginTextDiv", true);
-//  hideshow("registerTextDiv", false);
-//  hideshow('anonymousDiv', false);
-//	$("#headerText").text("Shelly Registration");
-//  $("#signInBtn").text("register");
-//  $("#cmd").attr("value", "register");
 }
 
 function loginMode()
@@ -143,37 +140,25 @@ function loginMode()
   $(".loginConfig").css("display", "block");
   $(".registerConfig").css("display", "none");
   $(".registerRow").css("display", "none");
-//  hideshow("loginTextDiv", false);
-//	hideshow("registerTextDiv", true);
-//  hideshow('anonymousDiv', true);
-//	$("#headerText").text("Shelly Login");
-//  $("#signInBtn").text("login");
-//	$("#cmd").attr("value", "login");
 }
 
 function hideAllMessages()
 {
-	hideshow("messageDiv", false);
-	hideshow('signInInfo', false);
-	hideshow('signInError', false);	
-}
-
-function hideshow(el,act)
-{
-	if(act) $('#'+el).css('display','block');
-	else $('#'+el).css('display','none');
+  $("#messageDiv").css("display", "none");
+  $("#signInInfo").css("display", "none");
+	$("#signInError").css("display", "none");
 }
 
 function info(txt)
 {
-	hideshow("messageDiv", true);
-	hideshow("signInInfo", true);
+  $("#messageDiv").css("display", "block");
+  $("#signInInfo").css("display", "block");
 	if(txt) $("#signInInfo").html(txt);
 }
 
 function error(txt)
 {
-	hideshow("messageDiv", true);
-	hideshow("signInError", true);
+  $("#messageDiv").css("display", "block");
+  $("#signInError").css("display", "block");
 	if(txt) $("#signInError").html(txt);
 }
