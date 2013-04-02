@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Shelly Login</title>
+    <meta charset="UTF-8">
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
+
+    <script type="text/javascript" src="login.js"></script>
+
+<script>
+
+var Env = {{{EnvJson}}};
+
+//$("#loginPage").live('pageinit',function() {
+$(init);
+function init() {
+    Env.shToken = $.cookie("shToken");
+    if (typeof (Env.shToken) === "undefined") {
+        debug.info("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
+        Env.shToken = Env.nextUuid;
+        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
+    }
+    debug.info("main", "info", "shToken using: " + Env.shToken);
+
+    $(".shHeaderDiv .userInfo").css("display", "none");
+	loginMode();
+
+    $('#loginBtn').click(function(e) {
+        doLogin();
+        e.preventDefault();
+        return false;
+    });
+    $('#registerBtn').click(function(e) {
+        doRegister();
+        e.preventDefault();
+        return false;
+    });
+    $('#anonymousBtn').click(function(e) {
+        doAnonymous();
+        e.preventDefault();
+        return false;
+    });
+    $('#newAnonymousBtn').click(function(e) {
+        setToken(Env.nextUuid);
+        doAnonymous();
+        e.preventDefault();
+        return false;
+    });
+}
+
+</script>
+
+<style>
+
+button {
+    width: 130px;
+}
+/*
+#messageDiv {
+    margin: 0 auto;
+    padding: 0 15px;
+    display: none;
+    width: 300px;
+}
+*/
+.info, .success, .warning, .error, .validation {
+    border: 1px solid;
+    padding:15px 10px 15px 50px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    display: none;
+    margin: 10px auto;
+    width: 400px;
+}
+.info {
+    color: #00529B;
+    background-color: #BDE5F8;
+    background-image: url('/static/images/toolbar/info.png');
+}
+.success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    background-image:url('/static/images/toolbar/success.png');
+}
+.warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+    background-image: url('/static/images/toolbar/warning.png');
+}
+.error {
+    color: #D8000C;
+    background-color: #FFBABA;
+    background-image: url('/static/images/toolbar/error.png');
+}
+</style>
+
+</head>
+<body>
+{{> header }}
+
+<div id="loginPage">
+
+	<div style="text-align:center; font-size: 20px; margin: 30px 0px 30px 0px">
+		<div class="loginConfig">New user? <a href="javascript:registerMode();">click to register</a>.</div>
+		<div class="registerConfig">Existing user? <a href="javascript:loginMode();">click to login</a>.</div>
+	</div>
+	
+	<div id="messageDiv">
+		<div id="signInInfo" class="info">Info message</div>
+		<div id="signInError" class="error">Error message</div>
+	</div>
+
+    <div id="upgradeDiv" class="info">
+        <div>
+        The anonymous account on this machine has been upgraded.  Please login or create a
+        new anonymous account.
+        </div>
+        <div style="text-align: center; margin-top: 10px; position: relative; left: -20px">
+            <button id="newAnonymousBtn">New Anonymous</button>
+        </div>
+    </div>
+	
+	<div class="gameBoxDiv" style="width: 300px; align: center; margin: 0 auto;">
+        <div class="gameBoxHeaderDiv" style="">Login</div>
+		<div id="signInForm" class="gameBoxInnerDiv" style="text-align: center">
+            <table>
+                <tr><td>User:</td><td><input type="email" id="email" name="email"/></td></tr>
+                <tr><td>Password:</td><td><input type="password" id="pass" name="email"/></td></tr>
+                <tr class="registerRow">
+                    <td>Password Verify:</td><td><input type="password" id="passVerify" name="passVerify"/></td>
+                </tr>
+            </table>
+            <div class="loginConfig">
+                <button id="loginBtn">Login</button><br/>
+                <button id="anonymousBtn">Anonymous</button>
+            </div>
+            <div class="registerConfig"><button id="registerBtn" class="regiserConfig">Register</button></div>
+
+            <div id="signInLoading" style="display: none"><img src="/static/jsm/images/ajax-loader.gif" alt="working.." /></div>
+		</div>
+	</div><!-- /content -->
+	
+<div class="success">Successful operation message</div>
+<div class="warning">Warning message</div>
+
+</div>
+
+{{> footer }}
+</body>
+</html>

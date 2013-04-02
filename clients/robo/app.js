@@ -2,7 +2,7 @@ var _ = require("lodash");
 var WebSocket = require('ws');
 
 
-var ws = new WebSocket('ws://localhost:5102');
+var ws = new WebSocket('ws://localhost:5110');
 var gWaitInt = 0;
 
 var gMoveSet = [

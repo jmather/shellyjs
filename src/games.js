@@ -9,22 +9,19 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var adminBase = global.gBaseDir + "/admin";
-var adminStatic = adminBase + "/static";
-var adminLogin = adminBase + "/login";
+var gamesBase = global.gBaseDir + "/www/games";
+var gamesStatic = gamesBase + "/static";
+var gamesLogin = gamesBase + "/login";
 
-shlog.info("admin directory: " + adminBase);
+shlog.info("games directory: " + gamesBase);
 
 var app = express();
-//app.use(express.basicAuth(function(user, pass){
-//  return "scott" == user & "foo" == pass;
-//}));
-app.use(express.favicon(adminStatic + "/images/favicon.ico"));
+app.use(express.favicon(gamesStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
-app.set("views", adminBase);
+app.set("views", gamesBase);
 app.engine("html", engines.hogan);
 
-app.use("/static", express.static(adminStatic));  // must be here so static files don't go through session check
+app.use("/static", express.static(gamesStatic));  // must be here so static files don't go through session check
 
 app.use(express.cookieParser());
 app.use(function (req, res, next) {
@@ -36,7 +33,7 @@ app.use(function (req, res, next) {
 
   // SWD little clunky to deal with express vs restify diffs
   req.params = {};
-  req.params.cmd = "admin.page";
+  req.params.cmd = "games.page";
   if (_.isUndefined(req.cookies.shSession)) {
     shlog.info("redirect - no session");
     res.redirect("/login/index.html");
@@ -85,29 +82,14 @@ function createEnv(req) {
   return map;
 }
 
-app.get("/core.html", function (req, res) {
-  shlog.info("%s %s", req.method, req.url);
-  var env = createEnv(req);
-
-  var cmdFile = global.gBaseDir + "/functions/module/module.js";
-  delete require.cache[require.resolve(cmdFile)];
-  var modulePack = require(cmdFile);
-  modulePack.list(req, res, function (err, data) {
-    env.modules = data;
-    res.render(path.basename(req.url), {Env: env, EnvJson: JSON.stringify(env),
-      partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
-  });
-});
-
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var env = createEnv(req);
-
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
+    partials: {header: "header", footer: "footer", gameNav: "gamenav"}});
 });
 
-app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
+app.use("/login", express.static(gamesLogin));  // catch all for logout.html and script.js
 
-var adminServer = app.listen(global.CONF.adminPort);
-shlog.info("admin server listening: %d", adminServer.address().port);
+var gameServer = app.listen(global.CONF.gamesPort);
+shlog.info("game server listening: %d", gameServer.address().port);

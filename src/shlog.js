@@ -8,6 +8,7 @@ var shlog = exports;
 
 var gDebug = {
   "admin": {},
+  "games": {},
   "live": {},
 //  "shutil": {},
 //  "socket": {},

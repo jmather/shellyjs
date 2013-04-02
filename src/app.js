@@ -22,7 +22,9 @@ shlog.info(global.CONF);
 global.db = require(global.gBaseDir + "/src/shdb.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var session = require(global.gBaseDir + "/src/session.js");
+
 var admin = require(global.gBaseDir + "/src/admin.js");
+var games = require(global.gBaseDir + "/src/games.js");
 global.socket = require(global.gBaseDir + "/src/socket.js");
 global.socket.start();
 
