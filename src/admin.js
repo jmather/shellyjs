@@ -64,10 +64,11 @@ app.use(function (req, res, next) {
 app.get("/login/*.html", function (req, res) {
   shlog.info("in login", req.url);
   var map = {};
+  map.version = global.PACKAGE.version;
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();
-  res.render(req.url.substring(1), {params: JSON.stringify(map),
+  res.render(req.url.substring(1), {Env: map, EnvJson: JSON.stringify(map),
     partials: {header: "header", footer: "footer"}});
 
   return 0;
