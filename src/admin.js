@@ -65,6 +65,7 @@ app.get("/login/*.html", function (req, res) {
   shlog.info("in login", req.url);
   var map = {};
   map.version = global.PACKAGE.version;
+  map.token = req.cookies.shToken;
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();

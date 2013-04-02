@@ -45,6 +45,12 @@ function init() {
         e.preventDefault();
         return false;
     });
+    $('#newAnonymousBtn').click(function(e) {
+        setToken(Env.nextUuid);
+        doAnonymous();
+        e.preventDefault();
+        return false;
+    });
 }
 
 </script>
@@ -52,15 +58,24 @@ function init() {
 <style>
 
 button {
-    width: 100px;
+    width: 130px;
 }
-.info, .success, .warning, .error, .validation .loading {
+/*
+#messageDiv {
+    margin: 0 auto;
+    padding: 0 15px;
+    display: none;
+    width: 300px;
+}
+*/
+.info, .success, .warning, .error, .validation {
     border: 1px solid;
-    margin: 10px 0px;
     padding:15px 10px 15px 50px;
     background-repeat: no-repeat;
     background-position: 10px center;
-		display: none;
+    display: none;
+    margin: 10px auto;
+    width: 400px;
 }
 .info {
     color: #00529B;
@@ -90,16 +105,25 @@ button {
 
 <div id="loginPage">
 
-
 	<div style="text-align:center; font-size: 20px; margin: 30px 0px 30px 0px">
 		<div class="loginConfig">New user? <a href="javascript:registerMode();">click to register</a>.</div>
 		<div class="registerConfig">Existing user? <a href="javascript:loginMode();">click to login</a>.</div>
 	</div>
 	
-	<div id="messageDiv" style="display:none; padding:0 15px;">
+	<div id="messageDiv">
 		<div id="signInInfo" class="info">Info message</div>
 		<div id="signInError" class="error">Error message</div>
 	</div>
+
+    <div id="upgradeDiv" class="info">
+        <div>
+        The anonymous account on this machine has been upgraded.  Please login or create a
+        new anonymous account.
+        </div>
+        <div style="text-align: center; margin-top: 10px; position: relative; left: -20px">
+            <button id="newAnonymousBtn">New Anonymous</button>
+        </div>
+    </div>
 	
 	<div class="gameBoxDiv" style="width: 300px; align: center; margin: 0 auto;">
         <div class="gameBoxHeaderDiv" style="">Login</div>
@@ -113,7 +137,7 @@ button {
             </table>
             <div class="loginConfig">
                 <button id="loginBtn">Login</button><br/>
-                <button id="anonymousBtn">anonymous</button>
+                <button id="anonymousBtn">Anonymous</button>
             </div>
             <div class="registerConfig"><button id="registerBtn" class="regiserConfig">Register</button></div>
 

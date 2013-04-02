@@ -23,22 +23,13 @@ function deleteCookie(name) {
     setCookie(name,"",-1);
 }
 
-function setToken(token) {
-  Env.shToken = token;
-  debug.info("reseting shToken", Env.shToken);
-  $.cookie("shToken", Env.shToken, { expires: 3650, path: '/' });
-}
-
 function doLogin() {
-  hideAllMessages();
-
   var data = {cmd: "reg.login",
     email: $("#email").val(),
     password: $("#pass").val()
   }
   console.log(data);
 
-  $("#signInLoading").css("display","block");
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -46,7 +37,6 @@ function doLogin() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      $("#signInLoading").css("display","none");
       debug.info(res);
       if (res.event === "event.error") {
         error(res.message);
@@ -62,8 +52,6 @@ function doLogin() {
 }
 
 function doRegister() {
-  hideAllMessages();
-
   if ($("#pass").val() !== $("#passVerify").val()) {
     error("password do not match");
     return;
@@ -73,8 +61,8 @@ function doRegister() {
     email: $("#email").val(),
     password: $("#pass").val()
   }
+  console.log(data);
 
-  $("#signInLoading").css("display","block");
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -82,7 +70,6 @@ function doRegister() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      $("#signInLoading").css("display","none");
       debug.info(res);
       if (res.event === "event.error") {
         error(res.message);
@@ -98,14 +85,11 @@ function doRegister() {
 }
 
 function doAnonymous() {
-  hideAllMessages();
-
   var data = {cmd: "reg.anonymous",
     token: Env.shToken
   }
   console.log(data);
 
-  $("#signInLoading").css("display","block");
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -113,14 +97,9 @@ function doAnonymous() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      $("#signInLoading").css("display","none");
       debug.info(res);
       if (res.event === "event.error") {
-        if (res.code === "user_upgraded") {
-          $("#upgradeDiv").css("display", "block");
-        } else {
-          error(res.message);
-        }
+        error(res.message);
       } else {
         $.cookie("shSession", res.data.session, {path: '/', expires: 365});
         window.location.href = "/index.html";
@@ -132,44 +111,67 @@ function doAnonymous() {
   })
 }
 
+function signIn()
+{
+	hideshow('signInLoading',true);
+	hideAllMessages();
+
+  debug.info("signIn: " + $("#cmd").attr("value"));
+  if ($("#cmd").attr("value") === "login") {
+    doLogin();
+  } else {
+    doRegister();
+  }
+
+}
+
 function registerMode()
 {
-  $("#shSubTitle").text("Register");
 	hideAllMessages();
-  $(".loginConfig").css("display", "none");
-  $(".registerConfig").css("display", "block");
-  $(".registerRow").css("display", "");
+	hideshow("loginTextDiv", true);
+	hideshow("registerTextDiv", false);
+	hideshow("registerConfig", true);
+  hideshow('anonymousDiv', false);
+	$("#headerText").text("Shelly Registration");
+  $("#signInBtn").text("register").button("refresh");
+  $("#cmd").attr("value", "register");
 }
 
 function loginMode()
 {
-  $("#shSubTitle").text("Login");
-
 	hideAllMessages();
-  $(".loginConfig").css("display", "block");
-  $(".registerConfig").css("display", "none");
-  $(".registerRow").css("display", "none");
+	hideshow("loginTextDiv", false);
+	hideshow("registerTextDiv", true);
+	hideshow("registerConfig", false);
+  hideshow('anonymousDiv', true);
+	$("#headerText").text("Shelly Login");
+  $("#signInBtn").text("login").button("refresh");
+	$("#cmd").attr("value", "login");
 }
 
 function hideAllMessages()
 {
-  $("#messageDiv").css("display", "none");
-  $("#signInInfo").css("display", "none");
-	$("#signInError").css("display", "none");
-  $("#upgradeDiv").css("display", "none");
-  $("#signInLoading").css("display","none");
+	hideshow("messageDiv", false);
+	hideshow('signInInfo', false);
+	hideshow('signInError', false);	
+}
+
+function hideshow(el,act)
+{
+	if(act) $('#'+el).css('display','block');
+	else $('#'+el).css('display','none');
 }
 
 function info(txt)
 {
-  $("#messageDiv").css("display", "block");
-  $("#signInInfo").css("display", "block");
+	hideshow("messageDiv", true);
+	hideshow("signInInfo", true);
 	if(txt) $("#signInInfo").html(txt);
 }
 
 function error(txt)
 {
-  $("#messageDiv").css("display", "block");
-  $("#signInError").css("display", "block");
+	hideshow("messageDiv", true);
+	hideshow("signInError", true);
 	if(txt) $("#signInError").html(txt);
 }
