@@ -56,7 +56,6 @@ button {
 p.stb { text-indent: 0; margin-top: 0.83em }
 p.mtb { text-indent: 0; margin-top: 2.17em }
 p.ltb { text-indent: 0; margin-top: 3.08em }
-</style>
 
 
 /**************** admin header */
@@ -116,4 +115,22 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
     bottom: 0;
     font-size: 12px;
     z-index: 10;
+}
+
+/**************** box layouts */
+.gameBoxDiv {
+    margin-top: 7px;
+    margin-right: 5px;
+}
+.gameBoxHeaderDiv {
+    background-color: hsla(357, 100.0000%, 27.0588%, .7);
+    border: 1px solid hsla(357, 100.0000%, 27.0588%, .3);
+    width: 100%;
+}
+.gameBoxInnerDiv {
+    background-color: #ffffff;
+    border: 1px solid hsla(357, 100.0000%, 27.0588%, .3);
+    width: 100%;
+    overflow:auto;
+    font-size: 14px;
 }
