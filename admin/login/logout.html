@@ -8,44 +8,36 @@ skLogout();
 <html>
 	<head>
 	<title>Skool51 Login</title>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="/static/jsm/jquery.mobile-1.1.1.min.css" />
-	<script src="/static/jsm/jquery-1.7.1.min.js"></script>
-	<script src="/static/jsm/jquery.mobile-1.1.1.min.js"></script>
-    <script src="/static/js/jquery.cookie.js"></script>
+    <meta charset="UTF-8">
 
-        <script src="/static/js/ba-debug.js"></script>
-	
-	<script type="text/javascript" src="login.js"></script>
-		
+    <script src="/static/js/jquery-1.7.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <script src="/static/js/ba-debug.js"></script>
+    <script type="text/javascript" src="login.js"></script>
+
 <script>
 
+$(init);
+function init() {
+    $(".shHeaderDiv .userInfo").css("display", "none");
+    $("#shSubTitle").text("Logout");
+
     $.removeCookie("ShSession", {path: '/', expires: 365});
+}
 
 </script>
 
 </head>
 <body>
+{{> header }}
 
-
-<div data-role="page" id="loginPage">
-
-	<div data-role="header">
-		<h1>Shelly Logout</h1>
-	</div><!-- /header -->
-
-	<div data-role="content">
+    <div>
 		<div style="text-align:center">You are now logged out of Shelly.</div>
 		<div style="text-align:center"><a href="/login/index.html" rel="external">Click here to log back in.</a></div>
-	</div><!-- /content -->
-	
-	<div id="signInError" style="visibility: hidden">
-		&nbsp;
 	</div>
-
-</div><!-- /page -->
-
 
 </body>
 </html>

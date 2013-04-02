@@ -67,7 +67,9 @@ app.get("/login/*.html", function (req, res) {
   map.restUrl = global.CONF.restUrl;
   map.socketUrl = global.CONF.socketUrl;
   map.nextUuid = sh.uuid();
-  res.render(req.url.substring(1), {params: JSON.stringify(map)});
+  res.render(req.url.substring(1), {params: JSON.stringify(map),
+    partials: {header: "header", footer: "footer"}});
+
   return 0;
 });
 
@@ -103,6 +105,7 @@ app.get("*.html", function (req, res) {
     partials: {header: "header", footer: "footer", adminNav: "adminnav", gameNav: "gamenav"}});
 });
 
+app.use("/login1", express.static(adminLogin + "1"));  // catch all for logout.html and script.js
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 app.use("/games", express.static(adminGames));  // catch all for any other game files
 

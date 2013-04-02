@@ -24,6 +24,9 @@ function deleteCookie(name) {
 }
 
 function doLogin() {
+  hideshow('signInLoading',true);
+  hideAllMessages();
+
   var data = {cmd: "reg.login",
     email: $("#email").val(),
     password: $("#pass").val()
@@ -52,6 +55,9 @@ function doLogin() {
 }
 
 function doRegister() {
+  hideshow('signInLoading',true);
+  hideAllMessages();
+
   if ($("#pass").val() !== $("#passVerify").val()) {
     error("password do not match");
     return;
@@ -85,6 +91,9 @@ function doRegister() {
 }
 
 function doAnonymous() {
+  hideshow('signInLoading',true);
+  hideAllMessages();
+
   var data = {cmd: "reg.anonymous",
     token: Env.shToken
   }
@@ -111,42 +120,35 @@ function doAnonymous() {
   })
 }
 
-function signIn()
-{
-	hideshow('signInLoading',true);
-	hideAllMessages();
-
-  debug.info("signIn: " + $("#cmd").attr("value"));
-  if ($("#cmd").attr("value") === "login") {
-    doLogin();
-  } else {
-    doRegister();
-  }
-
-}
-
 function registerMode()
 {
+  $("#shSubTitle").text("Register");
 	hideAllMessages();
-	hideshow("loginTextDiv", true);
-	hideshow("registerTextDiv", false);
-	hideshow("registerConfig", true);
-  hideshow('anonymousDiv', false);
-	$("#headerText").text("Shelly Registration");
-  $("#signInBtn").text("register").button("refresh");
-  $("#cmd").attr("value", "register");
+  $(".loginConfig").css("display", "none");
+  $(".registerConfig").css("display", "block");
+  $(".registerRow").css("display", "");
+//  hideshow("loginTextDiv", true);
+//  hideshow("registerTextDiv", false);
+//  hideshow('anonymousDiv', false);
+//	$("#headerText").text("Shelly Registration");
+//  $("#signInBtn").text("register");
+//  $("#cmd").attr("value", "register");
 }
 
 function loginMode()
 {
+  $("#shSubTitle").text("Login");
+
 	hideAllMessages();
-	hideshow("loginTextDiv", false);
-	hideshow("registerTextDiv", true);
-	hideshow("registerConfig", false);
-  hideshow('anonymousDiv', true);
-	$("#headerText").text("Shelly Login");
-  $("#signInBtn").text("login").button("refresh");
-	$("#cmd").attr("value", "login");
+  $(".loginConfig").css("display", "block");
+  $(".registerConfig").css("display", "none");
+  $(".registerRow").css("display", "none");
+//  hideshow("loginTextDiv", false);
+//	hideshow("registerTextDiv", true);
+//  hideshow('anonymousDiv', true);
+//	$("#headerText").text("Shelly Login");
+//  $("#signInBtn").text("login");
+//	$("#cmd").attr("value", "login");
 }
 
 function hideAllMessages()
