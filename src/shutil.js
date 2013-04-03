@@ -110,6 +110,9 @@ shutil.call = function (req, res, cb) {
   // validate params
   this.paramsOk = true;
   _.each(module.functions[funcName].params, function (value, key) {
+    if (!_.isUndefined(value.optional) || value.optional === true) {
+      return;
+    }
     if (_.isUndefined(req.params[key])) {
       this.paramsOk = false;
       cb(1, shutil.error("param_required", "missing required parameter", {key: key}));
@@ -216,25 +219,21 @@ shutil.extendProfiles = function (profiles, cb) {
 shutil.getUser = function (uid, cb) {
   var user = new ShUser();
   user.load(uid, function (error, data) {
+    if (error) {
+      cb(error, data);
+      return;
+    }
     cb(error, user);
   });
 };
 
-shutil.userEmail = function (uid, email) {
-  var name = "player" + uid;
-  var parts = email.split("@");
-  if (_.isString(parts[0])) {
-    name = parts[0];
-  }
+shutil.getOrCreateUser = function (uid, cb) {
   var user = new ShUser();
   user.loadOrCreate(uid, function (error, data) {
-    if (!error) {
-      if (user.get("email").length === 0) {
-        user.set("email", email);
-      }
-      if (user.get("name").length === 0) {
-        user.set("name", name);
-      }
+    if (error) {
+      cb(error, data);
+      return;
     }
+    cb(error, user);
   });
-}
+};

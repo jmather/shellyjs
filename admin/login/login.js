@@ -10,7 +10,8 @@ function doLogin() {
 
   var data = {cmd: "reg.login",
     email: $("#email").val(),
-    password: $("#pass").val()
+    password: $("#pass").val(),
+    role: "admin"
   }
   console.log(data);
 

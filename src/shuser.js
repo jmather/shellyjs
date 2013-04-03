@@ -14,7 +14,8 @@ function User() {
     name: "",
     email: "",
     age: "0",
-    gender: ""
+    gender: "",
+    roles: []
   };
 
   this._uid = 0;
@@ -28,6 +29,11 @@ util.inherits(User, events.EventEmitter);
 module.exports = User;
 
 User.prototype.load = function (uid, cb) {
+  if (!_.isString(uid)) {
+    cb(1, sh.error("bad_uid", "user load uid is not a string", {uid: uid}));
+    return;
+  }
+
   this._uid = uid;
 
   var self = this;
@@ -38,17 +44,25 @@ User.prototype.load = function (uid, cb) {
     }
     try {
       var savedData = JSON.parse(value);
-      self._data.uid = uid;
       self._data = _.merge(self._data, savedData);
+      self._data.uid = uid;
+      if (self._data.name.length === 0) {
+        self._data.name = "player" + uid;
+      }
     } catch (e) {
       cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
       return;
     }
-    cb(0);
+    cb(0); // object is valid
   });
 };
 
 User.prototype.loadOrCreate = function (uid, cb) {
+  if (!_.isString(uid)) {
+    cb(1, sh.error("bad_uid", "user load uid is not a string", {uid: uid}));
+    return;
+  }
+
   var self = this;
   this.load(uid, function (error, value) {
     if (error) {
@@ -57,7 +71,7 @@ User.prototype.loadOrCreate = function (uid, cb) {
       // try and create on since we are passed session check
       self.save(cb);
     } else {
-      cb(0);
+      cb(0);  // object is valid
     }
   });
 };

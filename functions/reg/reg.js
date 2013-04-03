@@ -1,5 +1,6 @@
 var util = require("util");
 var crypto = require("crypto");
+var _ = require("lodash");
 var check = require("validator").check;
 var sanitize = require("validator").sanitize;
 
@@ -22,7 +23,11 @@ exports.functions = {
   }, security: []},
   downgrade: {desc: "testing only - remove email from user object", params: {}, security: []},
   check: {desc: "check if user exists", params: {email: {dtype: "string"}}, security: []},
-  login: {desc: "user login", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
+  login: {desc: "user login", params: {
+    email: {dtype: "string"},
+    password: {dtype: "string"},
+    role: {dtype: "string", optional: true}
+  }, security: []},
   logout: {desc: "user logout", params: {}, security: []}
 };
 
@@ -48,6 +53,7 @@ exports.login = function (req, res, cb) {
     cb(1, sh.error("bad_email", "email is not correct format"));
     return;
   }
+  var role = sanitize(req.params.role).trim();
 
   gDb.kget("kEmailMap", email, function (error, value) {
     if (value === null) {
@@ -58,17 +64,32 @@ exports.login = function (req, res, cb) {
     emailMap.uid = emailMap.uid.toString();  // SWD some old data that has numbers
 
     // check password
-    if (checkPassword(emailMap.uid, password, emailMap.password)) {
+    if (!checkPassword(emailMap.uid, password, emailMap.password)) {
+      cb(1, sh.error("password_bad", "incorrect password", {email: email}));
+      return;
+    }
+
+    sh.getOrCreateUser(emailMap.uid, function (error, user) {
+      if (error) {
+        cb(error, user);
+        return;
+      }
+      if (role.length && !_.contains(user.get("roles"), role)) {
+        cb(1, sh.error("no_role", "user does not have this role: '" + role + "'", {role: role, roles: user.get("roles")}));
+        return;
+      }
+
+      // push the email into the user object
+      if (user.get("email").length === 0) {
+        user.set("email", email);
+      }
+
       shlog.info("login success:", email);
       var out = {};
       out.email = email;
       out.session = session.create(emailMap.uid);
-      // push email into user object
-      sh.userEmail(emailMap.uid, email);
       cb(0, sh.event("reg.login", out));
-      return;
-    }
-    cb(1, sh.error("password_bad", "incorrect password", {email: email}));
+    });
   });
 };
 
