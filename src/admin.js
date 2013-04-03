@@ -56,8 +56,8 @@ app.use(function (req, res, next) {
     // double check the role
     if (!_.contains(req.session.user.get("roles"), "admin")) {
       shlog.info("redirect - user does not have admin role", req.session.user.get("roles"));
-//      res.redirect("/login/index.html");
-//      return 0;
+      res.redirect("/login/index.html");
+      return 0;
     }
     return next();
   });
