@@ -18,9 +18,9 @@ object.functions = {
 
 object.pre = function (req, res, cb) {
   shlog.info("object.pre");
-  var cmd = req.params.cmd;
-  var className = req.params.className;
-  var oid = req.params.oid;
+  var cmd = req.body.cmd;
+  var className = req.body.className;
+  var oid = req.body.oid;
 
   if (cmd === "object.create") {
     cb(0);
@@ -74,7 +74,7 @@ object.post = function (req, res, cb) {
 
 object.create = function (req, res, cb) {
   shlog.info("object.create");
-  var className = req.params.className;
+  var className = req.body.className;
 
   var object = {};
   db.nextId("object-" + className, function (error, value) {
@@ -87,7 +87,7 @@ object.create = function (req, res, cb) {
       lastModified: ts,
       hash: ""
     };
-    object = _.merge(object, req.params.object);
+    object = _.merge(object, req.body.object);
 
     req.env.object = object;
     cb(0, object);
@@ -105,7 +105,7 @@ object.get = function (req, res, cb) {
 
 object.set = function (req, res, cb) {
   var object = req.env.object;
-  var newObject = req.params.object;
+  var newObject = req.body.object;
 
   if (!_.isUndefined(newObject._info)) {
     delete newObject._info; // never merge the info block;

@@ -19,6 +19,7 @@ function doLogin() {
     type: "POST",
     url: Env.restUrl,
     async: false,
+    contentType: "application/json",
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
@@ -55,6 +56,7 @@ function doRegister() {
     type: "POST",
     url: Env.restUrl,
     async: false,
+    contentType: "application/json",
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
@@ -86,6 +88,7 @@ function doAnonymous() {
     type: "POST",
     url: Env.restUrl,
     async: false,
+    contentType: "application/json",
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {

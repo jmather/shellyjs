@@ -44,8 +44,8 @@ function checkPassword(uid, password, hash) {
 exports.login = function (req, res, cb) {
   var out = {};
 
-  var email = sanitize(req.params.email).trim();
-  var password = sanitize(req.params.password).trim();
+  var email = sanitize(req.body.email).trim();
+  var password = sanitize(req.body.password).trim();
   shlog.info("login attempt:", email);
   try {
     check(email, 102).isEmail();
@@ -53,7 +53,7 @@ exports.login = function (req, res, cb) {
     cb(1, sh.error("bad_email", "email is not correct format"));
     return;
   }
-  var role = sanitize(req.params.role).trim();
+  var role = sanitize(req.body.role).trim();
 
   gDb.kget("kEmailMap", email, function (error, value) {
     if (value === null) {
@@ -101,7 +101,7 @@ exports.anonymous = function (req, res, cb) {
 
   //SWD check reg signature
 
-  var token = sanitize(req.params.token).trim();
+  var token = sanitize(req.body.token).trim();
   try {
     check(token, "token not long enough").len(6);
   } catch (e) {
@@ -147,8 +147,8 @@ exports.anonymous = function (req, res, cb) {
 };
 
 exports.upgrade = function (req, res, cb) {
-  var email = sanitize(req.params.email).trim();
-  var password = sanitize(req.params.password).trim();
+  var email = sanitize(req.body.email).trim();
+  var password = sanitize(req.body.password).trim();
   try {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
@@ -197,8 +197,8 @@ exports.downgrade = function (req, res, cb) {
 };
 
 exports.create = function (req, res, cb) {
-  var email = sanitize(req.params.email).trim();
-  var password = sanitize(req.params.password).trim();
+  var email = sanitize(req.body.email).trim();
+  var password = sanitize(req.body.password).trim();
   try {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
@@ -233,7 +233,7 @@ exports.create = function (req, res, cb) {
 };
 
 exports.check = function (req, res, cb) {
-  var email = sanitize(req.params.email).trim();
+  var email = sanitize(req.body.email).trim();
   try {
     check(email, 102).isEmail();
   } catch (e) {

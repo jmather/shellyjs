@@ -88,7 +88,7 @@ function checkWin(gb) {
 
 tictactoe.turn = function (req, cb) {
   var uid = req.session.uid;
-  var move = req.params.move;
+  var move = req.body.move;
   var game = req.env.game;
   var state = req.env.game.get("state");
   var gameBoard = state.gameBoard;

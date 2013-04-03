@@ -44,7 +44,7 @@ user.get = function (req, res, cb) {
 };
 
 user.set = function (req, res, cb) {
-  var newUser = req.params.user;
+  var newUser = req.body.user;
 
   req.session.user.setData(newUser);
 
@@ -52,7 +52,7 @@ user.set = function (req, res, cb) {
 };
 
 user.profiles = function (req, res, cb) {
-  var userIds = req.params.users;
+  var userIds = req.body.users;
   sh.fillProfiles(userIds, function (error, data) {
     if (!error) {
       cb(0, sh.event("event.user.profiles", data));

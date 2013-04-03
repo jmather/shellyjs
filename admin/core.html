@@ -159,6 +159,7 @@
                     type: "POST",
                     url: Env.restUrl,
                     async: false,
+                    contentType: "application/json",
                     dataType: "json",
                     data: JSON.stringify(input),
                     success: function (data, status) {

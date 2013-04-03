@@ -70,8 +70,8 @@ Socket.start = function () {
         socketNotify: socketNotify
       };
 
-      // fill in req.params
-      req.params = JSON.parse(message);
+      // fill in req.body
+      req.body = JSON.parse(message);
 
       // fill in req.session
       sh.fillSession(req, res, function (error, data) {
@@ -100,7 +100,7 @@ Socket.start = function () {
             shlog.error(error, data);
           }
           if (data !== null && !_.isUndefined(data)) {
-            data.cb = req.params.cb;
+            data.cb = req.body.cb;
             sh.sendWs(ws, error, data);
           }
         });  // end sh.call

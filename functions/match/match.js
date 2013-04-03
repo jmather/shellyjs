@@ -28,7 +28,7 @@ if (_.isUndefined(global.matchInfo)) {
 
 match.add = function (req, res, cb) {
   var uid = req.session.uid;
-  var name = req.params.name;
+  var name = req.body.name;
 
   if (_.isUndefined(global.matchq[name])) {
     cb(1, sh.error("bad_game", "unknown game", {name: name}));
@@ -41,9 +41,9 @@ match.add = function (req, res, cb) {
 
   var keys = Object.keys(global.matchq[name]);
   if (keys.length + 1 >= global.matchInfo[name].maxPlayers) {
-    req.params.cmd = "game.create";     // change the command, req.param.name is already set
-    req.params.players = keys.slice(0, global.matchInfo[name].maxPlayers);
-    req.params.players.push(uid); // add the current user
+    req.body.cmd = "game.create";     // change the command, req.param.name is already set
+    req.body.players = keys.slice(0, global.matchInfo[name].maxPlayers);
+    req.body.players.push(uid); // add the current user
 
     global.matchInfo[name].lastCreated = new Date().getTime();
     global.matchInfo[name].created += 1;
@@ -56,11 +56,11 @@ match.add = function (req, res, cb) {
 
       var matchInfo = {};
       matchInfo.gameId = data.data.gameId;
-      _.each(req.params.players, function (playerId) {
+      _.each(req.body.players, function (playerId) {
         delete global.matchq[name][playerId];
         matchInfo[playerId] = {};
       });
-      _.each(req.params.players, function (playerId) {
+      _.each(req.body.players, function (playerId) {
         global.socket.notifyUser(playerId, sh.event("event.match.made", matchInfo));
       });
 
@@ -78,7 +78,7 @@ match.add = function (req, res, cb) {
 
 match.remove = function (req, res, cb) {
   var uid = req.session.uid;
-  var name = req.params.name;
+  var name = req.body.name;
 
   delete global.matchq[name][uid];
   cb(0, sh.event("event.match.remove"));

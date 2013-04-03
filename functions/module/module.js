@@ -41,8 +41,8 @@ function getInfo(name) {
 }
 
 exports.info = function (req, res, cb) {
-  shlog.info("module.info name=" + req.params.name);
-  var m = getInfo(req.params.name);
+  shlog.info("module.info name=" + req.body.name);
+  var m = getInfo(req.body.name);
   cb(m.error, m);
 };
 

@@ -188,13 +188,14 @@
                     ({
                         type: "POST",
                         url: Env.restUrl,
-                        dataType: 'json',
+                        contentType: "application/json",
+                        dataType: "json",
                         async: false,
                         data: input,
                         success: function (res, status) {
                             log(res);
                             setState(res);
-                            if(typeof(res.data.gameId) != 'undefined')
+                            if(typeof(res.data.gameId) != "undefined")
                             {
                                 setDefaultParam($("#user1Defaults"), "gameId", res.data.gameId);
                                 setDefaultParam($("#user2Defaults"), "gameId", res.data.gameId);

@@ -46,25 +46,25 @@ shutil.error = function (code, message, data) {
 };
 
 shutil.fillSession = function (req, res, cb) {
-  if (_.isUndefined(req.params.cmd)) {
+  if (_.isUndefined(req.body.cmd)) {
     cb(1, shutil.error("no_cmd", "missing command data"));
     return;
   }
-  var cmd = req.params.cmd;
+  var cmd = req.body.cmd;
   if (cmd === "reg.login" || cmd === "reg.create" || cmd === "reg.check" || cmd === "reg.anonymous") {
     cb(0);
     return;
   }
-  if (_.isUndefined(req.params.session)) {
+  if (_.isUndefined(req.body.session)) {
     cb(1, shutil.error("no_session", "missing session data"));
     return;
   }
-  if (!session.check(req.params.session)) {
+  if (!session.check(req.body.session)) {
     cb(1, shutil.error("bad_session", "bad session data"));
     return;
   }
   req.session = {};
-  req.session.uid = req.params.session.split(":")[1];
+  req.session.uid = req.body.session.split(":")[1];
   shlog.info("loading user: uid = " + req.session.uid);
   var user = new ShUser();
   user.loadOrCreate(req.session.uid, function (error, data) {
@@ -79,7 +79,7 @@ shutil.fillSession = function (req, res, cb) {
 };
 
 shutil.call = function (req, res, cb) {
-  var cmd = req.params.cmd;
+  var cmd = req.body.cmd;
   shlog.info("cmd = " + cmd);
   var cmdParts = cmd.split(".");
   if (cmdParts.length < 2) {
@@ -113,18 +113,18 @@ shutil.call = function (req, res, cb) {
     if (!_.isUndefined(value.optional) || value.optional === true) {
       return;
     }
-    if (_.isUndefined(req.params[key])) {
+    if (_.isUndefined(req.body[key])) {
       this.paramsOk = false;
       cb(1, shutil.error("param_required", "missing required parameter", {key: key}));
       return false;
     }
-    var ptype = typeof req.params[key];
-    if (_.isArray(req.params[key])) {
+    var ptype = typeof req.body[key];
+    if (_.isArray(req.body[key])) {
       ptype = "array";
     }
     if (ptype !== value.dtype) {
       this.paramsOk = false;
-      cb(1, shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.params[key], type: ptype}));
+      cb(1, shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
       return false;
     }
   }, this);

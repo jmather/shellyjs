@@ -11,7 +11,7 @@ test.create = function (req, cb) {
 };
 
 test.turn = function (req, cb) {
-  if (req.params.guess === req.env.game.state.number) {
+  if (req.body.guess === req.env.game.state.number) {
     cb(0, sh.event("event.test.info", {message: "you won"}));
   } else {
     cb(0, sh.event("event.test.info", {message: "try again"}));

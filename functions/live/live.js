@@ -24,7 +24,7 @@ live.user = function (req, res, cb) {
     cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
     return;
   }
-  var status = req.params.status;
+  var status = req.body.status;
 
   var eventEmitter = res.eventEmitter;
   var socketNotify = res.socketNotify;
@@ -77,10 +77,10 @@ live.game = function (req, res, cb) {
   var socketNotify = res.socketNotify;
   var ws = res.ws;
 
-  var gameId = req.params.gameId;
+  var gameId = req.body.gameId;
   var gameChannel = sh.channel("game", gameId);
 
-  if (req.params.status === "on") {
+  if (req.body.status === "on") {
     if (eventEmitter.listeners(gameChannel).indexOf(socketNotify) === -1) {
       shlog.info("(" + ws.uid + ") add game channel: " + gameChannel, ws.games);
       global.socket.notify(gameId, sh.event("event.live.game.user", {uid: ws.uid,
@@ -114,7 +114,7 @@ live.game = function (req, res, cb) {
     }
   } else {
     shlog.info("(" + ws.uid + ") remove game channel:" + gameChannel, ws.games);
-    var idx = ws.games.indexOf(req.params.gameId);
+    var idx = ws.games.indexOf(req.body.gameId);
     if (idx !== -1) {
       ws.games.splice(idx, 1);
     }
@@ -126,7 +126,7 @@ live.game = function (req, res, cb) {
 };
 
 live.message = function (req, res, cb) {
-  var msg = req.params.message;
+  var msg = req.body.message;
 
   var event = sh.event("event.live.message", {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: msg});
   global.socket.notifyAll(event);

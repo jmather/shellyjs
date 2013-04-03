@@ -42,13 +42,13 @@ function loadGame(name) {
 }
 
 game.pre = function (req, res, cb) {
-  if (req.params.cmd === "game.list"
-      || req.params.cmd === "game.playing") {
+  if (req.body.cmd === "game.list"
+      || req.body.cmd === "game.playing") {
     cb(0);
     return;
   }
-  if (req.params.cmd === "game.create") {
-    var name = req.params.name;
+  if (req.body.cmd === "game.create") {
+    var name = req.body.name;
     try {
       shlog.info("game.pre: game.create = " + name);
       req.env.gameModule = loadGame(name);
@@ -60,7 +60,7 @@ game.pre = function (req, res, cb) {
     }
   }
 
-  var gameId = req.params.gameId;
+  var gameId = req.body.gameId;
   shlog.info("game.pre: populating game info for " + gameId);
   var game = new ShGame();
   game.load(gameId, function (error, data) {
@@ -128,21 +128,21 @@ game.create = function (req, res, cb) {
 
   db.nextId("game", function (err, data) {
     game.set("gameId", data.toString());
-    game.set("name", req.params.name);
+    game.set("name", req.body.name);
     game.set("ownerId", uid);
     game.set("whoTurn", uid);
 
     // add to request environment
     req.env.game = game;
 
-    if (_.isUndefined(req.params.players)) {
+    if (_.isUndefined(req.body.players)) {
       addGamePlaying(uid, game);
       game.setPlayer(uid, "ready");
     } else {
-      _.each(req.params.players, function (playerId) {
+      _.each(req.body.players, function (playerId) {
         game.setPlayer(playerId, "ready");
       });
-      addGamePlayingMulti(req.params.players, game, function (error, data) {
+      addGamePlayingMulti(req.body.players, game, function (error, data) {
         // SWD ignore any errors for now
         if (error) {
           shlog.error("add_players", "unable to add a player", data);
@@ -229,7 +229,7 @@ game.leave = function (req, res, cb) {
 };
 
 game.kick = function (req, res, cb) {
-  var kickId = req.params.kickId;
+  var kickId = req.body.kickId;
   var game = req.env.game;
 
   // SWD check user
@@ -241,7 +241,7 @@ game.kick = function (req, res, cb) {
 
 game.turn = function (req, res, cb) {
   var uid = req.session.uid;
-  var gameId = req.params.gameId;
+  var gameId = req.body.gameId;
   // fast and loose - muse setData before return or sub call
   var game = req.env.game.getData();
 
@@ -302,7 +302,7 @@ game.get = function (req, res, cb) {
 
 game.set = function (req, res, cb) {
   var game = req.env.game;
-  var newGame = req.params.game;
+  var newGame = req.body.game;
 
   game.setData(newGame);
 
@@ -404,15 +404,15 @@ game.list = function (req, res, cb) {
 };
 
 game.call = function (req, res, cb) {
-  shlog.info("game.call - req.params.func");
+  shlog.info("game.call - req.body.func");
   var module = req.env.gameModule;
 
-  if (_.isUndefined(module[req.params.func])) {
-    cb(1, sh.error("game_call", "function does not exist", {func: req.params.func}));
+  if (_.isUndefined(module[req.body.func])) {
+    cb(1, sh.error("game_call", "function does not exist", {func: req.body.func}));
     return;
   }
 
-  req.env.gameModule[req.params.func](req, cb);
+  req.env.gameModule[req.body.func](req, cb);
 };
 
 /////////////// Playing functions

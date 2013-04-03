@@ -146,6 +146,7 @@ function sendRestCmd(cmd, data, cb) {
       type: "POST",
       url: Env.restUrl,
       async: true,
+      contentType: "application/json",
       dataType: "json",
       data: JSON.stringify(obj),
       success: function (res, status) {
