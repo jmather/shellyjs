@@ -7,20 +7,20 @@ var stackTrace = require("stack-trace");
 var shlog = exports;
 
 var gDebug = {
-  "admin": {},
-  "games": {},
-  "rest": {},
-  "live": {},
+//  "live": {},
 //  "shutil": {},
-//  "socket": {},
 //  "game": {},
 //  "shdb": {},
 //	"game": {},
 //	"recv": {},
 //	"send": {},
 //	"user": {},
-	"reg": {},
-  "app": {}
+//	"reg": {},
+//  "admin": {},
+//  "rest": {},
+//  "socket": {},
+//  "games": {},
+  "shelly": {}
 };
 
 var winston = require("winston");
