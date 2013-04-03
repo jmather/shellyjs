@@ -13,7 +13,6 @@
     "mustache": "0.7.2",
     "nano": "3.3.6",
     "redis": "0.8.2",
-    "restify": "2.1.1",
     "sha1": "1.0.1",
     "stack-trace": "0.0.6",
     "validator": "0.4.24",

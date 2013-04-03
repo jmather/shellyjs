@@ -10,11 +10,6 @@ try {
 }
 global.PACKAGE = require(global.gBaseDir + "/package.json");
 
-var util = require("util");
-var http = require("http");
-var restify = require("restify");
-var _ = require("lodash");
-
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 shlog.info(global.CONF);
 
