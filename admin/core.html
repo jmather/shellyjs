@@ -93,9 +93,10 @@
             {
                 var dtype = funcInfo.params[key].dtype;
                 paramInfo += key + "=" + dtype;
-                if(typeof(funcInfo.params[key].options) != 'undefined')
+                if(typeof(funcInfo.params[key].optional) !== 'undefined'
+                        && funcInfo.params[key].optional)
                 {
-                    paramInfo += "(" + funcInfo.params[key].options + ")";
+                    paramInfo += " (optional)";
                 }
                 paramInfo += "<br>";
 
