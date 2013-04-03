@@ -75,8 +75,8 @@ exports.login = function (req, res, cb) {
         return;
       }
       if (role.length && !_.contains(user.get("roles"), role)) {
-        cb(1, sh.error("no_role", "user does not have this role: '" + role + "'", {role: role, roles: user.get("roles")}));
-        return;
+//        cb(1, sh.error("no_role", "user does not have this role: '" + role + "'", {role: role, roles: user.get("roles")}));
+//        return;
       }
 
       // push the email into the user object
