@@ -73,7 +73,7 @@ function setMyGames(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {
     var $newGame = $("#gameTemplate").clone();
-    $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId);
+    $newGame.find("#gameName").text(gameList[gameId].name);
     var game = gameList[gameId];
     $newGame.addClass("myGameId" + gameId);
     $newGame.addClass("activeGame");
