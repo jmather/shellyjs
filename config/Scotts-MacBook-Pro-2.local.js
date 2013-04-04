@@ -18,5 +18,7 @@ config.heartBeat = 300 * 1000;
 
 // db
 config.db = {};
+//config.db.name = "redis";
+//config.db.settings = {json: false, cache: 0};
 config.db.name = "sqlite";
-config.db.settings = {filename: global.gBaseDir + "/db/sqlite3.db"};
+config.db.settings = {json: false, cache: 0, filename: global.gBaseDir + "/db/sqlite3.db"};
