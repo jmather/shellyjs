@@ -127,22 +127,16 @@ exports.anonymous = function (req, res, cb) {
       });
       return;
     }
-    global.db.nextId("user", function (error, value) {
-      if (error) {
-        cb(1, sh.error("user_id", "unable to generate user id"));
-        return;
-      }
-      // create the user
-      var tokenMap = {};
-      tokenMap.uid = value;
-      tokenMap.token = token;
-      tokenMap.created = new Date().getTime();
-      gDb.kset("kTokenMap", token, JSON.stringify(tokenMap));
-      var out = {};
-      out.uid = tokenMap.uid;
-      out.session = session.create(tokenMap.uid);
-      cb(0, sh.event("reg.anonymous", out));
-    });
+    // create the user
+    var tokenMap = {};
+    tokenMap.uid = sh.uuid();
+    tokenMap.token = token;
+    tokenMap.created = new Date().getTime();
+    gDb.kset("kTokenMap", token, JSON.stringify(tokenMap));
+    var out = {};
+    out.uid = tokenMap.uid;
+    out.session = session.create(tokenMap.uid);
+    cb(0, sh.event("reg.anonymous", out));
   });
 };
 
@@ -212,23 +206,17 @@ exports.create = function (req, res, cb) {
       cb(1, sh.error("email_used", "this email is already registered", {email: email}));
       return;
     }
-    global.db.nextId("user", function (error, value) {
-      if (error) {
-        cb(1, sh.error("user_id", "unable to generate user id"));
-        return;
-      }
-      // create the user
-      var emailMap = {};
-      emailMap.uid = value;
-      emailMap.email = email;
-      emailMap.password = hashPassword(emailMap.uid, password);
-      emailMap.created = new Date().getTime();
-      gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
-      var out = {};
-      out.uid = emailMap.uid;
-      out.session = session.create(emailMap.uid);
-      cb(0, sh.event("reg.create", out));
-    });
+    // create the user
+    var emailMap = {};
+    emailMap.uid = sh.uuid();
+    emailMap.email = email;
+    emailMap.password = hashPassword(emailMap.uid, password);
+    emailMap.created = new Date().getTime();
+    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+    var out = {};
+    out.uid = emailMap.uid;
+    out.session = session.create(emailMap.uid);
+    cb(0, sh.event("reg.create", out));
   });
 };
 

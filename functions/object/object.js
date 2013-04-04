@@ -77,21 +77,19 @@ object.create = function (req, res, cb) {
   var className = req.body.className;
 
   var object = {};
-  db.nextId("object-" + className, function (error, value) {
-    // create the object
-    var ts = new Date().getTime();
-    object._info = {
-      oid: value.toString(),
-      className: className,
-      created: ts,
-      lastModified: ts,
-      hash: ""
-    };
-    object = _.merge(object, req.body.object);
+  // create the object
+  var ts = new Date().getTime();
+  object._info = {
+    oid: sh.uuid(),
+    className: className,
+    created: ts,
+    lastModified: ts,
+    hash: ""
+  };
+  object = _.merge(object, req.body.object);
 
-    req.env.object = object;
-    cb(0, object);
-  });
+  req.env.object = object;
+  cb(0, object);
 };
 
 object.destroy = function (req, res, cb) {

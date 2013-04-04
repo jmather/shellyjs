@@ -15,3 +15,8 @@ config.gamesUrl = "http://" + config.dnsName + ":" + config.gamesPort;
 config.socketPort = 5110;
 config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
 config.heartBeat = 30 * 1000;
+
+// db
+config.db = {};
+config.db.name = "sqlite";
+config.db.settings = {filename: global.gBaseDir + "/db/sqlite3.db"};

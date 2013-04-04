@@ -126,42 +126,39 @@ game.create = function (req, res, cb) {
 
   var game = new ShGame();
 
-  db.nextId("game", function (err, data) {
-    game.set("gameId", data.toString());
-    game.set("name", req.body.name);
-    game.set("ownerId", uid);
-    game.set("whoTurn", uid);
+  game.set("gameId", sh.uuid());
+  game.set("name", req.body.name);
+  game.set("ownerId", uid);
+  game.set("whoTurn", uid);
 
-    // add to request environment
-    req.env.game = game;
+  // add to request environment
+  req.env.game = game;
 
-    if (_.isUndefined(req.body.players)) {
-      addGamePlaying(uid, game);
-      game.setPlayer(uid, "ready");
-    } else {
-      _.each(req.body.players, function (playerId) {
-        game.setPlayer(playerId, "ready");
-      });
-      addGamePlayingMulti(req.body.players, game, function (error, data) {
-        // SWD ignore any errors for now
-        if (error) {
-          shlog.error("add_players", "unable to add a player", data);
-        }
-      });
-    }
-
-    // SWD make sure init is there
-    if (_.isUndefined(req.env.gameModule.create)) {
-      cb(0, sh.event("event.game.create", game.getData()));
-      return;
-    }
-    req.env.gameModule.create(req, function (error, data) {
-      if (!error && _.isUndefined(data)) {
-        data = sh.event("event.game.create", game.getData());
-      }
-      cb(error, data);
+  if (_.isUndefined(req.body.players)) {
+    addGamePlaying(uid, game);
+    game.setPlayer(uid, "ready");
+  } else {
+    _.each(req.body.players, function (playerId) {
+      game.setPlayer(playerId, "ready");
     });
+    addGamePlayingMulti(req.body.players, game, function (error, data) {
+      // SWD ignore any errors for now
+      if (error) {
+        shlog.error("add_players", "unable to add a player", data);
+      }
+    });
+  }
 
+  // SWD make sure init is there
+  if (_.isUndefined(req.env.gameModule.create)) {
+    cb(0, sh.event("event.game.create", game.getData()));
+    return;
+  }
+  req.env.gameModule.create(req, function (error, data) {
+    if (!error && _.isUndefined(data)) {
+      data = sh.event("event.game.create", game.getData());
+    }
+    cb(error, data);
   });
 };
 

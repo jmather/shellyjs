@@ -8,16 +8,10 @@ var gDbScope = "dev:";
 
 var shdb = exports;
 
-var client = require(global.gBaseDir + global.CONF.dbWrapper);
-
-// if you"d like to select database 3, instead of 0 (default), call
-// client.select(3, function() { /* ... */ });
-
-client.on("error", function (err) {
-  shlog.error("Error " + err);
-  // big trouble, just get out
-  process.exit(1);
-});
+//var client = require(global.gBaseDir + global.CONF.dbWrapper);
+var ueberDB = require("ueberDB");
+//var client = new ueberDB.database("sqlite");
+var client = new ueberDB.database(global.CONF.db.name, global.CONF.db.settings);
 
 var gKeyTypes = {
   kEmailMap: {tpl: "em:%s"},
@@ -28,8 +22,16 @@ var gKeyTypes = {
   kPlaying: {tpl: "gp:%s"}
 };
 
-shdb.init = function () {
+shdb.init = function (cb) {
   shlog.info("db init");
+  client.init(function (err) {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    shlog.info("db initilized");
+    cb()
+  });
 };
 
 shdb.get = function (key, cb) {
@@ -89,24 +91,13 @@ shdb.kdelete = function (keyType, params, value, cb) {
 
   var key = genKey(keyType, params);
   shlog.info("kremove: " + gKeyTypes[keyType].tpl + "->" + key);
-  client.del(key, function (err, value) {
+  client.remove(key, function (err) {
     if (err) {
-      shlog.error("error on remove", err, value);
+      shlog.error("error on remove", err);
     }
     if (_.isFunction(cb)) {
       cb(err);
     }
-  });
-};
-
-shdb.nextId = function (keyType, cb) {
-  var key = gDbScope + "idgen:" + keyType;
-  shlog.info("shdb.nextId: key = " + key);
-  client.incrby(key, 1, function (error, data) {
-    if (!error) {
-      data = data.toString();
-    }
-    cb(error, data);
   });
 };
 

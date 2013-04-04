@@ -11,19 +11,21 @@ try {
 global.PACKAGE = require(global.gBaseDir + "/package.json");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
-shlog.info("shelly loaded: ", new Date());
-shlog.info(global.CONF);
+shlog.info("loaded:", new Date());
+shlog.info("config:", global.CONF);
 
 global.db = require(global.gBaseDir + "/src/shdb.js");
 
 var shelly = exports;
 
 shelly.start = function () {
-  shlog.info("shelly started: ", new Date());
-  var admin = require(global.gBaseDir + "/src/admin.js");
-  var rest = require(global.gBaseDir + "/src/rest.js");
-  var games = require(global.gBaseDir + "/src/games.js");
+  global.db.init(function () {
+    shlog.info("started: ", new Date());
+    var admin = require(global.gBaseDir + "/src/admin.js");
+    var rest = require(global.gBaseDir + "/src/rest.js");
+    var games = require(global.gBaseDir + "/src/games.js");
 
-  global.socket = require(global.gBaseDir + "/src/socket.js");
-  global.socket.start();
+    global.socket = require(global.gBaseDir + "/src/socket.js");
+    global.socket.start();
+  });
 };

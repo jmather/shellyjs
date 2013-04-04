@@ -6,7 +6,9 @@
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
   "dependencies": {
-    "dirty": "0.9.7",
+    "ueberDB": "0.2.0",
+    "sqlite3": "2.1.7",
+    "redis": "0.8.2",
     "async": "0.2.5",
     "consolidate": "git://github.com/manuelbieh/consolidate.js.git#master",
     "express": "3.1.0",
@@ -14,7 +16,6 @@
     "lodash": "1.0.0",
     "mustache": "0.7.2",
     "nano": "3.3.6",
-    "redis": "0.8.2",
     "sha1": "1.0.1",
     "stack-trace": "0.0.6",
     "validator": "0.4.24",

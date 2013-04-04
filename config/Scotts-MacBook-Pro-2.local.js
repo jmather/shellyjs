@@ -17,7 +17,6 @@ config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
 config.heartBeat = 300 * 1000;
 
 // db
-config.dbWrapper = "/src/db/shdirty.js";
-//config.dbWrapper = "/src/db/shredis.js";
-
-// redis options
+config.db = {};
+config.db.name = "sqlite";
+config.db.settings = {filename: global.gBaseDir + "/db/sqlite3.db"};
