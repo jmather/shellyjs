@@ -8,8 +8,7 @@ var gDbScope = "dev:";
 
 var shdb = exports;
 
-var redis = require("redis");
-var client = redis.createClient();
+var client = require(global.gBaseDir + "/src/db/shredis.js");
 
 // if you"d like to select database 3, instead of 0 (default), call
 // client.select(3, function() { /* ... */ });
@@ -122,7 +121,7 @@ shdb.nextId = function (keyType, cb) {
   });
 };
 
-shdb.destroy = function () {
+shdb.quit = function () {
   // gracefull end
   client.quit();
 };
