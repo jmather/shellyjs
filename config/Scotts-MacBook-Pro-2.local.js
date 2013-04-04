@@ -15,3 +15,9 @@ config.gamesUrl = "http://" + config.dnsName + ":" + config.gamesPort;
 config.socketPort = 5110;
 config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
 config.heartBeat = 300 * 1000;
+
+// db
+config.dbWrapper = "/src/db/shdirty.js";
+//config.dbWrapper = "/src/db/shredis.js";
+
+// redis options

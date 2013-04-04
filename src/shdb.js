@@ -8,7 +8,7 @@ var gDbScope = "dev:";
 
 var shdb = exports;
 
-var client = require(global.gBaseDir + "/src/db/shredis.js");
+var client = require(global.gBaseDir + global.CONF.dbWrapper);
 
 // if you"d like to select database 3, instead of 0 (default), call
 // client.select(3, function() { /* ... */ });
@@ -30,17 +30,6 @@ var gKeyTypes = {
 
 shdb.init = function () {
   shlog.info("db init");
-  /*
-   client.set("string key", "string val", redis.print);
-   client.hset("hash key", "hashtest 1", "some value", redis.print);
-   client.hset(["hash key", "hashtest 2", "some other value"], redis.print);
-   client.hkeys("hash key", function (err, replies) {
-   shlog.info(replies.length + " replies:");
-   replies.forEach(function (reply, i) {
-   shlog.info("    " + i + ": " + reply);
-   });
-   });
-   */
 };
 
 shdb.get = function (key, cb) {

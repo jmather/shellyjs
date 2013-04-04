@@ -6,6 +6,7 @@
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
   "dependencies": {
+    "dirty": "0.9.7",
     "async": "0.2.5",
     "consolidate": "git://github.com/manuelbieh/consolidate.js.git#master",
     "express": "3.1.0",

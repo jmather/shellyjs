@@ -20,6 +20,7 @@ var gDebug = {
 //  "rest": {},
 //  "socket": {},
 //  "games": {},
+  "shdirty": {},
   "shelly": {}
 };
 

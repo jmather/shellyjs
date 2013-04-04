@@ -118,7 +118,7 @@ exports.anonymous = function (req, res, cb) {
       out.session = session.create(tokenMap.uid);
       // check if uid has upgraded account
       sh.getUser(tokenMap.uid, function (error, user) {
-        if (user !== null && user.get("email").length) {
+        if (!error && user.get("email").length) {
           cb(1, sh.error("user_upgraded", "user has upgraded the anonymous account"));
           return;
         }
