@@ -20,7 +20,7 @@ var shelly = exports;
 
 shelly.start = function () {
   global.db.init(function () {
-    shlog.info("started: ", new Date());
+    shlog.info("started:", new Date());
     var admin = require(global.gBaseDir + "/src/admin.js");
     var rest = require(global.gBaseDir + "/src/rest.js");
     var games = require(global.gBaseDir + "/src/games.js");

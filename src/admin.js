@@ -15,6 +15,9 @@ var adminLogin = adminBase + "/login";
 
 shlog.info("admin directory: " + adminBase);
 
+// ensure admin user
+require(global.gBaseDir + "/functions/reg/reg.js").verifyUser(global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN_PASSWORD);
+
 var app = express();
 //app.use(express.basicAuth(function(user, pass){
 //  return "scott" == user & "foo" == pass;
@@ -27,9 +30,10 @@ app.engine("html", engines.hogan);
 app.use("/static", express.static(adminStatic));  // must be here so static files don't go through session check
 
 app.use(express.cookieParser());
+
 app.use(function (req, res, next) {
-  if (req.path.substring(0, 7) === "/login/" ||
-      req.path.substring(0, 8) === "/static/") {
+  if (req.path.substring(0, 7) === "/login/"
+      || req.path.substring(0, 8) === "/static/") {
     return next();
   }
 

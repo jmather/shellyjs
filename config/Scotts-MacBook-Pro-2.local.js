@@ -22,3 +22,7 @@ config.db = {};
 //config.db.settings = {json: false, cache: 0};
 config.db.name = "sqlite";
 config.db.settings = {json: false, cache: 0, filename: global.gBaseDir + "/db/sqlite3.db"};
+
+// default admin
+config.DEFAULT_ADMIN_NAME = "shelly";
+config.DEFAULT_ADMIN_PASSWORD = "";

@@ -41,6 +41,48 @@ function checkPassword(uid, password, hash) {
   return newHash === hash;
 }
 
+function createEmailReg(uid, email, password) {
+  var emailMap = {};
+  emailMap.uid = uid;
+  emailMap.email = email;
+  emailMap.password = hashPassword(emailMap.uid, password);
+  emailMap.created = new Date().getTime();
+  gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+
+  return emailMap;
+}
+
+// used to create the default admin user
+// SWD  - a bit ugly
+exports.verifyUser = function (email, password, cb) {
+  gDb.kget("kEmailMap", email, function (error, value) {
+    var emailMap = {};
+    if (value === null) {
+      // create it
+      emailMap = createEmailReg(sh.uuid(), email, password);
+    } else {
+      emailMap = JSON.parse(value);
+    }
+    sh.getOrCreateUser(emailMap.uid, function (error, user) {
+      if (user === null) {
+        shlog.error("uanble to find or create admin user");
+        if (_.isFunction(cb)) {
+          cb(0, sh.error("no_admin_user", "unable to find or create admin user"));
+        }
+        return;
+      }
+      if (user.get("email").length === 0) {
+        user.set("email", email);
+        user.set("name", email.split("@")[0]);
+        user.set("roles", ["admin"]);
+      }
+    });
+    if (_.isFunction(cb)) {
+      cb(1);
+    }
+  });
+};
+
 exports.login = function (req, res, cb) {
   var out = {};
 
@@ -48,7 +90,9 @@ exports.login = function (req, res, cb) {
   var password = sanitize(req.body.password).trim();
   shlog.info("login attempt:", email);
   try {
-    check(email, 102).isEmail();
+    if (email !== global.CONF.DEFAULT_ADMIN_NAME) {
+      check(email, 102).isEmail();
+    }
   } catch (e) {
     cb(1, sh.error("bad_email", "email is not correct format"));
     return;
@@ -110,25 +154,24 @@ exports.anonymous = function (req, res, cb) {
   }
 
   gDb.kget("kTokenMap", token, function (error, value) {
+    var tokenMap = {};
     if (value !== null) {
       // SWD protect the json parse
-      var tokenMap = JSON.parse(value);
-      var out = {};
-      out.uid = tokenMap.uid;
-      out.session = session.create(tokenMap.uid);
+      tokenMap = JSON.parse(value);
       // check if uid has upgraded account
       sh.getUser(tokenMap.uid, function (error, user) {
         if (!error && user.get("email").length) {
           cb(1, sh.error("user_upgraded", "user has upgraded the anonymous account"));
           return;
         }
+        var out = {};
+        out.uid = tokenMap.uid;
+        out.session = session.create(tokenMap.uid);
         cb(0, sh.event("reg.anonymous", out));
         return;
       });
-      return;
     }
     // create the user
-    var tokenMap = {};
     tokenMap.uid = sh.uuid();
     tokenMap.token = token;
     tokenMap.created = new Date().getTime();
@@ -172,13 +215,15 @@ exports.upgrade = function (req, res, cb) {
       cb(1, sh.error("email_in_use", "email is already used by another user", {uid: userRaw.uid, email: email}));
       return;
     }
-    // create the email map
+    // set the email for the user
     req.session.user.set("email", email);
-    emailMap.uid = userRaw.uid;
-    emailMap.email = email;
-    emailMap.password = hashPassword(emailMap.uid, password);
-    emailMap.created = new Date().getTime();
-    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+    // create the email map
+    emailMap = this.createEmailReg(userRaw.uid, email, password);
+//    emailMap.uid = userRaw.uid;
+//    emailMap.email = email;
+//    emailMap.password = hashPassword(emailMap.uid, password);
+//    emailMap.created = new Date().getTime();
+//    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
     cb(0, sh.event("reg.upgrade", userRaw));
   });
 };
@@ -207,12 +252,13 @@ exports.create = function (req, res, cb) {
       return;
     }
     // create the user
-    var emailMap = {};
-    emailMap.uid = sh.uuid();
-    emailMap.email = email;
-    emailMap.password = hashPassword(emailMap.uid, password);
-    emailMap.created = new Date().getTime();
-    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+    var emailMap = createEmailReg(sh.uuid(), email, password);
+//    var emailMap = {};
+//    emailMap.uid = sh.uuid();
+//    emailMap.email = email;
+//    emailMap.password = hashPassword(emailMap.uid, password);
+//    emailMap.created = new Date().getTime();
+//    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
     var out = {};
     out.uid = emailMap.uid;
     out.session = session.create(emailMap.uid);
