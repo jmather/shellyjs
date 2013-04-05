@@ -26,11 +26,11 @@ shdb.init = function (cb) {
   shlog.info("db init");
   client.init(function (err) {
     if (err) {
-      console.error(err);
-      process.exit(1);
+      shlog.error(err, global.CONF.db.settings);
+      cb(err);
     }
     shlog.info("db initilized");
-    cb()
+    cb(0);
   });
 };
 
@@ -101,7 +101,7 @@ shdb.kdelete = function (keyType, params, value, cb) {
   });
 };
 
-shdb.quit = function () {
-  // gracefull end
-  client.quit();
+shdb.close = function (cb) {
+  // graceful end
+  client.close(cb);
 };

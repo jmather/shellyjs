@@ -104,3 +104,11 @@ var gameServer = app.listen(global.CONF.gamesPort, function () {
 gameServer.on("error", function (err) {
   shlog.error(err);
 });
+
+exports.close = function (cb) {
+  if (gameServer.address()) {
+    gameServer.close(cb);
+    return;
+  }
+  cb();
+};

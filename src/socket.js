@@ -150,3 +150,12 @@ Socket.start = function () {
     shlog.error(err);
   });
 };
+
+Socket.close = function (cb) {
+  try {
+    wss.close();
+  } catch (e) {
+    // don't care ws lib does not allow bind check via address() call
+  }
+  cb();
+};

@@ -66,3 +66,11 @@ var restServer = rest.listen(global.CONF.restPort, function () {
 restServer.on("error", function (err) {
   shlog.error(err);
 });
+
+exports.close = function (cb) {
+  if (restServer.address()) {
+    restServer.close(cb);
+    return;
+  }
+  cb();
+};

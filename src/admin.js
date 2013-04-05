@@ -133,3 +133,11 @@ var adminServer = app.listen(global.CONF.adminPort, function () {
 adminServer.on("error", function (err) {
   shlog.error(err);
 });
+
+exports.close = function (cb) {
+  if (adminServer.address()) {
+    adminServer.close(cb);
+    return;
+  }
+  cb();
+};
