@@ -147,6 +147,6 @@ Socket.start = function () {
   }); // end wss.on-connection
 
   wss.on("error", function (err) {
-    shlog.error("socketserver", err);
+    shlog.error(err);
   });
 };

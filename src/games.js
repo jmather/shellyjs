@@ -91,5 +91,16 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(gamesLogin));  // catch all for logout.html and script.js
 
-var gameServer = app.listen(global.CONF.gamesPort);
-shlog.info("game server listening: %d", gameServer.address().port);
+// SWD beef this up
+app.use(function (err, req, res, next) {
+  res.status(500);
+  res.render('error', { error: err });
+});
+
+var gameServer = app.listen(global.CONF.gamesPort, function () {
+  shlog.info("game server listening: %d", gameServer.address().port);
+});
+
+gameServer.on("error", function (err) {
+  shlog.error(err);
+});

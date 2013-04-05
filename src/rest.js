@@ -53,6 +53,16 @@ function respond(req, res, next) {
 
 rest.post("/api", respond);
 
-rest.listen(global.CONF.restPort, function () {
+// SWD beef this up
+rest.use(function (err, req, res, next) {
+  res.status(500);
+  res.render('error', { error: err });
+});
+
+var restServer = rest.listen(global.CONF.restPort, function () {
   shlog.info("rest server listening: %s", global.CONF.restPort);
+});
+
+restServer.on("error", function (err) {
+  shlog.error(err);
 });

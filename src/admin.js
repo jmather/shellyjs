@@ -120,5 +120,16 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 
-var adminServer = app.listen(global.CONF.adminPort);
-shlog.info("admin server listening: %d", adminServer.address().port);
+// SWD beef this up
+app.use(function (err, req, res, next) {
+  res.status(500);
+  res.render('error', { error: err });
+});
+
+var adminServer = app.listen(global.CONF.adminPort, function () {
+  shlog.info("admin server listening: %d", adminServer.address().port);
+});
+
+adminServer.on("error", function (err) {
+  shlog.error(err);
+});
