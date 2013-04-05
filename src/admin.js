@@ -120,10 +120,11 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 
-// SWD beef this up
+// catch all for errors
 app.use(function (err, req, res, next) {
   res.status(500);
-  res.render('error', { error: err });
+  shlog.error("admin error", err, err.stack);
+  res.send(sh.error("admin_page", { error: err.message, stack: err.stack }));
 });
 
 var adminServer = app.listen(global.CONF.adminPort, function () {

@@ -53,10 +53,11 @@ function respond(req, res, next) {
 
 rest.post("/api", respond);
 
-// SWD beef this up
+// catch all for errors
 rest.use(function (err, req, res, next) {
   res.status(500);
-  res.render('error', { error: err });
+  shlog.error("rest error", err, err.stack);
+  res.send(sh.error("rest_api", { error: err.message, stack: err.stack }));
 });
 
 var restServer = rest.listen(global.CONF.restPort, function () {

@@ -46,47 +46,50 @@ shelly.start = function () {
 };
 
 shelly.shutdown = function () {
-  async.parallel([
+  async.series([
     function (cb) {
       if (admin) {
         shlog.info("shutting down admin");
-        admin.close(function () { admin = null; cb(0); });
-      } else { cb(0); }
-    },
-    function (cb) {
+        admin.close();
+        admin = null;
+      }
       if (rest) {
         shlog.info("shutting down rest");
-        rest.close(function () { rest = null; cb(0); });
-      } else { cb(0); }
-    },
-    function (cb) {
+        rest.close();
+        rest = null;
+      }
       if (games) {
         shlog.info("shutting down games");
-        games.close(function () { games = null; cb(0); });
-      } else { cb(0); }
-    },
-    function (cb) {
+        games.close();
+        games = null;
+      }
       if (global.socket) {
         shlog.info("shutting down socket");
         global.socket.close(function () { global.socket = null; cb(0); });
       } else { cb(0); }
+    },
+    function (cb) {
+      if (global.db) {
+        shlog.info("shutting down db");
+        global.db.close(function () {
+          global.db = null;
+          cb(0);
+        });
+      } else { cb(0); }
     }
   ],
     function (err, results) {
-      if (!err) {
-        if (global.db) {
-          shlog.info("shutting down db");
-          global.db.close(function () {
-            global.db = null;
-            shlog.info("done.");
-            process.exit(0);
-          });
-        } else { process.exit(0); }
-      }
+      shlog.info("done.");
+      process.exit(0);
     });
 };
 
 process.on("SIGINT", function () {
   shlog.info("SIGINT - graceful shutdown");
+  shelly.shutdown();
+});
+
+process.on("SIGQUIT", function () {
+  shlog.info("SIGQUIT - graceful shutdown");
   shelly.shutdown();
 });

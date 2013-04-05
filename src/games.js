@@ -91,10 +91,11 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(gamesLogin));  // catch all for logout.html and script.js
 
-// SWD beef this up
+// catch all for errors
 app.use(function (err, req, res, next) {
   res.status(500);
-  res.render('error', { error: err });
+  shlog.error("game error", err, err.stack);
+  res.send(sh.error("game_page", { error: err.message, stack: err.stack }));
 });
 
 var gameServer = app.listen(global.CONF.gamesPort, function () {
