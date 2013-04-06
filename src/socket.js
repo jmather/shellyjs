@@ -115,7 +115,7 @@ function handleConnect(ws) {
     try {
       handleMessage(ws, message, socketNotify);
     } catch (err) {
-      sh.sendWs(ws, 1, sh.error("rest_api", "message - " + err.message, { message: err.message, stack: err.stack }));
+      sh.sendWs(ws, 1, sh.error("socket", "message - " + err.message, { message: err.message, stack: err.stack }));
     }
   });  // end ws.on-message
 
@@ -165,7 +165,7 @@ Socket.start = function () {
     try {
       handleConnect(ws);
     } catch (err) {
-      sh.sendWs(ws, 1, sh.error("rest_api", "connection - " + err.message, { message: err.message, stack: err.stack }));
+      sh.sendWs(ws, 1, sh.error("socket", "connection - " + err.message, { message: err.message, stack: err.stack }));
     }
   }); // end wss.on-connection
 
