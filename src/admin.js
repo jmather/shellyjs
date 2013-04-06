@@ -120,12 +120,22 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 
-// catch all for errors
+
+//********** error handling
+
 app.use(function (err, req, res, next) {
-  res.status(500);
   shlog.error("admin error", err, err.stack);
-  res.send(sh.error("admin_page", { error: err.message, stack: err.stack }));
+  var env = createEnv(req);
+  env.error = {message: err.message, stack: err.stack};
+
+  res.status(500);
+  res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
+    partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
+//  res.send(sh.error("admin_page", { error: err.message, stack: err.stack, error1: err.message }));
 });
+
+
+//********** server init and handlers
 
 var adminServer = app.listen(global.CONF.adminPort, function () {
   shlog.info("admin server listening: %d", adminServer.address().port);

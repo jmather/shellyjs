@@ -35,7 +35,7 @@ function log(api, type, msg) {
     msg = JSON.stringify(msg);
   }
   var disp = "<div style='font-size:10px;white-space:nowrap;'>";
-  disp += "<span style='color:" + color + ";'>" + api + ": </span>";
+  disp += "<span style='color:" + color + ";'>" + api + "-</span>";
   disp += "<span style='color:" + color + ";'>" + type + ": </span>";
   disp += "<span style='color:" + bodyColor + ";'>" + msg + "</span>";
   disp += "</div>";
@@ -154,7 +154,7 @@ function sendRestCmd(cmd, data, cb) {
         cb(0, res);
       },
       error: function (xhr, textStatus, errorThrown) {
-        log("rest", "error", textStatus);
+        log("rest", "error", xhr.responseText);
         cb(1, textStatus);
       }
     })

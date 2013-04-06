@@ -85,18 +85,28 @@ function createEnv(req) {
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var env = createEnv(req);
+
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
     partials: {header: "header", footer: "footer", gameNav: "gamenav"}});
 });
 
 app.use("/login", express.static(gamesLogin));  // catch all for logout.html and script.js
 
-// catch all for errors
+
+//********** error handling
+
 app.use(function (err, req, res, next) {
-  res.status(500);
   shlog.error("game error", err, err.stack);
-  res.send(sh.error("game_page", { error: err.message, stack: err.stack }));
+  var env = createEnv(req);
+  env.error = {message: err.message, stack: err.stack};
+
+  res.status(500);
+  res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
+    partials: {header: "header", footer: "footer", adminNav: "gamenav"}});
 });
+
+
+//********** server init and handlers
 
 var gameServer = app.listen(global.CONF.gamesPort, function () {
   shlog.info("game server listening: %d", gameServer.address().port);

@@ -61,6 +61,7 @@ Socket.start = function () {
     };
 
     ws.on("message", function (message) {
+try {
       shlog.recv("live - %s", message);
 
       var req = {};
@@ -95,6 +96,8 @@ Socket.start = function () {
           }
         }
 
+        shlog.foo();
+
         sh.call(req, res, function (error, data) {
           if (error) {
             shlog.error(error, data);
@@ -105,6 +108,9 @@ Socket.start = function () {
           }
         });  // end sh.call
       });  // end sh.fillSession
+} catch (err) {
+  sh.sendWs(ws, 1, sh.error("rest_api", err.message, { message: err.message, stack: err.stack }));
+}
     });  // end ws.on-message
 
     ws.on("error", function (err) {

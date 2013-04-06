@@ -7,13 +7,17 @@
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
     <script>
         var Env = {{{EnvJson}}};
 
         $(init);
         function init() {
-            $("#shSystem").text("Admin");
-            $("#shSubTitle").text("System Info");
+            $("#shSystem").text("Games");
+            $("#shSubTitle").text("Error");
+
+            $("#errorMessage").text(Env.error.message);
+            $("#errorStack").text(Env.error.stack);
         }
     </script>
 
@@ -21,6 +25,9 @@
 <body>
 {{> header}}
 {{> adminNav}}
+
+<div>Error: <pre id="errorMessage"></pre></div>
+<div>Stack: <pre id="errorStack"></pre></div>
 
 {{> footer}}
 </body>

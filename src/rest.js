@@ -37,14 +37,14 @@ rest.use(function (req, res, next) {
 
 function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
-
   shlog.recv("rest - %s", JSON.stringify(req.body));
+
   sh.call(req, res, function (error, data) {
     if (error) {
       shlog.error(error, data);
     }
     shlog.send(error, "rest - %s", JSON.stringify(data));
-    if (data !== null && !_.isUndefined(data)) {
+    if (_.isObject(data)) {
       data.cb = req.body.cb;
     }
     res.send(data);
@@ -53,12 +53,17 @@ function respond(req, res, next) {
 
 rest.post("/api", respond);
 
-// catch all for errors
+
+//********** error handling
+
 rest.use(function (err, req, res, next) {
   res.status(500);
   shlog.error("rest error", err, err.stack);
-  res.send(sh.error("rest_api", { error: err.message, stack: err.stack }));
+  res.send(sh.error("rest_api", err.message, { message: err.message, stack: err.stack }));
 });
+
+
+//********** server init and handlers
 
 var restServer = rest.listen(global.CONF.restPort, function () {
   shlog.info("rest server listening: %s", global.CONF.restPort);

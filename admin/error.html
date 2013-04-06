@@ -13,7 +13,10 @@
         $(init);
         function init() {
             $("#shSystem").text("Admin");
-            $("#shSubTitle").text("System Info");
+            $("#shSubTitle").text("Error");
+
+            $("#errorMessage").text(Env.error.message);
+            $("#errorStack").text(Env.error.stack);
         }
     </script>
 
@@ -21,6 +24,9 @@
 <body>
 {{> header}}
 {{> adminNav}}
+
+<div>Error: <pre id="errorMessage"></pre></div>
+<div>Stack: <pre id="errorStack"></pre></div>
 
 {{> footer}}
 </body>
