@@ -96,7 +96,7 @@ try {
           }
         }
 
-        shlog.foo();
+//        shlog.foo();
 
         sh.call(req, res, function (error, data) {
           if (error) {
