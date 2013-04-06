@@ -79,7 +79,7 @@ shlog.send = function () {
     level = "error";
   }
 
-  if (!_.isUndefined(gDebug[callerName])) {
+  if (level === "error" || !_.isUndefined(gDebug[callerName])) {
     var msg = util.format("%s - %s", callerName, util.format.apply(this, args));
 //		winston.log(level, msg.substr(0, 80));
     winston.log(level, msg);

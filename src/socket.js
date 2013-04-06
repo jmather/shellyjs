@@ -47,33 +47,42 @@ function handleMessage(ws, message, socketNotify) {
 
   // fill in req.session
   sh.fillSession(req, res, function (error, data) {
-    if (error !== 0) {
-      sh.sendWs(ws, error, data);
-      return;
-    }
-    // if valid user, add to list, if not we are in reg.* call
-    if (!_.isUndefined(req.session)) {
-      ws.uid = req.session.uid;
+    try {
+      if (error !== 0) {
+        sh.sendWs(ws, error, data);
+        return;
+      }
+      // if valid user, add to list, if not we are in reg.* call
+      if (!_.isUndefined(req.session)) {
+        ws.uid = req.session.uid;
 
-      // if socket not registered in gUsers, do it
-      if (_.isUndefined(gUsers[ws.uid])) {
-        gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", liveUser: "off", last: new Date().getTime()};
-        // hookup the user channel
-        var userChannel = sh.channel("user", ws.uid);
-        if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
-          shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
-          eventEmitter.on(userChannel, socketNotify);
+        // if socket not registered in gUsers, do it
+        if (_.isUndefined(gUsers[ws.uid])) {
+          gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", liveUser: "off", last: new Date().getTime()};
+          // hookup the user channel
+          var userChannel = sh.channel("user", ws.uid);
+          if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+            shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+            eventEmitter.on(userChannel, socketNotify);
+          }
         }
       }
+    } catch (err) {
+      sh.sendWs(ws, 1, sh.error("socket", "fillSession - " + err.message, { message: err.message, stack: err.stack }));
+      return;
     }
-
     sh.call(req, res, function (error, data) {
-      if (error) {
-        shlog.error(error, data);
-      }
-      if (data !== null && !_.isUndefined(data)) {
-        data.cb = req.body.cb;
-        sh.sendWs(ws, error, data);
+      try {
+        if (error) {
+          shlog.error(error, data);
+        }
+        if (data !== null && !_.isUndefined(data)) {
+          data.cb = req.body.cb;
+          sh.sendWs(ws, error, data);
+        }
+      } catch (err) {
+        sh.sendWs(ws, 1, sh.error("socket", "call - " + err.message, { message: err.message, stack: err.stack }));
+        return;
       }
     });  // end sh.call
   });  // end sh.fillSession
