@@ -6,7 +6,6 @@
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
   "dependencies": {
-    "ueberDB": "0.2.0",
     "sqlite3": "2.1.7",
     "redis": "0.8.2",
     "async": "0.2.5",

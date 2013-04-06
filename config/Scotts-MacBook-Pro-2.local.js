@@ -18,10 +18,10 @@ config.heartBeat = 300 * 1000;
 
 // db
 config.db = {};
-//config.db.name = "redis";
-//config.db.settings = {json: false, cache: 0};
-config.db.name = "sqlite";
-config.db.settings = {json: false, cache: 0, filename: global.gBaseDir + "/db/sqlite3.db"};
+//config.db.wrapper = "/src/db/shredis.js";
+//config.db.options = {};
+config.db.wrapper = "/src/db/shsqlite.js";
+config.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
 
 // default admin
 config.DEFAULT_ADMIN_NAME = "shelly";

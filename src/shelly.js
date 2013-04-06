@@ -84,6 +84,10 @@ shelly.shutdown = function () {
     });
 };
 
+process.on('uncaughtException', function (error) {
+  shlog.error("uncaughtException", error.stack);
+});
+
 process.on("SIGINT", function () {
   shlog.info("SIGINT - graceful shutdown");
   shelly.shutdown();

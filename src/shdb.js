@@ -8,10 +8,7 @@ var gDbScope = "dev:";
 
 var shdb = exports;
 
-//var client = require(global.gBaseDir + global.CONF.dbWrapper);
-var ueberDB = require("ueberDB");
-//var client = new ueberDB.database("sqlite");
-var client = new ueberDB.database(global.CONF.db.name, global.CONF.db.settings);
+var client = require(global.gBaseDir + global.CONF.db.wrapper);
 
 var gKeyTypes = {
   kEmailMap: {tpl: "em:%s"},
@@ -24,7 +21,7 @@ var gKeyTypes = {
 
 shdb.init = function (cb) {
   shlog.info("db init");
-  client.init(function (err) {
+  client.init(global.CONF.db.options, function (err) {
     if (err) {
       shlog.error(err, global.CONF.db.settings);
       cb(err);
@@ -102,6 +99,5 @@ shdb.kdelete = function (keyType, params, value, cb) {
 };
 
 shdb.close = function (cb) {
-  // graceful end
   client.close(cb);
 };

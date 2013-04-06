@@ -12,8 +12,9 @@ shRedis.on = function (event, cb) {
   client.on(event, cb);
 };
 
-shRedis.init = function () {
+shRedis.init = function (options, cb) {
   shlog.info("db init");
+  cb(0);
 };
 
 shRedis.get = function (key, cb) {
@@ -38,7 +39,6 @@ shRedis.incrby = function (key, amount, cb) {
   client.incrby(key, amount, cb);
 };
 
-shRedis.quit = function () {
-  // gracefull end
-  client.quit();
+shRedis.close = function (cb) {
+  client.quit(cb);
 };

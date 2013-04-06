@@ -34,122 +34,130 @@ Socket.notifyAll = function (data) {
   });
 };
 
+function handleMessage(ws, message, socketNotify) {
+  var req = {};
+  var res = {
+    ws: ws,
+    eventEmitter: eventEmitter,
+    socketNotify: socketNotify
+  };
+
+  // fill in req.body
+  req.body = JSON.parse(message);
+
+  // fill in req.session
+  sh.fillSession(req, res, function (error, data) {
+    if (error !== 0) {
+      sh.sendWs(ws, error, data);
+      return;
+    }
+    // if valid user, add to list, if not we are in reg.* call
+    if (!_.isUndefined(req.session)) {
+      ws.uid = req.session.uid;
+
+      // if socket not registered in gUsers, do it
+      if (_.isUndefined(gUsers[ws.uid])) {
+        gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", liveUser: "off", last: new Date().getTime()};
+        // hookup the user channel
+        var userChannel = sh.channel("user", ws.uid);
+        if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
+          shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
+          eventEmitter.on(userChannel, socketNotify);
+        }
+      }
+    }
+
+    sh.call(req, res, function (error, data) {
+      if (error) {
+        shlog.error(error, data);
+      }
+      if (data !== null && !_.isUndefined(data)) {
+        data.cb = req.body.cb;
+        sh.sendWs(ws, error, data);
+      }
+    });  // end sh.call
+  });  // end sh.fillSession
+}
+
+function handleConnect(ws) {
+  shlog.info("socket: connect");
+  ws.uid = 0;
+  ws.games = [];
+  ws.hbTimer = null;
+
+  var heartBeat = function () {
+    sh.sendWs(ws, 0, sh.event("event.heartbeat", {interval: global.CONF.heartBeat}));
+  };
+  ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
+
+  // helper functions in valid ws scope
+  var socketNotify = function (message) {
+    shlog.info("(" + ws.uid + ") socket: socketNotify");
+    if (ws.readyState === 1) {
+      // 1 = OPEN - SWD: find this in ws module later
+      sh.sendWs(ws, 0, message);
+    } else {
+      shlog.info("(" + ws.uid + ") socket: dead socket");
+    }
+  };
+
+  ws.on("message", function (message) {
+    shlog.recv("live - %s", message);
+    try {
+      handleMessage(ws, message, socketNotify);
+    } catch (err) {
+      sh.sendWs(ws, 1, sh.error("rest_api", "message - " + err.message, { message: err.message, stack: err.stack }));
+    }
+  });  // end ws.on-message
+
+  ws.on("error", function (err) {
+    shlog.error("(" + this.uid + ")", err);
+  });
+
+  ws.on("close", function () {
+    clearInterval(this.hbTimer);
+
+    if (_.isUndefined(this.uid) || this.uid === 0) {
+      shlog.info("socket: close - socket never had valid user session");
+      return;
+    }
+    shlog.info("(" + this.uid + ") socket: close");
+
+    var userConn = gUsers[this.uid];
+    if (_.isUndefined(userConn)) {
+      shlog.error("socket: uid set, but user not in map", userConn);
+    } else {
+      delete gUsers[this.uid];
+      if (userConn.liveUser === "on") {
+        Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
+      }
+    }
+
+    var userChannel = sh.channel("user", this.uid);
+    shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
+    eventEmitter.removeAllListeners(userChannel);
+    var self = this;
+    _.each(ws.games, function (game) {
+      var gameChannel = sh.channel("game", game);
+      shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
+      eventEmitter.removeListener(gameChannel, socketNotify);
+      // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
+      // userConn may not exist here so can't use it for name
+      global.socket.notify(game, sh.event("event.live.game.user", {uid: self.uid, name: "", pic: "", gameId: game, status: "offline"}));
+    });
+  });
+}
+
 Socket.start = function () {
   wss = new WebSocketServer({port: global.CONF.socketPort});
   shlog.info("socketserver listening: " + global.CONF.socketPort);
 
   wss.on("connection", function (ws) {
-    shlog.info("socket: connect");
-    ws.uid = 0;
-    ws.games = [];
-    ws.hbTimer = null;
-
-    var heartBeat = function () {
-      sh.sendWs(ws, 0, sh.event("event.heartbeat", {interval: global.CONF.heartBeat}));
-    };
-    ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
-
-    // helper functions in valid ws scope
-    var socketNotify = function (message) {
-      shlog.info("(" + ws.uid + ") socket: socketNotify");
-      if (ws.readyState === 1) {
-        // 1 = OPEN - SWD: find this in ws module later
-        sh.sendWs(ws, 0, message);
-      } else {
-        shlog.info("(" + ws.uid + ") socket: dead socket");
-      }
-    };
-
-    ws.on("message", function (message) {
-try {
-      shlog.recv("live - %s", message);
-
-      var req = {};
-      var res = {
-        ws: ws,
-        eventEmitter: eventEmitter,
-        socketNotify: socketNotify
-      };
-
-      // fill in req.body
-      req.body = JSON.parse(message);
-
-      // fill in req.session
-      sh.fillSession(req, res, function (error, data) {
-        if (error !== 0) {
-          sh.sendWs(ws, error, data);
-          return;
-        }
-        // if valid user, add to list, if not we are in reg.* call
-        if (!_.isUndefined(req.session)) {
-          ws.uid = req.session.uid;
-
-          // if socket not registered in gUsers, do it
-          if (_.isUndefined(gUsers[ws.uid])) {
-            gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "online", liveUser: "off", last: new Date().getTime()};
-            // hookup the user channel
-            var userChannel = sh.channel("user", ws.uid);
-            if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
-              shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
-              eventEmitter.on(userChannel, socketNotify);
-            }
-          }
-        }
-
-//        shlog.foo();
-
-        sh.call(req, res, function (error, data) {
-          if (error) {
-            shlog.error(error, data);
-          }
-          if (data !== null && !_.isUndefined(data)) {
-            data.cb = req.body.cb;
-            sh.sendWs(ws, error, data);
-          }
-        });  // end sh.call
-      });  // end sh.fillSession
-} catch (err) {
-  sh.sendWs(ws, 1, sh.error("rest_api", err.message, { message: err.message, stack: err.stack }));
-}
-    });  // end ws.on-message
-
-    ws.on("error", function (err) {
-      shlog.error("(" + this.uid + ")", err);
-    });
-
-    ws.on("close", function () {
-      clearInterval(this.hbTimer);
-
-      if (_.isUndefined(this.uid) || this.uid === 0) {
-        shlog.info("socket: close - socket never had valid user session");
-        return;
-      }
-      shlog.info("(" + this.uid + ") socket: close");
-
-      var userConn = gUsers[this.uid];
-      if (_.isUndefined(userConn)) {
-        shlog.error("socket: uid set, but user not in map", userConn);
-      } else {
-        delete gUsers[this.uid];
-        if (userConn.liveUser === "on") {
-          Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
-        }
-      }
-
-      var userChannel = sh.channel("user", this.uid);
-      shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
-      eventEmitter.removeAllListeners(userChannel);
-      var self = this;
-      _.each(ws.games, function (game) {
-        var gameChannel = sh.channel("game", game);
-        shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
-        eventEmitter.removeListener(gameChannel, socketNotify);
-        // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-        // userConn may not exist here so can't use it for name
-        global.socket.notify(game, sh.event("event.live.game.user", {uid: self.uid, name: "", pic: "", gameId: game, status: "offline"}));
-      });
-    });
-
+    try {
+      handleConnect(ws);
+    } catch (err) {
+      sh.sendWs(ws, 1, sh.error("rest_api", "connection - " + err.message, { message: err.message, stack: err.stack }));
+    }
   }); // end wss.on-connection
 
   wss.on("error", function (err) {

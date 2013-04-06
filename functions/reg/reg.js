@@ -64,11 +64,13 @@ exports.verifyUser = function (email, password, cb) {
       emailMap = JSON.parse(value);
     }
     sh.getOrCreateUser(emailMap.uid, function (error, user) {
+      if (error) {
+        cb(error, user);
+        return;
+      }
       if (user === null) {
         shlog.error("uanble to find or create admin user");
-        if (_.isFunction(cb)) {
-          cb(0, sh.error("no_admin_user", "unable to find or create admin user"));
-        }
+        cb(0, sh.error("no_admin_user", "unable to find or create admin user"));
         return;
       }
       if (user.get("email").length === 0) {
@@ -77,9 +79,7 @@ exports.verifyUser = function (email, password, cb) {
         user.set("roles", ["admin"]);
       }
     });
-    if (_.isFunction(cb)) {
-      cb(1);
-    }
+    cb(0);
   });
 };
 
