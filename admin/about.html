@@ -1,0 +1,32 @@
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+<title>Lobby</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+
+    <script language="javascript">
+var Env = {{{EnvJson}}};
+
+$(init);
+function init() {
+    $("#shSystem").text("Example");
+    $("#shSubTitle").text("About");
+
+
+    $("#about").text(JSON.stringify(Env, undefined, 2))
+}
+    </script>
+</head>
+<body>
+{{> header}}
+{{> adminNav}}
+
+<pre id="about"></pre>
+
+{{> footer}}
+</body>
+</html>
