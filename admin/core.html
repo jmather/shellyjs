@@ -159,6 +159,10 @@
                     data: JSON.stringify(input),
                     success: function (data, status) {
                         gOutputEdit.set(data);
+                    },
+                    error: function (xhr, status, err) {
+                        console.log(xhr.responseText);
+                        gOutputEdit.set(JSON.parse(xhr.responseText));
                     }
                 })
             });

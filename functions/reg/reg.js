@@ -21,7 +21,7 @@ exports.functions = {
     email: {dtype: "string"},
     password: {dtype: "string"}
   }, security: []},
-  downgrade: {desc: "testing only - remove email from user object", params: {}, security: []},
+  downgrade: {desc: "testing only - remove email from user object", params: {userId: {dtype: "string"}}, security: []},
   check: {desc: "check if user exists", params: {email: {dtype: "string"}}, security: []},
   login: {desc: "user login", params: {
     email: {dtype: "string"},
@@ -218,7 +218,7 @@ exports.upgrade = function (req, res, cb) {
     // set the email for the user
     req.session.user.set("email", email);
     // create the email map
-    emailMap = this.createEmailReg(userRaw.uid, email, password);
+    emailMap = createEmailReg(userRaw.uid, email, password);
 //    emailMap.uid = userRaw.uid;
 //    emailMap.email = email;
 //    emailMap.password = hashPassword(emailMap.uid, password);
@@ -230,9 +230,21 @@ exports.upgrade = function (req, res, cb) {
 
 // SWD for testing only
 exports.downgrade = function (req, res, cb) {
-  gDb.kdelete("kEmailMap", req.session.user.get("email"));
-  req.session.user.set("email", "");
-  cb(0, sh.event("reg.downgrade", {status: "ok"}));
+  var userId = req.body.userId;
+  sh.getUser(userId, function (err, user) {
+    if (user !== null) {
+      gDb.kdelete("kEmailMap", user.get("email"), function (err, data) {
+        if(err) {
+          cb(err, sh.error("delete_error", "unable to delete email map", data));
+          return;
+        }
+        user.set("email", "");
+        cb(0, sh.event("reg.downgrade", {status: "ok"}));
+      });
+    } else {
+      cb(1, sh.error("no_user", "unable to load user", {userId: userId}));
+    }
+  });
 };
 
 exports.create = function (req, res, cb) {
