@@ -47,7 +47,7 @@ User.prototype.load = function (uid, cb) {
       self._data = _.merge(self._data, savedData);
       self._data.uid = uid;
       if (self._data.name.length === 0) {
-        self._data.name = "player" + uid;
+        self._data.name = "player" + uid.substr(0, 4);
       }
     } catch (e) {
       cb(1, sh.error("user_parse", "unable to parse user data", {uid: uid, extra: e.message}));
@@ -67,7 +67,7 @@ User.prototype.loadOrCreate = function (uid, cb) {
   this.load(uid, function (error, value) {
     if (error) {
       self._data.uid = uid;
-      self._data.name = "player" + uid;
+      self._data.name = "player" + uid.substr(0, 4);
       // try and create on since we are passed session check
       self.save(cb);
     } else {
