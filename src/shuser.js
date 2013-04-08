@@ -113,3 +113,7 @@ User.prototype.setData = function (data) {
   this._dirty = true;
   this._data = _.merge(this._data, data);
 };
+
+User.prototype.hasRole = function (role) {
+  return _.contains(this._data.roles, role);
+};

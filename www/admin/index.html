@@ -9,10 +9,14 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <script>
         var Env = {{{EnvJson}}};
+        var Config = {{{ConfigJson}}};
+        var Package = {{{PackageJson}}};
 
         $(init);
         function init() {
             $("#shSubTitle").text("System Info");
+            $("#config").text(JSON.stringify(Config, undefined, 2))
+            $("#package").text(JSON.stringify(Package, undefined, 2))
         }
     </script>
 
@@ -20,6 +24,10 @@
 <body>
 {{> header}}
 {{> adminNav}}
+
+gBaseDir = {{gBaseDir}}
+<pre id="config"></pre>
+<pre id="package"></pre>
 
 {{> footer}}
 </body>
