@@ -87,6 +87,7 @@
             $('#functionName').text(func);
             var funcInfo = Env.modules[module].functions[func];
             $('#functionDescription').text(funcInfo.desc);
+            $('#functionSecurity').text(JSON.stringify(funcInfo.security));
             var paramInfo = "";
             console.log(funcInfo);
             for (key in funcInfo.params)
@@ -191,6 +192,9 @@
     </tr>
     <tr>
         <td class="nameCell">description:</td><td><div id="functionDescription">{function_description}</div></td>
+    </tr>
+    <tr>
+        <td class="nameCell">security:</td><td><div id="functionSecurity">{function_security}</div></td>
     </tr>
 </table>
 <div id="inputEditor"></div>

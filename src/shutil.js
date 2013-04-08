@@ -102,9 +102,27 @@ shutil.call = function (req, res, cb) {
   }
 
   // check function
-  if (_.isUndefined(module.functions[funcName])) {
-    cb(1, shutil.error("module_function", "function does not exist", {module: moduleName, function: funcName}));
+  if (_.isUndefined(module[funcName])) {
+    cb(1, shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
     return;
+  }
+
+  // check function def
+  if (_.isUndefined(module.functions[funcName])) {
+    cb(1, shutil.error("module_function", "function description does not exist", {module: moduleName, function: funcName}));
+    return;
+  }
+
+  // check function perms
+  if (module.functions[funcName].security.length > 0) {
+    var hasPerms = _.find(module.functions[funcName].security, function (value) {
+      return req.session.user.hasRole(value);
+    });
+    if (!hasPerms) {
+      cb(1, shutil.error("function_perms", "user does not have permision to call this function", {module: moduleName,
+        function: funcName, security: module.functions[funcName].security}));
+      return;
+    }
   }
 
   // validate params
