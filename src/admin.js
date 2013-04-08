@@ -9,7 +9,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var adminBase = global.gBaseDir + "/admin";
+var adminBase = global.gBaseDir + "/www/admin";
 var adminStatic = adminBase + "/static";
 var adminLogin = adminBase + "/login";
 
