@@ -120,6 +120,17 @@ app.get("*.html", function (req, res) {
   var env = createEnv(req);
 
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
+    gBaseDir: global.gBaseDir,
+    ConfigJson: JSON.stringify(global.CONF),
+    PackageJson: JSON.stringify(global.PACKAGE),
+    partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
+});
+
+app.get("*.html", function (req, res) {
+  shlog.info("%s %s", req.method, req.url);
+  var env = createEnv(req);
+
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
     partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
 });
 
