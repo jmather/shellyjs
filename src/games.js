@@ -16,8 +16,6 @@ var gamesLogin = gamesBase + "/login";
 shlog.info("games directory: " + gamesBase);
 
 var app = express();
-app.use(sh.expressCrossDomain);
-app.use(sh.expressError);
 app.use(express.favicon(gamesStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
 app.set("views", gamesBase);

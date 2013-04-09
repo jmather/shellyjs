@@ -24,8 +24,6 @@ reg.verifyUser(global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN_PASSWOR
 });
 
 var app = express();
-app.use(sh.expressCrossDomain);
-app.use(sh.expressError);
 app.use(express.favicon(adminStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
 app.set("views", adminBase);

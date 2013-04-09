@@ -7,7 +7,6 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 var rest = express();
 
 rest.use(sh.expressCrossDomain);
-rest.use(sh.expressError);
 rest.use(express.bodyParser());
 rest.use(express.cookieParser());
 
