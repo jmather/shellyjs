@@ -270,6 +270,11 @@ shutil.expressCrossDomain = function(req, res, next) {
 };
 
 shutil.expressError = function (req, res, next) {
+  next();
+// SWD: this doesn't work as the stack keeps growing
+// the run doesn't work either, the stack has a race condition where
+// if the second call finishes before the first it pops the wrong domain
+/*
   var dm = domain.create();
   dm.on('error', function(err) {
     next(err);
@@ -277,4 +282,6 @@ shutil.expressError = function (req, res, next) {
   });
   dm.enter();
   next();
+*/
+//  dm.run(next); // does not work
 };
