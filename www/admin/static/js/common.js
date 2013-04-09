@@ -12,7 +12,8 @@ function shCall(cmdData, cb) {
       cb(0, data);
     },
     error: function (xhr, status, err) {
-      cb(1, xhr.responseText);
+      var data = JSON.parse(xhr.responseText);
+      cb(1, data);
     }
   });
 }

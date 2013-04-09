@@ -83,6 +83,23 @@ exports.verifyUser = function (email, password, cb) {
   });
 };
 
+exports.findUserByEmail = function (email, cb) {
+  gDb.kget("kEmailMap", email, function (error, value) {
+    if (value === null) {
+      cb(1, sh.error("no_user_email", "unable to find user with email", {email: email}));
+      return;
+    }
+    var emailMap = JSON.parse(value);
+    sh.getUser(emailMap.uid, function (error, user) {
+      if (error) {
+        cb(1, sh.error("no_user_uid", "unable to load user for id", {email: email, uid: emailMap.uid}));
+        return;
+      }
+      cb(0, user);
+    });
+  });
+};
+
 exports.login = function (req, res, cb) {
   var out = {};
 

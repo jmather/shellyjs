@@ -5,6 +5,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
 var ShUser = require(global.gBaseDir + "/src/shuser.js");
+var reg = require(global.gBaseDir + "/functions/reg/reg.js");
 
 var db = global.db;
 
@@ -14,7 +15,8 @@ user.desc = "utility functions for shelly modules";
 user.functions = {
   get: {desc: "get user object", params: {}, security: []},
   set: {desc: "set user object", params: {user: {dtype: "object"}}, security: []},
-  profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []}
+  profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []},
+  find: {desc: "find a user based on email or token", params: {by : {dtype: "string"}, value: {dtype: "string"}}, security: []}
 };
 
 user.pre = function (req, res, cb) {
@@ -60,4 +62,23 @@ user.profiles = function (req, res, cb) {
       cb(error, data);
     }
   });
+};
+
+user.find = function (req, res, cb) {
+  if (req.body.by === "email") {
+    reg.findUserByEmail(req.body.value, function (err, data) {
+      if (err) {
+        cb(err, data);
+        return;
+      }
+      cb(0, sh.event("even.user.find", data.getData()));
+    });
+    return;
+  }
+  if (req.body.by === "token") {
+    cb(1, sh.error("not_implemented", "not yet"));
+    return;
+  }
+
+  cb(1, sh.error("unknown_find_by", "no way to find a user by this data type", {by: req.body.by}));
 };

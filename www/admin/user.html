@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Shelly System</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <script src="/static/js/common.js"></script>
+    <style>
+        pre {
+            margin: 0px;
+        }
+        .lookupUserDiv {
+            width: 300px;
+        }
+        .findDiv {
+            text-align: center;
+        }
+    </style>
+    <script>
+        var Env = {{{EnvJson}}};
+
+        $(init);
+        function init() {
+            $("#shSubTitle").text("User Manager");
+
+            $("#userInfo").text(JSON.stringify(Env.user, undefined, 2));
+
+            $('#findByEmail').click(function() {
+                var email = $("#email").val();
+                shCall({cmd: "user.find", by: "email", value: email}, function (err, data) {
+                    $("#userInfo").text(JSON.stringify(data, undefined, 2));
+                })
+            });
+
+            $('#findByToken').click(function() {
+            });
+        }
+    </script>
+
+</head>
+<body>
+{{> header}}
+{{> adminNav}}
+
+<div class="gameBoxDiv lookupUserDiv">
+    <div class="gameBoxHeaderDiv">Lookup User</div>
+    <div class="gameBoxInnerDiv">
+        <table>
+            <tr><td>By Email:</td><td><input id="email" type="text"></input></td><td><button id="findByEmail">find</button></td></tr>
+            <tr><td>By Token:</td><td><input id="token" type="text"></input></td><td><button id="findBytoken">find</button></td></tr>
+        </table>
+    </div>
+</div>
+
+<div>
+    user = <pre id="userInfo"></pre>
+</div>
+
+{{> footer}}
+</body>
+</html>
