@@ -24,16 +24,13 @@ reg.verifyUser(global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN_PASSWOR
 });
 
 var app = express();
-//app.use(express.basicAuth(function(user, pass){
-//  return "scott" == user & "foo" == pass;
-//}));
+app.use(sh.expressCrossDomain);
+app.use(sh.expressError);
 app.use(express.favicon(adminStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
 app.set("views", adminBase);
 app.engine("html", engines.hogan);
-
 app.use("/static", express.static(adminStatic));  // must be here so static files don't go through session check
-
 app.use(express.cookieParser());
 
 app.use(function (req, res, next) {

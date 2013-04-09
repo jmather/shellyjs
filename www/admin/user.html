@@ -13,7 +13,11 @@
             margin: 0px;
         }
         .lookupUserDiv {
-            width: 300px;
+            width: 450px;
+        }
+        .emailInput,
+        .tokenInput {
+            width: 245px;
         }
         .findDiv {
             text-align: center;
@@ -49,12 +53,12 @@
     <div class="gameBoxHeaderDiv">Lookup User</div>
     <div class="gameBoxInnerDiv">
         <table>
-            <tr><td>By Email:</td><td><input id="email" type="text"></input></td><td><button id="findByEmail">find</button></td></tr>
-            <tr><td>By Token:</td><td><input id="token" type="text"></input></td><td><button id="findBytoken">find</button></td></tr>
+            <tr><td>By Email:</td><td><input id="email" class="emailInput" type="text"></input></td><td><button id="findByEmail">find</button></td></tr>
+            <tr><td>By Token:</td><td><input id="token" class="tokenInput" type="text" value="3c894b70-9bdb-11e2-8df9-4161594da637"></input></td><td><button id="findBytoken">find</button></td></tr>
         </table>
     </div>
 </div>
-
+<div style="clear:both;"></div>
 <div>
     user = <pre id="userInfo"></pre>
 </div>

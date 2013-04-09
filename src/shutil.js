@@ -1,5 +1,6 @@
 var path = require("path");
 var util = require("util");
+var domain = require('domain');
 
 var _ = require("lodash");
 var async = require("async");
@@ -254,4 +255,26 @@ shutil.getOrCreateUser = function (uid, cb) {
     }
     cb(error, user);
   });
+};
+
+
+shutil.expressCrossDomain = function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  if ('OPTIONS' === req.method) {
+    res.send(200);
+    return;
+  }
+  next();
+};
+
+shutil.expressError = function (req, res, next) {
+  var dm = domain.create();
+  dm.on('error', function(err) {
+    next(err);
+    dm.dispose();
+  });
+  dm.enter();
+  next();
 };

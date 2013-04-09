@@ -129,6 +129,7 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
 .gameBoxDiv {
     margin-top: 7px;
     margin-right: 5px;
+    float: left;
 }
 .gameBoxHeaderDiv {
     background-color: hsla(357, 100.0000%, 27.0588%, .7);
