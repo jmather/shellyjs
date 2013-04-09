@@ -131,6 +131,11 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 
+app.use("/", function (req, res) {
+  shlog.info("default handler - default page");
+  res.redirect("/index.html");
+  return 0;
+});
 
 //********** error handling
 

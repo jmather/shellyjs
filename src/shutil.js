@@ -206,6 +206,9 @@ shutil.fillProfiles = function (userIds, cb) {
     user.load(userId, function (error, data) {
       profiles[userId] = {};
       profiles[userId].name = user.get("name");
+      if (profiles[userId].name.length === 0) {
+        profiles[userId].name = "anon" + userId.substr(0, 4);
+      }
       lcb();
     });
   }, function (error) {
@@ -224,6 +227,9 @@ shutil.extendProfiles = function (profiles, cb) {
     var user = new ShUser();
     user.load(userId, function (error, data) {
       profiles[userId].name = user.get("name");
+      if (profiles[userId].name.length === 0) {
+        profiles[userId].name = "anon" + userId.substr(0, 4);
+      }
       lcb();
     });
   }, function (error) {

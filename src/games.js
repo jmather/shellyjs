@@ -92,6 +92,11 @@ app.get("*.html", function (req, res) {
 
 app.use("/login", express.static(gamesLogin));  // catch all for logout.html and script.js
 
+app.use("/", function (req, res) {
+  shlog.info("default handler - goto lobby");
+  res.redirect("/lobby.html");
+  return 0;
+});
 
 //********** error handling
 

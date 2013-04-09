@@ -63,7 +63,11 @@ function setWhoTurn(gameId, whoTurn, profile) {
     $gamePlaying.prependTo("#gameList");
   } else {
     $turnSpan.addClass("playerName" + whoTurn);
-    $turnSpan.text(profile.name + "'s");
+    var name = profile.name;
+    if (name.length === 0) {
+      name = whoTurn;
+    }
+    $turnSpan.text(name + "'s");
     $gamePlaying.detach();
     $gamePlaying.appendTo("#gameList");
   }
@@ -73,7 +77,7 @@ function setMyGames(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {
     var $newGame = $("#gameTemplate").clone();
-    $newGame.find("#gameName").text(gameList[gameId].name);
+    $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId.substr(0, 4) + "..");
     var game = gameList[gameId];
     $newGame.addClass("myGameId" + gameId);
     $newGame.addClass("activeGame");
