@@ -5,8 +5,6 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var ShObject = require(global.gBaseDir + "/src/shobject.js");
 
-var db = global.db;
-
 function User() {
   this._keyType = "kUser";
   this._data = {

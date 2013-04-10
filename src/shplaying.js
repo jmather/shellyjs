@@ -4,27 +4,20 @@ var _ = require("lodash");
 
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
-
-var db = global.db;
+var ShObject = require(global.gBaseDir + "/src/shobject.js");
 
 function Playing() {
-  this._dirty = false;
+  this._keyType = "kPlaying",
   this._data = {
-    uid: 0,
     name: "",
     currentGames: {}
   };
-
-  this._uid = 0;
 }
 
-/**
- * Inherits from EventEmitter.
- */
-
-util.inherits(Playing, events.EventEmitter);
+util.inherits(Playing, ShObject);
 module.exports = Playing;
 
+/*
 Playing.prototype.load = function (uid, cb) {
   this._uid = uid;
 
@@ -97,21 +90,14 @@ Playing.prototype.setData = function (data) {
   this._dirty = true;
   this._data = _.merge(this._data, data);
 };
+*/
 
 Playing.prototype.addGame = function (game) {
-  this._dirty = true;
   var ts = new Date().getTime();
   this._data.currentGames[game.get("gameId")] = {name: game.get("name"), lastJoin: ts};
-  this.save(function () {
-    // don"t care;
-  });
 };
 
 Playing.prototype.removeGame = function (game) {
-  this._dirty = true;
   var ts = new Date().getTime();
   delete this._data.currentGames[game.get("gameId")];
-  this.save(function () {
-    // don"t care;
-  });
 };

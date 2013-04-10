@@ -5,7 +5,8 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var moduleMap = {
   kObject : {module: null, file: "/src/shobject.js"},
-  kUser : {module: null, file: "/src/shuser.js"}
+  kUser : {module: null, file: "/src/shuser.js"},
+  kPlaying : {module: null, file: "/src/shplaying.js"}
 };
 
 function ShLoader() {

@@ -86,7 +86,7 @@ ShObject.prototype.save = function (cb) {
       cb(1, sh.error("object_save", "unable to save object data", {oid: self._oid, err: err, res: res}));
       return;
     }
-    shlog.info("object saved '%s'", this._key);
+    shlog.info("object saved '%s'", self._key);
     self._hash = currHash;
     cb(0);
   });

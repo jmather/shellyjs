@@ -5,10 +5,6 @@ var async = require("async");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShGame = require(global.gBaseDir + "/src/shgame.js");
-var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by create when pre-populating users
-var ShPlaying = require(global.gBaseDir + "/src/shplaying.js");  // used by create when pre-populating users
-
-var db = global.db;
 
 var gGameDir = global.gBaseDir + "/games";
 
@@ -93,23 +89,24 @@ game.post = function (req, rs, cb) {
   req.env.game.save(cb);
 };
 
-function addGamePlaying(uid, game) {
-  var playing = new ShPlaying();
-  playing.loadOrCreate(uid, function (error, data) {
+function addGamePlaying(loader, uid, game) {
+  loader.get("kPlaying", uid, function (error, playing) {
     playing.addGame(game);
   });
 }
 
-function removeGamePlaying(uid, game) {
-  var playing = new ShPlaying();
-  playing.loadOrCreate(uid, function (error, data) {
-    playing.removeGame(game);
+function removeGamePlaying(loader, uid, game) {
+  loader.loadOrCreate(uid, function (error, playing) {
+    // SWD check error
+    if (!error) {
+      playing.removeGame(game);
+    }
   });
 }
 
-function addGamePlayingMulti(players, game, cb) {
+function addGamePlayingMulti(loader, players, game, cb) {
   async.each(players, function (playerId, cb) {
-    addGamePlaying(playerId, game);
+    addGamePlaying(loader, playerId, game);
     // ignore any errors
     cb();
   }, function (error) {
@@ -135,13 +132,13 @@ game.create = function (req, res, cb) {
   req.env.game = game;
 
   if (_.isUndefined(req.body.players)) {
-    addGamePlaying(uid, game);
+    addGamePlaying(req.loader, uid, game);
     game.setPlayer(uid, "ready");
   } else {
     _.each(req.body.players, function (playerId) {
       game.setPlayer(playerId, "ready");
     });
-    addGamePlayingMulti(req.body.players, game, function (error, data) {
+    addGamePlayingMulti(req.loader, req.body.players, game, function (error, data) {
       // SWD ignore any errors for now
       if (error) {
         shlog.error("add_players", "unable to add a player", data);
@@ -191,7 +188,7 @@ game.join = function (req, res, cb) {
 
   var isNew = !_.isObject(players[uid]);
 
-  addGamePlaying(uid, game);
+  addGamePlaying(req.loader, uid, game);
   game.setPlayer(uid, "ready");
 
   if (isNew) {
@@ -211,8 +208,7 @@ game.leave = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
 
-  var playing = new ShPlaying();
-  playing.loadOrCreate(uid, function (error, data) {
+  req.loader.loadOrCreate("kPlaying", uid, function (error, playing) {
     if (error) {
       cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
       return;
@@ -439,8 +435,7 @@ function fillGames(gameList, cb) {
 game.playing = function (req, res, cb) {
   var uid = req.session.uid;
 
-  var playing = new ShPlaying();
-  playing.loadOrCreate(uid, function (error, data) {
+  req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {
       cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
       return;
