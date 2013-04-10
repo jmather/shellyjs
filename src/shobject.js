@@ -21,6 +21,10 @@ util.inherits(ShObject, events.EventEmitter);
 
 module.exports = ShObject;
 
+ShObject.prototype.key = function () {
+  return db.key(this._keyType, this._oid);
+}
+
 ShObject.prototype.load = function (oid, cb) {
   if (!_.isString(oid)) {
     cb(1, sh.error("bad_oid", "unable to load - oid is not a string", {oid: oid}));
@@ -81,7 +85,6 @@ ShObject.prototype.save = function (cb) {
       return;
     }
     shlog.info("object saved '%s'", self._oid);
-    console.log(self._data);
     self._hash = currHash;
     cb(0);
   });

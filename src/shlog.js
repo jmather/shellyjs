@@ -21,6 +21,7 @@ var gDebug = {
 //  "socket": {},
 //  "games": {},
   "shobject": {},
+  "shloader": {},
   "shelly": {}
 };
 

@@ -58,6 +58,10 @@ function genKey(keyType, params) {
   return key;
 }
 
+shdb.key = function (keyType, params) {
+  return genKey(keyType, params);
+};
+
 shdb.kget = function (keyType, params, cb) {
   // SWD check keyType undefined
   try {
