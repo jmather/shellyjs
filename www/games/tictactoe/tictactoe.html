@@ -140,7 +140,7 @@ function setState(game) {
         $("#gamePlaying").text("O's")
     }
 
-    $("#gameId").text(game.gameId);
+    $("#gameId").text(game.gameId.substr(0, 6) + "..");
     Env.gameId = game.gameId;
 
     setPlayers(game.players, game.whoTurn);
