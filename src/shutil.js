@@ -73,7 +73,6 @@ shutil.fillSession = function (req, res, cb) {
       return;
     }
     shlog.info("user loaded: " + req.session.uid);
-    console.log(user);
     req.session.user = user;
     cb(0);
   });
