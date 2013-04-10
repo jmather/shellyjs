@@ -14,9 +14,17 @@ function ShLoader() {
 
 module.exports = ShLoader;
 
-ShLoader.prototype.loadOrCreate = function (keyType, params, cb) {
+ShLoader.prototype.get = function (keyType, params, cb) {
   if (_.isUndefined(moduleMap[keyType])) {
     cb(1, {message: "bad key"});
+    return;
+  }
+
+  var key = global.db.key(keyType, params);
+
+  if (_.isObject(this._objects[key])) {
+    shlog.info("cache hit: '%s'", key);
+    cb(0, this._objects[key]);
     return;
   }
 
@@ -30,9 +38,10 @@ ShLoader.prototype.loadOrCreate = function (keyType, params, cb) {
 
   var self = this;
   var obj = new ShClass();
+  shlog.info("loadOrCreate: '%s'", key);
   obj.loadOrCreate(params, function (err, data) {
     if (!err) {
-      self._objects[obj.key()] = obj;
+      self._objects[key] = obj;
       cb(0, obj);
       return;
     }
@@ -47,6 +56,8 @@ ShLoader.prototype.dump = function (cb) {
     self._objects[key].save(cb);
   }, function (err) {
     shlog.info("dump complete");
-    cb(0);
+    if (_.isFunction(cb)) {
+      cb(0);
+    }
   });
 };

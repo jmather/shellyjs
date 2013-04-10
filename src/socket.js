@@ -7,7 +7,7 @@ var eventEmitter = new events.EventEmitter();
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShGame = require(global.gBaseDir + "/src/shgame.js");
+var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
 var Socket = exports;
 var wss = null;
@@ -44,6 +44,7 @@ function handleMessage(ws, message, socketNotify) {
 
   // fill in req.body
   req.body = JSON.parse(message);
+  req.loader = new ShLoader();
 
   // fill in req.session
   sh.fillSession(req, res, function (error, data) {
@@ -72,11 +73,12 @@ function handleMessage(ws, message, socketNotify) {
       return;
     }
     sh.call(req, res, function (error, data) {
+      req.loader.dump();
       try {
         if (error) {
           shlog.error(error, data);
         }
-        if (data !== null && !_.isUndefined(data)) {
+        if (_.isObject(data)) {
           data.cb = req.body.cb;
           sh.sendWs(ws, error, data);
         }

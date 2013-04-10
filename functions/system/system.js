@@ -32,23 +32,22 @@ system.config = function (req, res, cb) {
   cb(0, sh.event("system.config", {gBaseDir: global.gBaseDir, CONF: global.CONF, PACKAGE: global.PACKAGE}));
 };
 
-var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-
 system.test = function (req, res, cb) {
   shlog.info("system.test");
 
-  var loader = new ShLoader();
-  loader.loadOrCreate("kObject", "testobj2", function (err, obj) {
+  req.loader.get("kObject", "testobj2", function (err, obj) {
     if (err) {
       cb(err, sh.error("object_load_or_create", "unable to load or create object", obj));
       return;
     }
+//    obj.set("foo", sh.uuid());
 
-    obj.set("foo", sh.uuid());
-
-    loader.dump(function (err, data) {
-      // nothing for now
+    req.loader.get("kObject", "testobj2", function (err, obj) {
+      if (err) {
+        cb(err, sh.error("object_load_or_create", "unable to load or create object", obj));
+        return;
+      }
+      cb(0, sh.event("system.test", obj.getData()));
     });
-    cb(0, sh.event("system.test", obj.getData()));
   });
 };
