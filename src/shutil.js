@@ -98,7 +98,7 @@ shutil.call = function (req, res, cb) {
     delete require.cache[require.resolve(cmdFile)];
     module = require(cmdFile);
   } catch (e) {
-    cb(1, shutil.error("module_require", "unable to load module", {module: moduleName, info: e.message}));
+    cb(1, shutil.error("module_require", "unable to load module", {module: moduleName, message: e.message, stack: e.stack}));
     return;
   }
 

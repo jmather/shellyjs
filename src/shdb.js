@@ -15,7 +15,7 @@ var gKeyTypes = {
   kTokenMap: {tpl: "token:%s"},
   kUser: {tpl: "u:%s"},
   kGame: {tpl: "game:%s"},
-  kObject: {tpl: "object:%s:%s"},
+  kObject: {tpl: "obj:%s"},
   kPlaying: {tpl: "gp:%s"}
 };
 
