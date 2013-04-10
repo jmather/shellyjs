@@ -20,7 +20,7 @@ var gDebug = {
 //  "rest": {},
 //  "socket": {},
 //  "games": {},
-  "dbobject": {},
+  "shobject": {},
   "shelly": {}
 };
 
