@@ -57,7 +57,7 @@ function setWhoTurn(gameId, whoTurn, profile) {
   $turnSpan.removeClass("playerName" + whoTurn);
   if (whoTurn === "0") {
     $turnSpan.text("over");
-  } else if (whoTurn === Env.user.uid) {
+  } else if (whoTurn === Env.user.oid) {
     $turnSpan.text("yours");
     $gamePlaying.detach();
     $gamePlaying.prependTo("#gameList");

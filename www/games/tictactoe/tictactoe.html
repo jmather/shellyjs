@@ -73,7 +73,7 @@ function setPlayers(playerList, whoTurn) {
     $(".activePlayer").remove();
     for (playerId in playerList) {
         var $newGame = $("#playerTemplate").clone();
-        if (playerId === Env.user.uid) {
+        if (playerId === Env.user.oid) {
             $newGame.find("#playerName").text("me");
             $newGame.find("#playerKick").remove();
             $newGame.find("#playerStatus").remove();
@@ -99,7 +99,7 @@ function setPlayers(playerList, whoTurn) {
 }
 
 function setState(game) {
-    $.cookie("shLastGame" + Env.user.uid, game.gameId, { expires: 3650, path: '/' });
+    $.cookie("shLastGame" + Env.user.oid, game.gameId, { expires: 3650, path: '/' });
     hideError();
 
     var gameBoard = game.state.gameBoard;
@@ -111,7 +111,7 @@ function setState(game) {
     }
 
     $("#gameStatus").text(game.status);
-    if (game.whoTurn == Env.user.uid) {
+    if (game.whoTurn == Env.user.oid) {
         $("#whoTurn").text("yours");
         turnDipl = "yours";
     } else if (game.whoTurn == 0) {
@@ -134,7 +134,7 @@ function setState(game) {
         }
     }
 
-    if (game.state.xes == Env.user.uid) {
+    if (game.state.xes == Env.user.oid) {
         $("#gamePlaying").text("X's");
     } else {
         $("#gamePlaying").text("O's")
@@ -147,7 +147,7 @@ function setState(game) {
 }
 
 function clearState() {
-    $.cookie("shLastGame" + Env.user.uid, "0", { expires: 3650, path: '/' });
+    $.cookie("shLastGame" + Env.user.oid, "0", { expires: 3650, path: '/' });
 
     hideError();
     for (var i = 0; i < 3; i++) {
@@ -174,7 +174,7 @@ function shellyInit() {
     sendCmd("game.playing");
 
     if (Env.gameId === "0") {
-        var lastGame = $.cookie("shLastGame" + Env.user.uid);
+        var lastGame = $.cookie("shLastGame" + Env.user.oid);
         if (typeof (lastGame) === "string") {
             Env.gameId = lastGame;
         }

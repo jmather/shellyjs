@@ -8,6 +8,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
 var adminBase = global.gBaseDir + "/www/admin";
 var adminStatic = adminBase + "/static";
@@ -52,6 +53,7 @@ app.use(function (req, res, next) {
   shlog.info("found cookie shSession: ", req.cookies.shSession);
 //  req.body.session = "1:41:xxxx:0";
 
+  req.loader = new ShLoader();
   sh.fillSession(req, res, function (error, data) {
     if (error) {
       shlog.info("redirect - bad session");
@@ -64,6 +66,7 @@ app.use(function (req, res, next) {
       res.redirect("/login/index.html");
       return 0;
     }
+    req.loader.dump();
     return next();
   });
 

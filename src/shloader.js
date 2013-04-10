@@ -4,7 +4,8 @@ var async = require("async");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var moduleMap = {
-  kObject : {module: null, file: "/src/shobject.js"}
+  kObject : {module: null, file: "/src/shobject.js"},
+  kUser : {module: null, file: "/src/shuser.js"}
 };
 
 function ShLoader() {

@@ -67,13 +67,13 @@ shutil.fillSession = function (req, res, cb) {
   req.session = {};
   req.session.uid = req.body.session.split(":")[1];
   shlog.info("loading user: uid = " + req.session.uid);
-  var user = new ShUser();
-  user.loadOrCreate(req.session.uid, function (error, data) {
-    if (error !== 0) {
-      cb(1, shutil.error("user_load", "unable to load user", {uid: req.session.uid, error: error, data: data}));
+  req.loader.get("kUser", req.session.uid, function (error, user) {
+    if (error) {
+      cb(1, shutil.error("user_load", "unable to load user", {uid: req.session.uid, error: error, user: user}));
       return;
     }
     shlog.info("user loaded: " + req.session.uid);
+    console.log(user);
     req.session.user = user;
     cb(0);
   });

@@ -41,10 +41,10 @@ function addUser(user) {
     }
     var $newGame = $("#userTemplate").clone();
     $newGame.find("#userName").text(user.name);
-    $newGame.find("#userName").addClass("playerName" + user.uid);
-    $newGame.addClass("userId" + user.uid);
+    $newGame.find("#userName").addClass("playerName" + user.oid);
+    $newGame.addClass("userId" + user.oid);
     $newGame.addClass("activeUser");
-    $newGame.attr("uid", user.uid);
+    $newGame.attr("uid", user.oid);
     $newGame.css("display", "block");
 
     $newGame.find("#userOffer").click(function () {

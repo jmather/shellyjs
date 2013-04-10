@@ -14,6 +14,8 @@ rest.use(express.cookieParser());
 rest.use(function (req, res, next) {
   shlog.info("session check");
 
+  req.loader = new ShLoader();
+
   sh.fillSession(req, res, function (error, data) {
     if (error !== 0) {
       res.send(data);
@@ -29,7 +31,6 @@ function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
   shlog.recv("rest - %s", JSON.stringify(req.body));
 
-  req.loader = new ShLoader();
   sh.call(req, res, function (error, data) {
     if (error) {
       shlog.error(error, data);

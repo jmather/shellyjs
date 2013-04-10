@@ -77,6 +77,8 @@ exports.verifyUser = function (email, password, cb) {
         user.set("email", email);
         user.set("name", email.split("@")[0]);
         user.set("roles", ["admin"]);
+        user.save(cb);
+        return;
       }
     });
     cb(0);

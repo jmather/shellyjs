@@ -8,6 +8,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
 var gamesBase = global.gBaseDir + "/www/games";
 var gamesStatic = gamesBase + "/static";
@@ -44,12 +45,15 @@ app.use(function (req, res, next) {
   shlog.info("found cookie shSession: ", req.cookies.shSession);
 //  req.body.session = "1:41:xxxx:0";
 
+  // there is no dump and these page do not modify objects
+  req.loader = new ShLoader();
   sh.fillSession(req, res, function (error, data) {
     if (error) {
       shlog.info("redirect - bad session");
       res.redirect("/login/index.html");
       return 0;
     }
+    req.loader.dump();
     return next();
   });
 

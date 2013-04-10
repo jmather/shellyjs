@@ -16,13 +16,14 @@ function ShObject() {
   this._hash = "";
 
   this._keyType = "kObject";
+  this._key = "";
 }
 util.inherits(ShObject, events.EventEmitter);
 
 module.exports = ShObject;
 
 ShObject.prototype.key = function () {
-  return db.key(this._keyType, this._oid);
+  return  this._key;
 }
 
 ShObject.prototype.load = function (oid, cb) {
@@ -32,6 +33,7 @@ ShObject.prototype.load = function (oid, cb) {
   }
 
   this._oid = oid;
+  this._key = db.key(this._keyType, this._oid);
 
   var self = this;
   db.kget(this._keyType, oid, function (err, value) {
@@ -70,7 +72,7 @@ ShObject.prototype.save = function (cb) {
   var currHash = crypto.createHash("md5").update(JSON.stringify(this._data)).digest("hex");
 
   if (currHash === this._hash) {
-    shlog.info("ignoring save - object not modified '%s'", this._oid);
+    shlog.info("ignoring save - object not modified '%s'", this._key);
     cb(0);
     return;
   }
@@ -84,7 +86,7 @@ ShObject.prototype.save = function (cb) {
       cb(1, sh.error("object_save", "unable to save object data", {oid: self._oid, err: err, res: res}));
       return;
     }
-    shlog.info("object saved '%s'", self._oid);
+    shlog.info("object saved '%s'", this._key);
     self._hash = currHash;
     cb(0);
   });
