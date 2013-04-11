@@ -43,7 +43,12 @@ function handleMessage(ws, message, socketNotify) {
   };
 
   // fill in req.body
-  req.body = JSON.parse(message);
+  try {
+    req.body = JSON.parse(message);
+  } catch (err) {
+    sh.sendWs(ws, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
+    return;
+  }
   req.loader = new ShLoader();
 
   // fill in req.session

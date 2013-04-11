@@ -63,7 +63,12 @@ function makeMove(game) {
 
 ws.on('message', function (message) {
   console.log('received: %s', message);
+  try {
   var msg = JSON.parse(message);
+  } catch (e) {
+    console.error("unabel to parse message");
+    return;
+  }
   if (msg.event === "event.match.stats") {
     if (msg.data["tictactoe"].waiting > 0) {
       sendCmd("match.add", {name: "tictactoe"});
