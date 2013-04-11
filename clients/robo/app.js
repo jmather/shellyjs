@@ -54,7 +54,7 @@ function makeMove(game) {
   for (var i=0; i<3; i++) {
     for (var j=0; j<3; j++) {
       if (game.state.gameBoard[i][j] === "") {
-        sendCmd("game.turn", {gameId: game.gameId, move: {x: i, y: j}});
+        sendCmd("game.turn", {gameId: game.oid, move: {x: i, y: j}});
         return;
       }
     }

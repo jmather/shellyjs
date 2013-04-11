@@ -30,7 +30,7 @@
     }
     .gameListDiv {
         float: left;
-        width: 325px;
+        width: 375px;
     }
     #gameList {
         height: 100px;
@@ -99,7 +99,7 @@ function setPlayers(playerList, whoTurn) {
 }
 
 function setState(game) {
-    $.cookie("shLastGame" + Env.user.oid, game.gameId, { expires: 3650, path: '/' });
+    $.cookie("shLastGame" + Env.user.oid, game.oid, { expires: 3650, path: '/' });
     hideError();
 
     var gameBoard = game.state.gameBoard;
@@ -140,8 +140,8 @@ function setState(game) {
         $("#gamePlaying").text("O's")
     }
 
-    $("#gameId").text(game.gameId.substr(0, 6) + "..");
-    Env.gameId = game.gameId;
+    $("#gameId").text(game.oid.substr(0, 6) + "..");
+    Env.gameId = game.oid;
 
     setPlayers(game.players, game.whoTurn);
 }

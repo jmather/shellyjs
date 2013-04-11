@@ -113,11 +113,8 @@ function addGamePlayingMulti(loader, players, game, cb) {
 game.create = function (req, res, cb) {
   var uid = req.session.uid;
 
+  var game = req.loader.create("kGame", sh.uuid());
 
-  var gameId = sh.uuid();
-  var game = req.loader.create("kGame", gameId);
-
-  game.set("gameId", gameId); // SWD remove this eventually
   game.set("name", req.body.name);
   game.set("ownerId", uid);
   game.set("whoTurn", uid);
@@ -313,10 +310,10 @@ game.reset = function (req, res, cb) {
   req.env.gameModule.reset(req, function (error, data) {
     if (error === 0) {
       // notify live.game listeners
-      global.socket.notify(game.gameId, data);
+      global.socket.notify(game.oid, data);
       // notify live.users that are in this game
       _.forEach(game.playerOrder, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.gameId,
+        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.oid,
           whoTurn: game.whoTurn,
           name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
           pic: ""

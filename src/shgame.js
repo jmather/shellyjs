@@ -12,7 +12,6 @@ function Game() {
   this._keyType = "kGame";
   var ts = new Date().getTime();
   this._data = {
-    gameId: 0,
     name: "",
     ownerId: 0,
     created: ts,
