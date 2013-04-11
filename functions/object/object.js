@@ -47,7 +47,7 @@ object.set = function (req, res, cb) {
       cb(err, obj);
       return;
     }
-    obj.set(req.body.object);
-    cb(0, sh.event("object.get", obj.getData()));
+    obj.setData(req.body.object);
+    cb(0, sh.event("object.set", obj.getData()));
   });
 };
