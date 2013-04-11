@@ -68,20 +68,14 @@ exports.verifyUser = function (email, password, cb) {
         cb(error, user);
         return;
       }
-      if (user === null) {
-        shlog.error("uanble to find or create admin user");
-        cb(0, sh.error("no_admin_user", "unable to find or create admin user"));
-        return;
-      }
       if (user.get("email").length === 0) {
         user.set("email", email);
         user.set("name", email.split("@")[0]);
         user.set("roles", ["admin"]);
-        user.save(cb);
-        return;
       }
+      cb(0, user);
+      return;
     });
-    cb(0);
   });
 };
 

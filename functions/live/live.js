@@ -3,7 +3,6 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
 var live = exports;
 
@@ -92,8 +91,7 @@ live.game = function (req, res, cb) {
       eventEmitter.on(gameChannel, socketNotify);
 
       // must send myself notifs for games existing online users
-      var game = new ShGame();
-      game.load(gameId, function (error) {
+      req.loader.get("kGame", gameId, function (error, game) {
         if (error) {
           sh.sendWs(ws, 1, sh.error("bad_game", "unable to load game", {gameId: gameId}));
           return;

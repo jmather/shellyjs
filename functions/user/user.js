@@ -3,8 +3,6 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShGame = require(global.gBaseDir + "/src/shgame.js");
-var ShUser = require(global.gBaseDir + "/src/shuser.js");
 var reg = require(global.gBaseDir + "/functions/reg/reg.js");
 
 var db = global.db;
@@ -29,14 +27,6 @@ user.pre = function (req, res, cb) {
 
 user.post = function (req, res, cb) {
   shlog.info("user.post");
-
-  if (_.isObject(req.session.user)) {
-    req.session.user.save(function (error, data) {
-      // ingore
-    });
-  }
-
-  // SWD: work out pre/post user save later, for now save on every set
   cb(0);
 };
 

@@ -4,7 +4,6 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShGame = require(global.gBaseDir + "/src/shgame.js");
 
 var gGameDir = global.gBaseDir + "/games";
 
@@ -29,7 +28,7 @@ game.functions = {
   playing: {desc: "list all games user is currently playing", params: {}, security: []}
 };
 
-function loadGame(name) {
+function loadGameModule(name) {
   var gameFile = gGameDir + "/" + name + "/" + name + ".js";
   // SWD for now clear cache each time - will add server command to reload a module
   // SWD should check for all required functions
@@ -47,7 +46,7 @@ game.pre = function (req, res, cb) {
     var name = req.body.name;
     try {
       shlog.info("game.pre: game.create = " + name);
-      req.env.gameModule = loadGame(name);
+      req.env.gameModule = loadGameModule(name);
       cb(0);
       return;
     } catch (e) {
@@ -58,16 +57,15 @@ game.pre = function (req, res, cb) {
 
   var gameId = req.body.gameId;
   shlog.info("game.pre: populating game info for " + gameId);
-  var game = new ShGame();
-  game.load(gameId, function (error, data) {
+  req.loader.get("kGame", gameId, function (error, game) {
     if (error !== 0) {
-      cb(error, data);
+      cb(error, game);
       return;
     }
     var gameName = game.get("name");
     try {
       shlog.info("game.pre: setting game:" + gameName + " = " + gameId);
-      req.env.gameModule = loadGame(gameName);
+      req.env.gameModule = loadGameModule(gameName);
     } catch (e) {
       cb(1, sh.error("game_require", "unable to load game module", {name: gameName, message: e.message}));
       return;
@@ -80,13 +78,7 @@ game.pre = function (req, res, cb) {
 
 game.post = function (req, rs, cb) {
   shlog.info("game.post");
-  if (_.isUndefined(req.env.game)) { // no game to save
-    cb(0);
-    return;
-  }
-  shlog.info("game.post - saving game");
-
-  req.env.game.save(cb);
+  cb(0);
 };
 
 function addGamePlaying(loader, uid, game) {
@@ -121,9 +113,11 @@ function addGamePlayingMulti(loader, players, game, cb) {
 game.create = function (req, res, cb) {
   var uid = req.session.uid;
 
-  var game = new ShGame();
 
-  game.set("gameId", sh.uuid());
+  var gameId = sh.uuid();
+  var game = req.loader.create("kGame", gameId);
+
+  game.set("gameId", gameId); // SWD remove this eventually
   game.set("name", req.body.name);
   game.set("ownerId", uid);
   game.set("whoTurn", uid);
@@ -410,13 +404,12 @@ game.call = function (req, res, cb) {
 
 /////////////// Playing functions
 
-function fillGames(gameList, cb) {
+function fillGames(loader, gameList, cb) {
   var gameIds = Object.keys(gameList);
   async.each(gameIds, function (gameId, lcb) {
-    var game = new ShGame();
-    game.load(gameId, function (error, data) {
+    loader.get("kGame", gameId, function (error, game) {
       if (error) {
-        lcb(data);
+        lcb(game);
         return;
       }
       gameList[gameId].whoTurn = game.get("whoTurn");
@@ -440,7 +433,7 @@ game.playing = function (req, res, cb) {
       cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
       return;
     }
-    fillGames(playing.getData().currentGames, function (error, data) {
+    fillGames(req.loader, playing.getData().currentGames, function (error, data) {
       if (!error) {
         cb(0, sh.event("event.game.playing", data));
       } else {

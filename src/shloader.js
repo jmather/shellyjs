@@ -6,7 +6,8 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var moduleMap = {
   kObject : {module: null, file: "/src/shobject.js"},
   kUser : {module: null, file: "/src/shuser.js"},
-  kPlaying : {module: null, file: "/src/shplaying.js"}
+  kPlaying : {module: null, file: "/src/shplaying.js"},
+  kGame : {module: null, file: "/src/shgame.js"},
 };
 
 function ShLoader() {
@@ -16,12 +17,32 @@ function ShLoader() {
 
 module.exports = ShLoader;
 
+ShLoader.prototype.create = function (keyType, params) {
+  if (_.isUndefined(moduleMap[keyType])) {
+    cb(1, {message: "bad key"});
+    return;
+  }
+  var key = global.db.key(keyType, params);
+
+  var ShClass = null;
+  try {
+    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
+  } catch (e) {
+    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
+    return;
+  }
+
+  var obj = new ShClass();
+  this._objects[key] = obj;
+
+  return obj;
+}
+
 ShLoader.prototype.get = function (keyType, params, cb) {
   if (_.isUndefined(moduleMap[keyType])) {
     cb(1, {message: "bad key"});
     return;
   }
-
   var key = global.db.key(keyType, params);
 
   if (_.isObject(this._objects[key])) {
