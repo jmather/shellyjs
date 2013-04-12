@@ -45,7 +45,7 @@ user.set = function (req, res, cb) {
 
 user.profiles = function (req, res, cb) {
   var userIds = req.body.users;
-  sh.fillProfiles(userIds, function (error, data) {
+  sh.fillProfiles(req.loader, userIds, function (error, data) {
     if (!error) {
       cb(0, sh.event("event.user.profiles", data));
     } else {
@@ -56,7 +56,7 @@ user.profiles = function (req, res, cb) {
 
 user.find = function (req, res, cb) {
   if (req.body.by === "email") {
-    reg.findUserByEmail(req.body.value, function (err, data) {
+    reg.findUserByEmail(req.loader, req.body.value, function (err, data) {
       if (err) {
         cb(err, data);
         return;

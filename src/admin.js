@@ -18,11 +18,13 @@ shlog.info("admin directory: " + adminBase);
 
 // ensure admin user
 var reg = require(global.gBaseDir + "/functions/reg/reg.js");
-reg.verifyUser(global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN_PASSWORD, function (error, data) {
+var loader = new ShLoader();
+reg.verifyUser(loader, global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN_PASSWORD, function (error, data) {
   if (error) {
     shlog.error("unable to load or create default admin", data);
   }
 });
+loader.dump();
 
 var app = express();
 app.use(express.favicon(adminStatic + "/images/favicon.ico"));

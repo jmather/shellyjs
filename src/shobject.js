@@ -50,7 +50,7 @@ ShObject.prototype.load = function (oid, cb) {
       cb(1, sh.error("object_parse", "unable to parse object data", {oid: oid, message: e.message}));
       return;
     }
-    cb(0); // object is valid
+    cb(0, self); // object is valid
   });
 };
 

@@ -36,6 +36,34 @@ ShLoader.prototype.create = function (keyType, params) {
   this._objects[key] = obj;
 
   return obj;
+};
+
+ShLoader.prototype.exists = function (keyType, params, cb) {
+  if (_.isUndefined(moduleMap[keyType])) {
+    cb(1, {message: "bad key"});
+    return;
+  }
+  var key = global.db.key(keyType, params);
+
+  var ShClass = null;
+  try {
+    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
+  } catch (e) {
+    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
+    return;
+  }
+
+  var self = this;
+  var obj = new ShClass();
+  shlog.info("loadOrCreate: '%s'", key);
+  obj.load(params, function (err, data) {
+    if (!err) {
+      self._objects[key] = obj;
+      cb(0, obj);
+      return;
+    }
+    cb(err, data);
+  });
 }
 
 ShLoader.prototype.get = function (keyType, params, cb) {

@@ -186,7 +186,7 @@ game.join = function (req, res, cb) {
     global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {gameId: game.get("gameId"), uid: uid}));
   }
 
-  sh.extendProfiles(game.get("players"), function (error, data) {
+  sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
     if (error) {
       cb(1, sh.error("user_info", "unable to load users for this game", data));
       return;

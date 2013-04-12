@@ -8,7 +8,6 @@ var uuid = require("node-uuid");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var session = require(global.gBaseDir + "/src/session.js");  // used by fill session
-var ShUser = require(global.gBaseDir + "/src/shuser.js");  // used by fill session
 
 var shutil = exports;
 
@@ -198,11 +197,14 @@ shutil.call = function (req, res, cb) {
 };
 
 // takes array of uids
-shutil.fillProfiles = function (userIds, cb) {
+shutil.fillProfiles = function (loader, userIds, cb) {
   var profiles = {};
   async.each(userIds, function (userId, lcb) {
-    var user = new ShUser();
-    user.load(userId, function (error, data) {
+    loader.exists("kUser", userId, function (error, user) {
+      if (error) {
+        lcb(); // just skip and keep going
+        return;
+      }
       profiles[userId] = {};
       profiles[userId].name = user.get("name");
       if (profiles[userId].name.length === 0) {
@@ -220,11 +222,14 @@ shutil.fillProfiles = function (userIds, cb) {
 };
 
 // takes object of objects with uids of keys
-shutil.extendProfiles = function (profiles, cb) {
+shutil.extendProfiles = function (loader, profiles, cb) {
   var userIds = Object.keys(profiles);
   async.each(userIds, function (userId, lcb) {
-    var user = new ShUser();
-    user.load(userId, function (error, data) {
+    loader.get("kUser", userId, function (error, user) {
+      if (error) {
+        lcb(user);
+        return;
+      }
       profiles[userId].name = user.get("name");
       if (profiles[userId].name.length === 0) {
         profiles[userId].name = "anon" + userId.substr(0, 4);
@@ -240,30 +245,7 @@ shutil.extendProfiles = function (profiles, cb) {
   });
 };
 
-shutil.getUser = function (uid, cb) {
-  var user = new ShUser();
-  user.load(uid, function (error, data) {
-    if (error) {
-      cb(error, data);
-      return;
-    }
-    cb(error, user);
-  });
-};
-
-shutil.getOrCreateUser = function (uid, cb) {
-  var user = new ShUser();
-  user.loadOrCreate(uid, function (error, data) {
-    if (error) {
-      cb(error, data);
-      return;
-    }
-    cb(error, user);
-  });
-};
-
-
-shutil.expressCrossDomain = function(req, res, next) {
+shutil.expressCrossDomain = function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');

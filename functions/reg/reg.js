@@ -54,7 +54,7 @@ function createEmailReg(uid, email, password) {
 
 // used to create the default admin user
 // SWD  - a bit ugly
-exports.verifyUser = function (email, password, cb) {
+exports.verifyUser = function (loader, email, password, cb) {
   gDb.kget("kEmailMap", email, function (error, value) {
     var emailMap = {};
     if (value === null) {
@@ -63,7 +63,7 @@ exports.verifyUser = function (email, password, cb) {
     } else {
       emailMap = JSON.parse(value);
     }
-    sh.getOrCreateUser(emailMap.uid, function (error, user) {
+    loader.get("kUser", emailMap.uid, function (error, user) {
       if (error) {
         cb(error, user);
         return;
@@ -79,14 +79,14 @@ exports.verifyUser = function (email, password, cb) {
   });
 };
 
-exports.findUserByEmail = function (email, cb) {
+exports.findUserByEmail = function (loader, email, cb) {
   gDb.kget("kEmailMap", email, function (error, value) {
     if (value === null) {
       cb(1, sh.error("no_user_email", "unable to find user with email", {email: email}));
       return;
     }
     var emailMap = JSON.parse(value);
-    sh.getUser(emailMap.uid, function (error, user) {
+    loader.exists("kUser", emailMap.uid, function (error, user) {
       if (error) {
         cb(1, sh.error("no_user_uid", "unable to load user for id", {email: email, uid: emailMap.uid}));
         return;
@@ -126,7 +126,7 @@ exports.login = function (req, res, cb) {
       return;
     }
 
-    sh.getOrCreateUser(emailMap.uid, function (error, user) {
+    req.loader.get("kUser", emailMap.uid, function (error, user) {
       if (error) {
         cb(error, user);
         return;
@@ -172,7 +172,7 @@ exports.anonymous = function (req, res, cb) {
       // SWD protect the json parse
       tokenMap = JSON.parse(value);
       // check if uid has upgraded account
-      sh.getUser(tokenMap.uid, function (error, user) {
+      req.loader.exists("kUser", tokenMap.uid, function (error, user) {
         if (!error && user.get("email").length) {
           cb(1, sh.error("user_upgraded", "user has upgraded the anonymous account"));
           return;
@@ -244,7 +244,7 @@ exports.upgrade = function (req, res, cb) {
 // SWD for testing only
 exports.downgrade = function (req, res, cb) {
   var userId = req.body.userId;
-  sh.getUser(userId, function (err, user) {
+  req.loader.get("kUser", userId, function (err, user) {
     if (user !== null) {
       gDb.kdelete("kEmailMap", user.get("email"), function (err, data) {
         if(err) {
