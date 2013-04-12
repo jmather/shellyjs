@@ -9,6 +9,7 @@ var moduleMap = {
   kPlaying : {module: null, file: "/src/shplaying.js"},
   kGame : {module: null, file: "/src/shgame.js"},
   kEmailMap : {module: null, file: "/src/do/shemailmap.js"},
+  kTokenMap : {module: null, file: "/src/do/shtokenmap.js"},
 };
 
 function ShLoader() {
@@ -20,8 +21,8 @@ module.exports = ShLoader;
 
 ShLoader.prototype.create = function (keyType, params) {
   if (_.isUndefined(moduleMap[keyType])) {
-    cb(1, {message: "bad key"});
-    return;
+    shlog.error("bad key passed to create", keyType);
+    return null;
   }
 
   var ShClass = null;

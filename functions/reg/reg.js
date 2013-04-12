@@ -47,15 +47,6 @@ function createEmailReg(loader, uid, email, password) {
   em.set("uid", uid);
   em.set("password", hashPassword(uid, password));
   return em;
-/*
-  var emailMap = {};
-  emailMap.uid = uid;
-  emailMap.email = email;
-  emailMap.password = hashPassword(emailMap.uid, password);
-  emailMap.created = new Date().getTime();
-  gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
-  return emailMap;
-  */
 }
 
 // used to create the default admin user
@@ -167,32 +158,30 @@ exports.anonymous = function (req, res, cb) {
     return;
   }
 
-  gDb.kget("kTokenMap", token, function (error, value) {
-    var tokenMap = {};
-    if (value !== null) {
-      // SWD protect the json parse
-      tokenMap = JSON.parse(value);
+  req.loader.exists("kTokenMap", token, function (error, tm) {
+    if (!error) {
       // check if uid has upgraded account
-      req.loader.exists("kUser", tokenMap.uid, function (error, user) {
+      req.loader.exists("kUser", tm.get("uid"), function (error, user) {
         if (!error && user.get("email").length) {
           cb(1, sh.error("user_upgraded", "user has upgraded the anonymous account"));
           return;
         }
         var out = {};
-        out.uid = tokenMap.uid;
-        out.session = session.create(tokenMap.uid);
+        out.uid = tm.get("uid");
+        out.session = session.create(tm.get("uid"));
         cb(0, sh.event("reg.anonymous", out));
-        return;
       });
+      return;
     }
-    // create the user
-    tokenMap.uid = sh.uuid();
-    tokenMap.token = token;
-    tokenMap.created = new Date().getTime();
-    gDb.kset("kTokenMap", token, JSON.stringify(tokenMap));
+
+    // not there, so create token map
+    tm = req.loader.create("kTokenMap", token);
+    tm.set("uid", sh.uuid());
+    // user will get created on first login if session is valid
+
     var out = {};
-    out.uid = tokenMap.uid;
-    out.session = session.create(tokenMap.uid);
+    out.uid = tm.get("uid");
+    out.session = session.create(tm.get("uid"));
     cb(0, sh.event("reg.anonymous", out));
   });
 };
@@ -209,31 +198,27 @@ exports.upgrade = function (req, res, cb) {
   }
 
   // make sure the email is not already set
-  var userRaw = req.session.user.getData();
-  if (userRaw.email.length > 0) {
-    cb(1, sh.error("email_set", "email is already set for this user", {uid: userRaw.uid, email: userRaw.email}));
+  if (req.session.user.get("email").length > 0) {
+    cb(1, sh.error("email_set", "email is already set for this user", req.session.user.getData()));
     return;
   }
 
   // make sure the email is not in use by someone else
-  var emailMap = {};
-  gDb.kget("kEmailMap", email, function (error, value) {
-    if (value !== null) {
-      emailMap = JSON.parse(value);
-      if (emailMap.uid === userRaw.uid) {
-        // just set it as something must have gone wrong before
-        // SWD - still need to work out user dirty/save
+  req.loader.exists("kEmailMap", email, function (error, em) {
+    if (!error) {
+      if (em.get("uid") === req.session.user.get("oid")) {
+        // set it just in case something went wrong before
         req.session.user.set("email", email);
-        cb(0, sh.event("reg.upgrade", userRaw));
+        cb(0, sh.event("reg.upgrade", req.session.user.getData()));
       }
-      cb(1, sh.error("email_in_use", "email is already used by another user", {uid: userRaw.uid, email: email}));
+      cb(1, sh.error("email_in_use", "email is already used by another user"));
       return;
     }
     // set the email for the user
     req.session.user.set("email", email);
     // create the email map
-    emailMap = createEmailReg(req.loader, userRaw.uid, email, password);
-    cb(0, sh.event("reg.upgrade", userRaw));
+    emailMap = createEmailReg(req.loader, req.session.uid, email, password);
+    cb(0, sh.event("reg.upgrade", req.session.user.getData()));
   });
 };
 

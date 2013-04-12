@@ -35,16 +35,16 @@ function removeUser(uid) {
     $(".userId" + uid).remove();
 }
 
-function addUser(user) {
-    if ($(".userId" + user.uid).size() > 0) {
+function addUser(profile) {
+    if ($(".userId" + profile.uid).size() > 0) {
         return;
     }
     var $newGame = $("#userTemplate").clone();
-    $newGame.find("#userName").text(user.name);
-    $newGame.find("#userName").addClass("playerName" + user.oid);
-    $newGame.addClass("userId" + user.oid);
+    $newGame.find("#userName").text(profile.name);
+    $newGame.find("#userName").addClass("playerName" + profile.uid);
+    $newGame.addClass("userId" + profile.uid);
     $newGame.addClass("activeUser");
-    $newGame.attr("uid", user.oid);
+    $newGame.attr("uid", profile.uid);
     $newGame.css("display", "block");
 
     $newGame.find("#userOffer").click(function () {

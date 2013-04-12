@@ -12,7 +12,7 @@ var client = require(global.gBaseDir + global.CONF.db.wrapper);
 
 var gKeyTypes = {
   kEmailMap: {tpl: "em:%s"},
-  kTokenMap: {tpl: "token:%s"},
+  kTokenMap: {tpl: "tm:%s"},
   kUser: {tpl: "u:%s"},
   kGame: {tpl: "game:%s"},
   kObject: {tpl: "obj:%s"},
