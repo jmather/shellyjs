@@ -204,7 +204,7 @@ function processEvent(res, from) {
     }
     if (res.event == 'event.game.join') {
         // turn off live events for old game
-        var newGameId = res.data.gameId;
+        var newGameId = res.data.oid;
         var oldGameId = Env.gameId;
         if (typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
             sendCmd("live.game", {gameId: oldGameId, status: "off"})

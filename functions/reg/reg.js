@@ -8,8 +8,6 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var session = require(global.gBaseDir + "/src/session.js");
 
-var gDb = global.db;
-
 var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
 var passwordVersion = 1;
 
@@ -22,7 +20,6 @@ exports.functions = {
     password: {dtype: "string"}
   }, security: []},
   downgrade: {desc: "testing only - remove email from user object", params: {userId: {dtype: "string"}}, security: []},
-  check: {desc: "check if user exists", params: {email: {dtype: "string"}}, security: []},
   login: {desc: "user login", params: {
     email: {dtype: "string"},
     password: {dtype: "string"},
@@ -72,15 +69,14 @@ exports.verifyUser = function (loader, email, password, cb) {
 };
 
 exports.findUserByEmail = function (loader, email, cb) {
-  gDb.kget("kEmailMap", email, function (error, value) {
-    if (value === null) {
+  loader.exists("kEmailMap", email, function (error, em) {
+    if (error) {
       cb(1, sh.error("no_user_email", "unable to find user with email", {email: email}));
       return;
     }
-    var emailMap = JSON.parse(value);
-    loader.exists("kUser", emailMap.uid, function (error, user) {
+    loader.exists("kUser", em.get("uid"), function (error, user) {
       if (error) {
-        cb(1, sh.error("no_user_uid", "unable to load user for id", {email: email, uid: emailMap.uid}));
+        cb(1, sh.error("no_user_uid", "unable to load user for id", {email: email, uid: em.get("uid")}));
         return;
       }
       cb(0, user);
@@ -104,21 +100,19 @@ exports.login = function (req, res, cb) {
   }
   var role = sanitize(req.body.role).trim();
 
-  gDb.kget("kEmailMap", email, function (error, value) {
-    if (value === null) {
+  req.loader.exists("kEmailMap", email, function (error, em) {
+    if (error) {
       cb(1, sh.error("email_notfound", "email is not registered", {email: email}));
       return;
     }
-    var emailMap = JSON.parse(value);
-    emailMap.uid = emailMap.uid.toString();  // SWD some old data that has numbers
 
     // check password
-    if (!checkPassword(emailMap.uid, password, emailMap.password)) {
+    if (!checkPassword(em.get("uid"), password, em.get("password"))) {
       cb(1, sh.error("password_bad", "incorrect password", {email: email}));
       return;
     }
 
-    req.loader.get("kUser", emailMap.uid, function (error, user) {
+    req.loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
         cb(error, user);
         return;
@@ -136,7 +130,7 @@ exports.login = function (req, res, cb) {
       shlog.info("login success:", email);
       var out = {};
       out.email = email;
-      out.session = session.create(emailMap.uid);
+      out.session = session.create(em.get("uid"));
       cb(0, sh.event("reg.login", out));
     });
   });
@@ -217,7 +211,7 @@ exports.upgrade = function (req, res, cb) {
     // set the email for the user
     req.session.user.set("email", email);
     // create the email map
-    emailMap = createEmailReg(req.loader, req.session.uid, email, password);
+    createEmailReg(req.loader, req.session.uid, email, password);
     cb(0, sh.event("reg.upgrade", req.session.user.getData()));
   });
 };
@@ -227,7 +221,7 @@ exports.downgrade = function (req, res, cb) {
   var userId = req.body.userId;
   req.loader.get("kUser", userId, function (err, user) {
     if (user !== null) {
-      gDb.kdelete("kEmailMap", user.get("email"), function (err, data) {
+      req.loader.delete("kEmailMap", user.get("email"), function (err, data) {
         if (err) {
           cb(err, sh.error("delete_error", "unable to delete email map", data));
           return;
@@ -252,34 +246,16 @@ exports.create = function (req, res, cb) {
     return;
   }
 
-  gDb.kget("kEmailMap", email, function (error, value) {
-    if (value !== null) {
+  req.loader.exists("kEmailMap", email, function (error, em) {
+    if (!error) {
       cb(1, sh.error("email_used", "this email is already registered", {email: email}));
       return;
     }
     // create the user
-    var emailMap = createEmailReg(req.loader, sh.uuid(), email, password);
+    var em = createEmailReg(req.loader, sh.uuid(), email, password);
     var out = {};
-    out.uid = emailMap.uid;
-    out.session = session.create(emailMap.uid);
+    out.uid = em.get("uid");
+    out.session = session.create(em.get("uid"));
     cb(0, sh.event("reg.create", out));
-  });
-};
-
-exports.check = function (req, res, cb) {
-  var email = sanitize(req.body.email).trim();
-  try {
-    check(email, 102).isEmail();
-  } catch (e) {
-    cb(e.message);
-    return;
-  }
-
-  gDb.kget("kEmailMap", email, function (error, value) {
-    if (value !== null) {
-      cb(0, JSON.parse(value));
-      return;
-    }
-    cb(1, sh.error("unregistered", "this email is not registered", {email: email}));
   });
 };

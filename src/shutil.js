@@ -132,7 +132,7 @@ shutil.call = function (req, res, cb) {
     }
     if (_.isUndefined(req.body[key])) {
       this.paramsOk = false;
-      cb(1, shutil.error("param_required", "missing required parameter", {key: key}));
+      cb(1, shutil.error("param_required", "missing required parameter", {cmd: cmd, key: key}));
       return false;
     }
     var ptype = typeof req.body[key];

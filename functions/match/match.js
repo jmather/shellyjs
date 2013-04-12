@@ -54,7 +54,7 @@ match.add = function (req, res, cb) {
       }
 
       var matchInfo = {};
-      matchInfo.gameId = data.data.gameId;
+      matchInfo.gameId = data.data.oid;
       _.each(req.body.players, function (playerId) {
         delete global.matchq[name][playerId];
         matchInfo[playerId] = {};

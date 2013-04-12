@@ -110,6 +110,17 @@ ShLoader.prototype.get = function (keyType, params, cb) {
   });
 };
 
+ShLoader.prototype.delete = function (keyType, params, cb) {
+  if (_.isUndefined(moduleMap[keyType])) {
+    cb(1, {message: "bad key"});
+    return;
+  }
+  var key = global.db.key(keyType, params);
+  delete this._objects[key];
+
+  global.db.kdelete(keyType, params, cb);
+};
+
 ShLoader.prototype.dump = function (cb) {
   shlog.info("dump start");
   var self = this;
