@@ -8,6 +8,7 @@ var moduleMap = {
   kUser : {module: null, file: "/src/shuser.js"},
   kPlaying : {module: null, file: "/src/shplaying.js"},
   kGame : {module: null, file: "/src/shgame.js"},
+  kEmailMap : {module: null, file: "/src/do/shemailmap.js"},
 };
 
 function ShLoader() {
@@ -22,7 +23,6 @@ ShLoader.prototype.create = function (keyType, params) {
     cb(1, {message: "bad key"});
     return;
   }
-  var key = global.db.key(keyType, params);
 
   var ShClass = null;
   try {
@@ -32,8 +32,11 @@ ShLoader.prototype.create = function (keyType, params) {
     return;
   }
 
+  shlog.info("create-create: '%s - %s'", keyType, params);
   var obj = new ShClass();
-  this._objects[key] = obj;
+  obj.create(params);  // SWD assumes params is just oid for shobjects
+  this._objects[obj._key] = obj;
+  shlog.info("create-new: '%s'", obj._key);
 
   return obj;
 };
@@ -43,36 +46,8 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
     cb(1, {message: "bad key"});
     return;
   }
+  // check cache
   var key = global.db.key(keyType, params);
-
-  var ShClass = null;
-  try {
-    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
-  } catch (e) {
-    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
-    return;
-  }
-
-  var self = this;
-  var obj = new ShClass();
-  shlog.info("loadOrCreate: '%s'", key);
-  obj.load(params, function (err, data) {
-    if (!err) {
-      self._objects[key] = obj;
-      cb(0, obj);
-      return;
-    }
-    cb(err, data);
-  });
-}
-
-ShLoader.prototype.get = function (keyType, params, cb) {
-  if (_.isUndefined(moduleMap[keyType])) {
-    cb(1, {message: "bad key"});
-    return;
-  }
-  var key = global.db.key(keyType, params);
-
   if (_.isObject(this._objects[key])) {
     shlog.info("cache hit: '%s'", key);
     cb(0, this._objects[key]);
@@ -87,12 +62,46 @@ ShLoader.prototype.get = function (keyType, params, cb) {
     return;
   }
 
+  shlog.info("exists-load: '%s - %s'", keyType, params);
   var self = this;
   var obj = new ShClass();
-  shlog.info("loadOrCreate: '%s'", key);
+  obj.load(params, function (err, data) {
+    if (!err) {
+      self._objects[obj._key] = obj;
+      cb(0, obj);
+      return;
+    }
+    cb(err, data);
+  });
+}
+
+ShLoader.prototype.get = function (keyType, params, cb) {
+  if (_.isUndefined(moduleMap[keyType])) {
+    cb(1, {message: "bad key"});
+    return;
+  }
+  // check cache
+  var key = global.db.key(keyType, params);
+  if (_.isObject(this._objects[key])) {
+    shlog.info("cache hit: '%s'", key);
+    cb(0, this._objects[key]);
+    return;
+  }
+
+  var ShClass = null;
+  try {
+    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
+  } catch (e) {
+    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
+    return;
+  }
+
+  shlog.info("get-loadOrCreate: '%s - %s'", keyType, params);
+  var self = this;
+  var obj = new ShClass();
   obj.loadOrCreate(params, function (err, data) {
     if (!err) {
-      self._objects[key] = obj;
+      self._objects[obj._key] = obj;
       cb(0, obj);
       return;
     }
@@ -101,6 +110,7 @@ ShLoader.prototype.get = function (keyType, params, cb) {
 };
 
 ShLoader.prototype.dump = function (cb) {
+  shlog.info("dump start");
   var self = this;
   async.each(Object.keys(this._objects), function (key, cb) {
     shlog.info("dumping: '%s'", key);

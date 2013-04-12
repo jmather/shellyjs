@@ -9,6 +9,8 @@ var ShObject = require(global.gBaseDir + "/src/shobject.js");
 var db = global.db;
 
 function Game() {
+  ShObject.call(this);
+
   this._keyType = "kGame";
   var ts = new Date().getTime();
   this._data = {

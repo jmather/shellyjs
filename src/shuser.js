@@ -6,6 +6,8 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var ShObject = require(global.gBaseDir + "/src/shobject.js");
 
 function User() {
+  ShObject.call(this);
+
   this._keyType = "kUser";
   this._data = {
     name: "",

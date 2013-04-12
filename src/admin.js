@@ -23,8 +23,8 @@ reg.verifyUser(loader, global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN
   if (error) {
     shlog.error("unable to load or create default admin", data);
   }
+  loader.dump();
 });
-loader.dump();
 
 var app = express();
 app.use(express.favicon(adminStatic + "/images/favicon.ico"));

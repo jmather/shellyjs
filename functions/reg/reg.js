@@ -41,29 +41,30 @@ function checkPassword(uid, password, hash) {
   return newHash === hash;
 }
 
-function createEmailReg(uid, email, password) {
+function createEmailReg(loader, uid, email, password) {
+  var em = loader.create("kEmailMap", email);
+  em.set("email", email);
+  em.set("uid", uid);
+  em.set("password", hashPassword(uid, password));
+  return em;
+/*
   var emailMap = {};
   emailMap.uid = uid;
   emailMap.email = email;
   emailMap.password = hashPassword(emailMap.uid, password);
   emailMap.created = new Date().getTime();
   gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
-
   return emailMap;
+  */
 }
 
 // used to create the default admin user
-// SWD  - a bit ugly
 exports.verifyUser = function (loader, email, password, cb) {
-  gDb.kget("kEmailMap", email, function (error, value) {
-    var emailMap = {};
-    if (value === null) {
-      // create it
-      emailMap = createEmailReg(sh.uuid(), email, password);
-    } else {
-      emailMap = JSON.parse(value);
+  loader.exists("kEmailMap", email, function (error, em) {
+    if (error) {
+      em = createEmailReg(loader, sh.uuid(), email, password);
     }
-    loader.get("kUser", emailMap.uid, function (error, user) {
+    loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
         cb(error, user);
         return;
@@ -231,12 +232,7 @@ exports.upgrade = function (req, res, cb) {
     // set the email for the user
     req.session.user.set("email", email);
     // create the email map
-    emailMap = createEmailReg(userRaw.uid, email, password);
-//    emailMap.uid = userRaw.uid;
-//    emailMap.email = email;
-//    emailMap.password = hashPassword(emailMap.uid, password);
-//    emailMap.created = new Date().getTime();
-//    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+    emailMap = createEmailReg(req.loader, userRaw.uid, email, password);
     cb(0, sh.event("reg.upgrade", userRaw));
   });
 };
@@ -247,7 +243,7 @@ exports.downgrade = function (req, res, cb) {
   req.loader.get("kUser", userId, function (err, user) {
     if (user !== null) {
       gDb.kdelete("kEmailMap", user.get("email"), function (err, data) {
-        if(err) {
+        if (err) {
           cb(err, sh.error("delete_error", "unable to delete email map", data));
           return;
         }
@@ -277,13 +273,7 @@ exports.create = function (req, res, cb) {
       return;
     }
     // create the user
-    var emailMap = createEmailReg(sh.uuid(), email, password);
-//    var emailMap = {};
-//    emailMap.uid = sh.uuid();
-//    emailMap.email = email;
-//    emailMap.password = hashPassword(emailMap.uid, password);
-//    emailMap.created = new Date().getTime();
-//    gDb.kset("kEmailMap", email, JSON.stringify(emailMap));
+    var emailMap = createEmailReg(req.loader, sh.uuid(), email, password);
     var out = {};
     out.uid = emailMap.uid;
     out.session = session.create(emailMap.uid);
