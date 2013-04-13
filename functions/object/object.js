@@ -4,8 +4,6 @@ var crypto = require("crypto");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var db = global.db;
-
 var object = exports;
 
 object.desc = "generic object store";

@@ -5,8 +5,6 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var reg = require(global.gBaseDir + "/functions/reg/reg.js");
 
-var db = global.db;
-
 var user = exports;
 
 user.desc = "utility functions for shelly modules";

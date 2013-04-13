@@ -6,8 +6,6 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var ShObject = require(global.gBaseDir + "/src/shobject.js");
 
-var db = global.db;
-
 function Game() {
   ShObject.call(this);
 
