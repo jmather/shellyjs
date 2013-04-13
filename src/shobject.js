@@ -21,7 +21,7 @@ function ShObject() {
 module.exports = ShObject;
 
 ShObject.prototype.key = function () {
-  return  this._key;
+  return this._key;
 };
 
 ShObject.prototype.create = function (oid) {

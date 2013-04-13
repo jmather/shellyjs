@@ -9,7 +9,7 @@ var moduleMap = {
   kPlaying : {module: null, file: "/src/shplaying.js"},
   kGame : {module: null, file: "/src/shgame.js"},
   kEmailMap : {module: null, file: "/src/do/shemailmap.js"},
-  kTokenMap : {module: null, file: "/src/do/shtokenmap.js"},
+  kTokenMap : {module: null, file: "/src/do/shtokenmap.js"}
 };
 
 function ShLoader() {
@@ -29,8 +29,8 @@ ShLoader.prototype.create = function (keyType, params) {
   try {
     ShClass = require(global.gBaseDir + moduleMap[keyType].file);
   } catch (e) {
-    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
-    return;
+    shlog.error("unable to load object module", keyType);
+    return null;
   }
 
   shlog.info("create-create: '%s - %s'", keyType, params);
@@ -48,7 +48,7 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
     return;
   }
   // check cache
-  var key = global.db.key(keyType, params);
+  var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
     shlog.info("cache hit: '%s'", key);
     cb(0, this._objects[key]);
@@ -74,7 +74,7 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
     }
     cb(err, data);
   });
-}
+};
 
 ShLoader.prototype.get = function (keyType, params, cb) {
   if (_.isUndefined(moduleMap[keyType])) {
@@ -82,7 +82,7 @@ ShLoader.prototype.get = function (keyType, params, cb) {
     return;
   }
   // check cache
-  var key = global.db.key(keyType, params);
+  var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
     shlog.info("cache hit: '%s'", key);
     cb(0, this._objects[key]);
@@ -115,10 +115,10 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
     cb(1, {message: "bad key"});
     return;
   }
-  var key = global.db.key(keyType, params);
+  var key = this._db.key(keyType, params);
   delete this._objects[key];
 
-  global.db.kdelete(keyType, params, cb);
+  this._db.kdelete(keyType, params, cb);
 };
 
 ShLoader.prototype.dump = function (cb) {

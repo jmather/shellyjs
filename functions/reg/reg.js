@@ -252,7 +252,7 @@ exports.create = function (req, res, cb) {
       return;
     }
     // create the user
-    var em = createEmailReg(req.loader, sh.uuid(), email, password);
+    em = createEmailReg(req.loader, sh.uuid(), email, password);
     var out = {};
     out.uid = em.get("uid");
     out.session = session.create(em.get("uid"));
