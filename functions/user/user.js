@@ -9,17 +9,16 @@ var user = exports;
 
 user.desc = "utility functions for shelly modules";
 user.functions = {
-  get: {desc: "get user object", params: {}, security: []},
-  set: {desc: "set user object", params: {user: {dtype: "object"}}, security: []},
+  get: {desc: "get current user object", params: {}, security: []},
+  set: {desc: "set current user object", params: {user: {dtype: "object"}}, security: []},
+  aget: {desc: "get any user object", params: {uid: {dtype: "string"}}, security: ["admin"]},
+  aset: {desc: "set any user object", params: {uid: {dtype: "string"}, user: {dtype: "object"}}, security: ["admin"]},
   profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []},
   find: {desc: "find a user based on email or token", params: {by : {dtype: "string"}, value: {dtype: "string"}}, security: []}
 };
 
 user.pre = function (req, res, cb) {
   shlog.info("user.pre");
-  // user is always preloaded now in session check
-
-  // SWD - eventually check security session.uid has rights to params.uid
   cb(0);
 };
 
@@ -29,16 +28,49 @@ user.post = function (req, res, cb) {
 };
 
 user.get = function (req, res, cb) {
-  shlog.info(req.env.user);
   cb(0, sh.event("event.user.get", req.session.user.getData()));
-};
+}
 
 user.set = function (req, res, cb) {
+  // only admin can change roles
+  if (!_.isUndefined(newUser.roles)  && !req.session.user.hasRole("admin")) {
+    cb(1, sh.error("no_permision", "user does not have rights to alter roles"));
+    return;
+  }
+
+  req.session.user.setData(req.body.user);
+  cb(0, sh.event("event.user.get", req.session.user.getData()));
+}
+
+user.aget = function (req, res, cb) {
+  var uid = req.body.uid;
+
+  req.loader.exists("kUser", uid, function (error, user) {
+    if (error) {
+      cb(error, data);
+      return;
+    }
+    cb(0, sh.event("event.user.get", user.getData()));
+    return;
+  });
+};
+
+user.aset = function (req, res, cb) {
+  var uid = req.body.uid;
   var newUser = req.body.user;
 
-  req.session.user.setData(newUser);
+  req.loader.exists("kUser", uid, function (error, user) {
+    if (error) {
+      cb(error, data);
+      return;
+    }
+    console.log("set user data", newUser);
+    user.setData(newUser);
+    console.log("user data", user.getData());
+    cb(0, sh.event("event.user.get", user.getData()));
+    return;
+  });
 
-  cb(0, sh.event("event.user.get", req.session.user.getData()));
 };
 
 user.profiles = function (req, res, cb) {

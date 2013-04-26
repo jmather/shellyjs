@@ -10,6 +10,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
+var commonStatic = global.gBaseDir + "/www/common";
 var adminBase = global.gBaseDir + "/www/admin";
 var adminStatic = adminBase + "/static";
 var adminLogin = adminBase + "/login";
@@ -31,7 +32,8 @@ app.use(express.favicon(adminStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
 app.set("views", adminBase);
 app.engine("html", engines.hogan);
-app.use("/static", express.static(adminStatic));  // must be here so static files don't go through session check
+app.use("/common", express.static(commonStatic));
+app.use("/static", express.static(adminStatic));
 app.use(express.cookieParser());
 
 app.use(function (req, res, next) {

@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Shelly System</title>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+    <title>Shelly User Manager</title>
+    <link rel="stylesheet" href="/common/jquery-ui-1.10.2/css/smoothness/jquery-ui.css" />
+    <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <script src="/static/js/common.js"></script>
     <style>
@@ -16,7 +16,8 @@
             width: 450px;
         }
         .emailInput,
-        .tokenInput {
+        .tokenInput,
+        .uidInput {
             width: 245px;
         }
         .findDiv {
@@ -26,20 +27,111 @@
     <script>
         var Env = {{{EnvJson}}};
 
+        function userValue(key) {
+            if(typeof(Env.user[key]) === "object") {
+                return JSON.stringify(Env.user[key]);
+            } else {
+                return Env.user[key];
+            }
+        }
+
+        function showUser(user) {
+            $(".user-key-value-div").remove();
+            Env.user = user;
+            for (key in user) {
+                $newKv = $("#keyValueTpl").clone();
+                $newKv.addClass("user-key-value-div");
+                $newKv.css("display", "block");
+                $newKv.find("#key").text(key);
+                if (key !== "oid" && key !== "email" && key !== "created" && key !== "modified") {
+                    $newKv.find("#value").addClass("value-edit-span");
+                    $newKv.find("#value").attr("editId", key);
+                }
+                $newKv.find("#value").text(userValue(key));
+                $("#userEditor").append($newKv);
+            }
+            $(".edit-user-btn").css("display", "none");
+            $(".display-user-btn").css("display", "block");
+        }
+
+        function editCurrent() {
+            $(".value-edit-span").replaceWith(function () {
+                var editId = $(this).attr("editId");
+                if (typeof(editId) === "undefined") return;
+                $input = $("<input/>");
+                $input.attr("editId", editId);
+                $input.addClass("value-edit-span");
+                $input.val($(this).text());
+                return $input;
+            });
+            $(".edit-user-btn").css("display", "block");
+            $(".display-user-btn").css("display", "none");
+        }
+
+        function resetCurrent(saved) {
+            var saveData = {};
+            $(".value-edit-span").replaceWith(function () {
+                var editId = $(this).attr("editId");
+                if (typeof(editId) === "undefined") return;
+                var value = $(this).val();
+                if (value !== userValue(editId)) {
+//                    if (editId !== "roles") {
+                    if (typeof(Env.user[editId]) !== "object") {
+                        saveData[editId] = value;
+                    } else {
+                        saveData[editId] = JSON.parse(value);
+                    }
+                }
+//                Env.user[editId] = value;
+                $span = $("<span/>");
+                $span.attr("editId", editId);
+                $span.addClass("value-edit-span");
+                if (saved) {
+                    $span.text(value);
+                } else {
+                    $span.text(userValue(editId));
+                }
+                return $span;
+            });
+            $(".edit-user-btn").css("display", "none");
+            $(".display-user-btn").css("display", "block");
+            return saveData;
+        }
+
         $(init);
         function init() {
             $("#shSubTitle").text("User Manager");
 
             $("#userInfo").text(JSON.stringify(Env.user, undefined, 2));
+            showUser(Env.user);
+//            editCurrent();
+//            resetCurrent(false);
 
-            $('#findByEmail').click(function() {
+            $("#findByEmail").click(function() {
                 var email = $("#email").val();
                 shCall({cmd: "user.find", by: "email", value: email}, function (err, data) {
-                    $("#userInfo").text(JSON.stringify(data, undefined, 2));
+                    $("#userInfo").text(JSON.stringify(data.data, undefined, 2));
+                    showUser(data.data);
                 })
             });
 
-            $('#findByToken').click(function() {
+            $("#editUserBtn").click(function() {
+                editCurrent();
+            });
+            $("#saveUserBtn").click(function() {
+                var saveData = resetCurrent(true);
+                var res = shCall({cmd: "user.aset", uid: Env.user.oid, user: saveData}, function (error, data) {
+                    console.log(error, data);
+                });
+            });
+            $("#cancelUserBtn").click(function() {
+                resetCurrent(false);
+            });
+            $("#findByToken").click(function() {
+                alert("token find");
+            });
+            $("#findByUid").click(function() {
+                alert("uid find");
             });
         }
     </script>
@@ -54,7 +146,8 @@
     <div class="gameBoxInnerDiv">
         <table>
             <tr><td>By Email:</td><td><input id="email" class="emailInput" type="text"></input></td><td><button id="findByEmail">find</button></td></tr>
-            <tr><td>By Token:</td><td><input id="token" class="tokenInput" type="text" value="3c894b70-9bdb-11e2-8df9-4161594da637"></input></td><td><button id="findBytoken">find</button></td></tr>
+            <tr><td>By Token:</td><td><input id="token" class="tokenInput" type="text" value=""></input></td><td><button id="findByToken">find</button></td></tr>
+            <tr><td>By Uid:</td><td><input id="uid" class="uidInput" type="text" value=""></input></td><td><button id="findByUid">find</button></td></tr>
         </table>
     </div>
 </div>
@@ -62,6 +155,13 @@
 <div>
     user = <pre id="userInfo"></pre>
 </div>
+
+<div id="userEditor">
+    <div id="keyValueTpl" style="display:none"><span id="key">key</span> = <span id="value">value</span></div>
+</div>
+<button id="editUserBtn" class="display-user-btn">Edit</button>
+<button id="saveUserBtn" class="edit-user-btn">Save</button>
+<button id="cancelUserBtn" class="edit-user-btn">Cancel</button>
 
 {{> footer}}
 </body>

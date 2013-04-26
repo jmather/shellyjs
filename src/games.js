@@ -10,6 +10,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
+var commonStatic = global.gBaseDir + "/www/common";
 var gamesBase = global.gBaseDir + "/www/games";
 var gamesStatic = gamesBase + "/static";
 var gamesLogin = gamesBase + "/login";
@@ -21,9 +22,8 @@ app.use(express.favicon(gamesStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
 app.set("views", gamesBase);
 app.engine("html", engines.hogan);
-
-app.use("/static", express.static(gamesStatic));  // must be here so static files don't go through session check
-
+app.use("/common", express.static(commonStatic));
+app.use("/static", express.static(gamesStatic));
 app.use(express.cookieParser());
 app.use(function (req, res, next) {
   if (req.path.substring(0, 7) === "/login/") {
