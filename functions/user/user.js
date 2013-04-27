@@ -14,7 +14,7 @@ user.functions = {
   aget: {desc: "get any user object", params: {uid: {dtype: "string"}}, security: ["admin"]},
   aset: {desc: "set any user object", params: {uid: {dtype: "string"}, user: {dtype: "object"}}, security: ["admin"]},
   profiles: {desc: "get public user infoformation", params: {users : {dtype: "array"}}, security: []},
-  find: {desc: "find a user based on email or token", params: {by : {dtype: "string"}, value: {dtype: "string"}}, security: []}
+  find: {desc: "find a user based on email or token", params: {by : {dtype: "string"}, value: {dtype: "string"}}, security: ["admin"]}
 };
 
 user.pre = function (req, res, cb) {
@@ -91,14 +91,30 @@ user.find = function (req, res, cb) {
         cb(err, data);
         return;
       }
-      cb(0, sh.event("even.user.find", data.getData()));
+      cb(0, sh.event("event.user.find", data.getData()));
+    });
+    return;
+  }
+  if (req.body.by === "uid") {
+    req.loader.exists("kUser", req.body.value, function (err, data) {
+      if (err) {
+        cb(1, sh.error("no_user", "unable to find user with uid = " + req.body.value));
+        return;
+      }
+      cb(1, sh.event("event.user.find", data.getData()));
     });
     return;
   }
   if (req.body.by === "token") {
-    cb(1, sh.error("not_implemented", "not yet"));
+    reg.findUserByToken(req.loader, req.body.value, function (err, data) {
+      if (err) {
+        cb(err, data);
+        return;
+      }
+      cb(0, sh.event("event.user.find", data.getData()));
+    });
     return;
   }
 
-  cb(1, sh.error("unknown_find_by", "no way to find a user by this data type", {by: req.body.by}));
+  cb(1, sh.error("unknown_find_by", "no way to find a user by this data type = "  + req.body.by, {by: req.body.by}));
 };

@@ -71,12 +71,28 @@ exports.verifyUser = function (loader, email, password, cb) {
 exports.findUserByEmail = function (loader, email, cb) {
   loader.exists("kEmailMap", email, function (error, em) {
     if (error) {
-      cb(1, sh.error("no_user_email", "unable to find user with email", {email: email}));
+      cb(1, sh.error("no_user_email", "unable to find user with email = " + email, {email: email}));
       return;
     }
     loader.exists("kUser", em.get("uid"), function (error, user) {
       if (error) {
         cb(1, sh.error("no_user_uid", "unable to load user for id", {email: email, uid: em.get("uid")}));
+        return;
+      }
+      cb(0, user);
+    });
+  });
+};
+
+exports.findUserByToken = function (loader, token, cb) {
+  loader.exists("kTokenMap", token, function (error, tm) {
+    if (error) {
+      cb(1, sh.error("no_user_token", "unable to find user with token = " + token, {token: token}));
+      return;
+    }
+    loader.exists("kUser", tm.get("uid"), function (error, user) {
+      if (error) {
+        cb(1, sh.error("no_user_uid", "unable to load user for id", {token: token, uid: tm.get("uid")}));
         return;
       }
       cb(0, user);
