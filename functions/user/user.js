@@ -32,13 +32,15 @@ user.get = function (req, res, cb) {
 }
 
 user.set = function (req, res, cb) {
+  var userData = req.body.user
+
   // only admin can change roles
-  if (!_.isUndefined(newUser.roles)  && !req.session.user.hasRole("admin")) {
+  if (!_.isUndefined(userData.roles)  && !req.session.user.hasRole("admin")) {
     cb(1, sh.error("no_permision", "user does not have rights to alter roles"));
     return;
   }
 
-  req.session.user.setData(req.body.user);
+  req.session.user.setData(userData);
   cb(0, sh.event("event.user.get", req.session.user.getData()));
 }
 

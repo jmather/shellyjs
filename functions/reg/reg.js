@@ -269,9 +269,18 @@ exports.create = function (req, res, cb) {
     }
     // create the user
     em = createEmailReg(req.loader, sh.uuid(), email, password);
-    var out = {};
-    out.uid = em.get("uid");
-    out.session = session.create(em.get("uid"));
-    cb(0, sh.event("reg.create", out));
+    req.loader.get("kUser", em.get("uid"), function (error, user) {
+      if (error) {
+        cb(error, user);
+        return;
+      }
+      user.set("email", email);
+      user.set("name", email.split("@")[0]);
+
+      var out = {};
+      out.uid = em.get("uid");
+      out.session = session.create(em.get("uid"));
+      cb(0, sh.event("reg.create", out));
+    });
   });
 };
