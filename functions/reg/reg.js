@@ -14,6 +14,7 @@ var passwordVersion = 1;
 exports.desc = "handles user login/logout and new user registration";
 exports.functions = {
   create: {desc: "register a user", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
+  remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: []},
   anonymous: {desc: "register an anonymous user", params: {token: {dtype: "string"}}, security: []},
   upgrade: {desc: "upgrade a user id from anonymous to registered", params: {
     email: {dtype: "string"},
@@ -281,6 +282,29 @@ exports.create = function (req, res, cb) {
       out.uid = em.get("uid");
       out.session = session.create(em.get("uid"));
       cb(0, sh.event("reg.create", out));
+    });
+  });
+};
+
+exports.remove = function (req, res, cb) {
+  req.loader.exists("kEmailMap", req.body.email, function (err, em) {
+    if (err) {
+      cb(0, sh.event("reg.remove", {status: "ok"}));
+      return;
+    }
+
+    req.loader.delete("kEmailMap", req.body.email, function (err, data) {
+      if (err) {
+        cb(err, sh.error("delete_error", "unable to delete email map", em));
+        return;
+      }
+      req.loader.delete("kUser", em.get("uid"), function (err, data) {
+        if (err) {
+          cb(err, sh.error("delete_error", "unable to delete user", em.get("uid")));
+          return;
+        }
+        cb(0, sh.event("reg.remove", {status: "ok"}));
+      });
     });
   });
 };

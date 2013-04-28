@@ -39,7 +39,7 @@ shutil.event = function (event, data) {
 };
 
 shutil.error = function (code, message, data) {
-  var res = this.event("event.error", data);
+  var res = this.event("error", data);
   res.code = code;
   res.message = message;
   return res;

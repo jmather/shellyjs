@@ -63,7 +63,7 @@ function processEvent(res, from) {
         log(from, "error", "old message: " + JSON.stringify(res));
         return;
     }
-    if (res.event == 'event.error') {
+    if (res.event == 'error') {
         showError(res.message);
         log(from, "error", JSON.stringify(res));
         return;

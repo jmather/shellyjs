@@ -107,7 +107,7 @@ function init() {
         var res = sendRestCmd("reg.upgrade", regData, function (error, data) {
             if(!error) {
                 console.log(data);
-                if (data.event === "event.error") {
+                if (data.event === "error") {
                     showError(data.message);
                 } else {
                     updateProfile(data.data);

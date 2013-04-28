@@ -121,7 +121,7 @@ shdb.kdelete = function (keyType, params, cb) {
         shlog.error("error on remove", err);
       }
       if (_.isFunction(cb)) {
-        cb(err);
+        cb(0);
       }
     });
   } catch (e) {

@@ -134,7 +134,7 @@
             if (err) {
                 showError(true, res.message);
             } else {
-                if(res.event == "event.error") {
+                if(res.event == "error") {
                     showError(true, res.message);
                 } else {
                     showUser(res.data);

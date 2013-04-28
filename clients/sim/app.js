@@ -108,7 +108,7 @@ function moveUntilEnd(tpl, moves, cb) {
   var idx = _.random(moves.length - 1);
   var newMove = moves.splice(idx, 1);
   move(tpl, newMove[0][0], newMove[0][1], function (res) {
-    if (res.event === "event.error" && res.code !== "game_noturn") {
+    if (res.event === "error" && res.code !== "game_noturn") {
       console.log("error", res);
       cb();
       return;

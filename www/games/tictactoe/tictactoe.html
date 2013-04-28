@@ -191,7 +191,7 @@ function processEvent(res, from) {
     if (res.event == 'event.heartbeat') {
         return;
     }
-    if (res.event == 'event.error') {
+    if (res.event == 'error') {
         showError(res.message);
         log(from, "error", JSON.stringify(res));
         return;

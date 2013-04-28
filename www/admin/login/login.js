@@ -26,7 +26,7 @@ function doLogin() {
     success: function (res, status) {
       $("#signInLoading").css("display","none");
       debug.info(res);
-      if (res.event === "event.error") {
+      if (res.event === "error") {
         error(res.message);
       } else {
         $.cookie("shSession", res.data.session, {path: '/', expires: 365});

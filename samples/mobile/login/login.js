@@ -38,7 +38,7 @@ function doLogin() {
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
-      if (res.event === "event.error") {
+      if (res.event === "error") {
         error(res.message);
       } else {
         $.cookie("shSession", res.data.session, {path: '/', expires: 365});
@@ -71,7 +71,7 @@ function doRegister() {
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
-      if (res.event === "event.error") {
+      if (res.event === "error") {
         error(res.message);
       } else {
         $.cookie("shSession", res.data.session, {path: '/', expires: 365});
@@ -98,7 +98,7 @@ function doAnonymous() {
     data: JSON.stringify(data),
     success: function (res, status) {
       debug.info(res);
-      if (res.event === "event.error") {
+      if (res.event === "error") {
         error(res.message);
       } else {
         $.cookie("shSession", res.data.session, {path: '/', expires: 365});
