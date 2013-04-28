@@ -2,14 +2,14 @@ var request = require("superagent");
 var _ = require("lodash");
 var async = require("async");
 
+var st = require("/Users/scott/git/shelly/test/shtest.js");
+
 var host = "http://localhost:5101";
 
 console.log("go");
 
-var gGameId = "269";
-
-var reqTpl1 = {session: "1:43:xxxx:0", gameId: gGameId};
-var reqTpl2 = {session: "1:41:xxxx:0", gameId: gGameId};
+var reqTpl1 = {session: "", uid: "", gameId: ""};
+var reqTpl2 = {session: "", uid: "", gameId: ""};
 
 var gMoveDelay = 500;
 
@@ -27,7 +27,7 @@ var gMoveSet = [
 ];
 
 var gMoves = _.clone(gMoveSet);
-var gStats = {"43": 0, "41": 0, "0": 0};
+var gStats = {"0": 0}; // zero is tie
 var gRunCount = 0;
 
 /**
@@ -53,8 +53,8 @@ function reset(cb) {
  *
  * @param cb
  */
-function join(cb) {
-  var reqData = _.clone(reqTpl1);
+function join(reqTpl, cb) {
+  var reqData = _.clone(reqTpl);
   reqData.cmd = "game.join";
   request.post(host + "/api")
     .send(reqData)
@@ -64,6 +64,7 @@ function join(cb) {
         cb(res.error, res.text);
         return;
       }
+      console.log("player join", res.body.data.players);
       cb();
     });
 }
@@ -120,12 +121,45 @@ function moveUntilEnd(tpl, moves, cb) {
     // if win stop
     if (res.event === "event.game.over") {
       gStats[res.data.state.winner] += 1;
+      console.log("game over");
       cb();
       return;
     }
-    var tpl = (res.data.whoTurn === "41" ? reqTpl2 : reqTpl1);
+    var tpl = (res.data.whoTurn === reqTpl1.uid ? reqTpl1 : reqTpl2);
     moveUntilEnd(tpl, moves, cb);
   });
+}
+
+function init(cb) {
+  st.call({cmd: "reg.login", email: "scott@lgdales.com", password: "foofoo"},
+    function (err, res) {
+      if (err) {
+        console.log("bad login 1");
+        cb(1);
+      }
+      reqTpl1.session = res.body.data.session;
+      reqTpl1.uid = res.body.data.session.split(":")[1];
+      gStats[reqTpl1.uid] = 0;
+      console.log("login:", res.body.data.email, reqTpl1.uid);
+      st.call({cmd: "reg.login", email: "test@lgdales.com", password: "foofoo"},
+        function (err, res) {
+          if (err) {
+            console.log("bad login 2");
+            cb(1);
+          }
+          reqTpl2.session = res.body.data.session;
+          reqTpl2.uid = res.body.data.session.split(":")[1];
+          gStats[reqTpl2.uid] = 0;
+          console.log("login:", res.body.data.email, reqTpl2.uid);
+          st.call({cmd: "game.create", name: "tictactoe", session: reqTpl1.session},
+            function (err, res) {
+              console.log("game created:", res.body.data.oid);
+              reqTpl1.gameId = res.body.data.oid;
+              reqTpl2.gameId = res.body.data.oid;
+              cb();
+            });
+        });
+    });
 }
 
 /**
@@ -135,7 +169,8 @@ function run() {
   console.log("------------", gRunCount);
   async.waterfall([
     function (cb) { reset(cb); },
-    function (cb) { join(cb); },
+    function (cb) { join(reqTpl1, cb); },
+    function (cb) { join(reqTpl2, cb); },
     function (cb) { moveUntilEnd(reqTpl1, gMoves, cb); }
   ], function (err, result) {
     if (err) {
@@ -153,4 +188,11 @@ function run() {
     }
   });
 }
-run();
+
+init(function (err) {
+  if (err) {
+    process.exit();
+  }
+  run();
+});
+
