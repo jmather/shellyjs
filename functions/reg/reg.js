@@ -11,22 +11,22 @@ var session = require(global.gBaseDir + "/src/session.js");
 var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
 var passwordVersion = 1;
 
-exports.desc = "handles user login/logout and new user registration";
+exports.desc = "handles user login and new user registration";
 exports.functions = {
   create: {desc: "register a user", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
-  remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: []},
   anonymous: {desc: "register an anonymous user", params: {token: {dtype: "string"}}, security: []},
   upgrade: {desc: "upgrade a user id from anonymous to registered", params: {
     email: {dtype: "string"},
     password: {dtype: "string"}
   }, security: []},
-  downgrade: {desc: "testing only - remove email from user object", params: {userId: {dtype: "string"}}, security: []},
   login: {desc: "user login", params: {
     email: {dtype: "string"},
     password: {dtype: "string"},
     role: {dtype: "string", optional: true}
   }, security: []},
-  logout: {desc: "user logout", params: {}, security: []}
+
+  remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: []},
+  downgrade: {desc: "testing only - remove email from user object", params: {uid: {dtype: "string"}}, security: []}
 };
 
 function hashPassword(uid, password) {
@@ -153,10 +153,6 @@ exports.login = function (req, res, cb) {
   });
 };
 
-exports.logout = function (req, res, cb) {
-  cb(null, {"reg.logout": "foo foo foo"});
-};
-
 exports.anonymous = function (req, res, cb) {
 
   //SWD check reg signature
@@ -235,8 +231,8 @@ exports.upgrade = function (req, res, cb) {
 
 // SWD for testing only
 exports.downgrade = function (req, res, cb) {
-  var userId = req.body.userId;
-  req.loader.get("kUser", userId, function (err, user) {
+  var uid = req.body.uid;
+  req.loader.get("kUser", uid, function (err, user) {
     if (user !== null) {
       req.loader.delete("kEmailMap", user.get("email"), function (err, data) {
         if (err) {
