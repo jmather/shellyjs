@@ -379,7 +379,7 @@ game.list = function (req, res, cb) {
         }
         fileCount -= 1;
         if (fileCount === 0) {
-          cb(error, games);
+          cb(error, sh.event("event.game.list", games));
         }
       });
     });

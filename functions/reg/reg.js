@@ -25,8 +25,8 @@ exports.functions = {
     role: {dtype: "string", optional: true}
   }, security: []},
 
-  remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: []},
-  downgrade: {desc: "testing only - remove email from user object", params: {uid: {dtype: "string"}}, security: []}
+  remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: ["admin"]},
+  downgrade: {desc: "testing only - remove email from user object", params: {uid: {dtype: "string"}}, security: ["admin"]}
 };
 
 function hashPassword(uid, password) {
@@ -169,8 +169,9 @@ exports.anonymous = function (req, res, cb) {
     if (!error) {
       // check if uid has upgraded account
       req.loader.exists("kUser", tm.get("uid"), function (error, user) {
+        console.log(user);
         if (!error && user.get("email").length) {
-          cb(1, sh.error("user_upgraded", "user has upgraded the anonymous account"));
+          cb(1, sh.error("user_upgraded", "user has already upgraded the anonymous account"));
           return;
         }
         var out = {};
@@ -285,7 +286,7 @@ exports.create = function (req, res, cb) {
 exports.remove = function (req, res, cb) {
   req.loader.exists("kEmailMap", req.body.email, function (err, em) {
     if (err) {
-      cb(0, sh.event("reg.remove", {status: "ok"}));
+      cb(0, sh.event("reg.remove", {status: "ok", message: "no user exists"}));
       return;
     }
 
@@ -299,7 +300,7 @@ exports.remove = function (req, res, cb) {
           cb(err, sh.error("delete_error", "unable to delete user", em.get("uid")));
           return;
         }
-        cb(0, sh.event("reg.remove", {status: "ok"}));
+        cb(0, sh.event("reg.remove", {status: "ok", message: "user and email map removed"}));
       });
     });
   });

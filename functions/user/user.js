@@ -49,7 +49,7 @@ user.aget = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, function (error, user) {
     if (error) {
-      cb(error, data);
+      cb(error, user);
       return;
     }
     cb(0, sh.event("event.user.get", user.getData()));
@@ -63,7 +63,7 @@ user.aset = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, function (error, user) {
     if (error) {
-      cb(error, data);
+      cb(error, user);
       return;
     }
     console.log("set user data", newUser);

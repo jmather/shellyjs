@@ -1,50 +1,79 @@
 var request = require('supertest');
 var should = require('should');
 var _ = require('lodash');
+var st = require("./shtest.js")
 
-request = request('http://localhost:5101');
-var data = {session: '1:33:xxxx:0'};
+var gEmail = "test@lgdales.com";
+var gPassword = "foofoo";
+var gCurrentGame = "";
 
-function validGame(res) {
-	res.should.be.json;
-	var msg = res.body;
-	msg.should.have.property('event', 'event.game.info');
-	msg.should.have.property('data');
-	msg.data.should.have.property('gameId');
-	msg.data.should.have.property('name', 'tictactoe');
-	return msg;	
-}
+describe('module game', function () {
 
-describe('CMD game.create', function(){
-  it('respond with valid game', function(done){
-		var req = _.clone(data);
-		req.cmd = "game.create";
-		req.name = "tictactoe";
-    request.post('/api').send(req)
-		  .set('Accept', 'application/json')
-      .expect(200)
-      .end(function(err, res) {
-				should.not.exist(err);
-				var game = validGame(res);
-//				console.log(msg);
-        done();
-      });
-  })
-})
+  before(function (done) {
+    st.init(gEmail, gPassword, function (err, res) {
+      done();
+    });
+  });
 
-describe('CMD game.get', function(){
-  it('respond with valid game', function(done){
-		var req = _.clone(data);
-		req.cmd = "game.get";
-		req.gameId = "193";
-    request.post('/api').send(req)
-		  .set('Accept', 'application/json')		
-      .expect(200)
-      .end(function(err, res) {
-				should.not.exist(err);
-				var game = validGame(res);
-//				console.log(msg);
-        done();
-      });
-  })
-})
+  describe('CMD game.create', function () {
+    it('respond with valid game', function (done) {
+      st.userCall({cmd: "game.create", name: "tictactoe"},
+        function(err, res) {
+          should.not.exist(err);
+          res.body.data.should.have.property("name", "tictactoe");
+          res.body.data.should.have.property("oid");
+          res.body.data.should.have.property("state");
+          gCurrentGame = res.body.data.oid;
+          done();
+        });
+    });
+  });
+  describe('CMD game.get', function () {
+    it('respond with valid game', function (done) {
+      st.userCall({cmd: "game.get", gameId: gCurrentGame},
+        function(err, res) {
+          should.not.exist(err);
+          res.body.data.should.have.property("name", "tictactoe");
+          res.body.data.should.have.property("oid");
+          res.body.data.should.have.property("state");
+          done();
+        });
+    });
+  });
+
+  describe('CMD game.reset', function () {
+    it('respond with valid game', function (done) {
+      st.userCall({cmd: "game.reset", gameId: gCurrentGame},
+        function(err, res) {
+          should.not.exist(err);
+          res.body.data.should.have.property("name", "tictactoe");
+          res.body.data.should.have.property("oid");
+          res.body.data.should.have.property("state");
+          done();
+        });
+    });
+  });
+
+  describe('CMD game.playing', function () {
+    it('list games user is playing', function (done) {
+      st.userCall({cmd: "game.playing"},
+        function(err, res) {
+          should.not.exist(err);
+          res.body.should.not.have.property("event", "error");
+          done();
+        });
+    });
+  });
+
+  describe('CMD game.list', function () {
+    it('list games available to user', function (done) {
+      st.userCall({cmd: "game.list"},
+        function(err, res) {
+          should.not.exist(err);
+          res.body.should.have.property("event", "event.game.list");
+          done();
+        });
+    });
+  });
+
+});
