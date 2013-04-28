@@ -26,8 +26,8 @@ shutil.sendWs = function (ws, error, data) {
 };
 
 shutil.event = function (event, data) {
-  if (_.isUndefined(data)) {
-    data = null;
+  if (_.isUndefined(data) || data === null) {
+    data = {};
   }
 
   var resp = {};
