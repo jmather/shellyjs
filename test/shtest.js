@@ -33,7 +33,7 @@ shtest.init = function (email, password, cb) {
       }
       gAdminSession = res.body.data.session;
 
-      // SWD probably want to add reg.create, just to be sure it's there
+      // SWD probably want to add reg.create, just to be sure it is there
 
       self.call({cmd: "reg.login", email: email, password: password},
         function (err, res) {

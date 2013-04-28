@@ -1,13 +1,13 @@
-var request = require('supertest');
-var should = require('should');
-var _ = require('lodash');
+var request = require("supertest");
+var should = require("should");
+var _ = require("lodash");
 var st = require("./shtest.js")
 
 var gEmail = "test@lgdales.com";
 var gPassword = "foofoo";
 var gCurrentGame = "";
 
-describe('module game', function () {
+describe("module game", function () {
 
   before(function (done) {
     st.init(gEmail, gPassword, function (err, res) {
@@ -15,8 +15,8 @@ describe('module game', function () {
     });
   });
 
-  describe('CMD game.create', function () {
-    it('respond with valid game', function (done) {
+  describe("CMD game.create", function () {
+    it("respond with valid game", function (done) {
       st.userCall({cmd: "game.create", name: "tictactoe"},
         function(err, res) {
           should.not.exist(err);
@@ -28,8 +28,8 @@ describe('module game', function () {
         });
     });
   });
-  describe('CMD game.get', function () {
-    it('respond with valid game', function (done) {
+  describe("CMD game.get", function () {
+    it("respond with valid game", function (done) {
       st.userCall({cmd: "game.get", gameId: gCurrentGame},
         function(err, res) {
           should.not.exist(err);
@@ -41,8 +41,8 @@ describe('module game', function () {
     });
   });
 
-  describe('CMD game.reset', function () {
-    it('respond with valid game', function (done) {
+  describe("CMD game.reset", function () {
+    it("respond with valid game", function (done) {
       st.userCall({cmd: "game.reset", gameId: gCurrentGame},
         function(err, res) {
           should.not.exist(err);
@@ -54,8 +54,8 @@ describe('module game', function () {
     });
   });
 
-  describe('CMD game.playing', function () {
-    it('list games user is playing', function (done) {
+  describe("CMD game.playing", function () {
+    it("list games user is playing", function (done) {
       st.userCall({cmd: "game.playing"},
         function(err, res) {
           should.not.exist(err);
@@ -65,8 +65,8 @@ describe('module game', function () {
     });
   });
 
-  describe('CMD game.list', function () {
-    it('list games available to user', function (done) {
+  describe("CMD game.list", function () {
+    it("list games available to user", function (done) {
       st.userCall({cmd: "game.list"},
         function(err, res) {
           should.not.exist(err);
