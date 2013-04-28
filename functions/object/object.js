@@ -9,7 +9,7 @@ var object = exports;
 object.desc = "generic object store";
 object.functions = {
   create: {desc: "get object", params: {object: {dtype: "object"}}, security: []},
-  destroy: {desc: "get object", params: {oid: {dtype: "string"}}, security: []},
+  delete: {desc: "remove object", params: {oid: {dtype: "string"}}, security: []},
   get: {desc: "get object", params: {oid: {dtype: "string"}}, security: []},
   set: {desc: "set object", params: {oid: {dtype: "string"}, object: {dtype: "object"}}, security: []}
 };
@@ -17,20 +17,27 @@ object.functions = {
 object.create = function (req, res, cb) {
   shlog.info("object.create");
 
-  var obj = req.loader.get("kObject", sh.uuid());
+  var obj = req.loader.create("kObject", sh.uuid());
   obj.set(req.body.object);
 
   cb(0, sh.event("object.get", obj.getData()));
 };
 
-object.destroy = function (req, res, cb) {
-  shlog.info("object.destroy");
-  // SWD - destroy object
-  cb(0, sh.event("object.destry", {message: "not implemented"}));
+object.delete = function (req, res, cb) {
+  shlog.info("object.delete");
+
+  req.loader.delete("kObject", req.body.oid, function (err, data) {
+    if (err) {
+      cb(err, sh.error("object_delete", "unable to delete object", {oid: req.body.oid, info: data}));
+      return;
+    }
+
+    cb(0, sh.event("object.destry", {status: "ok"}));
+  });
 };
 
 object.get = function (req, res, cb) {
-  req.loader.get("kObject", req.body.oid, function (err, obj) {
+  req.loader.exists("kObject", req.body.oid, function (err, obj) {
     if (err) {
       cb(err, obj);
       return;

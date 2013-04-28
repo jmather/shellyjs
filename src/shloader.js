@@ -115,7 +115,9 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
     cb(1, {message: "bad key"});
     return;
   }
+
   var key = this._db.key(keyType, params);
+  shlog.info("delete object", key);
   delete this._objects[key];
 
   this._db.kdelete(keyType, params, cb);
