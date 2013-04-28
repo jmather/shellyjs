@@ -3,6 +3,8 @@ var should = require("should");
 var _ = require("lodash");
 var st = require("./shtest.js");
 
+/*global describe, before, it*/
+
 var gEmail = "test@lgdales.com";
 var gBadEmail = "bad@lgdales.com";
 var gPassword = "foofoo";

@@ -1,7 +1,9 @@
 var request = require("supertest");
 var should = require("should");
 var _ = require("lodash");
-var st = require("./shtest.js")
+var st = require("./shtest.js");
+
+/*global describe, before, it*/
 
 var gEmail = "test@lgdales.com";
 var gPassword = "foofoo";
@@ -18,7 +20,7 @@ describe("module game", function () {
   describe("CMD object.create", function () {
     it("respond with valid game", function (done) {
       st.userCall({cmd: "object.create", object: {}},
-        function(err, res) {
+        function (err, res) {
           should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("oid");
@@ -31,7 +33,7 @@ describe("module game", function () {
   describe("CMD object.set", function () {
     it("set a value in an existing object", function (done) {
       st.userCall({cmd: "object.set", oid: gOid, object: {test: "foo"}},
-        function(err, res) {
+        function (err, res) {
           should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("test", "foo");
@@ -43,7 +45,7 @@ describe("module game", function () {
   describe("CMD object.get", function () {
     it("get an existing object", function (done) {
       st.userCall({cmd: "object.get", oid: gOid, object: {test: "foo"}},
-        function(err, res) {
+        function (err, res) {
           should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("test", "foo");
