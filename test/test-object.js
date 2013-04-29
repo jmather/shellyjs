@@ -21,7 +21,6 @@ describe("module game", function () {
     it("respond with valid game", function (done) {
       st.userCall({cmd: "object.create", object: {}},
         function (err, res) {
-          should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("oid");
           gOid = res.body.data.oid;
@@ -34,7 +33,6 @@ describe("module game", function () {
     it("set a value in an existing object", function (done) {
       st.userCall({cmd: "object.set", oid: gOid, object: {test: "foo"}},
         function (err, res) {
-          should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("test", "foo");
           done();
@@ -46,7 +44,6 @@ describe("module game", function () {
     it("get an existing object", function (done) {
       st.userCall({cmd: "object.get", oid: gOid, object: {test: "foo"}},
         function (err, res) {
-          should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("test", "foo");
           done();
@@ -58,7 +55,6 @@ describe("module game", function () {
     it("delete an existing object", function (done) {
       st.userCall({cmd: "object.delete", oid: gOid},
         function (err, res) {
-          should.not.exist(err);
           res.body.should.not.have.property("event", "error");
           res.body.data.should.have.property("status", "ok");
           done();
@@ -67,7 +63,6 @@ describe("module game", function () {
     it("verify delete of object", function (done) {
       st.userCall({cmd: "object.get", oid: gOid},
         function (err, res) {
-          should.not.exist(err);
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "object_get");
           done();

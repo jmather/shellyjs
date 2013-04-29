@@ -2,6 +2,7 @@ var fs = require("fs");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 exports.desc = "utility functions for shelly modules";
 exports.functions = {
@@ -43,7 +44,7 @@ function getInfo(name) {
 exports.info = function (req, res, cb) {
   shlog.info("module.info name=" + req.body.name);
   var m = getInfo(req.body.name);
-  cb(m.error, m);
+  cb(m.error, sh.event("module.info", m));
 };
 
 exports.list = function (req, res, cb) {
@@ -64,7 +65,7 @@ exports.list = function (req, res, cb) {
         }
         fileCount -= 1;
         if (fileCount === 0) {
-          cb(error, modules);
+          cb(error, sh.event("module.list", modules));
         }
       });
     });
