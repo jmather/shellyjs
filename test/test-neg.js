@@ -18,6 +18,20 @@ describe("general negative tests", function () {
   });
 
   describe("modules and functions", function () {
+    it("missing command", function (done) {
+      st.userCall({},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          done();
+        });
+    });
+    it("bad command request", function (done) {
+      st.userCall("bad",
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          done();
+        });
+    });
     it("bad command", function (done) {
       st.userCall({cmd: "bad"},
         function (err, res) {
@@ -73,6 +87,48 @@ describe("general negative tests", function () {
   });
 
   describe("security", function () {
+    it("no session", function (done) {
+      st.call({cmd: "module.list"},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          res.body.should.have.property("code", "no_session");
+          done();
+        });
+    });
+    it("bad session format", function (done) {
+      st.call({cmd: "module.list", session: "bad"},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          res.body.should.have.property("code", "bad_session");
+          done();
+        });
+    });
+    it("bad session signature", function (done) {
+      st.call({cmd: "module.list", session: "1:foo:foo:0"},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          res.body.should.have.property("code", "bad_session");
+          done();
+        });
+    });
+    it("bad session data", function (done) {
+      st.call({cmd: "module.list", session: "1:13:bad:0"},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          res.body.should.have.property("code", "bad_session");
+          done();
+        });
+    });
+    it("bad session time", function (done) {
+      var parts = st.session("user").split(":");
+      var sess = parts[0] + ":" + parts[1] + ":" + parts[2] + ":0";
+      st.call({cmd: "module.list", session: sess},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          res.body.should.have.property("code", "bad_session");
+          done();
+        });
+    });
     it("no permisions", function (done) {
       st.userCall({cmd: "system.config"},
         function (err, res) {

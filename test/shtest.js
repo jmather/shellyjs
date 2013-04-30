@@ -32,6 +32,15 @@ shtest.uid = function (utype) {
   return "";
 }
 
+shtest.session = function (utype) {
+  if (utype === "user") {
+    return gUserSession;
+  } else if (utype === "admin") {
+    return gAdminSession;
+  }
+  return "";
+}
+
 shtest.init = function (email, password, cb) {
   var self = this;
   this.call({cmd: "reg.login", email: "shelly", password: ""},
