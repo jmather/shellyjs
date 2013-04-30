@@ -31,6 +31,7 @@ match.add = function (req, res, cb) {
 
   if (_.isUndefined(global.matchq[name])) {
     cb(1, sh.error("bad_game", "unknown game", {name: name}));
+    return;
   }
 
   if (!_.isUndefined(global.matchq[name][uid])) {
@@ -78,6 +79,11 @@ match.add = function (req, res, cb) {
 match.remove = function (req, res, cb) {
   var uid = req.session.uid;
   var name = req.body.name;
+
+  if (_.isUndefined(global.matchq[name])) {
+    cb(1, sh.error("bad_game", "unknown game", {name: name}));
+    return;
+  }
 
   delete global.matchq[name][uid];
   cb(0, sh.event("event.match.remove"));

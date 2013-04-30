@@ -21,6 +21,15 @@ shtest.call = function (data, cb) {
       should.not.exist(err);
       cb(err, res);
     });
+};
+
+shtest.uid = function (utype) {
+  if (utype === "user") {
+    return gUserSession.split(":")[1];
+  } else if (utype === "admin") {
+    return gAdminSession.split(":")[1];
+  }
+  return "";
 }
 
 shtest.init = function (email, password, cb) {
