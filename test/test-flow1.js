@@ -17,46 +17,46 @@ var gWhoTurn = "";
 var gConns = [];
 
 function playGame() {
-it("turn 1", function (done) {
-  gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 0}},
-    function (err, res) {
-      res.should.not.have.property("event", "error");
-      gWhoTurn = res.data.whoTurn;
-      done();
-    });
-});
-it("turn 2", function (done) {
-  gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 1}},
-    function (err, res) {
-      res.should.not.have.property("event", "error");
-      gWhoTurn = res.data.whoTurn;
-      done();
-    });
-});
-it("turn 3", function (done) {
-  gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 0}},
-    function (err, res) {
-      res.should.not.have.property("event", "error");
-      gWhoTurn = res.data.whoTurn;
-      done();
-    });
-});
-it("turn 4", function (done) {
-  gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 1}},
-    function (err, res) {
-      res.should.not.have.property("event", "error");
-      gWhoTurn = res.data.whoTurn;
-      done();
-    });
-});
-it("turn 5 - winning", function (done) {
-  gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 2, y: 0}},
-    function (err, res) {
-      res.should.have.property("event", "event.game.over");
-      res.data.should.have.property("whoTurn", "0");
-      done();
-    });
-});
+  it("turn 1", function (done) {
+    gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 0}},
+      function (err, res) {
+        res.should.not.have.property("event", "error");
+        gWhoTurn = res.data.whoTurn;
+        done();
+      });
+  });
+  it("turn 2", function (done) {
+    gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 1}},
+      function (err, res) {
+        res.should.not.have.property("event", "error");
+        gWhoTurn = res.data.whoTurn;
+        done();
+      });
+  });
+  it("turn 3", function (done) {
+    gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 0}},
+      function (err, res) {
+        res.should.not.have.property("event", "error");
+        gWhoTurn = res.data.whoTurn;
+        done();
+      });
+  });
+  it("turn 4", function (done) {
+    gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 1}},
+      function (err, res) {
+        res.should.not.have.property("event", "error");
+        gWhoTurn = res.data.whoTurn;
+        done();
+      });
+  });
+  it("turn 5 - winning", function (done) {
+    gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 2, y: 0}},
+      function (err, res) {
+        res.should.have.property("event", "event.game.over");
+        res.data.should.have.property("whoTurn", "0");
+        done();
+      });
+  });
 }
 
 describe("basic user create and game play", function () {
@@ -128,7 +128,6 @@ describe("basic user create and game play", function () {
       gConn1.call("game.join", {gameId: gGameId},
         function (err, res) {
           res.should.not.have.property("event", "error");
-//          console.log(res);
           done();
         });
     });
@@ -136,7 +135,6 @@ describe("basic user create and game play", function () {
       gConn2.call("game.join", {gameId: gGameId},
         function (err, res) {
           res.should.not.have.property("event", "error");
-//          console.log(res);
           gWhoTurn = res.data.whoTurn;
           done();
         });
@@ -166,7 +164,6 @@ describe("basic user create and game play", function () {
       gConn1.call("game.leave", {gameId: gGameId},
         function (err, res) {
           res.should.not.have.property("event", "error");
-//          console.log(res);
           done();
         });
     });
@@ -174,7 +171,6 @@ describe("basic user create and game play", function () {
       gConn2.call("game.leave", {gameId: gGameId},
         function (err, res) {
           res.should.not.have.property("event", "error");
-//          console.log(res);
           done();
         });
     });
