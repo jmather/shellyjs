@@ -199,17 +199,19 @@ game.leave = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
 
-  req.loader.loadOrCreate("kPlaying", uid, function (error, playing) {
+  req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {
       cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
       return;
     }
+    console.log(playing);
     playing.removeGame(game);
+    console.log(playing);
+
+    global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {gameId: game.get("gameId"), uid: uid}));
+
+    cb(0, sh.event("event.game.leave", game.get("players")));
   });
-
-  global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {gameId: game.get("gameId"), uid: uid}));
-
-  cb(0, sh.event("event.game.leave", game.get("players")));
 };
 
 game.kick = function (req, res, cb) {

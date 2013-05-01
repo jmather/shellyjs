@@ -122,7 +122,10 @@ ws.onerror = function (evt) {
 
 // assumes global ws object
 function sendWs(data) {
-  var msg = JSON.stringify(data);
+  var obj = {};
+  obj.session = Env.session;
+  var obj = $.extend(obj, data);
+  var msg = JSON.stringify(obj);
   log("socket", "send", msg);
   ws.send(msg);
 }
