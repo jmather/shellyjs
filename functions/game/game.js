@@ -204,9 +204,7 @@ game.leave = function (req, res, cb) {
       cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
       return;
     }
-    console.log(playing);
     playing.removeGame(game);
-    console.log(playing);
 
     global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {gameId: game.get("gameId"), uid: uid}));
 
