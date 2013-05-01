@@ -17,22 +17,12 @@ user.functions = {
   find: {desc: "find a user based on email or token", params: {by : {dtype: "string"}, value: {dtype: "string"}}, security: ["admin"]}
 };
 
-user.pre = function (req, res, cb) {
-  shlog.info("user.pre");
-  cb(0);
-};
-
-user.post = function (req, res, cb) {
-  shlog.info("user.post");
-  cb(0);
-};
-
 user.get = function (req, res, cb) {
   cb(0, sh.event("event.user.get", req.session.user.getData()));
-}
+};
 
 user.set = function (req, res, cb) {
-  var userData = req.body.user
+  var userData = req.body.user;
 
   // only admin can change roles
   if (!_.isUndefined(userData.roles)  && !req.session.user.hasRole("admin")) {
@@ -42,7 +32,7 @@ user.set = function (req, res, cb) {
 
   req.session.user.setData(userData);
   cb(0, sh.event("event.user.get", req.session.user.getData()));
-}
+};
 
 user.aget = function (req, res, cb) {
   var uid = req.body.uid;

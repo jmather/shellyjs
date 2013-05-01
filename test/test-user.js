@@ -16,6 +16,12 @@ describe("module user", function () {
     });
   });
 
+  after(function (done) {
+    st.userCall({cmd: "user.set", user: {name: "test"}}, function (err, res) {
+      done();
+    });
+  });
+
   describe("CMD user.get", function () {
     it("respond with valid user", function (done) {
       st.userCall({cmd: "user.get"}, function (err, res) {
