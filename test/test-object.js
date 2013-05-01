@@ -18,7 +18,7 @@ describe("module game", function () {
   });
 
   describe("CMD object.create", function () {
-    it("respond with valid game", function (done) {
+    it("create a new object", function (done) {
       st.userCall({cmd: "object.create", object: {}},
         function (err, res) {
           res.body.should.not.have.property("event", "error");

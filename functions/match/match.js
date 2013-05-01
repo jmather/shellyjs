@@ -67,13 +67,13 @@ match.add = function (req, res, cb) {
       cb(0, sh.event("event.match", matchInfo));
       return;
     });
+  } else {
+    // just add the user
+    var ts = new Date().getTime();
+    var playerInfo = {uid: uid, posted: ts};
+    global.matchq[name][uid] = playerInfo;
+    cb(0, sh.event("event.match.add", playerInfo));
   }
-
-  // just add the user
-  var ts = new Date().getTime();
-  var playerInfo = {uid: uid, posted: ts};
-  global.matchq[name][uid] = playerInfo;
-  cb(0, sh.event("event.match.add", playerInfo));
 };
 
 match.remove = function (req, res, cb) {
