@@ -143,13 +143,16 @@ function init() {
             width: 300px;
         }
         #userList {
+            height: 278px;
+        }
+        #gameList {
             height: 150px;
         }
         .gameListDiv {
             float: left;
             width: 340px;
         }
-        #gameList {
+        #gameDoneList {
             height: 150px;
         }
         #messageLog {
@@ -188,13 +191,26 @@ function init() {
 </div>
 
 <div class="gameListDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Recent Games</div>
+    <div class="gameBoxHeaderDiv">Current Games</div>
     <div id="gameList" class="gameBoxInnerDiv">
         <div id="gameTemplate" style="display:none;">
             <span id="gameName">game-0</span>
             (<span id="gameTurn">?</span>)
             <button style="float:right;" id="myGameRemove">remove</button>
             <button style="float:right;" id="myGameJoin">play</button>
+            <div style="clear:both"></div>
+        </div>
+    </div>
+</div>
+
+<div class="gameListDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Finished Games</div>
+    <div id="gameDoneList" class="gameBoxInnerDiv">
+        <div id="gameDoneTemplate" style="display:none;">
+            <span id="gameDoneName">game-0</span>
+            (<span id="gameDonTurn">?</span>)
+            <button style="float:right;" id="myGameDoneRemove">remove</button>
+            <button style="float:right;" id="myGameDoneJoin">play</button>
             <div style="clear:both"></div>
         </div>
     </div>

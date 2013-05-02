@@ -96,7 +96,12 @@ function setMyGames(gameList) {
       sendWs(data);
     });
 
-    $("#gameList").append($newGame);
+    if (gameList[gameId].whoTurn === "0") {
+      $("#gameDoneList").append($newGame);
+    } else {
+      $("#gameList").append($newGame);
+    }
+
     setWhoTurn(gameId, game.whoTurn, game.players[game.whoTurn]);
   }
 }
