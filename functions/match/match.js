@@ -19,10 +19,12 @@ match.functions = {
 if (_.isUndefined(global.matchq)) {
   global.matchq = {};
   global.matchq.tictactoe = {};
+  global.matchq.connect4 = {};
 }
 if (_.isUndefined(global.matchInfo)) {
   global.matchInfo = {};
-  global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0};
+  global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
+  global.matchInfo.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/index.html"};
 }
 
 match.add = function (req, res, cb) {
@@ -56,6 +58,7 @@ match.add = function (req, res, cb) {
 
       var matchInfo = {};
       matchInfo.gameId = data.data.oid;
+      matchInfo.gameName = name;
       _.each(req.body.players, function (playerId) {
         delete global.matchq[name][playerId];
         matchInfo[playerId] = {};

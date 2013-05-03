@@ -54,8 +54,9 @@ function addUser(profile) {
     $("#userList").append($newGame);
 }
 
-function gameInit(gameId) {
-    window.location.href = "/tictactoe/tictactoe.html?gameId=" + gameId;
+function gameInit(gameName, gameId) {
+    var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
+    window.location.href = url;
 }
 
 function processEvent(res, from) {
@@ -92,7 +93,7 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == 'event.match.made') {
-        gameInit(res.data.gameId);
+        gameInit(res.data.gameName, res.data.gameId);
         return;
     }
     if (res.event == 'event.match.add') {
@@ -118,6 +119,10 @@ function init() {
 
     $("#gameTicTacToe").click(function () {
         sendCmd("match.add", {name: "tictactoe"});
+        $("#dialog").dialog();
+    });
+    $("#gameConnect4").click(function () {
+        sendCmd("match.add", {name: "connect4"});
         $("#dialog").dialog();
     });
     $("#liveToggle").click(function () {
@@ -173,7 +178,8 @@ function init() {
     <div class="playAnyoneDiv gameBoxDiv">
         <div class="gameBoxHeaderDiv">Play Anyone Now</div>
         <div id="playNowList" class="gameBoxInnerDiv">
-            <button id="gameTicTacToe">TicTacToe</button>
+            <button id="gameTicTacToe">Tic Tac Toe</button>
+            <button id="gameConnect4">Connect 4</button>
         </div>
     </div>
     <div class="lobbyUsersDiv gameBoxDiv">

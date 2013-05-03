@@ -94,7 +94,7 @@ app.get("*.html", function (req, res) {
     partials: {header: "header", footer: "footer", gameNav: "gamenav"}});
 });
 
-app.use("/login", express.static(gamesLogin));  // catch all for logout.html and script.js
+app.use("/", express.static(gamesBase));  // catch all for any example js files
 
 app.use("/", function (req, res) {
   shlog.info("default handler - goto lobby");

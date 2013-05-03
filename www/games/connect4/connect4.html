@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" href="/common/jquery-ui-1.10.2/css/smoothness/jquery-ui.css" />
+    <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
+    <script src="/common/jquery.cookie.js"></script>
+    <script src="/static/js/ba-debug.js"></script>
+    <script src="/static/js/reconnecting-websocket.js"></script>
+
+	<script type="text/javascript" src="http://craftyjs.com/release/0.4.2/crafty-min.js"></script>
+    <script src='/static/js/common.js'></script>
+	<script type="text/javascript" src="game.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
+
+	<title>Connect 4</title>
+	<style>
+	#cr-stage { float: left; margin:5px auto; border:5px solid black; }
+	</style>
+    <script language="javascript">
+        var Env = {{{EnvJson}}};
+
+        Env.gameId = "0";
+        var pgameId = getURLParameter("gameId");
+        if (pgameId != 'null') {
+            Env.gameId = pgameId.toString();
+        }
+
+        function shellyInit() {
+            sendCmd("game.join", {gameId: Env.gameId});
+        }
+
+        function processEvent(msg) {
+            console.log(msg);
+        }
+
+        $(init);
+        function init() {
+            $("#shSystem").text("Example");
+            $("#shSubTitle").text("Connect 4");
+
+            $(".tictac").click(function () {
+                var id = $(this).attr("id");
+                var x = id.slice(1, 2);
+                var y = id.slice(3, 4);
+                sendCmd("game.turn", {gameId: Env.gameId, move: {x: x, y: y}})
+            });
+
+            $("#gameReset").click(function () {
+                sendCmd("game.reset", {gameId: Env.gameId});
+            });
+
+            ws.connect(Env.socketUrl);
+        }
+    </script>
+</head>
+<body>
+{{> header}}
+{{> gameNav}}
+<div id="cr-stage"></div>
+<div style="clear:both"</div>
+
+<div class="messageLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
+<div id="messageLog" class="gameBoxInnerDiv" readonly></div>
+</div>
+{{> footer}}
+</body>
+</html>

@@ -57,9 +57,9 @@ game.pre = function (req, res, cb) {
 
   var gameId = req.body.gameId;
   shlog.info("game.pre: populating game info for " + gameId);
-  req.loader.get("kGame", gameId, function (error, game) {
-    if (error !== 0) {
-      cb(error, game);
+  req.loader.exists("kGame", gameId, function (error, game) {
+    if (error) {
+      cb(1, sh.error("game_load", "unable to load game data", {gameId: req.body.gameId}));
       return;
     }
     var gameName = game.get("name");

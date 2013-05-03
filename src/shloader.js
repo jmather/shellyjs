@@ -59,7 +59,7 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
   try {
     ShClass = require(global.gBaseDir + moduleMap[keyType].file);
   } catch (e) {
-    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
+    cb(1, {message: "unable to load object module", data: moduleMap[keyType]});
     return;
   }
 

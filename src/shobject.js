@@ -2,7 +2,6 @@ var util = require("util");
 var crypto = require("crypto");
 var _ = require("lodash");
 
-var sh = require(global.gBaseDir + "/src/shutil.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var db = global.db;
@@ -36,7 +35,7 @@ ShObject.prototype.create = function (oid) {
 
 ShObject.prototype.load = function (oid, cb) {
   if (!_.isString(oid)) {
-    cb(1, sh.error("bad_oid", "unable to load - oid is not a string", {oid: oid}));
+    cb(1, {code: "bad_oid", message: "unable to load - oid is not a string", info: {oid: oid}});
     return;
   }
 
@@ -46,7 +45,7 @@ ShObject.prototype.load = function (oid, cb) {
   var self = this;
   db.kget(this._keyType, oid, function (err, value) {
     if (value === null) {
-      cb(1, sh.error("object_get", "unable to load object data", {oid: oid}));
+      cb(1, {code: "object_get", message: "unable to load object data", info: {oid: oid}});
       return;
     }
     try {
@@ -54,7 +53,7 @@ ShObject.prototype.load = function (oid, cb) {
       self._hash = crypto.createHash("md5").update(value).digest("hex");
       self._data = _.merge(self._data, savedData);
     } catch (e) {
-      cb(1, sh.error("object_parse", "unable to parse object data", {oid: oid, message: e.message}));
+      cb(1, {code: "object_parse", message: "unable to parse object data", info: {oid: oid, message: e.message}});
       return;
     }
     cb(0, self); // object is valid
@@ -86,7 +85,7 @@ ShObject.prototype.save = function (cb) {
   var dataStr = JSON.stringify(this._data);
   db.kset(this._keyType, this._oid, dataStr, function (err, res) {
     if (err !== null) {
-      cb(1, sh.error("object_save", "unable to save object data", {oid: self._oid, err: err, res: res}));
+      cb(1, {code: "object_save", message: "unable to save object data", info: {oid: self._oid, err: err, res: res}});
       return;
     }
     shlog.info("object saved '%s'", self._key);

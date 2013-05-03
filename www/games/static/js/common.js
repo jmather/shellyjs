@@ -82,11 +82,13 @@ function setMyGames(gameList) {
     $newGame.addClass("myGameId" + gameId);
     $newGame.addClass("activeGame");
     $newGame.attr("gameId", gameId);
+    $newGame.attr("gameName", gameList[gameId].name);
     $newGame.css("display", "block");
 
     $newGame.find("#myGameJoin").click(function () {
-      var gameId = $(this).parent().attr('gameId');
-      gameInit(gameId);
+      var gameId = $(this).parent().attr("gameId");
+      var gameName = $(this).parent().attr("gameName");
+      gameInit(gameName, gameId);
     });
     $newGame.find("#myGameRemove").click(function (event) {
       $(event.target).parent().remove();
