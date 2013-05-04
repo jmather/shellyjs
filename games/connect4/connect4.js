@@ -3,22 +3,28 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var tictactoe = exports;
+var connect4 = exports;
 
-tictactoe.create = function (req, cb) {
-  var gameBoard = [
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""]
-  ];
+var COLUMN_FULL = -2;
+var EMPTY = -1;
+var YELLOW = 0;
+var RED = 1;
+
+connect4.create = function (req, cb) {
+  var board = [];
+  for (var i = 0; i < 7; i++) {
+    board[i] = []; //init board
+    for(var j = 0; j < 6; j++) {
+      board[i][j] = EMPTY; //set it to empty
+    }
+  }
 
   var state = {};
-  state.gameBoard = gameBoard;  // SWD: change this to just board
-  // first player is always X
-  state.xes = req.session.uid;
+  state.board = board;
+  // first player is always red
+  state.reds = req.session.uid;
   state.winner = 0;
   state.winnerSet = null;
-  state.xes = req.session.uid;
 
   req.env.game.set("minPlayers", 2);
   req.env.game.set("maxPlayers", 2);
@@ -27,7 +33,7 @@ tictactoe.create = function (req, cb) {
   cb(0, sh.event("event.game.create", req.env.game.getData()));
 };
 
-tictactoe.reset = function (req, cb) {
+connect4.reset = function (req, cb) {
   this.create(req, function (error, data) {
     if (error === 0) {
       data.event = "event.game.reset";
@@ -37,74 +43,41 @@ tictactoe.reset = function (req, cb) {
 };
 
 function checkFull(gb) {
-  var res = true;
-  for (var i = 0; i < 3; i++) {
-    for (var j = 0; j < 3; j++) {
-      if (gb[i][j] === "") {
+  for (var i = 0; i < 7; i++) {
+    for (var j = 0; j < 6; j++) {
+      if (gb[i][j] === EMPTY) {
         return false;
       }
     }
   }
-  return res;
+  return true;
 }
 
 function checkWin(gb) {
   var res = {winner: "", set: null};
 
-  shlog.log("checkWin");
-  for (var i = 0; i < 3; i++) {
-    if (gb[i][0] == gb[i][1] && gb[i][0] == gb[i][2]) {
-      if (gb[i][0] != "") {
-        res.winner = gb[i][0];
-        res.set = ["x" + i + "y0", "x" + i + "y1", "x" + i + "y2"];
-        return res;
-      }
-    }
-    if (gb[0][i] == gb[1][i] && gb[0][i] == gb[2][i]) {
-      if (gb[0][i] != "") {
-        res.winner = gb[0][i];
-        res.set = ["x0y" + i, "x1y" + i, "x2y" + i];
-        return res;
-      }
-    }
-  }
-
-  if (gb[0][0] == gb[1][1] && gb[0][0] == gb[2][2]) {
-    if (gb[1][1] != "") {
-      res.winner = gb[1][1];
-      res.set = ["x0y0", "x1y1", "x2y2"];
-      return res;
-    }
-  }
-  if (gb[0][2] == gb[1][1] && gb[0][2] == gb[2][0]) {
-    if (gb[1][1] != "") {
-      res.winner = gb[1][1];
-      res.set = ["x0y2", "x1y1", "x2y0"];
-      return res;
-    }
-  }
   return res;
 }
 
-tictactoe.turn = function (req, cb) {
+connect4.turn = function (req, cb) {
   var uid = req.session.uid;
   var move = req.body.move;
   var game = req.env.game;
   var state = req.env.game.get("state");
-  var gameBoard = state.gameBoard;
+  var board = state.board;
 
-  if (gameBoard[move.x][move.y] != "") {
+  if (board[move.x][move.y] !== EMPTY) {
     cb(2, sh.error("move_bad", "this square has been taken"));
     return;
   }
 
-  if (state.xes == uid) {
-    gameBoard[move.x][move.y] = "X";
+  if (state.reds == uid) {
+    board[move.x][move.y] = RED;
   } else {
-    gameBoard[move.x][move.y] = "O";
+    board[move.x][move.y] = YELLOW;
   }
 
-  var win = checkWin(gameBoard);
+  var win = checkWin(board);
   if (win.winner != "") {
     game.set("status", "over");
     game.set("whoTurn", "0");
@@ -115,7 +88,7 @@ tictactoe.turn = function (req, cb) {
     return;
   }
 
-  if (checkFull(gameBoard)) {
+  if (checkFull(board)) {
     game.set("status", "over");
     game.set("whoTurn", "0");
     state.winner = "0";
@@ -126,5 +99,5 @@ tictactoe.turn = function (req, cb) {
   }
 
   game.set("state", state);
-  cb(0, sh.event("event.game.info", game.getData()));
+  cb(0, sh.event("event.game.turn", {uid: uid, move: move, color: board[move.x][move.y]}));
 }

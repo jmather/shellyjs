@@ -11,7 +11,7 @@ var gDebug = {
 //  "shsqlite": {},
 //  "live": {},
 //  "shutil": {},
-//	"game": {},
+	"game": {},
 //	"recv": {},
 //	"send": {},
 //	"user": {},
@@ -20,8 +20,8 @@ var gDebug = {
 //  "rest": {},
 //  "socket": {},
 //  "games": {},
-  "shobject": {},
-  "shloader": {},
+//  "shobject": {},
+//  "shloader": {},
   "shelly": {}
 };
 

@@ -111,6 +111,7 @@ function addGamePlayingMulti(loader, players, game, cb) {
 }
 
 game.create = function (req, res, cb) {
+  shlog.info("game.create");
   var uid = req.session.uid;
 
   var game = req.loader.create("kGame", sh.uuid());
@@ -253,11 +254,11 @@ game.turn = function (req, res, cb) {
 
   //SWD make sure turn function is there
   req.env.gameModule.turn(req, function (error, data) {
-    if (error === 0) {
+    if (!error) {
       if (_.isUndefined(data)) {  // fill in the game info if not already by the game
         data = sh.event("event.game.info", game);
       }
-      // notify others listening to game
+      // notify users in game
       global.socket.notify(gameId, data);
       // notify any player of turn change
       _.forEach(game.playerOrder, function (playerId) {
@@ -267,11 +268,11 @@ game.turn = function (req, res, cb) {
           pic: ""
           }));
       });
-    }
-    // already sent on the socket notify
-    if (_.isObject(res.ws)) {
-      cb(0);
-      return;
+      // already sent on the socket notify to self
+      if (_.isObject(res.ws)) {
+        cb(0);
+        return;
+      }
     }
     cb(error, data);
   });

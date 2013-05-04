@@ -30,11 +30,48 @@
         }
 
         function shellyInit() {
+            sendCmd("live.game", {gameId: Env.gameId, status: "on"});
             sendCmd("game.join", {gameId: Env.gameId});
         }
 
+        function fillRow(rowNum, board) {
+            for (var i = 0; i < 7; i++) {
+                gBoard[i][rowNum] = board[i][rowNum];
+                if(board[i][rowNum] === 1) {
+                    addPiece("red", i);
+                } else if (board[i][rowNum] === 0) {
+                    addPiece("yellow", i);
+                }
+            }
+            if(rowNum < 6) {
+                setTimeout(function () { fillRow(rowNum+1, board)}, 500);
+            }
+        }
+
         function processEvent(msg) {
-            console.log(msg);
+            if (msg.event === "event.game.turn") {
+                var move = msg.data.move;
+                if (Env.user.oid !== msg.data.uid) { // ignore our own moves
+                    gBoard[move.x][move.y] = msg.data.color;
+                    addPiece((msg.data.color===0 ? "red" : "yellow"), move.x);
+                }
+            }
+            if (msg.event === "event.game.join") {
+                var board = msg.data.state.board;
+                fillRow(0, board);
+            }
+        }
+
+        function addPiece(color, column) {
+            console.log("add", color, column);
+//            var current = Crafty.e("2D, Canvas, piece, stopper, " + color).attr({x: column * 64, y: 0});
+            var current = Crafty.e("2D, Canvas, gravity, stopper, " + color).attr({x: column * 64, y: 0});
+            current.gravity("stopper")
+        }
+
+        function pieceDrop(turn, column, row) {
+            // 1===red, 0===yellow
+            sendCmd("game.turn", {gameId: Env.gameId, move: {x: column, y: row}});
         }
 
         $(init);
@@ -54,6 +91,9 @@
             });
 
             ws.connect(Env.socketUrl);
+
+            initGame();
+            Crafty.scene("game");
         }
     </script>
 </head>
