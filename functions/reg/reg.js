@@ -112,31 +112,31 @@ exports.login = function (req, res, cb) {
       check(email, 102).isEmail();
     }
   } catch (e) {
-    cb(1, sh.error("bad_email", "email is not correct format"));
-    return;
+    res.add(sh.error("bad_email", "email is not correct format"));
+    return cb(1);
   }
   var role = sanitize(req.body.role).trim();
 
   req.loader.exists("kEmailMap", email, function (error, em) {
     if (error) {
-      cb(1, sh.error("email_notfound", "email is not registered", {email: email}));
-      return;
+      res.add(sh.error("email_notfound", "email is not registered", {email: email}));
+      return cb(1);
     }
 
     // check password
     if (!checkPassword(em.get("uid"), password, em.get("password"))) {
-      cb(1, sh.error("password_bad", "incorrect password", {email: email}));
-      return;
+      res.add(sh.error("password_bad", "incorrect password", {email: email}));
+      return cb(1);
     }
 
     req.loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
-        cb(error, user);
-        return;
+        res.add(sh.error("user_get", "unable to get user", user));
+        return cb(1);
       }
       if (role.length && !_.contains(user.get("roles"), role)) {
-        cb(1, sh.error("no_role", "user does not have this role: '" + role + "'", {role: role, roles: user.get("roles")}));
-        return;
+        res.add(sh.error("no_role", "user does not have this role: '" + role + "'", {role: role, roles: user.get("roles")}));
+        return cb(1);
       }
 
       // push the email into the user object
@@ -148,7 +148,8 @@ exports.login = function (req, res, cb) {
       var out = {};
       out.email = email;
       out.session = session.create(em.get("uid"));
-      cb(0, sh.event("reg.login", out));
+      res.add(sh.event("reg.login", out));
+      return cb(0);
     });
   });
 };
@@ -161,25 +162,25 @@ exports.anonymous = function (req, res, cb) {
   try {
     check(token, "token not long enough").len(6);
   } catch (e) {
-    cb(1, sh.error("params_bad", "token not valid", {info: e.message}));
-    return;
+    res.add(sh.error("params_bad", "token not valid", {info: e.message}));
+    return cb(1);
   }
 
   req.loader.exists("kTokenMap", token, function (error, tm) {
     if (!error) {
       // check if uid has upgraded account
       req.loader.exists("kUser", tm.get("uid"), function (error, user) {
-        console.log(user);
         if (!error && user.get("email").length) {
-          cb(1, sh.error("user_upgraded", "user has already upgraded the anonymous account"));
-          return;
+          res.add(sh.error("user_upgraded", "user has already upgraded the anonymous account"));
+          return cb(1);
         }
         var out = {};
         out.uid = tm.get("uid");
         out.session = session.create(tm.get("uid"));
-        cb(0, sh.event("reg.anonymous", out));
+        res.add(sh.event("reg.anonymous", out));
+        return cb(0);
       });
-      return;
+      return; // stop here
     }
 
     // not there, so create token map
@@ -190,7 +191,8 @@ exports.anonymous = function (req, res, cb) {
     var out = {};
     out.uid = tm.get("uid");
     out.session = session.create(tm.get("uid"));
-    cb(0, sh.event("reg.anonymous", out));
+    res.add(sh.event("reg.anonymous", out));
+    return cb(0);
   });
 };
 
@@ -201,14 +203,14 @@ exports.upgrade = function (req, res, cb) {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
   } catch (e) {
-    cb(1, sh.error("params_bad", e.message, {info: e.message}));
-    return;
+    res.add(sh.error("params_bad", e.message, {info: e.message}));
+    return cb(1);
   }
 
   // make sure the email is not already set
   if (req.session.user.get("email").length > 0) {
-    cb(1, sh.error("email_set", "email is already set for this user", req.session.user.getData()));
-    return;
+    res.add(sh.error("email_set", "email is already set for this user", req.session.user.getData()));
+    return cb(1);
   }
 
   // make sure the email is not in use by someone else
@@ -217,34 +219,38 @@ exports.upgrade = function (req, res, cb) {
       if (em.get("uid") === req.session.user.get("oid")) {
         // set it just in case something went wrong before
         req.session.user.set("email", email);
-        cb(0, sh.event("reg.upgrade", req.session.user.getData()));
+        res.add(sh.event("reg.upgrade", req.session.user.getData()));
+        return cb(0);
       }
-      cb(1, sh.error("email_in_use", "email is already used by another user"));
-      return;
+      res.add(sh.error("email_in_use", "email is already used by another user"));
+      return cb(1);
     }
     // set the email for the user
     req.session.user.set("email", email);
     // create the email map
     createEmailReg(req.loader, req.session.uid, email, password);
-    cb(0, sh.event("reg.upgrade", req.session.user.getData()));
+    res.add(sh.event("reg.upgrade", req.session.user.getData()));
+    return cb(0);
   });
 };
 
 // SWD for testing only
 exports.downgrade = function (req, res, cb) {
   var uid = req.body.uid;
-  req.loader.get("kUser", uid, function (err, user) {
-    if (user !== null) {
+  req.loader.exists("kUser", uid, function (err, user) {
+    if (!err) {
       req.loader.delete("kEmailMap", user.get("email"), function (err, data) {
         if (err) {
-          cb(err, sh.error("delete_error", "unable to delete email map", data));
-          return;
+          res.add(sh.error("delete_error", "unable to delete email map", data));
+          return cb(1);
         }
         user.set("email", "");
-        cb(0, sh.event("reg.downgrade", {status: "ok"}));
+        res.add(sh.event("reg.downgrade", {status: "ok"}));
+        return cb(0);
       });
     } else {
-      cb(1, sh.error("no_user", "unable to load user", {userId: userId}));
+      res.add(sh.error("no_user", "unable to load user", {userId: uid}));
+      return cb(1);
     }
   });
 };
@@ -256,21 +262,21 @@ exports.create = function (req, res, cb) {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
   } catch (e) {
-    cb(1, sh.error("params_bad", e.message, {info: e.message}));
-    return;
+    res.add(sh.error("params_bad", e.message, {info: e.message}));
+    return cb(1);
   }
 
   req.loader.exists("kEmailMap", email, function (error, em) {
     if (!error) {
-      cb(1, sh.error("email_used", "this email is already registered", {email: email}));
-      return;
+      res.add(sh.error("email_used", "this email is already registered", {email: email}));
+      return cb(1);
     }
     // create the user
     em = createEmailReg(req.loader, sh.uuid(), email, password);
     req.loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
-        cb(error, user);
-        return;
+        res.add(sh.error("user_get", "unable to load user", user));
+        return cb(1);
       }
       user.set("email", email);
       user.set("name", email.split("@")[0]);
@@ -278,7 +284,8 @@ exports.create = function (req, res, cb) {
       var out = {};
       out.uid = em.get("uid");
       out.session = session.create(em.get("uid"));
-      cb(0, sh.event("reg.create", out));
+      res.add(sh.event("reg.create", out));
+      return cb(0);
     });
   });
 };
@@ -286,21 +293,22 @@ exports.create = function (req, res, cb) {
 exports.remove = function (req, res, cb) {
   req.loader.exists("kEmailMap", req.body.email, function (err, em) {
     if (err) {
-      cb(0, sh.event("reg.remove", {status: "ok", message: "no user exists"}));
-      return;
+      res.add(sh.event("reg.remove", {status: "ok", message: "no user exists"}));
+      return cb(0);
     }
 
     req.loader.delete("kEmailMap", req.body.email, function (err, data) {
       if (err) {
-        cb(err, sh.error("delete_error", "unable to delete email map", em));
-        return;
+        res.add(sh.error("delete_error", "unable to delete email map", em));
+        return cb(1);
       }
       req.loader.delete("kUser", em.get("uid"), function (err, data) {
         if (err) {
-          cb(err, sh.error("delete_error", "unable to delete user", em.get("uid")));
-          return;
+          res.add(sh.error("delete_error", "unable to delete user", em.get("uid")));
+          return cb(1);
         }
-        cb(0, sh.event("reg.remove", {status: "ok", message: "user and email map removed"}));
+        res.add(sh.event("reg.remove", {status: "ok", message: "user and email map removed"}));
+        return cb(0);
       });
     });
   });

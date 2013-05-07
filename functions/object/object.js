@@ -20,7 +20,8 @@ object.create = function (req, res, cb) {
   var obj = req.loader.create("kObject", sh.uuid());
   obj.set(req.body.object);
 
-  cb(0, sh.event("object.get", obj.getData()));
+  res.add(sh.event("object.get", obj.getData()));
+  return cb(0);
 };
 
 object.delete = function (req, res, cb) {
@@ -28,31 +29,34 @@ object.delete = function (req, res, cb) {
 
   req.loader.delete("kObject", req.body.oid, function (err, data) {
     if (err) {
-      cb(err, sh.error("object_delete", "unable to delete object", {oid: req.body.oid, info: data}));
-      return;
+      res.add(sh.error("object_delete", "unable to delete object", {oid: req.body.oid, info: data}));
+      return cb(1);
     }
 
-    cb(0, sh.event("object.delete", {status: "ok"}));
+    res.add(sh.event("object.delete", {status: "ok"}));
+    return cb(0);
   });
 };
 
 object.get = function (req, res, cb) {
   req.loader.exists("kObject", req.body.oid, function (err, obj) {
     if (err) {
-      cb(err, sh.error("object_get", obj));
-      return;
+      res.add(sh.error("object_get", "unable to load object", obj));
+      return cb(1);
     }
-    cb(0, sh.event("object.get", obj.getData()));
+    res.add(sh.event("object.get", obj.getData()));
+    return cb(0);
   });
 };
 
 object.set = function (req, res, cb) {
   req.loader.get("kObject", req.body.oid, function (err, obj) {
     if (err) {
-      cb(err, obj);
-      return;
+      res.add(sh.error("object_set", "unable to load object to set", obj));
+      return cb(1);
     }
     obj.setData(req.body.object);
-    cb(0, sh.event("object.set", obj.getData()));
+    res.add(sh.event("object.set", obj.getData()));
+    return cb(0);
   });
 };

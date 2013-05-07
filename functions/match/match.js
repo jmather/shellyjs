@@ -32,13 +32,13 @@ match.add = function (req, res, cb) {
   var name = req.body.name;
 
   if (_.isUndefined(global.matchq[name])) {
-    cb(1, sh.error("bad_game", "unknown game", {name: name}));
-    return;
+    res.add(sh.error("bad_game", "unknown game", {name: name}));
+    return cb(1);
   }
 
   if (!_.isUndefined(global.matchq[name][uid])) {
-    cb(1, sh.error("match_added", "player is already being matched", {uid: uid, name: name}));
-    return;
+    res.add(sh.error("match_added", "player is already being matched", {uid: uid, name: name}));
+    return cb(1);
   }
 
   var keys = Object.keys(global.matchq[name]);
@@ -67,15 +67,16 @@ match.add = function (req, res, cb) {
         global.socket.notifyUser(playerId, sh.event("event.match.made", matchInfo));
       });
 
-      cb(0, sh.event("event.match", matchInfo));
-      return;
+      res.add(sh.event("event.match", matchInfo));
+      return cb(0);
     });
   } else {
     // just add the user
     var ts = new Date().getTime();
     var playerInfo = {uid: uid, posted: ts};
     global.matchq[name][uid] = playerInfo;
-    cb(0, sh.event("event.match.add", playerInfo));
+    res.add(sh.event("event.match.add", playerInfo));
+    return cb(0);
   }
 };
 
@@ -84,12 +85,13 @@ match.remove = function (req, res, cb) {
   var name = req.body.name;
 
   if (_.isUndefined(global.matchq[name])) {
-    cb(1, sh.error("bad_game", "unknown game", {name: name}));
-    return;
+    res.add(sh.error("bad_game", "unknown game", {name: name}));
+    return cb(1);
   }
 
   delete global.matchq[name][uid];
-  cb(0, sh.event("event.match.remove"));
+  res.add(sh.event("event.match.remove"));
+  return cb(0);
 };
 
 match.stats = function (req, res, cb) {
@@ -98,7 +100,8 @@ match.stats = function (req, res, cb) {
 //    counts[idx] = Object.keys(gameq).length;
     global.matchInfo[idx].waiting = Object.keys(gameq).length;
   });
-  cb(0, sh.event("event.match.stats", global.matchInfo));
+  res.add(sh.event("event.match.stats", global.matchInfo));
+  return cb(0);
 };
 
 match.list = function (req, res, cb) {

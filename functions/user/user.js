@@ -18,7 +18,8 @@ user.functions = {
 };
 
 user.get = function (req, res, cb) {
-  cb(0, sh.event("event.user.get", req.session.user.getData()));
+  res.add(sh.event("event.user.get", req.session.user.getData()));
+  return cb(0);
 };
 
 user.set = function (req, res, cb) {
@@ -26,12 +27,13 @@ user.set = function (req, res, cb) {
 
   // only admin can change roles
   if (!_.isUndefined(userData.roles)  && !req.session.user.hasRole("admin")) {
-    cb(1, sh.error("no_permision", "user does not have rights to alter roles"));
-    return;
+    res.add(sh.error("no_permision", "user does not have rights to alter roles"));
+    return cb(1);
   }
 
   req.session.user.setData(userData);
-  cb(0, sh.event("event.user.get", req.session.user.getData()));
+  res.add(sh.event("event.user.get", req.session.user.getData()));
+  return cb(0);
 };
 
 user.aget = function (req, res, cb) {
@@ -39,11 +41,11 @@ user.aget = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, function (error, user) {
     if (error) {
-      cb(error, user);
+      res.add(sh.error("user_aget", "user does not exist", user));
       return;
     }
-    cb(0, sh.event("event.user.get", user.getData()));
-    return;
+    res.add(sh.event("event.user.get", user.getData()));
+    return cb(0);
   });
 };
 
@@ -53,14 +55,12 @@ user.aset = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, function (error, user) {
     if (error) {
-      cb(error, user);
+      res.add(sh.error("user_aset", "user does not exist", user));
       return;
     }
-    console.log("set user data", newUser);
     user.setData(newUser);
-    console.log("user data", user.getData());
-    cb(0, sh.event("event.user.get", user.getData()));
-    return;
+    res.add(sh.event("event.user.get", user.getData()));
+    return cb(0);
   });
 
 };
@@ -68,11 +68,12 @@ user.aset = function (req, res, cb) {
 user.profiles = function (req, res, cb) {
   var userIds = req.body.users;
   sh.fillProfiles(req.loader, userIds, function (error, data) {
-    if (!error) {
-      cb(0, sh.event("event.user.profiles", data));
-    } else {
-      cb(error, data);
+    if (error) {
+      res.add(sh.error("profile_fill", "unable to fill in profile data", data));
+      return cb(1);
     }
+    res.add(sh.event("event.user.profiles", data));
+    return cb(0);
   });
 };
 
@@ -80,33 +81,37 @@ user.find = function (req, res, cb) {
   if (req.body.by === "email") {
     reg.findUserByEmail(req.loader, req.body.value, function (err, data) {
       if (err) {
-        cb(err, data);
-        return;
+        res.add(data);  // helper function fills in correct error - SWD - should change this
+        return cb(1);
       }
-      cb(0, sh.event("event.user.find", data.getData()));
+      res.add(sh.event("event.user.find", data.getData()));
+      return cb(0);
     });
     return;
   }
   if (req.body.by === "uid") {
     req.loader.exists("kUser", req.body.value, function (err, data) {
       if (err) {
-        cb(1, sh.error("no_user", "unable to find user with uid = " + req.body.value));
-        return;
+        res.add(sh.error("no_user", "unable to find user with uid = " + req.body.value));
+        return cb(1);
       }
-      cb(1, sh.event("event.user.find", data.getData()));
+      res.add(sh.event("event.user.find", data.getData()));
+      return cb(0);
     });
     return;
   }
   if (req.body.by === "token") {
     reg.findUserByToken(req.loader, req.body.value, function (err, data) {
       if (err) {
-        cb(err, data);
-        return;
+        res.add(data);
+        return cb(1);
       }
-      cb(0, sh.event("event.user.find", data.getData()));
+      res.add(sh.event("event.user.find", data.getData()));
+      return cb(0);
     });
     return;
   }
 
-  cb(1, sh.error("unknown_find_by", "no way to find a user by this data type = "  + req.body.by, {by: req.body.by}));
+  res.add(sh.error("unknown_find_by", "no way to find a user by this data type = "  + req.body.by, {by: req.body.by}));
+  return cb(1);
 };

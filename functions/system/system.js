@@ -8,37 +8,41 @@ system.functions = {
   stats: {desc: "get all server stats", params: {}, security: ["admin"]},
   config: {desc: "get all server settings", params: {}, security: ["admin"]},
   rawGet: {desc: "get an object given any key", params: {key: {dtype: "string"}}, security: ["admin"]},
-  rawSet: {desc: "set an object given any key", params: {key: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]},
+  rawSet: {desc: "set an object given any key", params: {key: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]}
 };
 
 system.stats = function (req, res, cb) {
   shlog.info("system.stats");
 
-  cb(0, sh.event("system.stats", {stats: "here"}));
+  res.add(sh.event("system.stats", {stats: "here"}));
+  return cb(0);
 };
 
 system.config = function (req, res, cb) {
   shlog.info("system.config");
 
-  cb(0, sh.event("system.config", {gBaseDir: global.gBaseDir, CONF: global.CONF, PACKAGE: global.PACKAGE}));
+  res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONF: global.CONF, PACKAGE: global.PACKAGE}));
+  return cb(0);
 };
 
 system.rawGet = function (req, res, cb) {
-  global.db.get(req.body.key, function (err, data) {
+  global.db.exists(req.body.key, function (err, data) {
     if (err) {
-      cb(err, dataj);
-      return;
+      res.add(sh.error("object_get", "unable to et object", data));
+      return cb(1);
     }
-    cb(0, sh.event("system.rawGet", JSON.parse(data)));
+    res.add(sh.event("system.rawGet", JSON.parse(data)));
+    return cb(0);
   });
 };
 
 system.rawSet = function (req, res, cb) {
-  global.db.set(req.body.key, JSON.stringify(req.body.data), function (err, obj) {
+  global.db.set(req.body.key, JSON.stringify(req.body.data), function (err, data) {
     if (err) {
-      cb(err, obj);
-      return;
+      res.add(sh.error("object_set", "unable to set object", data));
+      return cb(1);
     }
-    cb(0, sh.event("system.rawSet", req.body.data));
+    res.add(sh.event("system.rawSet", req.body.data));
+    return cb(0);
   });
 };

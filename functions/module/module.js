@@ -44,7 +44,8 @@ function getInfo(name) {
 exports.info = function (req, res, cb) {
   shlog.info("module.info name=" + req.body.name);
   var m = getInfo(req.body.name);
-  cb(m.error, sh.event("module.info", m));
+  res.add(sh.event("module.info", m));
+  return cb(0);
 };
 
 exports.list = function (req, res, cb) {
@@ -65,7 +66,8 @@ exports.list = function (req, res, cb) {
         }
         fileCount -= 1;
         if (fileCount === 0) {
-          cb(error, sh.event("module.list", modules));
+          res.add(sh.event("module.list", modules));
+          return cb(0);
         }
       });
     });

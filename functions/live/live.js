@@ -15,13 +15,14 @@ live.functions = {
 };
 
 live.list = function (req, res, cb) {
-  cb(0, sh.event("event.live.list", global.gUsers));
+  res.add(sh.event("event.live.list", global.gUsers));
+  return cb(0);
 };
 
 live.user = function (req, res, cb) {
   if (_.isUndefined(res.ws)) {
-    cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
-    return;
+    res.add(sh.error("socket_only_call", "this call can only be made from the socket interafce"));
+    return cb(1);
   }
   var status = req.body.status;
 
@@ -69,8 +70,8 @@ live.user = function (req, res, cb) {
 
 live.game = function (req, res, cb) {
   if (_.isUndefined(res.ws)) {
-    cb(1, sh.error("socket_only_call", "this call can only be made from the socket interafce"));
-    return;
+    res.add(sh.error("socket_only_call", "this call can only be made from the socket interafce"));
+    return cb(1);
   }
   var eventEmitter = res.eventEmitter;
   var socketNotify = res.socketNotify;
@@ -129,9 +130,6 @@ live.message = function (req, res, cb) {
   var event = sh.event("event.live.message", {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: msg});
   global.socket.notifyAll(event);
 
-  if (_.isUndefined(res.ws)) {
-    cb(0, sh.event("event.live.message", {status: "sent"}));
-  } else {
-    cb(0);
-  }
+  res.add(sh.event("event.live.message", {status: "sent"}));
+  return cb(0);
 };
