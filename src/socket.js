@@ -34,12 +34,22 @@ Socket.notifyAll = function (data) {
   });
 };
 
+function add(data) {
+  sh.sendWs(this.ws, 0, data);
+}
+
+// no-op as we send right away
+function sendAll() {
+}
+
 function handleMessage(ws, message, socketNotify) {
   var req = {};
   var res = {
     ws: ws,
     eventEmitter: eventEmitter,
-    socketNotify: socketNotify
+    socketNotify: socketNotify,
+    add: add,
+    sendAll: sendAll
   };
 
   // fill in req.body
@@ -55,7 +65,7 @@ function handleMessage(ws, message, socketNotify) {
   sh.fillSession(req, res, function (error, data) {
     try {
       if (error !== 0) {
-        sh.sendWs(ws, error, data);
+        res.sendAll();
         return;
       }
       // if valid user, add to list, if not we are in reg.* call
@@ -84,12 +94,14 @@ function handleMessage(ws, message, socketNotify) {
           shlog.error(error, data);
         }
         if (_.isObject(data)) {
-          data.cb = req.body.cb;
+          if (_.isString(req.body.cb)) {
+            data.cb = req.body.cb;
+          }
           sh.sendWs(ws, error, data);
         }
+        res.sendAll();
       } catch (err) {
         sh.sendWs(ws, 1, sh.error("socket", "call - " + err.message, { message: err.message, stack: err.stack }));
-        return;
       }
     });  // end sh.call
   });  // end sh.fillSession

@@ -32,14 +32,14 @@ object.delete = function (req, res, cb) {
       return;
     }
 
-    cb(0, sh.event("object.destry", {status: "ok"}));
+    cb(0, sh.event("object.delete", {status: "ok"}));
   });
 };
 
 object.get = function (req, res, cb) {
   req.loader.exists("kObject", req.body.oid, function (err, obj) {
     if (err) {
-      cb(err, obj);
+      cb(err, sh.error("object_get", obj));
       return;
     }
     cb(0, sh.event("object.get", obj.getData()));

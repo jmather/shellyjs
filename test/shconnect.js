@@ -57,7 +57,7 @@ ShConnect.prototype.setSession = function (session) {
 
   var ts = new Date().getTime();
   this._started = ts;
-}
+};
 
 ShConnect.prototype.call = function (cmd, data, cb) {
   var obj = {};
@@ -73,10 +73,10 @@ ShConnect.prototype.call = function (cmd, data, cb) {
         cb(err, {event: "error", message: res});
         return;
       }
-      if (res.body.event === "error") {
-        cb(1, res.body);
+      if (res.body[0].event === "error") {
+        cb(1, res.body[0]);
         return;
       }
-      cb(0, res.body);
+      cb(0, res.body[0]);
     });
 };

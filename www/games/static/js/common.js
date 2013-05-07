@@ -165,7 +165,8 @@ function sendRestCmd(cmd, data, cb) {
       data: JSON.stringify(obj),
       success: function (res, status) {
         log("rest", "recv", res);
-        cb(0, res);
+        // SWD just take first message for now
+        cb(0, res[0]);
       },
       error: function (xhr, textStatus, errorThrown) {
         log("rest", "error", xhr.responseText);

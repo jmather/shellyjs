@@ -11,14 +11,31 @@ rest.use(sh.expressCrossDomain);
 rest.use(express.bodyParser());
 rest.use(express.cookieParser());
 
+// res.add - adds event or error to output stream
+function add(data) {
+  if (_.isUndefined(this.msgs)) {
+    this.msgs = [];
+  }
+  this.msgs.push(data);
+}
+
+// res.send - sends all events or errors
+function sendAll() {
+  console.log(this.msgs);
+  this.send(this.msgs);
+  this.msgs = [];
+}
+
 rest.use(function (req, res, next) {
   shlog.info("session check");
 
   req.loader = new ShLoader();
+  res.add = add;
+  res.sendAll = sendAll;
 
   sh.fillSession(req, res, function (error, data) {
-    if (error !== 0) {
-      res.send(data);
+    if (error) {
+      res.sendAll();
       return 0;
     }
     return next();
@@ -37,10 +54,14 @@ function respond(req, res, next) {
     }
     shlog.send(error, "rest - %s", JSON.stringify(data));
     if (_.isObject(data)) {
-      data.cb = req.body.cb;
+      res.add(data);
+      if (_.isObject(req.body.cb)) {
+        data.cb = req.body.cb;
+      }
     }
     req.loader.dump();
-    res.send(data);
+    res.add("foo");
+    res.sendAll();
   });
 }
 

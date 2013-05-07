@@ -19,6 +19,7 @@ shtest.call = function (data, cb) {
     .expect(200)
     .end(function (err, res) {
       should.not.exist(err);
+      res.body = res.body[0];
       cb(err, res);
     });
 };

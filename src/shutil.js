@@ -47,29 +47,28 @@ shutil.error = function (code, message, data) {
 
 shutil.fillSession = function (req, res, cb) {
   if (_.isUndefined(req.body.cmd)) {
-    cb(1, shutil.error("no_cmd", "missing command data"));
-    return;
+    res.add(shutil.error("no_cmd", "missing command data"));
+    return cb(1);
   }
   var cmd = req.body.cmd;
   if (cmd === "reg.login" || cmd === "reg.create" || cmd === "reg.check" || cmd === "reg.anonymous") {
-    cb(0);
-    return;
+    return cb(0);
   }
   if (_.isUndefined(req.body.session)) {
-    cb(1, shutil.error("no_session", "missing session data"));
-    return;
+    res.add(shutil.error("no_session", "missing session data"));
+    return cb(1);
   }
   if (!session.check(req.body.session)) {
-    cb(1, shutil.error("bad_session", "bad session data"));
-    return;
+    res.add(shutil.error("bad_session", "bad session data"));
+    return cb(1);
   }
   req.session = {};
   req.session.uid = req.body.session.split(":")[1];
   shlog.info("loading user: uid = " + req.session.uid);
   req.loader.get("kUser", req.session.uid, function (error, user) {
     if (error) {
-      cb(1, shutil.error("user_load", "unable to load user", {uid: req.session.uid, error: error, user: user}));
-      return;
+      res.add(shutil.error("user_load", "unable to load user", {uid: req.session.uid, error: error, user: user}));
+      return cb(1);
     }
     shlog.info("user loaded: " + req.session.uid);
     req.session.user = user;
@@ -82,8 +81,8 @@ shutil.call = function (req, res, cb) {
   shlog.info("cmd = " + cmd);
   var cmdParts = cmd.split(".");
   if (cmdParts.length < 2) {
-    cb(1, shutil.error("module_call", "invalid command", {cmd: cmd}));
-    return;
+    res.add(shutil.error("module_call", "invalid command", {cmd: cmd}));
+    return cb(1);
   }
   var moduleName = cmdParts[0];
   var funcName = cmdParts[1];
@@ -96,20 +95,20 @@ shutil.call = function (req, res, cb) {
     delete require.cache[require.resolve(cmdFile)];
     module = require(cmdFile);
   } catch (e) {
-    cb(1, shutil.error("module_require", "unable to load module", {module: moduleName, message: e.message, stack: e.stack}));
-    return;
+    res.add(shutil.error("module_require", "unable to load module", {module: moduleName, message: e.message, stack: e.stack}));
+    return cb(1);
   }
 
   // check function
   if (_.isUndefined(module[funcName])) {
-    cb(1, shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
-    return;
+    res.add(shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
+    return cb(1);
   }
 
   // check function def
   if (_.isUndefined(module.functions[funcName])) {
-    cb(1, shutil.error("module_function", "function description does not exist", {module: moduleName, function: funcName}));
-    return;
+    res.add(shutil.error("module_function", "function description does not exist", {module: moduleName, function: funcName}));
+    return cb(1);
   }
 
   // check function perms
@@ -118,9 +117,9 @@ shutil.call = function (req, res, cb) {
       return req.session.user.hasRole(value);
     });
     if (!hasPerms) {
-      cb(1, shutil.error("function_perms", "user does not have permision to call this function", {module: moduleName,
+      res.add(shutil.error("function_perms", "user does not have permision to call this function", {module: moduleName,
         function: funcName, security: module.functions[funcName].security}));
-      return;
+      return cb(1);
     }
   }
 
@@ -132,8 +131,8 @@ shutil.call = function (req, res, cb) {
     }
     if (_.isUndefined(req.body[key])) {
       this.paramsOk = false;
-      cb(1, shutil.error("param_required", "missing required parameter", {cmd: cmd, key: key}));
-      return false;
+      res.add(shutil.error("param_required", "missing required parameter", {cmd: cmd, key: key}));
+      return cb(1);
     }
     var ptype = typeof req.body[key];
     if (_.isArray(req.body[key])) {
@@ -141,8 +140,8 @@ shutil.call = function (req, res, cb) {
     }
     if (ptype !== value.dtype) {
       this.paramsOk = false;
-      cb(1, shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
-      return false;
+      res.add(shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
+      return cb(1);
     }
   }, this);
   if (!this.paramsOk) {

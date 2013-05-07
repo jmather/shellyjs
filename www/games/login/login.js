@@ -28,7 +28,7 @@ function doLogin() {
       if (res.event === "error") {
         error(res.message);
       } else {
-        $.cookie("shSession", res.data.session, {path: '/', expires: 365});
+        $.cookie("shSession", res[0].data.session, {path: '/', expires: 365});
         window.location.href = "/lobby.html";
       }
     },
@@ -65,7 +65,7 @@ function doRegister() {
       if (res.event === "error") {
         error(res.message);
       } else {
-        $.cookie("shSession", res.data.session, {path: '/', expires: 365});
+        $.cookie("shSession", res[0].data.session, {path: '/', expires: 365});
         window.location.href = "/lobby.html";
       }
     },
@@ -101,7 +101,7 @@ function doAnonymous() {
           error(res.message);
         }
       } else {
-        $.cookie("shSession", res.data.session, {path: '/', expires: 365});
+        $.cookie("shSession", res[0].data.session, {path: '/', expires: 365});
         window.location.href = "/lobby.html";
       }
     },

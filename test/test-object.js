@@ -9,7 +9,7 @@ var gEmail = "test@lgdales.com";
 var gPassword = "foofoo";
 var gOid = "";
 
-describe("module game", function () {
+describe("module object", function () {
 
   before(function (done) {
     st.init(gEmail, gPassword, function (err, res) {

@@ -102,5 +102,6 @@ match.stats = function (req, res, cb) {
 };
 
 match.list = function (req, res, cb) {
-  cb(0, sh.event("event.match.list", global.matchq));
+  res.add(sh.event("event.match.list", global.matchq));
+  cb(0);
 };
