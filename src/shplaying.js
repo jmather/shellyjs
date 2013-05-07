@@ -23,8 +23,8 @@ Playing.prototype.addGame = function (game) {
   this._data.currentGames[game.get("oid")] = {name: game.get("name"), lastJoin: ts};
 };
 
-Playing.prototype.removeGame = function (game) {
-  shlog.info("remove game:", game.get("oid"));
+Playing.prototype.removeGame = function (gameId) {
+  shlog.info("remove game:", gameId);
 
-  delete this._data.currentGames[game.get("oid")];
+  delete this._data.currentGames[gameId];
 };

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Shelly Object Editor</title>
+    <link rel="stylesheet" href="/common/jquery-ui-1.10.2/css/smoothness/jquery-ui.css" />
+    <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <script src="/static/js/common.js"></script>
+    <style>
+        pre {
+            margin: 0px;
+        }
+        .lookupObjDiv {
+            width: 450px;
+        }
+        .keyInput {
+            width: 245px;
+        }
+        .btn-div {
+            width: 450px;
+        }
+        .edit-obj-btn,
+        .display-obj-btn {
+            float: right;
+        }
+        #errorMsg {
+            border: 1px solid;
+            padding:15px 10px 15px 50px;
+            background-repeat: no-repeat;
+            background-position: 10px center;
+            display: none;
+            margin: 10px auto;
+            width: 400px;
+            color: #D8000C;
+            background-color: #FFBABA;
+            background-image: url('/static/images/toolbar/error.png');
+        }
+
+    </style>
+    <script>
+        var Env = {{{EnvJson}}};
+        var gObject = null;
+
+        function objValue(key) {
+            if(typeof(gObject[key]) === "object") {
+                return JSON.stringify(gObject[key]);
+            } else {
+                return gObject[key];
+            }
+        }
+
+        function showObject(obj) {
+            $(".obj-key-value-div").remove();
+            gObject = obj;
+            for (key in obj) {
+                $newKv = $("#keyValueTpl").clone();
+                $newKv.addClass("obj-key-value-div");
+                $newKv.css("display", "block");
+                $newKv.find("#key").text(key);
+                $newKv.find("#value").addClass("value-edit-span");
+                $newKv.find("#value").attr("editId", key);
+                $newKv.find("#value").text(objValue(key));
+                $("#objEditor").append($newKv);
+            }
+            $(".edit-obj-btn").css("display", "none");
+            $(".display-obj-btn").css("display", "block");
+        }
+
+        function editCurrent() {
+            $(".value-edit-span").replaceWith(function () {
+                var editId = $(this).attr("editId");
+                if (typeof(editId) === "undefined") return;
+                $input = $("<input/>");
+                $input.attr("editId", editId);
+                $input.addClass("value-edit-span");
+                $input.val($(this).text());
+                return $input;
+            });
+            $(".edit-obj-btn").css("display", "block");
+            $(".display-obj-btn").css("display", "none");
+        }
+
+        function resetCurrent(saved) {
+            var saveData = {};
+            $(".value-edit-span").replaceWith(function () {
+                var editId = $(this).attr("editId");
+                if (typeof(editId) === "undefined") return;
+                var value = $(this).val();
+                if (typeof(gObject[editId]) !== "object") {
+                    saveData[editId] = value;
+                } else {
+                    saveData[editId] = JSON.parse(value);
+                }
+                $span = $("<span/>");
+                $span.attr("editId", editId);
+                $span.addClass("value-edit-span");
+                if (saved) {
+                    gObject[editId] = value;
+                    $span.text(value);
+                } else {
+                    $span.text(objValue(editId));
+                }
+                return $span;
+            });
+            $(".edit-obj-btn").css("display", "none");
+            $(".display-obj-btn").css("display", "block");
+            return saveData;
+        }
+
+        function showError(show, msg) {
+            if(show) {
+                $("#errorMsg").css("display", "block");
+                $("#errorMsg").text(msg);
+                $("")
+            } else {
+                $("#errorMsg").css("display", "none");
+            }
+        }
+
+        function processFind(err, res) {
+            showError(false);
+            $(".obj-key-value-div").remove();
+            $(".edit-obj-btn").css("display", "none");
+            $(".display-obj-btn").css("display", "none");
+            console.log(res)
+            if (err) {
+                showError(true, res.message);
+            } else {
+                if(res.event == "error") {
+                    showError(true, res.message);
+                } else {
+                    showObject(res.data);
+                }
+            }
+        }
+
+        $(init);
+        function init() {
+            $("#shSubTitle").text("Object Editor");
+
+            $("#findByKey").click(function() {
+                Env.lastKey = $("#key").val();
+                shCall({cmd: "system.rawGet", key: Env.lastKey}, processFind);
+            });
+
+            $("#editObjBtn").click(function() {
+                editCurrent();
+            });
+            $("#saveObjBtn").click(function() {
+                var saveData = resetCurrent(true);
+                var res = shCall({cmd: "system.rawSet", key: Env.lastKey, data: saveData}, function (error, data) {
+                    console.log(error, data);
+                });
+            });
+            $("#cancelObjBtn").click(function() {
+                resetCurrent(false);
+            });
+        }
+    </script>
+
+</head>
+<body>
+{{> header}}
+{{> adminNav}}
+
+<div class="gameBoxDiv lookupObjDiv">
+    <div class="gameBoxHeaderDiv">Lookup Object</div>
+    <div class="gameBoxInnerDiv">
+        <table>
+            <tr><td>Key:</td><td><input id="key" class="keyInput" type="text"></input></td><td><button id="findByKey">find</button></td></tr>
+        </table>
+    </div>
+</div>
+<div style="clear:both;"></div>
+<div id="errorMsg"></div>
+<div id="objEditor">
+    <div id="keyValueTpl" style="display:none"><span id="key">key</span> = <span id="value">value</span></div>
+</div>
+<div class="btn-div">
+    <button id="editObjBtn" class="display-obj-btn" style="display:none">Edit</button>
+    <button id="saveObjBtn" class="edit-obj-btn" style="display:none">Save</button>
+    <button id="cancelObjBtn" class="edit-obj-btn" style="display:none">Cancel</button>
+</div>
+
+{{> footer}}
+</body>
+</html>

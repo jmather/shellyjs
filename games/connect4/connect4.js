@@ -77,6 +77,8 @@ connect4.turn = function (req, cb) {
     board[move.x][move.y] = YELLOW;
   }
 
+  state.lastMove = {uid: uid, move: move, color: board[move.x][move.y]};
+
   var win = checkWin(board);
   if (win.winner != "") {
     game.set("status", "over");
@@ -99,5 +101,5 @@ connect4.turn = function (req, cb) {
   }
 
   game.set("state", state);
-  cb(0, sh.event("event.game.turn", {uid: uid, move: move, color: board[move.x][move.y]}));
+  cb(0, sh.event("event.game.turn", state.lastMove));
 }

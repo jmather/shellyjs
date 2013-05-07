@@ -37,6 +37,8 @@ function loadGameModule(name) {
 }
 
 game.pre = function (req, res, cb) {
+  req.env.game = null;
+
   if (req.body.cmd === "game.list"
       || req.body.cmd === "game.playing") {
     cb(0);
@@ -59,7 +61,9 @@ game.pre = function (req, res, cb) {
   shlog.info("game.pre: populating game info for " + gameId);
   req.loader.exists("kGame", gameId, function (error, game) {
     if (error) {
-      cb(1, sh.error("game_load", "unable to load game data", {gameId: req.body.gameId}));
+      if (req.body.cmd !== "game.leave") {  // always alow user to remove a bad game
+        cb(1, sh.error("game_load", "unable to load game data", {gameId: req.body.gameId}));
+      }
       return;
     }
     var gameName = game.get("name");
@@ -198,18 +202,17 @@ game.join = function (req, res, cb) {
 
 game.leave = function (req, res, cb) {
   var uid = req.session.uid;
-  var game = req.env.game;
 
   req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {
       cb(1, sh.error("playing_load", "unable to load playing list", {uid: uid}));
       return;
     }
-    playing.removeGame(game);
-
-    global.socket.notify(game.get("gameId"), sh.event("event.game.user.leave", {gameId: game.get("gameId"), uid: uid}));
-
-    cb(0, sh.event("event.game.leave", game.get("players")));
+    playing.removeGame(req.body.gameId);
+    if (req.body.game) {
+      global.socket.notify(game.get("oid"), sh.event("event.game.user.leave", {gameId: req.body.gameId, uid: uid}));
+    }
+    cb(0, sh.event("event.game.leave", req.body.gameId));
   });
 };
 
@@ -234,16 +237,15 @@ game.turn = function (req, res, cb) {
     cb(2, sh.error("players_missing", "not enough players in game", {required: game.minPlayers, playerCount: Object.keys(game.players).length}));
     return;
   }
-
   if (game.status === "over") {
     cb(0, sh.event("event.game.over", game));
     return;
   }
-
   if (game.whoTurn !== uid) {
     cb(1, sh.error("game_noturn", "not your turn", {whoTurn: game.whoTurn}));
     return;
   }
+
   var nextIndex = game.playerOrder.indexOf(uid) + 1;
   if (nextIndex === game.playerOrder.length) {
     nextIndex = 0;
