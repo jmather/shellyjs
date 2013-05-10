@@ -1,9 +1,12 @@
-var turn = 0, //turn based
-  gBoard = [],
-  COLUMN_FULL = -2,
-  EMPTY = -1,
-  YELLOW = 0,
-  RED = 1;
+//var turn = 0, //turn based
+var COLUMN_FULL = -2;
+var EMPTY = -1;
+var YELLOW = 0;
+var RED = 1;
+
+var gMyColor = EMPTY;
+var gBoard = [];
+var gCurrent = null;
 
 function initGame() {
 	Crafty.init(600, 500);
@@ -35,43 +38,45 @@ function initGame() {
 					var column = Math.round(this._x / 64);
 					this.x = column * 64;
 					this.gravity("stopper");
-					this.unbind("mousedown");
-					
+          this.unbind("mousedown");
+
 					reset(column);
 				});
 			}
 		});
 
-    var current;
     function reset(column) {
       var row = findEmptyRow(column);
       if(row !== COLUMN_FULL && column >= 0 && column < 7) {
-        gBoard[column][row] = turn;
-        pieceDrop(turn, column, row);
-
-//        if(checkFour(column,row)) {
-//          win(turn);
-//          return;
-//        }
-
-        turn ^= 1; //alternate turns
-        current = Crafty.e("2D, Canvas, piece, stopper,"+(turn ? "red" : "yellow")).attr({x: 495, y: 420});
+        gBoard[column][row] = gMyColor;
+        pieceDrop(gMyColor, column, row);
+        gCurrent = null; // stop tracking this piece - it's set
       } else {
-        //dont' place
-        current.destroy();
-        current = Crafty.e("2D, Canvas, piece, stopper,"+(turn ? "red" : "yellow")).attr({x: 495, y: 420});
+        // reset to original position
+        gCurrent.destroy();
+        gCurrent = null;
+        setWhoTurn(Env.user.oid);
       }
     }
-    current = Crafty.e("2D, Canvas, piece, stopper, yellow").attr({x: 495, y: 420});
 
 		var ground = Crafty.e("2D, stopper").attr({y: Crafty.viewport.height - 16, w: Crafty.viewport.width, h: 20 });
 		var bg = Crafty.e("2D, Canvas, Image").image("images/bg.png").attr({z: -1});
 	});
-	
-	Crafty.scene("win", function() {
-		var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
-		Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text(turn ? "RED" : "YELLOW").font("30pt Arial");
-	});
+
+  Crafty.scene("youWon", function() {
+    var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
+    Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text("You Won!").font("30pt Arial");
+  });
+
+  Crafty.scene("theyWon", function() {
+    var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
+    Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text("They Won").font("30pt Arial");
+  });
+
+  Crafty.scene("tieGame", function() {
+    var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
+    Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text("tie game").font("30pt Arial");
+  });
 
 };
 
@@ -87,84 +92,86 @@ function findEmptyRow(column) {
   return COLUMN_FULL;
 }
 
-function checkFour(column,row) {
-  if(checkVertical(column,row)) return true;
-  if(checkHorizontal(column,row)) return true;
-  if(checkLeftDiagonal(column,row)) return true;
-  if(checkRightDiagonal(column,row)) return true;
-  return false;
-}
+/*
+ function checkFour(column,row) {
+ if(checkVertical(column,row)) return true;
+ if(checkHorizontal(column,row)) return true;
+ if(checkLeftDiagonal(column,row)) return true;
+ if(checkRightDiagonal(column,row)) return true;
+ return false;
+ }
 
-function checkVertical(column,row) {
-  if(row < 3) return false;
-  for(var i = row; i > row-4; i--) {
-    if(gBoard[column][i] != turn) return false;
-  }
-  return true;
-}
+ function checkVertical(column,row) {
+ if(row < 3) return false;
+ for(var i = row; i > row-4; i--) {
+ if(gBoard[column][i] != turn) return false;
+ }
+ return true;
+ }
 
-function checkHorizontal(column,row) {
-  var counter = 1;
-  for(var i = column-1; i >= 0; i--) {
-    if(gBoard[i][row] != turn) break;
-    counter++;
-  }
+ function checkHorizontal(column,row) {
+ var counter = 1;
+ for(var i = column-1; i >= 0; i--) {
+ if(gBoard[i][row] != turn) break;
+ counter++;
+ }
 
-  for(var j = column+1; j < 7; j++) {
-    if(gBoard[j][row] != turn) break;
-    counter++;
-  }
-  return counter>=4;
-}
+ for(var j = column+1; j < 7; j++) {
+ if(gBoard[j][row] != turn) break;
+ counter++;
+ }
+ return counter>=4;
+ }
 
-function checkLeftDiagonal(column,row) {
-  var counter = 1;
-  var tmp_row = row-1;
-  var tmp_column = column-1;
+ function checkLeftDiagonal(column,row) {
+ var counter = 1;
+ var tmp_row = row-1;
+ var tmp_column = column-1;
 
-  while(tmp_row >= 0 && tmp_column >= 0) {
-    if(gBoard[tmp_column][tmp_row] == turn) {
-      counter++;
-      tmp_row--;
-      tmp_column--;
-    } else break;
-  }
+ while(tmp_row >= 0 && tmp_column >= 0) {
+ if(gBoard[tmp_column][tmp_row] == turn) {
+ counter++;
+ tmp_row--;
+ tmp_column--;
+ } else break;
+ }
 
-  row += 1;
-  column += 1;
+ row += 1;
+ column += 1;
 
-  while(row < 6 && column < 7) {
-    if(gBoard[column][row] == turn) {
-      counter++;
-      row++;
-      column++;
-    } else { break; }
-  }
-  return counter>=4;
-}
+ while(row < 6 && column < 7) {
+ if(gBoard[column][row] == turn) {
+ counter++;
+ row++;
+ column++;
+ } else { break; }
+ }
+ return counter>=4;
+ }
 
-function checkRightDiagonal(column,row) {
-  var counter = 1;
-  var tmp_row = row+1;
-  var tmp_column = column-1;
+ function checkRightDiagonal(column,row) {
+ var counter = 1;
+ var tmp_row = row+1;
+ var tmp_column = column-1;
 
-  while(tmp_row < 6 && tmp_column >= 0) {
-    if(gBoard[tmp_column][tmp_row] == turn) {
-      counter++;
-      tmp_row++;
-      tmp_column--;
-    } else break;
-  }
+ while(tmp_row < 6 && tmp_column >= 0) {
+ if(gBoard[tmp_column][tmp_row] == turn) {
+ counter++;
+ tmp_row++;
+ tmp_column--;
+ } else break;
+ }
 
-  row -= 1;
-  column += 1;
+ row -= 1;
+ column += 1;
 
-  while(row >= 0 && column < 7) {
-    if(gBoard[column][row] == turn) {
-      counter++;
-      row--;
-      column++;
-    } else break;
-  }
-  return counter>=4;
-}
+ while(row >= 0 && column < 7) {
+ if(gBoard[column][row] == turn) {
+ counter++;
+ row--;
+ column++;
+ } else break;
+ }
+ return counter>=4;
+ }
+ */

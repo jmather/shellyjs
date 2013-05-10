@@ -255,12 +255,18 @@ game.turn = function (req, res, cb) {
 
   //SWD make sure turn function is there
   req.env.gameModule.turn(req, res, function (error) {
-    if (!error) {
+    if (error) {
+      return cb(error);
+    }
+    if (game.whoTurn !== "") {
       global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: gameId,
-          whoTurn: game.whoTurn,
-          name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
-          pic: ""
-          }));
+        whoTurn: game.whoTurn,
+        name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
+        pic: ""
+        }));
+    }
+    if (game.status === "over") {
+      global.socket.notify(game.oid, sh.event("event.game.over", game));
     }
     return cb(error);
   });
@@ -289,9 +295,8 @@ game.reset = function (req, res, cb) {
 
   game.rounds += 1;
   game.turns = 0;
-  game.whoTurn = game.ownerId;
+  game.whoTurn = req.session.uid;
   game.status = "playing";
-  game.winner = null;
 
   if (_.isUndefined(req.env.gameModule)) {
     res.add(sh.error("game_reset", "this game has no reset"));
@@ -301,7 +306,7 @@ game.reset = function (req, res, cb) {
   req.env.gameModule.reset(req, res, function (error) {
     if (!error) {
       // notify players in game of new state
-      global.socket.notify(game.oid, sh.event("event.game.info", game));
+      global.socket.notify(game.oid, sh.event("event.game.reset", game));
       // notify players online of turn change
       global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: game.oid,
           whoTurn: game.whoTurn,

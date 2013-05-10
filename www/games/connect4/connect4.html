@@ -9,7 +9,7 @@
     <script src="/static/js/ba-debug.js"></script>
     <script src="/static/js/reconnecting-websocket.js"></script>
 
-	<script type="text/javascript" src="http://craftyjs.com/release/0.4.2/crafty-min.js"></script>
+	<script type="text/javascript" src="crafty-min.js"></script>
     <script src='/static/js/common.js'></script>
 	<script type="text/javascript" src="game.js"></script>
 
@@ -59,11 +59,48 @@
         }
 
         function setWhoTurn(uid) {
+            if(gCurrent) return;
+
+            if (uid === "") {
+                $("#whoTurn").text("over");
+                return;
+            }
             if (uid === Env.user.oid) {
                 $("#whoTurn").text("yours");
+                gMyColor = 0;
+                var color = "yellow";
+                if (Env.game.state.reds === uid) {
+                    gMyColor = 1;
+                    color = "red";
+                }
+                console.log("create object");
+                gCurrent = Crafty.e("2D, Canvas, piece, stopper, " + color).attr({x: 495, y: 420});
             } else {
                 $("#whoTurn").text(Env.game.players[uid].name);
             }
+        }
+
+        function setInfo(data) {
+            setWhoTurn(data.whoTurn);
+            if (data.state.reds === Env.user.oid) {
+                $("#playerColor").text("red");
+            } else {
+                $("#playerColor").text("yellow");
+            }
+        }
+
+        function checkOver(data) {
+            if(data.status === "over") {
+                if (data.state.winner === Env.user.oid) {
+                    Crafty.scene("youWon");
+                } else if (data.state. winner === "") {
+                    Crafty.scene("tieGame");
+                } else {
+                    Crafty.scene("theyWon");
+                }
+                return true;;
+            }
+            return false;
         }
 
         function processEvent(msg) {
@@ -71,24 +108,40 @@
                 var move = msg.data.move;
                 if (Env.user.oid !== msg.data.uid) { // ignore our own moves
                     gBoard[move.x][move.y] = msg.data.color;
-                    addPiece((msg.data.color===0 ? "red" : "yellow"), move.x);
+                    addPiece((msg.data.color===0 ? "yellow" : "red"), move.x);
                 }
             }
             if (msg.event === "event.game.turn.next") {
                 setWhoTurn(msg.data.whoTurn);
             }
             if (msg.event === "event.game.join") {
+                if(checkOver(msg.data)) {
+                    return;
+                }
                 var board = msg.data.state.board;
                 Env.game = msg.data;
-                setWhoTurn(msg.data.whoTurn);
+                setInfo(msg.data);
                 fillRow(0, board);
+            }
+            if (msg.event === "event.game.over") {
+                checkOver(msg.data);
+            }
+            if (msg.event === "event.game.reset") {
+                Crafty.scene("game");
+                if (gCurrent) {
+                    gCurrent.destroy();
+                    gCurrent = null;
+                }
+                var board = msg.data.state.board;
+                Env.game = msg.data;
+                setInfo(msg.data);
             }
         }
 
         function addPiece(color, column) {
             console.log("add", color, column);
-            var current = Crafty.e("2D, Canvas, gravity, stopper, " + color).attr({x: column * 64, y: 0});
-            current.gravity("stopper")
+            var newPiece = Crafty.e("2D, Canvas, gravity, stopper, " + color).attr({x: column * 64, y: 0});
+            newPiece.gravity("stopper")
         }
 
         function pieceDrop(turn, column, row) {
