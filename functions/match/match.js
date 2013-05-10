@@ -50,14 +50,13 @@ match.add = function (req, res, cb) {
     global.matchInfo[name].lastCreated = new Date().getTime();
     global.matchInfo[name].created += 1;
 
-    sh.call(req, res, function (error, data) {
+    sh.call(req, res, function (error) {
       if (error) {
-        cb(error, data);
-        return;
+        return cb(error);
       }
 
       var matchInfo = {};
-      matchInfo.gameId = data.data.oid;
+      matchInfo.gameId = req.env.game.get("oid");
       matchInfo.gameName = name;
       _.each(req.body.players, function (playerId) {
         delete global.matchq[name][playerId];

@@ -16,12 +16,15 @@ function add(data) {
   if (_.isUndefined(this.msgs)) {
     this.msgs = [];
   }
+  if (data.event === "error") {
+    shlog.error(data);  // log all errors
+  }
+  console.log(data);
   this.msgs.push(data);
 }
 
 // res.send - sends all events or errors
 function sendAll() {
-  console.log(this.msgs);
   this.send(this.msgs);
   this.msgs = [];
 }
@@ -48,19 +51,8 @@ function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
   shlog.recv("rest - %s", JSON.stringify(req.body));
 
-  sh.call(req, res, function (error, data) {
-    if (error) {
-      shlog.error(error, data);
-    }
-    shlog.send(error, "rest - %s", JSON.stringify(data));
-    if (_.isObject(data)) {
-      res.add(data);
-      if (_.isObject(req.body.cb)) {
-        data.cb = req.body.cb;
-      }
-    }
+  sh.call(req, res, function (error) {
     req.loader.dump();
-    res.add("foo");
     res.sendAll();
   });
 }

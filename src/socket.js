@@ -21,8 +21,15 @@ Socket.notify = function (gameId, data) {
 };
 
 Socket.notifyUser = function (uid, data) {
-  shlog.info("(" + uid + ") notify user");
+  shlog.info("notify user", uid);
   eventEmitter.emit(sh.channel("user", uid), data);
+};
+
+Socket.notifyUsers = function (uids, data) {
+  shlog.info("notify users", uids);
+  _.forEach(uids, function (uid) {
+    eventEmitter.emit(sh.channel("user", uid), data);
+  });
 };
 
 Socket.notifyAll = function (data) {
@@ -35,6 +42,9 @@ Socket.notifyAll = function (data) {
 };
 
 function add(data) {
+  if (data.event === "error") {
+    shlog.error(data);
+  }
   sh.sendWs(this.ws, 0, data);
 }
 
@@ -89,20 +99,7 @@ function handleMessage(ws, message, socketNotify) {
     }
     sh.call(req, res, function (error, data) {
       req.loader.dump();
-      try {
-        if (error) {
-          shlog.error(error, data);
-        }
-        if (_.isObject(data)) {
-          if (_.isString(req.body.cb)) {
-            data.cb = req.body.cb;
-          }
-          sh.sendWs(ws, error, data);
-        }
-        res.sendAll();
-      } catch (err) {
-        sh.sendWs(ws, 1, sh.error("socket", "call - " + err.message, { message: err.message, stack: err.stack }));
-      }
+      res.sendAll();
     });  // end sh.call
   });  // end sh.fillSession
 }

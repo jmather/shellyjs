@@ -33,7 +33,7 @@ ShConnect.prototype.login = function (email, password, cb) {
         cb(err, res);
         return;
       }
-      self.setSession(res.data.session);
+      self.setSession(res[0].data.session);
       cb(0, res);
     });
 };
@@ -46,7 +46,7 @@ ShConnect.prototype.register = function (email, password, cb) {
         cb(err, res);
         return;
       }
-      self.setSession(res.data.session);
+      self.setSession(res[0].data.session);
       cb(0, res);
     });
 };
@@ -70,13 +70,14 @@ ShConnect.prototype.call = function (cmd, data, cb) {
     .expect(200)
     .end(function (err, res) {
       if (err) {
-        cb(err, {event: "error", message: res});
+        cb(err, [{event: "error", message: res}]);
         return;
       }
+//      console.log(res.body);
       if (res.body[0].event === "error") {
         cb(1, res.body[0]);
         return;
       }
-      cb(0, res.body[0]);
+      cb(0, res.body);
     });
 };

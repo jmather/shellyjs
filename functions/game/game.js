@@ -62,7 +62,7 @@ game.pre = function (req, res, cb) {
       if (req.body.cmd === "game.leave") {  // always alow user to remove a bad game
         return cb(0);
       }
-      res.add(sh.error("game_load", "unable to load game data", {gameId: req.body.gameId}));
+      res.add(sh.error("game_load", "unable to load game data in game.pre", {gameId: req.body.gameId}));
       return cb(1);
     }
     var gameName = game.get("name");
@@ -146,7 +146,7 @@ game.create = function (req, res, cb) {
     res.add(sh.event("event.game.create", game.getData()));
     return cb(0);
   }
-  req.env.gameModule.create(req, cb);
+  req.env.gameModule.create(req, res, cb);
 };
 
 game.start = function (req, res, cb) {
@@ -254,27 +254,14 @@ game.turn = function (req, res, cb) {
   game.status = "playing";  // turn looks valid, game module sets "over"
 
   //SWD make sure turn function is there
-  req.env.gameModule.turn(req, function (error, data) {
+  req.env.gameModule.turn(req, res, function (error) {
     if (!error) {
-      if (_.isUndefined(data)) {  // fill in the game info if not already by the game
-        data = sh.event("event.game.info", game);
-      }
-      // notify users in game
-      global.socket.notify(gameId, data);
-      // notify any player of turn change
-      _.forEach(game.playerOrder, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: gameId,
+      global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: gameId,
           whoTurn: game.whoTurn,
           name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
           pic: ""
           }));
-      });
-      // already sent on the socket notify to self
-      if (_.isObject(res.ws)) {
-        return cb(0);
-      }
     }
-    res.add(data);
     return cb(error);
   });
 };
@@ -311,24 +298,17 @@ game.reset = function (req, res, cb) {
     return cb(1);
   }
 
-  req.env.gameModule.reset(req, function (error, data) {
-    if (error === 0) {
-      // notify live.game listeners
-      global.socket.notify(game.oid, data);
-      // notify live.users that are in this game
-      _.forEach(game.playerOrder, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("event.game.turn.next", {gameId: game.oid,
+  req.env.gameModule.reset(req, res, function (error) {
+    if (!error) {
+      // notify players in game of new state
+      global.socket.notify(game.oid, sh.event("event.game.info", game));
+      // notify players online of turn change
+      global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: game.oid,
           whoTurn: game.whoTurn,
           name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
           pic: ""
-          }));
-      });
+        }));
     }
-    // already sent on the socket notify
-    if (_.isObject(res.ws)) {
-      return cb(0);
-    }
-    res.add(data);
     return cb(error);
   });
 };
@@ -401,7 +381,7 @@ game.call = function (req, res, cb) {
     return cb(1);
   }
 
-  req.env.gameModule[req.body.func](req, cb);
+  req.env.gameModule[req.body.func](req, res, cb);
 };
 
 /////////////// Playing functions

@@ -18,7 +18,17 @@
 
 	<title>Connect 4</title>
 	<style>
-	#cr-stage { float: left; margin:5px auto; border:5px solid black; }
+        .gameInfoDiv {
+            float:left;
+            margin-left: 20px;
+            width: 200px;
+        }
+
+        #cr-stage {
+            float: left;
+            margin:5px auto;
+            border:5px solid black;
+        }
 	</style>
     <script language="javascript">
         var Env = {{{EnvJson}}};
@@ -48,23 +58,35 @@
             }
         }
 
+        function setWhoTurn(uid) {
+            if (uid === Env.user.oid) {
+                $("#whoTurn").text("yours");
+            } else {
+                $("#whoTurn").text(Env.game.players[uid].name);
+            }
+        }
+
         function processEvent(msg) {
-            if (msg.event === "event.game.turn") {
+            if (msg.event === "event.game.update") {
                 var move = msg.data.move;
                 if (Env.user.oid !== msg.data.uid) { // ignore our own moves
                     gBoard[move.x][move.y] = msg.data.color;
                     addPiece((msg.data.color===0 ? "red" : "yellow"), move.x);
                 }
             }
+            if (msg.event === "event.game.turn.next") {
+                setWhoTurn(msg.data.whoTurn);
+            }
             if (msg.event === "event.game.join") {
                 var board = msg.data.state.board;
+                Env.game = msg.data;
+                setWhoTurn(msg.data.whoTurn);
                 fillRow(0, board);
             }
         }
 
         function addPiece(color, column) {
             console.log("add", color, column);
-//            var current = Crafty.e("2D, Canvas, piece, stopper, " + color).attr({x: column * 64, y: 0});
             var current = Crafty.e("2D, Canvas, gravity, stopper, " + color).attr({x: column * 64, y: 0});
             current.gravity("stopper")
         }
@@ -101,8 +123,24 @@
 {{> header}}
 {{> gameNav}}
 <div id="cr-stage"></div>
-<div style="clear:both"</div>
 
+<div class="gameInfoDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv" style="">Game Info</div>
+    <div class="gameBoxInnerDiv">
+        <div>your color: <span id="playerColor">unknown</span></div>
+        <div>whose turn: <span id="whoTurn"></span></div>
+        <div>winner: <span id="gameWinner">none</span></div>
+        <div>playing: <span id="gamePlaying"></span></div>
+        <button id="gameReset" style="float:right">reset</button>
+    </div>
+</div>
+<div class="gameInfoDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv" style="">Players</div>
+    <div class="gameBoxInnerDiv">
+        <div>foo</div>
+    </div>
+</div>
+<div style="clear:both"></div>
 <div class="messageLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
 <div id="messageLog" class="gameBoxInnerDiv" readonly></div>

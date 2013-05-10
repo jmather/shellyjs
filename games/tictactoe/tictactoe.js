@@ -5,35 +5,38 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var tictactoe = exports;
 
-tictactoe.create = function (req, cb) {
-  var gameBoard = [
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""]
-  ];
+var gDefaultBoard = [
+  ["", "", ""],
+  ["", "", ""],
+  ["", "", ""]
+];
+
+tictactoe.create = function (req, res, cb) {
+  req.env.game.set("minPlayers", 2);
+  req.env.game.set("maxPlayers", 2);
 
   var state = {};
-  state.gameBoard = gameBoard;  // SWD: change this to just board
+  state.gameBoard = _.clone(gDefaultBoard);
   // first player is always X
   state.xes = req.session.uid;
   state.winner = 0;
   state.winnerSet = null;
   state.xes = req.session.uid;
-
-  req.env.game.set("minPlayers", 2);
-  req.env.game.set("maxPlayers", 2);
   req.env.game.set("state", state);
 
-  cb(0, sh.event("event.game.create", req.env.game.getData()));
+  res.add(sh.event("event.game.create", req.env.game.getData()));
+  return cb(0);
 };
 
-tictactoe.reset = function (req, cb) {
-  this.create(req, function (error, data) {
-    if (error === 0) {
-      data.event = "event.game.reset";
-    }
-    cb(error, data);
-  });
+tictactoe.reset = function (req, res, cb) {
+  var state = req.env.game.get("state");
+  state.gameBoard = _.clone(gDefaultBoard);
+  state.winner = 0;
+  state.winnerSet = null;
+  state.xes = req.session.uid;
+
+  res.add(sh.event("event.game.info", req.env.game.getData()));
+  return cb(0);
 };
 
 function checkFull(gb) {
@@ -86,7 +89,7 @@ function checkWin(gb) {
   return res;
 }
 
-tictactoe.turn = function (req, cb) {
+tictactoe.turn = function (req, res, cb) {
   var uid = req.session.uid;
   var move = req.body.move;
   var game = req.env.game;
@@ -94,8 +97,8 @@ tictactoe.turn = function (req, cb) {
   var gameBoard = state.gameBoard;
 
   if (gameBoard[move.x][move.y] != "") {
-    cb(2, sh.error("move_bad", "this square has been taken"));
-    return;
+    res.add(sh.error("move_bad", "this square has been taken"));
+    return cb(1);
   }
 
   if (state.xes == uid) {
@@ -103,6 +106,10 @@ tictactoe.turn = function (req, cb) {
   } else {
     gameBoard[move.x][move.y] = "O";
   }
+  state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
+
+  //live update move - SWD be nice to filter out the double send for current user
+  global.socket.notify(game.get("oid"), sh.event("event.game.info", game.getData()));
 
   var win = checkWin(gameBoard);
   if (win.winner != "") {
@@ -111,8 +118,9 @@ tictactoe.turn = function (req, cb) {
     state.winner = uid;
     state.winnerSet = win.set;
     game.set("state", state);
-    cb(0, sh.event("event.game.over", game.getData()));
-    return;
+    res.add(sh.event("event.game.over", game.getData()));
+    global.socket.notify(game.get("oid"), sh.event("event.game.over", game.getData()));
+    return cb(0);
   }
 
   if (checkFull(gameBoard)) {
@@ -121,10 +129,12 @@ tictactoe.turn = function (req, cb) {
     state.winner = "0";
     state.winnerSet = null;
     game.set("state", state);
-    cb(0, sh.event("event.game.over", game.getData()));
-    return;
+    res.add(sh.event("event.game.over", game.getData()));
+    global.socket.notify(game.get("oid"), sh.event("event.game.over", game.getData()));
+    return cb(0);
   }
 
-  game.set("state", state);
-  cb(0, sh.event("event.game.info", game.getData()));
+  // send back the updated board
+  res.add(sh.event("event.game.info", game.getData()));
+  return cb(0);
 }
