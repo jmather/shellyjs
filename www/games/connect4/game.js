@@ -36,10 +36,13 @@ function initGame() {
 				this.bind("StopDrag", function() {
 					console.log("STOP");
 					var column = Math.round(this._x / 64);
-					this.x = column * 64;
+          this.x = column * 64;
 					this.gravity("stopper");
           this.unbind("mousedown");
 
+          if (this._y > 80) {
+            column = 99;       // drop is too low, set to bad column for reset
+          }
 					reset(column);
 				});
 			}
