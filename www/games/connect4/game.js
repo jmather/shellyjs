@@ -10,12 +10,12 @@ var gCurrent = null;
 
 function initGame() {
 	Crafty.init(600, 500);
-	Crafty.canvas();
+	Crafty.canvas.init();
 
 	Crafty.sprite(64, "images/sprite.png", {
-		red: [0,0],
-		yellow: [1,0],
-		empty: [2,0]
+		red: [0, 0],
+		yellow: [1, 0],
+		empty: [2, 0]
 	});
 
   Crafty.scene("game", function() {
@@ -29,10 +29,36 @@ function initGame() {
       }
     }
 
-		Crafty.c("piece", {
+    Crafty.c("Circle", {
+      Circle: function(radius, color) {
+        this.radius = radius;
+        this.w = this.h = radius * 2;
+        this.color = color || "#000000";
+
+        return this;
+      },
+
+      draw: function() {
+        var ctx = Crafty.canvas.context;
+        ctx.save();
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(
+          this.x + this.radius,
+          this.y + this.radius,
+          this.radius,
+          0,
+          Math.PI * 2
+        );
+        ctx.closePath();
+        ctx.fill();
+      }
+    });
+
+    Crafty.c("piece", {
 			init: function() {
 				this.z = 3;
-				this.requires("Mouse, Gravity, Draggable");
+        this.requires("Mouse, Gravity, Draggable");
 				this.bind("StopDrag", function() {
 					console.log("STOP");
 					var column = Math.round(this._x / 64);
@@ -65,22 +91,6 @@ function initGame() {
 		var ground = Crafty.e("2D, stopper").attr({y: Crafty.viewport.height - 16, w: Crafty.viewport.width, h: 20 });
 		var bg = Crafty.e("2D, Canvas, Image").image("images/bg.png").attr({z: -1});
 	});
-
-  Crafty.scene("youWon", function() {
-    var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
-    Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text("You Won!").font("30pt Arial");
-  });
-
-  Crafty.scene("theyWon", function() {
-    var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
-    Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text("They Won").font("30pt Arial");
-  });
-
-  Crafty.scene("tieGame", function() {
-    var bg = Crafty.e("2D, DOM, Image").image("images/win.png", "no-repeat").attr({w: 600, h: 500, z: -1});
-    Crafty.e("2D, DOM, Text").attr({x: 220, y: 200}).text("tie game").font("30pt Arial");
-  });
-
 };
 
 function win(turn) {

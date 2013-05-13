@@ -43,7 +43,8 @@ connect4.reset = function (req, res, cb) {
       state.board[i][j] = EMPTY; //set it to empty
     }
   }
-  console.log('reset the board', state.board);
+  state.winner = "";
+  state.winnerSet = null;
 
   res.add(sh.event("event.game.reset", req.env.game.getData()));
   return cb(0);
@@ -60,35 +61,48 @@ function checkFull(gb) {
   return true;
 }
 
-function checkVertical(board, turn, column, row) {
+function checkVertical(board, turn, column, row, winSet) {
   if (row < 3) return false;
   for (var i = row; i > row - 4; i--) {
-    if (board[column][i] != turn) return false;
+    if (board[column][i] != turn) {
+      winSet.length = 0;
+      return false;
+    }
+    winSet.push({x: column, y: i});
   }
   return true;
 }
 
-function checkHorizontal(board, turn, column, row) {
+function checkHorizontal(board, turn, column, row, winSet) {
   var counter = 1;
+  winSet.push({x: column, y: row});
+
   for (var i = column - 1; i >= 0; i--) {
     if (board[i][row] != turn) break;
+    winSet.push({x: i, y: row});
     counter++;
   }
 
   for (var j = column + 1; j < 7; j++) {
     if (board[j][row] != turn) break;
+    winSet.push({x: j, y: row});
     counter++;
+  }
+  if(winSet.length < 4) {
+    winSet.length = 0;
   }
   return counter >= 4;
 }
 
-function checkLeftDiagonal(board, turn, column, row) {
+function checkLeftDiagonal(board, turn, column, row, winSet) {
   var counter = 1;
   var tmp_row = row - 1;
   var tmp_column = column - 1;
+  winSet.push({x: column, y: row});
 
   while (tmp_row >= 0 && tmp_column >= 0) {
     if (board[tmp_column][tmp_row] == turn) {
+      winSet.push({x: tmp_column, y: tmp_row});
       counter++;
       tmp_row--;
       tmp_column--;
@@ -100,6 +114,7 @@ function checkLeftDiagonal(board, turn, column, row) {
 
   while (row < 6 && column < 7) {
     if (board[column][row] == turn) {
+      winSet.push({x: column, y: row})
       counter++;
       row++;
       column++;
@@ -107,16 +122,22 @@ function checkLeftDiagonal(board, turn, column, row) {
       break;
     }
   }
+
+  if(winSet.length < 4) {
+    winSet.length = 0;
+  }
   return counter >= 4;
 }
 
-function checkRightDiagonal(board, turn, column, row) {
+function checkRightDiagonal(board, turn, column, row, winSet) {
   var counter = 1;
   var tmp_row = row + 1;
   var tmp_column = column - 1;
+  winSet.push({x: column, y: row});
 
   while (tmp_row < 6 && tmp_column >= 0) {
     if (board[tmp_column][tmp_row] == turn) {
+      winSet.push({x: tmp_column, y: tmp_row});
       counter++;
       tmp_row++;
       tmp_column--;
@@ -128,21 +149,25 @@ function checkRightDiagonal(board, turn, column, row) {
 
   while (row >= 0 && column < 7) {
     if (board[column][row] == turn) {
+      winSet.push({x: column, y: row});
       counter++;
       row--;
       column++;
     } else break;
   }
+
+  if(winSet.length < 4) {
+    winSet.length = 0;
+  }
   return counter >= 4;
 }
 
-function checkWin(board, turn, column, row) {
-//  var res = {winner: "", set: null};
+function checkWin(board, turn, column, row, winSet) {
 
-  if (checkVertical(board, turn, column, row)) return true;
-  if (checkHorizontal(board, turn, column, row)) return true;
-  if (checkLeftDiagonal(board, turn, column, row)) return true;
-  if (checkRightDiagonal(board, turn, column, row)) return true;
+  if (checkVertical(board, turn, column, row, winSet)) return true;
+  if (checkHorizontal(board, turn, column, row, winSet)) return true;
+  if (checkLeftDiagonal(board, turn, column, row, winSet)) return true;
+  if (checkRightDiagonal(board, turn, column, row, winSet)) return true;
 
   return false;
 }
@@ -170,13 +195,13 @@ connect4.turn = function (req, res, cb) {
   global.socket.notify(game.get("oid"), sh.event("event.game.update", state.lastMove));
 
 
-  var win = checkWin(state.board, color, move.x, move.y);
+  var winSet = [];
+  var win = checkWin(state.board, color, move.x, move.y, winSet);
   if (win) {
     game.set("status", "over");
     game.set("whoTurn", "");
     state.winner = uid;
-//    state.winnerSet = win.set;
-//    game.set("state", state);
+    state.winnerSet = winSet;
     res.add(sh.event("event.game.over", game.getData()));
     return cb(0);
   }
@@ -186,7 +211,6 @@ connect4.turn = function (req, res, cb) {
     game.set("whoTurn", "");
     state.winner = "";
     state.winnerSet = null;
-//    game.set("state", state);
     res.add(sh.event("event.game.over", game.getData()));
     return cb(0);
   }
