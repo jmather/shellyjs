@@ -56,20 +56,22 @@ function setWhoTurn(gameId, whoTurn, profile) {
   $turnSpan = $gamePlaying.find("#gameTurn");
   $turnSpan.removeClass("playerName" + whoTurn);
   if (whoTurn === "0") {
-    $turnSpan.text("over");
+    $turnSpan.text("");
+    $gamePlaying.detach();
+    $gamePlaying.prependTo("#gameDoneList");
   } else if (whoTurn === Env.user.oid) {
-    $turnSpan.text("yours");
+    $turnSpan.text("");
     $gamePlaying.detach();
     $gamePlaying.prependTo("#gameList");
   } else {
-    $turnSpan.addClass("playerName" + whoTurn);
     var name = profile.name;
     if (name.length === 0) {
       name = whoTurn;
     }
     $turnSpan.text(name + "'s");
+    $turnSpan.addClass("playerName" + whoTurn);  // helps with name changes
     $gamePlaying.detach();
-    $gamePlaying.appendTo("#gameList");
+    $gamePlaying.appendTo("#gameOppList");
   }
 }
 
@@ -100,6 +102,8 @@ function setMyGames(gameList) {
 
     if (gameList[gameId].whoTurn === "0") {
       $("#gameDoneList").append($newGame);
+    } else if (gameList[gameId].whoTurn !== Env.user.oid) {
+      $("#gameOppList").append($newGame);
     } else {
       $("#gameList").append($newGame);
     }
