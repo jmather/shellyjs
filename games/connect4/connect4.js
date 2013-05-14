@@ -191,7 +191,7 @@ connect4.turn = function (req, res, cb) {
   board[move.x][move.y] = color;
 
   state.lastMove = {uid: uid, move: move, color: color};
-//  res.add(sh.event("event.game.turn", state.lastMove));
+  res.add(sh.event("event.game.update", state.lastMove));
   global.socket.notify(game.get("oid"), sh.event("event.game.update", state.lastMove));
 
 

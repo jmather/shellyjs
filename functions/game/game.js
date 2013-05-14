@@ -258,13 +258,11 @@ game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    if (game.whoTurn !== "") {
-      global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: gameId,
-        whoTurn: game.whoTurn,
-        name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
-        pic: ""
-        }));
-    }
+    global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: gameId,
+      whoTurn: game.whoTurn,
+      name: (game.whoTurn === "" ? "no one" : game.players[game.whoTurn].name),
+      pic: ""
+      }));
     if (game.status === "over") {
       global.socket.notify(game.oid, sh.event("event.game.over", game));
     }

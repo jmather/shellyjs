@@ -55,7 +55,7 @@ function setWhoTurn(gameId, whoTurn, profile) {
   $gamePlaying = $(".myGameId" + gameId);
   $turnSpan = $gamePlaying.find("#gameTurn");
   $turnSpan.removeClass("playerName" + whoTurn);
-  if (whoTurn === "0") {
+  if (whoTurn === "") {
     $turnSpan.text("");
     $gamePlaying.detach();
     $gamePlaying.prependTo("#gameDoneList");
@@ -68,7 +68,7 @@ function setWhoTurn(gameId, whoTurn, profile) {
     if (name.length === 0) {
       name = whoTurn;
     }
-    $turnSpan.text(name + "'s");
+    $turnSpan.text(name.substr(0, 12) + "'s");
     $turnSpan.addClass("playerName" + whoTurn);  // helps with name changes
     $gamePlaying.detach();
     $gamePlaying.appendTo("#gameOppList");
@@ -79,7 +79,7 @@ function setMyGames(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {
     var $newGame = $("#gameTemplate").clone();
-    $newGame.find("#gameName").text(gameList[gameId].name + "-" + gameId.substr(0, 6) + "..");
+    $newGame.find("#gameName").text(gameList[gameId].name.substr(0, 6) + "-" + gameId.substr(0, 4) + "..");
     var game = gameList[gameId];
     $newGame.addClass("myGameId" + gameId);
     $newGame.addClass("activeGame");
@@ -100,13 +100,8 @@ function setMyGames(gameList) {
       sendWs(data);
     });
 
-    if (gameList[gameId].whoTurn === "0") {
-      $("#gameDoneList").append($newGame);
-    } else if (gameList[gameId].whoTurn !== Env.user.oid) {
-      $("#gameOppList").append($newGame);
-    } else {
-      $("#gameList").append($newGame);
-    }
+    // start it in the game list and let setWhoTurn sort it
+    $("#gameList").append($newGame);
 
     setWhoTurn(gameId, game.whoTurn, game.players[game.whoTurn]);
   }
