@@ -107,8 +107,8 @@ tictactoe.turn = function (req, res, cb) {
     gameBoard[move.x][move.y] = "O";
   }
   state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
-
-  //live update move - SWD be nice to filter out the double send for current user
+  // sending entire board down for simple example
+  res.add(sh.event("event.game.info", game.getData()));
   global.socket.notify(game.get("oid"), sh.event("event.game.info", game.getData()));
 
   var win = checkWin(gameBoard);
