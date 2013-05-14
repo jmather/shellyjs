@@ -168,28 +168,24 @@ shutil.call = function (req, res, cb) {
   }
 
   // call the pre, function, post sequence
-  module.pre(req, res, function (error, data) {
-    if (error !== 0) {
-      shlog.info("pre error: ", data);
-      cb(error, data);
-      return;
+  module.pre(req, res, function (error) {
+    if (error) {
+      shlog.info("pre error: ", error);
+      return cb(error);
     }
-    module[funcName](req, res, function (error, data) {
+    module[funcName](req, res, function (error) {
       var retError = error;
-      var retData = data;
-      if (error !== 0) {
+      if (error) {
         // bail out, no post as function failed
-        shlog.info("func error: ", error, data);
-        cb(error, data);
-        return;
+        shlog.info("func error: ", error);
+        return cb(error);
       }
-      module.post(req, res, function (error, data) {
-        if (error !== 0) {
-          cb(error, data);
-        } else {
-          // return data from actual function call
-          cb(retError, retData);
+      module.post(req, res, function (error) {
+        if (error) {
+          return cb(error);
         }
+        // return data from actual function call
+        cb(retError);
       });
     });
   });

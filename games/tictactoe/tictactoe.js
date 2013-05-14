@@ -107,14 +107,12 @@ tictactoe.turn = function (req, res, cb) {
     gameBoard[move.x][move.y] = "O";
   }
   state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
-  // sending entire board down for simple example
-  res.add(sh.event("event.game.info", game.getData()));
   global.socket.notify(game.get("oid"), sh.event("event.game.info", game.getData()));
 
   var win = checkWin(gameBoard);
   if (win.winner != "") {
     game.set("status", "over");
-    game.set("whoTurn", "0");
+    game.set("whoTurn", "");
     state.winner = uid;
     state.winnerSet = win.set;
     game.set("state", state);
@@ -125,8 +123,8 @@ tictactoe.turn = function (req, res, cb) {
 
   if (checkFull(gameBoard)) {
     game.set("status", "over");
-    game.set("whoTurn", "0");
-    state.winner = "0";
+    game.set("whoTurn", "");
+    state.winner = "";
     state.winnerSet = null;
     game.set("state", state);
     res.add(sh.event("event.game.over", game.getData()));

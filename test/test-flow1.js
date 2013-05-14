@@ -53,7 +53,7 @@ function playGame() {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 2, y: 0}},
       function (err, res) {
         res[0].should.have.property("event", "event.game.over");
-        res[0].data.should.have.property("whoTurn", "0");
+        res[0].data.should.have.property("whoTurn", "");
         done();
       });
   });
@@ -137,7 +137,6 @@ describe("basic user create and game play", function () {
         function (err, res) {
           res[0].should.not.have.property("event", "error");
           gWhoTurn = res[0].data.whoTurn;
-          console.log(gWhoTurn);
           done();
         });
     });
@@ -152,6 +151,7 @@ describe("basic user create and game play", function () {
       gConn1.call("game.reset", {gameId: gGameId},
         function (err, res) {
           res[0].should.not.have.property("event", "error");
+          gWhoTurn = res[0].data.whoTurn;
           done();
         });
     });

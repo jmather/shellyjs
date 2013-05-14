@@ -19,7 +19,6 @@ function add(data) {
   if (data.event === "error") {
     shlog.error(data);  // log all errors
   }
-  console.log(data);
   this.msgs.push(data);
 }
 

@@ -73,9 +73,8 @@ ShConnect.prototype.call = function (cmd, data, cb) {
         cb(err, [{event: "error", message: res}]);
         return;
       }
-//      console.log(res.body);
       if (res.body[0].event === "error") {
-        cb(1, res.body[0]);
+        cb(1, res.body);
         return;
       }
       cb(0, res.body);
