@@ -31,7 +31,7 @@
 
         function log(msg)
         {
-            if (typeof(msg) == 'object') {
+            if (typeof(msg) == "object") {
 //                msg = "<div style='color:red;'>" + JSON.stringify(msg) + "/div>";
                 msg = JSON.stringify(msg);
             }
@@ -40,20 +40,20 @@
         }
 
         function formatJson(val) {
-            val = val.replace(/(\n|\t)/gm, '');	// strip all newlines first
+            val = val.replace(/(\n|\t)/gm, "");	// strip all newlines first
 
-            var retval = '';
+            var retval = "";
             var str = val;
             var pos = 0;
             var strLen = str.length;
-            var indentStr = '\t';
-            var newLine = '\n';
-            var char = '';
+            var indentStr = "\t";
+            var newLine = "\n";
+            var char = "";
 
             for (var i=0; i<strLen; i++) {
                 char = str.substring(i,i+1);
 
-                if (char == '}' || char == ']') {
+                if (char == "}" || char == "]") {
                     retval = retval + newLine;
                     pos = pos - 1;
 
@@ -64,10 +64,10 @@
 
                 retval = retval + char;
 
-                if (char == '{' || char == '[' || char == ',') {
+                if (char == "{" || char == "[" || char == ",") {
                     retval = retval + newLine;
 
-                    if (char == '{' || char == '[') {
+                    if (char == "{" || char == "[") {
                         pos = pos + 1;
                     }
 
@@ -95,7 +95,7 @@
         {
            var cmdDefaults = $defaults.val();
            console.log("saving: " + $defaults.attr("id") + " = " + cmdDefaults);
-           $.cookie($defaults.attr("id"), cmdDefaults, {path: '/', expires: 365});
+           $.cookie($defaults.attr("id"), cmdDefaults, {path: "/", expires: 365});
         }
 
         function getDefaultParams($defaults)
@@ -115,7 +115,7 @@
         {
             var dParams = {};
             var cmdDefaults = $.cookie($defaults.attr("id"));
-            if(typeof(cmdDefaults)!='undefined')
+            if(typeof(cmdDefaults)!="undefined")
             {
                 $defaults.val(cmdDefaults);
                 try {
@@ -138,10 +138,10 @@
             cmd = "game." + name;
             var input = {cmd:cmd};
             var key = "session";
-            if(typeof(dParams[key]) != 'undefined') {
+            if(typeof(dParams[key]) != "undefined") {
                 input[key] = dParams[key];
             } else {
-                input.session = 'xxxx';
+                input.session = "xxxx";
             }
 
             var paramInfo = "";
@@ -150,22 +150,22 @@
             {
                 var dtype = funcInfo.params[key].dtype;
 
-                if(typeof(dParams[key]) != 'undefined') {
+                if(typeof(dParams[key]) != "undefined") {
                     input[key] = dParams[key];
                     continue;
                 }
-                if(dtype == 'object') {
+                if(dtype == "object") {
                     input[key] = null;
-                } else if (dtype == 'array') {
+                } else if (dtype == "array") {
                     input[key] = null;
-                } else if (dtype == 'int') {
+                } else if (dtype == "int") {
                     input[key] = 0;
-                } else if (dtype == 'float') {
+                } else if (dtype == "float") {
                     input[key] = 0.0;
-                } else if (dtype == 'array') {
+                } else if (dtype == "array") {
                     input[key] = [];
-                } else if (dtype == 'string') {
-                    input[key] = '';
+                } else if (dtype == "string") {
+                    input[key] = "";
                 }
             }
             target.set(input);
@@ -223,49 +223,49 @@
             initDefaultParams($user1Defaults);
             initDefaultParams($user2Defaults);
 
-            $('#user1SetDefaults').click(function() {
+            $("#user1SetDefaults").click(function() {
                 saveDefaultParams($user1Defaults);
             });
 
-            $('#user2SetDefaults').click(function() {
+            $("#user2SetDefaults").click(function() {
                 saveDefaultParams($user2Defaults);
             });
 
 
-            $('#user1Create').click(function() {
+            $("#user1Create").click(function() {
                 populateCmd("create", user1Edit, $user1Defaults);
             });
-            $('#user1Kick').click(function() {
+            $("#user1Kick").click(function() {
                 populateCmd("kick", user1Edit, $user1Defaults);
             });
-            $('#user1Turn').click(function() {
+            $("#user1Turn").click(function() {
                 populateCmd("turn", user1Edit, $user1Defaults);
             });
-            $('#gameGet').click(function() {
+            $("#gameGet").click(function() {
                 populateCmd("get", user1Edit, $user1Defaults);
             });
 
-            $('#user2Join').click(function() {
+            $("#user2Join").click(function() {
                 populateCmd("join", user2Edit, $user2Defaults);
             });
-            $('#user2Turn').click(function() {
+            $("#user2Turn").click(function() {
                 populateCmd("turn", user2Edit, $user2Defaults);
             });
-            $('#user2Leave').click(function() {
+            $("#user2Leave").click(function() {
                 populateCmd("leave", user2Edit, $user2Defaults);
             });
 
 
-            $('#user1CallFunction').click(function() {
+            $("#user1CallFunction").click(function() {
                 var input = user1Edit.get();
                 callServer(input);
             });
-            $('#user2CallFunction').click(function() {
+            $("#user2CallFunction").click(function() {
                 var input = user2Edit.get();
                 callServer(input);
             });
 
-            $('#resetFunction').click(function() {
+            $("#resetFunction").click(function() {
                 initParams(user1Edit, user2Edit)
             });
         }

@@ -62,7 +62,7 @@
             debug.info("create module:", name, m);
 
             // create the module
-            var $section = $("#accordion").append('<h3><a href="#">' + name + '</a></h3>');
+            var $section = $("#accordion").append("<h3><a href='#'>" + name + "</a></h3>");
             var $functionDiv = $("<div></div>");
             // list the functions
             for (fkey in m.functions) {
@@ -79,43 +79,43 @@
             console.log(module, func);
             var cmd = module + "." + func;
             var input = {cmd:cmd};
-            if (cmd!='reg.login' && cmd!='reg.check' && cmd!='reg.create')
+            if (cmd!="reg.login" && cmd!="reg.check" && cmd!="reg.create")
             {
                 input.session = Env.session;
             }
 
-            $('#moduleName').text(module);
-            $('#functionName').text(func);
+            $("#moduleName").text(module);
+            $("#functionName").text(func);
             var funcInfo = Env.modules[module].functions[func];
-            $('#functionDescription').text(funcInfo.desc);
-            $('#functionSecurity').text(JSON.stringify(funcInfo.security));
+            $("#functionDescription").text(funcInfo.desc);
+            $("#functionSecurity").text(JSON.stringify(funcInfo.security));
             var paramInfo = "";
             console.log(funcInfo);
             for (key in funcInfo.params)
             {
                 var dtype = funcInfo.params[key].dtype;
                 paramInfo += key + "=" + dtype;
-                if(typeof(funcInfo.params[key].optional) !== 'undefined'
+                if(typeof(funcInfo.params[key].optional) !== "undefined"
                         && funcInfo.params[key].optional)
                 {
                     paramInfo += " (optional)";
                 }
                 paramInfo += "<br>";
-                if(dtype == 'object') {
+                if(dtype == "object") {
                     input[key] = {};
-                } else if (dtype == 'array') {
+                } else if (dtype == "array") {
                     input[key] = [];
-                } else if (dtype == 'number') {
+                } else if (dtype == "number") {
                     input[key] = 0;
-                } else if (dtype == 'string') {
-                    input[key] = '';
+                } else if (dtype == "string") {
+                    input[key] = "";
                 }
             }
             if(paramInfo.length==0)
             {
                 paramInfo = "(none)";
             }
-            $('#functionParams').html(paramInfo);
+            $("#functionParams").html(paramInfo);
             gInputEdit.set(input);
             gOutputEdit.set();
         }
@@ -146,7 +146,7 @@
 
             shCall({cmd:"module.list"}, setupModules);
 
-            $('.setFunctionDiv').click(function(event) {
+            $(".setFunctionDiv").click(function(event) {
                 gLastModule = $(this).attr("module");
                 gLastFunction = $(this).attr("function");
                 console.log(gLastModule, gLastFunction);
@@ -155,7 +155,7 @@
                 return false;
             });
 
-            $('#callFunction').click(function() {
+            $("#callFunction").click(function() {
                 try {
                     var input = gInputEdit.get();
                 } catch (e) {
@@ -165,7 +165,7 @@
                     gOutputEdit.set(data);
                 });
             });
-            $('#resetFunction').click(function() {
+            $("#resetFunction").click(function() {
                 initParams(gLastModule, gLastFunction)
             });
 

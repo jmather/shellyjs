@@ -22,29 +22,29 @@ function init() {
     if (typeof (Env.shToken) === "undefined") {
         debug.info("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
         Env.shToken = Env.nextUuid;
-        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: '/' });
+        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: "/" });
     }
     debug.info("main", "info", "shToken using: " + Env.shToken);
 
     $(".shHeaderDiv .userInfo").css("display", "none");
 	loginMode();
 
-    $('#loginBtn').click(function(e) {
+    $("#loginBtn").click(function(e) {
         doLogin();
         e.preventDefault();
         return false;
     });
-    $('#registerBtn').click(function(e) {
+    $("#registerBtn").click(function(e) {
         doRegister();
         e.preventDefault();
         return false;
     });
-    $('#anonymousBtn').click(function(e) {
+    $("#anonymousBtn").click(function(e) {
         doAnonymous();
         e.preventDefault();
         return false;
     });
-    $('#newAnonymousBtn').click(function(e) {
+    $("#newAnonymousBtn").click(function(e) {
         setToken(Env.nextUuid);
         doAnonymous();
         e.preventDefault();
@@ -72,22 +72,22 @@ button {
 .info {
     color: #00529B;
     background-color: #BDE5F8;
-    background-image: url('/static/images/toolbar/info.png');
+    background-image: url("/static/images/toolbar/info.png");
 }
 .success {
     color: #4F8A10;
     background-color: #DFF2BF;
-    background-image:url('/static/images/toolbar/success.png');
+    background-image:url("/static/images/toolbar/success.png");
 }
 .warning {
     color: #9F6000;
     background-color: #FEEFB3;
-    background-image: url('/static/images/toolbar/warning.png');
+    background-image: url("/static/images/toolbar/warning.png");
 }
 .error {
     color: #D8000C;
     background-color: #FFBABA;
-    background-image: url('/static/images/toolbar/error.png');
+    background-image: url("/static/images/toolbar/error.png");
 }
 </style>
 

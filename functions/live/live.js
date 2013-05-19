@@ -41,7 +41,7 @@ live.user = function (req, res, cb) {
     global.gUsers[ws.uid].liveUser = "on";
   }
 
-  // notify all users that I'm on/offline, including me
+  // notify all users that I am on/offline, including me
   var onoffLine = (status === "on" ? "online" : "offline");
   var event = sh.event("live.user", {uid: ws.uid, name: req.session.user.get("name"), pic: "",  status: onoffLine});
   global.socket.notifyAll(event);

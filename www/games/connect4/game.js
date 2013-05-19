@@ -79,7 +79,7 @@ function initGame() {
       if(row !== COLUMN_FULL && column >= 0 && column < 7) {
         gBoard[column][row] = gMyColor;
         pieceDrop(gMyColor, column, row);
-        gCurrent = null; // stop tracking this piece - it's set
+        gCurrent = null; // stop tracking this piece - it is set
       } else {
         // reset to original position
         gCurrent.destroy();

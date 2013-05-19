@@ -2,7 +2,7 @@
 function setToken(token) {
   Env.shToken = token;
   debug.info("reseting shToken", Env.shToken);
-  $.cookie("shToken", Env.shToken, { expires: 3650, path: '/' });
+  $.cookie("shToken", Env.shToken, { expires: 3650, path: "/" });
 }
 
 function doLogin() {
@@ -29,7 +29,7 @@ function doLogin() {
       if (res.event === "error") {
         error(res.message);
       } else {
-        $.cookie("shSession", res[0].data.session, {path: '/', expires: 365});
+        $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/index.html";
       }
     },

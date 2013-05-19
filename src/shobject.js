@@ -74,7 +74,7 @@ ShObject.prototype.save = function (cb) {
   var currHash = crypto.createHash("md5").update(JSON.stringify(this._data)).digest("hex");
 
   if (currHash === this._hash) {
-    shlog.info("ignoring save - object not modified '%s'", this._key);
+    shlog.info("ignoring save - object not modified: %s", this._key);
     cb(0);
     return;
   }
@@ -88,7 +88,7 @@ ShObject.prototype.save = function (cb) {
       cb(1, {code: "object_save", message: "unable to save object data", info: {oid: self._oid, err: err, res: res}});
       return;
     }
-    shlog.info("object saved '%s'", self._key);
+    shlog.info("object saved: %s", self._key);
     self._hash = currHash;
     cb(0);
   });

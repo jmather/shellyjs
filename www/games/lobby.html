@@ -7,8 +7,8 @@
     <script src="/common/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
     <script src="/static/js/reconnecting-websocket.js"></script>
-    <script src='/static/js/fastclick.js'></script>
-    <script src='/static/js/common.js'></script>
+    <script src="/static/js/fastclick.js"></script>
+    <script src="/static/js/common.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
@@ -48,7 +48,7 @@ function addUser(profile) {
 
     $newGame.find("#userOffer").click(function () {
         alert("not implemented");
-//                var gameId = $(this).parent().attr('gameId');
+//                var gameId = $(this).parent().attr("gameId");
     });
 
     $("#userList").append($newGame);
@@ -60,27 +60,27 @@ function gameInit(gameName, gameId) {
 }
 
 function processEvent(res, from) {
-    if (typeof(res.event) == 'undefined') {
+    if (typeof(res.event) == "undefined") {
         log(from, "error", "old message: " + JSON.stringify(res));
         return;
     }
-    if (res.event == 'error') {
+    if (res.event == "error") {
         showError(res.message);
         log(from, "error", JSON.stringify(res));
         return;
     }
-    if (res.event == 'event.heartbeat') {
+    if (res.event == "event.heartbeat") {
         return;
     }
-    if (res.event == 'event.game.playing') {
+    if (res.event == "event.game.playing") {
         setMyGames(res.data);
         return;
     }
-    if (res.event == 'event.game.turn.next') {
+    if (res.event == "event.game.turn.next") {
         setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
-    if (res.event == 'event.live.user') {
+    if (res.event == "event.live.user") {
         if (res.data.status === "online") {
             addUser(res.data);
         } else {
@@ -88,15 +88,15 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == 'event.match.stats') {
+    if (res.event == "event.match.stats") {
         setMatchInfo(res.data);
         return;
     }
-    if (res.event == 'event.match.made') {
+    if (res.event == "event.match.made") {
         gameInit(res.data.gameName, res.data.gameId);
         return;
     }
-    if (res.event == 'event.match.add') {
+    if (res.event == "event.match.add") {
         return;
     }
     log(from, "unknown-event", JSON.stringify(res));
@@ -113,7 +113,7 @@ function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("Lobby");
 
-    window.addEventListener('load', function () {
+    window.addEventListener("load", function () {
         new FastClick(document.body);
     }, false);
 
@@ -248,7 +248,7 @@ function init() {
 </style>
 <div id="dialog" style="display:none" title="Ready to Play">
     <div class="waitOptionDiv">waiting for user to join you...</div>
-    <div class="waitOptionDiv">Or give us your email and we'll notify you.</div>
+    <div class="waitOptionDiv">Or give us your email and we will notify you.</div>
     <div class="waitOptionDiv">Or come back later.</div>
 </div>
 

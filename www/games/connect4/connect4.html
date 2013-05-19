@@ -10,7 +10,7 @@
     <script src="/static/js/reconnecting-websocket.js"></script>
 
 	<script type="text/javascript" src="crafty-min.js"></script>
-    <script src='/static/js/common.js'></script>
+    <script src="/static/js/common.js"></script>
 	<script type="text/javascript" src="game.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
@@ -35,7 +35,7 @@
 
         Env.gameId = "0";
         var pgameId = getURLParameter("gameId");
-        if (pgameId != 'null') {
+        if (pgameId != "null") {
             Env.gameId = pgameId.toString();
         }
 
@@ -121,13 +121,13 @@
                 if (data.state.winner === Env.user.oid) {
                     console.log("adding winner text");
                     Crafty.e("2D, DOM, Text").attr({x: 140, y: 200, w: 200, z: 6}).text("You Won!")
-                            .css({fontFamily: 'Impact', fontSize: '50px'});
+                            .css({fontFamily: "Impact", fontSize: "50px"});
                 } else if (data.state. winner === "") {
                     Crafty.e("2D, DOM, Text").attr({x: 140, y: 200, w: 200, z: 6}).text("Tie Game")
-                            .css({fontFamily: 'Impact', fontSize: '50px'});
+                            .css({fontFamily: "Impact", fontSize: "50px"});
                 } else {
                     Crafty.e("2D, DOM, Text").attr({x: 140, y: 200, w: 200, z: 6}).text("You Lost!")
-                            .css({fontFamily: 'Impact', fontSize: '50px'});
+                            .css({fontFamily: "Impact", fontSize: "50px"});
                 }
                 return true;
             }

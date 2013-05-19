@@ -1,6 +1,6 @@
 var path = require("path");
 var util = require("util");
-var domain = require('domain');
+var domain = require("domain");
 
 var _ = require("lodash");
 var async = require("async");
@@ -241,10 +241,10 @@ shutil.extendProfiles = function (loader, profiles, cb) {
 };
 
 shutil.expressCrossDomain = function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-  if ('OPTIONS' === req.method) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
+  if ("OPTIONS" === req.method) {
     res.send(200);
     return;
   }
@@ -253,12 +253,12 @@ shutil.expressCrossDomain = function (req, res, next) {
 
 shutil.expressError = function (req, res, next) {
   next();
-// SWD: this doesn't work as the stack keeps growing
-// the run doesn't work either, the stack has a race condition where
+// SWD: this does not work as the stack keeps growing
+// the run does not work either, the stack has a race condition where
 // if the second call finishes before the first it pops the wrong domain
 /*
   var dm = domain.create();
-  dm.on('error', function(err) {
+  dm.on("error", function(err) {
     next(err);
     dm.dispose();
   });

@@ -33,11 +33,11 @@ ShLoader.prototype.create = function (keyType, params) {
     return null;
   }
 
-  shlog.info("create-create: '%s - %s'", keyType, params);
+  shlog.info("create-create: %s - %s", keyType, params);
   var obj = new ShClass();
   obj.create(params);  // SWD assumes params is just oid for shobjects
   this._objects[obj._key] = obj;
-  shlog.info("create-new: '%s'", obj._key);
+  shlog.info("create-new: %s", obj._key);
 
   return obj;
 };
@@ -50,7 +50,7 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
   // check cache
   var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
-    shlog.info("cache hit: '%s'", key);
+    shlog.info("cache hit: %s", key);
     cb(0, this._objects[key]);
     return;
   }
@@ -63,7 +63,7 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
     return;
   }
 
-  shlog.info("exists-load: '%s - %s'", keyType, params);
+  shlog.info("exists-load: %s - %s", keyType, params);
   var self = this;
   var obj = new ShClass();
   obj.load(params, function (err, data) {
@@ -84,7 +84,7 @@ ShLoader.prototype.get = function (keyType, params, cb) {
   // check cache
   var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
-    shlog.info("cache hit: '%s'", key);
+    shlog.info("cache hit: %s", key);
     cb(0, this._objects[key]);
     return;
   }
@@ -97,7 +97,7 @@ ShLoader.prototype.get = function (keyType, params, cb) {
     return;
   }
 
-  shlog.info("get-loadOrCreate: '%s - %s'", keyType, params);
+  shlog.info("get-loadOrCreate: %s - %s", keyType, params);
   var self = this;
   var obj = new ShClass();
   obj.loadOrCreate(params, function (err, data) {
@@ -127,7 +127,7 @@ ShLoader.prototype.dump = function (cb) {
   shlog.info("dump start");
   var self = this;
   async.each(Object.keys(this._objects), function (key, cb) {
-    shlog.info("dumping: '%s'", key);
+    shlog.info("dumping: %s", key);
     self._objects[key].save(cb);
   }, function (err) {
     shlog.info("dump complete");

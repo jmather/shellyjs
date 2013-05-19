@@ -167,7 +167,7 @@ function handleConnect(ws) {
       shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
       eventEmitter.removeListener(gameChannel, socketNotify);
       // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-      // userConn may not exist here so can't use it for name
+      // userConn may not exist here so can not use it for name
       global.socket.notify(game, sh.event("live.game.user", {uid: self.uid, name: "", pic: "", gameId: game, status: "offline"}));
     });
   });
@@ -194,7 +194,7 @@ Socket.close = function (cb) {
   try {
     wss.close();
   } catch (e) {
-    // don't care ws lib does not allow bind check via address() call
+    // do not care ws lib does not allow bind check via address() call
   }
   cb();
 };

@@ -7,7 +7,7 @@ function clone(obj) {
 
 function getURLParameter(name) {
   return decodeURI(
-    (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, null])[1]
+    (RegExp(name + "=" + "(.+?)(&|$)").exec(location.search) || [, null])[1]
   );
 }
 
@@ -31,7 +31,7 @@ function log(api, type, msg) {
   if (api == "socket") {
     color = "green";
   }
-  if (typeof(msg) == 'object') {
+  if (typeof(msg) == "object") {
     msg = JSON.stringify(msg);
   }
   var disp = "<div style='font-size:10px;white-space:nowrap;'>";

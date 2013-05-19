@@ -7,8 +7,8 @@
 <script src="/common/jquery.cookie.js"></script>
 <script src="/static/js/ba-debug.js"></script>
 <script src="/static/js/reconnecting-websocket.js"></script>
-<script src='/static/js/fastclick.js'></script>
-<script src='/static/js/common.js'></script>
+<script src="/static/js/fastclick.js"></script>
+<script src="/static/js/common.js"></script>
 
 <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
 <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
@@ -64,7 +64,7 @@ Env.players = {};
 Env.gameId = "0";
 
 var pgameId = getURLParameter("gameId");
-if (pgameId != 'null') {
+if (pgameId != "null") {
     Env.gameId = pgameId.toString();
 }
 
@@ -89,7 +89,7 @@ function setPlayers(playerList, whoTurn) {
         }
 
         $newGame.find("#playerKick").click(function () {
-            var playerId = $(this).parent().attr('playerId');
+            var playerId = $(this).parent().attr("playerId");
         });
 
         $("#playerList").append($newGame);
@@ -98,14 +98,14 @@ function setPlayers(playerList, whoTurn) {
 }
 
 function setState(game) {
-    $.cookie("shLastGame" + Env.user.oid, game.oid, { expires: 3650, path: '/' });
+    $.cookie("shLastGame" + Env.user.oid, game.oid, { expires: 3650, path: "/" });
     hideError();
 
     var gameBoard = game.state.gameBoard;
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < 3; j++) {
             $("#x" + i + "y" + j).text(gameBoard[i][j]);
-            $("#x" + i + "y" + j).css('background', '#ccc');
+            $("#x" + i + "y" + j).css("background", "#ccc");
         }
     }
 
@@ -119,11 +119,11 @@ function setState(game) {
         $("#whoTurn").text(game.players[game.whoTurn].name);
     }
 
-    if (game.status == 'over') {
+    if (game.status == "over") {
         showError("game over");
-        $('#gameWinner').text(game.players[game.state.winner].name);
+        $("#gameWinner").text(game.players[game.state.winner].name);
     } else {
-        $('#gameWinner').text('');
+        $("#gameWinner").text("");
     }
 
     var winnerSet = game.state.winnerSet;
@@ -134,9 +134,9 @@ function setState(game) {
     }
 
     if (game.state.xes == Env.user.oid) {
-        $("#gamePlaying").text("X's");
+        $("#gamePlaying").text("Xs");
     } else {
-        $("#gamePlaying").text("O's")
+        $("#gamePlaying").text("Os")
     }
 
     $("#gameId").text(game.oid.substr(0, 6) + "..");
@@ -146,20 +146,20 @@ function setState(game) {
 }
 
 function clearState() {
-    $.cookie("shLastGame" + Env.user.oid, "0", { expires: 3650, path: '/' });
+    $.cookie("shLastGame" + Env.user.oid, "0", { expires: 3650, path: "/" });
 
     hideError();
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < 3; j++) {
             $("#x" + i + "y" + j).text("");
-            $("#x" + i + "y" + j).css('background', '#ccc');
+            $("#x" + i + "y" + j).css("background", "#ccc");
         }
     }
 
     $("#gameId").text("");
     $("#gameStatus").text("");
     $("#whoTurn").text("");
-    $('#gameWinner').text('');
+    $("#gameWinner").text("");
     $("#gamePlaying").text("");
 
     $(".activePlayer").remove();
@@ -184,14 +184,14 @@ function shellyInit() {
 }
 
 function processEvent(res, from) {
-    if (typeof(res.event) == 'undefined') {
+    if (typeof(res.event) == "undefined") {
         log(from, "error", "old message: " + JSON.stringify(res));
         return;
     }
-    if (res.event == 'heartbeat') {
+    if (res.event == "heartbeat") {
         return;
     }
-    if (res.event == 'error') {
+    if (res.event == "error") {
         showError(res.message);
         log(from, "error", JSON.stringify(res));
         return;
@@ -201,11 +201,11 @@ function processEvent(res, from) {
         window[res.cb](res.data);
         return;
     }
-    if (res.event == 'game.join') {
+    if (res.event == "game.join") {
         // turn off live events for old game
         var newGameId = res.data.oid;
         var oldGameId = Env.gameId;
-        if (typeof (oldGameId) !== 'undefined' && oldGameId != newGameId) {
+        if (typeof (oldGameId) !== "undefined" && oldGameId != newGameId) {
             sendCmd("live.game", {gameId: oldGameId, status: "off"})
             Env.players = {};  // reset the player list
         }
@@ -213,7 +213,7 @@ function processEvent(res, from) {
         sendCmd("live.game", {gameId: newGameId, status: "on"})
         return;
     }
-    if (res.event == 'live.game.user') {
+    if (res.event == "live.game.user") {
         Env.players[res.data.uid] = res.data;
         var $playerStatus = $(".playerId" + res.data.uid).find("#playerStatus");
         if ($playerStatus.size) {
@@ -221,17 +221,17 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == 'game.turn.next') {
+    if (res.event == "game.turn.next") {
         setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
-    if (res.event == 'game.info'
-            || res.event == 'game.over'
-            || res.event == 'game.reset') {
+    if (res.event == "game.info"
+            || res.event == "game.over"
+            || res.event == "game.reset") {
         setState(res.data);
         return;
     }
-    if (res.event == 'game.playing') {
+    if (res.event == "game.playing") {
         setMyGames(res.data);
         return;
     }
@@ -243,7 +243,7 @@ function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("TicTacToe");
 
-    window.addEventListener('load', function () {
+    window.addEventListener("load", function () {
         new FastClick(document.body);
     }, false);
 

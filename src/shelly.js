@@ -84,7 +84,7 @@ shelly.shutdown = function () {
     });
 };
 
-process.on('uncaughtException', function (error) {
+process.on("uncaughtException", function (error) {
   shlog.error("uncaughtException", error.stack);
 });
 

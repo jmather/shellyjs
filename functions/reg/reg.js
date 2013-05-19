@@ -135,7 +135,7 @@ exports.login = function (req, res, cb) {
         return cb(1);
       }
       if (role.length && !_.contains(user.get("roles"), role)) {
-        res.add(sh.error("no_role", "user does not have this role: '" + role + "'", {role: role, roles: user.get("roles")}));
+        res.add(sh.error("no_role", "user does not have this role: " + role, {role: role, roles: user.get("roles")}));
         return cb(1);
       }
 

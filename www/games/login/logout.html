@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../lib/config.php');
+require_once(__DIR__."/../lib/config.php");
 
 skLogout();
 
@@ -23,7 +23,7 @@ function init() {
     $(".shHeaderDiv .userInfo").css("display", "none");
     $("#shSubTitle").text("Logout");
 
-    $.removeCookie("ShSession", {path: '/', expires: 365});
+    $.removeCookie("ShSession", {path: "/", expires: 365});
 }
 
 </script>
