@@ -103,32 +103,6 @@ function createEnv(req) {
   return map;
 }
 
-// SWD change page to load from ajax call so we can remvoe this
-app.get("/core.html", function (req, res) {
-  shlog.info("%s %s", req.method, req.url);
-  var env = createEnv(req);
-
-  var cmdFile = global.gBaseDir + "/functions/module/module.js";
-  delete require.cache[require.resolve(cmdFile)];
-  var modulePack = require(cmdFile);
-  modulePack.list(req, res, function (err, data) {
-    env.modules = data.data;
-    res.render(path.basename(req.url), {Env: env, EnvJson: JSON.stringify(env),
-      partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
-  });
-});
-
-app.get("*.html", function (req, res) {
-  shlog.info("%s %s", req.method, req.url);
-  var env = createEnv(req);
-
-  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    gBaseDir: global.gBaseDir,
-    ConfigJson: JSON.stringify(global.CONF),
-    PackageJson: JSON.stringify(global.PACKAGE),
-    partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
-});
-
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var env = createEnv(req);

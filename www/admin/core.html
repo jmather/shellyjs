@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/static/jsoneditor-2.0.0/jsoneditor.css">
     <script type="text/javascript" src="/static/jsoneditor-2.0.0/jsoneditor.js"></script>
     <script src="/static/js/ba-debug.js"></script>
+    <script src="/static/js/common.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <style>
         .ui-widget {
@@ -119,10 +120,13 @@
             gOutputEdit.set();
         }
 
-        $(init);
-        function init() {
-            $("#shSubTitle").text("Core Modules");
-
+        function setupModules(err, msg) {
+            if(msg.event === "error") {
+                console.log(msg);
+                alert(msg.message);
+                return;
+            }
+            Env.modules = msg.data;
             for (mkey in Env.modules) {
                 createModule(mkey, Env.modules[mkey]);
             }
@@ -134,6 +138,13 @@
             gOutputEdit = new jsoneditor.JSONFormatter(outputContainer);
 
             initParams(gLastModule, gLastFunction);
+        }
+
+        $(init);
+        function init() {
+            $("#shSubTitle").text("Core Modules");
+
+            shCall({cmd:"module.list"}, setupModules);
 
             $('.setFunctionDiv').click(function(event) {
                 gLastModule = $(this).attr("module");
@@ -150,22 +161,9 @@
                 } catch (e) {
                     alert("error parsing input: " + e.message);
                 }
-                console.log(JSON.stringify(input));
-                $.ajax({
-                    type: "POST",
-                    url: Env.restUrl,
-                    async: false,
-                    contentType: "application/json",
-                    dataType: "json",
-                    data: JSON.stringify(input),
-                    success: function (data, status) {
-                        gOutputEdit.set(data);
-                    },
-                    error: function (xhr, status, err) {
-                        console.log(xhr.responseText);
-                        gOutputEdit.set(JSON.parse(xhr.responseText));
-                    }
-                })
+                shCall(input, function (err, data) {
+                    gOutputEdit.set(data);
+                });
             });
             $('#resetFunction').click(function() {
                 initParams(gLastModule, gLastFunction)
