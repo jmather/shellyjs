@@ -134,42 +134,47 @@
             return false;
         }
 
+        function resetBoard(msg) {
+            Crafty.scene("game");
+            if (gCurrent) {
+                gCurrent.destroy();
+                gCurrent = null;
+            }
+            var board = msg.data.state.board;
+            Env.game = msg.data;
+            setInfo(msg.data);
+            if (msg.data.state.winner === "") {
+                flowRow(0, board);
+            } else {
+                fillBoard(board);
+                checkOver(msg.data);
+            }
+        }
+
         function processEvent(msg) {
-            if (msg.event === "event.game.update") {
+            if (msg.event === "game.update") {
                 var move = msg.data.move;
                 if (Env.user.oid !== msg.data.uid) { // ignore our own moves
                     gBoard[move.x][move.y] = msg.data.color;
                     addPiece((msg.data.color===0 ? "yellow" : "red"), move.x);
                 }
             }
-            if (msg.event === "event.game.turn.next") {
+            if (msg.event === "game.turn.next") {
                 setWhoTurn(msg.data.whoTurn);
             }
-            if (msg.event === "event.game.join") {
-                var board = msg.data.state.board;
-                Env.game = msg.data;
-                setInfo(msg.data);
-                if (msg.data.state.winner === "") {
-                    flowRow(0, board);
-                } else {
-                    fillBoard(board);
-                    checkOver(msg.data);
-                }
+            if (msg.event === "game.join") {
+                resetBoard(msg);
             }
-            if (msg.event === "event.game.over") {
+            if (msg.event === "game.over") {
                 setTimeout(function () { // simple delay for fall
                     checkOver(msg.data);
                 }, 2000);
             }
-            if (msg.event === "event.game.reset") {
-                Crafty.scene("game");
-                if (gCurrent) {
-                    gCurrent.destroy();
-                    gCurrent = null;
-                }
-                var board = msg.data.state.board;
-                Env.game = msg.data;
-                setInfo(msg.data);
+            if (msg.event === "game.reset") {
+                resetBoard(msg);
+//                var board = msg.data.state.board;
+//                Env.game = msg.data;
+//                setInfo(msg.data);
             }
         }
 

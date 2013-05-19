@@ -188,7 +188,7 @@ function processEvent(res, from) {
         log(from, "error", "old message: " + JSON.stringify(res));
         return;
     }
-    if (res.event == 'event.heartbeat') {
+    if (res.event == 'heartbeat') {
         return;
     }
     if (res.event == 'error') {
@@ -201,7 +201,7 @@ function processEvent(res, from) {
         window[res.cb](res.data);
         return;
     }
-    if (res.event == 'event.game.join') {
+    if (res.event == 'game.join') {
         // turn off live events for old game
         var newGameId = res.data.oid;
         var oldGameId = Env.gameId;
@@ -213,7 +213,7 @@ function processEvent(res, from) {
         sendCmd("live.game", {gameId: newGameId, status: "on"})
         return;
     }
-    if (res.event == 'event.live.game.user') {
+    if (res.event == 'live.game.user') {
         Env.players[res.data.uid] = res.data;
         var $playerStatus = $(".playerId" + res.data.uid).find("#playerStatus");
         if ($playerStatus.size) {
@@ -221,17 +221,17 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == 'event.game.turn.next') {
+    if (res.event == 'game.turn.next') {
         setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
-    if (res.event == 'event.game.info'
-            || res.event == 'event.game.over'
-            || res.event == 'event.game.reset') {
+    if (res.event == 'game.info'
+            || res.event == 'game.over'
+            || res.event == 'game.reset') {
         setState(res.data);
         return;
     }
-    if (res.event == 'event.game.playing') {
+    if (res.event == 'game.playing') {
         setMyGames(res.data);
         return;
     }

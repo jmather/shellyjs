@@ -52,7 +52,7 @@ function playGame() {
   it("turn 5 - winning", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 2, y: 0}},
       function (err, res) {
-        res[0].should.have.property("event", "event.game.over");
+        res[0].should.have.property("event", "game.over");
         res[0].data.should.have.property("whoTurn", "");
         done();
       });

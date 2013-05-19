@@ -18,7 +18,7 @@ user.functions = {
 };
 
 user.get = function (req, res, cb) {
-  res.add(sh.event("event.user.get", req.session.user.getData()));
+  res.add(sh.event("user.get", req.session.user.getData()));
   return cb(0);
 };
 
@@ -32,7 +32,7 @@ user.set = function (req, res, cb) {
   }
 
   req.session.user.setData(userData);
-  res.add(sh.event("event.user.get", req.session.user.getData()));
+  res.add(sh.event("user.get", req.session.user.getData()));
   return cb(0);
 };
 
@@ -44,7 +44,7 @@ user.aget = function (req, res, cb) {
       res.add(sh.error("user_aget", "user does not exist", user));
       return;
     }
-    res.add(sh.event("event.user.get", user.getData()));
+    res.add(sh.event("user.get", user.getData()));
     return cb(0);
   });
 };
@@ -59,7 +59,7 @@ user.aset = function (req, res, cb) {
       return;
     }
     user.setData(newUser);
-    res.add(sh.event("event.user.get", user.getData()));
+    res.add(sh.event("user.get", user.getData()));
     return cb(0);
   });
 
@@ -72,7 +72,7 @@ user.profiles = function (req, res, cb) {
       res.add(sh.error("profile_fill", "unable to fill in profile data", data));
       return cb(1);
     }
-    res.add(sh.event("event.user.profiles", data));
+    res.add(sh.event("user.profiles", data));
     return cb(0);
   });
 };
@@ -84,7 +84,7 @@ user.find = function (req, res, cb) {
         res.add(data);  // helper function fills in correct error - SWD - should change this
         return cb(1);
       }
-      res.add(sh.event("event.user.find", data.getData()));
+      res.add(sh.event("user.find", data.getData()));
       return cb(0);
     });
     return;
@@ -95,7 +95,7 @@ user.find = function (req, res, cb) {
         res.add(sh.error("no_user", "unable to find user with uid = " + req.body.value));
         return cb(1);
       }
-      res.add(sh.event("event.user.find", data.getData()));
+      res.add(sh.event("user.find", data.getData()));
       return cb(0);
     });
     return;
@@ -106,7 +106,7 @@ user.find = function (req, res, cb) {
         res.add(data);
         return cb(1);
       }
-      res.add(sh.event("event.user.find", data.getData()));
+      res.add(sh.event("user.find", data.getData()));
       return cb(0);
     });
     return;

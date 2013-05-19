@@ -69,29 +69,29 @@ ws.on('message', function (message) {
     console.error("unabel to parse message");
     return;
   }
-  if (msg.event === "event.match.stats") {
+  if (msg.event === "match.stats") {
     if (msg.data["tictactoe"].waiting > 0) {
       sendCmd("match.add", {name: "tictactoe"});
     }
-  } else if (msg.event === "event.match.made") {
+  } else if (msg.event === "match.made") {
     sendCmd("game.join", {gameId: msg.data.gameId});
     sendCmd("live.game", {gameId: msg.data.gameId, status: "on"});
-  } else if (msg.event === "event.game.info"
-    || msg.event === "event.game.reset"
-    || msg.event === "event.game.join") {
+  } else if (msg.event === "game.info"
+    || msg.event === "game.reset"
+    || msg.event === "game.join") {
     if (msg.data.whoTurn === gUid) {
       setTimeout(function () {
         makeMove(msg.data);
       }, 1000);
     }
-  } else if (msg.event === "event.game.playing") {
+  } else if (msg.event === "game.playing") {
     _.each(msg.data, function (gameInfo, gameId) {
       sendCmd("live.game", {gameId: gameId, status: "on"});
       if(gameInfo.whoTurn === gUid) {
         sendCmd("game.get", {gameId: gameId});  // trigger a move base on gameBoard
       }
     });
-  } else if (msg.event === "event.game.turn.next") {
+  } else if (msg.event === "game.turn.next") {
     if (msg.data.whoTurn === gUid) {
       sendCmd("game.get", {gameId: msg.data.gameId});  // trigger a move base on gameBoard
     }

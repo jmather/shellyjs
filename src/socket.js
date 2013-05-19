@@ -111,7 +111,7 @@ function handleConnect(ws) {
   ws.hbTimer = null;
 
   var heartBeat = function () {
-    sh.sendWs(ws, 0, sh.event("event.heartbeat", {interval: global.CONF.heartBeat}));
+    sh.sendWs(ws, 0, sh.event("heartbeat", {interval: global.CONF.heartBeat}));
   };
   ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
 
@@ -154,7 +154,7 @@ function handleConnect(ws) {
     } else {
       delete gUsers[this.uid];
       if (userConn.liveUser === "on") {
-        Socket.notifyAll(sh.event("event.live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
+        Socket.notifyAll(sh.event("live.user", {uid: this.uid, name: userConn.name, pic: "", status: "offline" }));
       }
     }
 
@@ -168,7 +168,7 @@ function handleConnect(ws) {
       eventEmitter.removeListener(gameChannel, socketNotify);
       // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
       // userConn may not exist here so can't use it for name
-      global.socket.notify(game, sh.event("event.live.game.user", {uid: self.uid, name: "", pic: "", gameId: game, status: "offline"}));
+      global.socket.notify(game, sh.event("live.game.user", {uid: self.uid, name: "", pic: "", gameId: game, status: "offline"}));
     });
   });
 }

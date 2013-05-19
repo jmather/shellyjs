@@ -119,7 +119,7 @@ function moveUntilEnd(tpl, moves, cb) {
       moves.push(newMove[0]);
     }
     // if win stop
-    if (res.event === "event.game.over") {
+    if (res.event === "game.over") {
       gStats[res.data.state.winner] += 1;
       console.log("game over");
       cb();

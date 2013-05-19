@@ -31,7 +31,7 @@ connect4.create = function (req, res, cb) {
   req.env.game.set("state", state);
 
 
-  res.add(sh.event("event.game.create", req.env.game.getData()));
+  res.add(sh.event("game.create", req.env.game.getData()));
   return cb(0);
 };
 
@@ -46,7 +46,7 @@ connect4.reset = function (req, res, cb) {
   state.winner = "";
   state.winnerSet = null;
 
-  res.add(sh.event("event.game.reset", req.env.game.getData()));
+  res.add(sh.event("game.reset", req.env.game.getData()));
   return cb(0);
 };
 
@@ -191,8 +191,8 @@ connect4.turn = function (req, res, cb) {
   board[move.x][move.y] = color;
 
   state.lastMove = {uid: uid, move: move, color: color};
-  res.add(sh.event("event.game.update", state.lastMove));
-  global.socket.notify(game.get("oid"), sh.event("event.game.update", state.lastMove));
+  res.add(sh.event("game.update", state.lastMove));
+  global.socket.notify(game.get("oid"), sh.event("game.update", state.lastMove));
 
 
   var winSet = [];
@@ -202,7 +202,7 @@ connect4.turn = function (req, res, cb) {
     game.set("whoTurn", "");
     state.winner = uid;
     state.winnerSet = winSet;
-    res.add(sh.event("event.game.over", game.getData()));
+    res.add(sh.event("game.over", game.getData()));
     return cb(0);
   }
 
@@ -211,7 +211,7 @@ connect4.turn = function (req, res, cb) {
     game.set("whoTurn", "");
     state.winner = "";
     state.winnerSet = null;
-    res.add(sh.event("event.game.over", game.getData()));
+    res.add(sh.event("game.over", game.getData()));
     return cb(0);
   }
 

@@ -67,7 +67,7 @@ describe("module game", function () {
     it("list games available to user", function (done) {
       st.userCall({cmd: "game.list"},
         function (err, res) {
-          res.body.should.have.property("event", "event.game.list");
+          res.body.should.have.property("event", "game.list");
           done();
         });
     });

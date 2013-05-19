@@ -143,7 +143,7 @@ game.create = function (req, res, cb) {
 
   // just use default game data if create no there
   if (_.isUndefined(req.env.gameModule.create)) {
-    res.add(sh.event("event.game.create", game.getData()));
+    res.add(sh.event("game.create", game.getData()));
     return cb(0);
   }
   req.env.gameModule.create(req, res, cb);
@@ -154,7 +154,7 @@ game.start = function (req, res, cb) {
 
   game.set("status", "playing");
 
-  res.add(sh.event("event.game.start", game.getData()));
+  res.add(sh.event("game.start", game.getData()));
   return cb(0);
 };
 
@@ -163,7 +163,7 @@ game.end = function (req, res, cb) {
 
   game.set("status", "over");
 
-  res.add(sh.event("event.game.end", game.getData()));
+  res.add(sh.event("game.end", game.getData()));
   return cb(0);
 };
 
@@ -184,7 +184,7 @@ game.join = function (req, res, cb) {
   game.setPlayer(uid, "ready");
 
   if (isNew) {
-    global.socket.notify(game.get("gameId"), sh.event("event.game.user.join", {gameId: game.get("gameId"), uid: uid}));
+    global.socket.notify(game.get("gameId"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
   }
 
   sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
@@ -192,7 +192,7 @@ game.join = function (req, res, cb) {
       res.add(sh.error("user_info", "unable to load users for this game", data));
       return cb(1);
     }
-    res.add(sh.event("event.game.join", game.getData()));
+    res.add(sh.event("game.join", game.getData()));
     return cb(0);
   });
 };
@@ -207,9 +207,9 @@ game.leave = function (req, res, cb) {
     }
     playing.removeGame(req.body.gameId);
     if (req.body.game) {
-      global.socket.notify(game.get("oid"), sh.event("event.game.user.leave", {gameId: req.body.gameId, uid: uid}));
+      global.socket.notify(game.get("oid"), sh.event("game.user.leave", {gameId: req.body.gameId, uid: uid}));
     }
-    res.add(sh.event("event.game.leave", req.body.gameId));
+    res.add(sh.event("game.leave", req.body.gameId));
     return cb(0);
   });
 };
@@ -222,7 +222,7 @@ game.kick = function (req, res, cb) {
   game.players[kickId] = {status: "kicked"};
   game.setPlayer(kickId, "kicked");
 
-  res.add(sh.event("event.game.leave", game.get("players")));
+  res.add(sh.event("game.leave", game.get("players")));
   return cb(0);
 };
 
@@ -237,7 +237,7 @@ game.turn = function (req, res, cb) {
     return cb(1);
   }
   if (game.status === "over") {
-    res.add(sh.event("event.game.over", game));
+    res.add(sh.event("game.over", game));
     return cb(0);
   }
   if (game.whoTurn !== uid) {
@@ -258,13 +258,13 @@ game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: gameId,
+    global.socket.notifyUsers(game.playerOrder, sh.event("game.turn.next", {gameId: gameId,
       whoTurn: game.whoTurn,
       name: (game.whoTurn === "" ? "no one" : game.players[game.whoTurn].name),
       pic: ""
       }));
     if (game.status === "over") {
-      global.socket.notify(game.oid, sh.event("event.game.over", game));
+      global.socket.notify(game.oid, sh.event("game.over", game));
     }
     return cb(error);
   });
@@ -274,7 +274,7 @@ game.get = function (req, res, cb) {
   // SWD - game is bad name for this all over
   var game = req.env.game;
 
-  res.add(sh.event("event.game.info", game.getData()));
+  res.add(sh.event("game.info", game.getData()));
   return cb(0);
 };
 
@@ -284,7 +284,7 @@ game.set = function (req, res, cb) {
 
   game.setData(newGame);
 
-  res.add(sh.event("event.game.info", game.getData()));
+  res.add(sh.event("game.info", game.getData()));
   return cb(0);
 };
 
@@ -304,9 +304,9 @@ game.reset = function (req, res, cb) {
   req.env.gameModule.reset(req, res, function (error) {
     if (!error) {
       // notify players in game of new state
-      global.socket.notify(game.oid, sh.event("event.game.reset", game));
+      global.socket.notify(game.oid, sh.event("game.reset", game));
       // notify players online of turn change
-      global.socket.notifyUsers(game.playerOrder, sh.event("event.game.turn.next", {gameId: game.oid,
+      global.socket.notifyUsers(game.playerOrder, sh.event("game.turn.next", {gameId: game.oid,
           whoTurn: game.whoTurn,
           name: (game.whoTurn === "0" ? "no one" : game.players[game.whoTurn].name),
           pic: ""
@@ -366,7 +366,7 @@ game.list = function (req, res, cb) {
         }
         fileCount -= 1;
         if (fileCount === 0) {
-          res.add(sh.event("event.game.list", games));
+          res.add(sh.event("game.list", games));
           return cb(0);
         }
       });
@@ -420,7 +420,7 @@ game.playing = function (req, res, cb) {
     }
     fillGames(req.loader, playing.getData().currentGames, function (error, data) {
       if (!error) {
-        res.add(sh.event("event.game.playing", data));
+        res.add(sh.event("game.playing", data));
         return cb(0);
       }
       res.add(sh.error("playing_fill", "unable to fill games in playing list", data));

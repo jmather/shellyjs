@@ -24,7 +24,7 @@ tictactoe.create = function (req, res, cb) {
   state.xes = req.session.uid;
   req.env.game.set("state", state);
 
-  res.add(sh.event("event.game.create", req.env.game.getData()));
+  res.add(sh.event("game.create", req.env.game.getData()));
   return cb(0);
 };
 
@@ -35,7 +35,7 @@ tictactoe.reset = function (req, res, cb) {
   state.winnerSet = null;
   state.xes = req.session.uid;
 
-  res.add(sh.event("event.game.info", req.env.game.getData()));
+  res.add(sh.event("game.info", req.env.game.getData()));
   return cb(0);
 };
 
@@ -107,7 +107,7 @@ tictactoe.turn = function (req, res, cb) {
     gameBoard[move.x][move.y] = "O";
   }
   state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
-  global.socket.notify(game.get("oid"), sh.event("event.game.info", game.getData()));
+  global.socket.notify(game.get("oid"), sh.event("game.info", game.getData()));
 
   var win = checkWin(gameBoard);
   if (win.winner != "") {
@@ -116,8 +116,8 @@ tictactoe.turn = function (req, res, cb) {
     state.winner = uid;
     state.winnerSet = win.set;
     game.set("state", state);
-    res.add(sh.event("event.game.over", game.getData()));
-    global.socket.notify(game.get("oid"), sh.event("event.game.over", game.getData()));
+    res.add(sh.event("game.over", game.getData()));
+    global.socket.notify(game.get("oid"), sh.event("game.over", game.getData()));
     return cb(0);
   }
 
@@ -127,12 +127,12 @@ tictactoe.turn = function (req, res, cb) {
     state.winner = "";
     state.winnerSet = null;
     game.set("state", state);
-    res.add(sh.event("event.game.over", game.getData()));
-    global.socket.notify(game.get("oid"), sh.event("event.game.over", game.getData()));
+    res.add(sh.event("game.over", game.getData()));
+    global.socket.notify(game.get("oid"), sh.event("game.over", game.getData()));
     return cb(0);
   }
 
   // send back the updated board
-  res.add(sh.event("event.game.info", game.getData()));
+  res.add(sh.event("game.info", game.getData()));
   return cb(0);
 }

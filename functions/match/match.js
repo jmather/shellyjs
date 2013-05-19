@@ -63,10 +63,10 @@ match.add = function (req, res, cb) {
         matchInfo[playerId] = {};
       });
       _.each(req.body.players, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("event.match.made", matchInfo));
+        global.socket.notifyUser(playerId, sh.event("match.made", matchInfo));
       });
 
-      res.add(sh.event("event.match", matchInfo));
+      res.add(sh.event("match", matchInfo));
       return cb(0);
     });
   } else {
@@ -74,7 +74,7 @@ match.add = function (req, res, cb) {
     var ts = new Date().getTime();
     var playerInfo = {uid: uid, posted: ts};
     global.matchq[name][uid] = playerInfo;
-    res.add(sh.event("event.match.add", playerInfo));
+    res.add(sh.event("match.add", playerInfo));
     return cb(0);
   }
 };
@@ -89,7 +89,7 @@ match.remove = function (req, res, cb) {
   }
 
   delete global.matchq[name][uid];
-  res.add(sh.event("event.match.remove"));
+  res.add(sh.event("match.remove"));
   return cb(0);
 };
 
@@ -99,11 +99,11 @@ match.stats = function (req, res, cb) {
 //    counts[idx] = Object.keys(gameq).length;
     global.matchInfo[idx].waiting = Object.keys(gameq).length;
   });
-  res.add(sh.event("event.match.stats", global.matchInfo));
+  res.add(sh.event("match.stats", global.matchInfo));
   return cb(0);
 };
 
 match.list = function (req, res, cb) {
-  res.add(sh.event("event.match.list", global.matchq));
+  res.add(sh.event("match.list", global.matchq));
   cb(0);
 };
