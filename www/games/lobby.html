@@ -69,18 +69,18 @@ function processEvent(res, from) {
         log(from, "error", JSON.stringify(res));
         return;
     }
-    if (res.event == "event.heartbeat") {
+    if (res.event == "heartbeat") {
         return;
     }
-    if (res.event == "event.game.playing") {
+    if (res.event == "game.playing") {
         setMyGames(res.data);
         return;
     }
-    if (res.event == "event.game.turn.next") {
+    if (res.event == "game.turn.next") {
         setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
-    if (res.event == "event.live.user") {
+    if (res.event == "live.user") {
         if (res.data.status === "online") {
             addUser(res.data);
         } else {
@@ -88,15 +88,15 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == "event.match.stats") {
+    if (res.event == "match.stats") {
         setMatchInfo(res.data);
         return;
     }
-    if (res.event == "event.match.made") {
+    if (res.event == "match.made") {
         gameInit(res.data.gameName, res.data.gameId);
         return;
     }
-    if (res.event == "event.match.add") {
+    if (res.event == "match.add") {
         return;
     }
     log(from, "unknown-event", JSON.stringify(res));
