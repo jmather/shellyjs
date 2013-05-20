@@ -96,7 +96,7 @@
         }
 
         function setPlayers(players) {
-            $(".activePlayers").remove();
+            $(".activePlayer").remove();
             for (key in players) {
                 var player = players[key];
                 var $newPlayer = $("#playerTemplate").clone();
