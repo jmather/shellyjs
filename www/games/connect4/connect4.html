@@ -39,7 +39,6 @@
         }
 
         function shellyInit() {
-            sendCmd("live.game", {gameId: Env.gameId, status: "on"});
             sendCmd("game.join", {gameId: Env.gameId});
         }
 
@@ -96,6 +95,24 @@
             }
         }
 
+        function setPlayers(players) {
+            $(".activePlayers").remove();
+            for (key in players) {
+                var player = players[key];
+                var $newPlayer = $("#playerTemplate").clone();
+                $newPlayer.find("#playerName").text(player.name.substr(0, 16));
+                $newPlayer.addClass("uid" + key);
+                $newPlayer.addClass("activePlayer");
+
+                if(key === Env.user.oid) {
+                    $newPlayer.find("#playerStatus").text("on");
+                }
+
+                $newPlayer.css("display", "block");
+                $("#playerList").append($newPlayer);
+            }
+        }
+
         function setInfo(data) {
             setWhoTurn(data.whoTurn);
             if (data.state.reds === Env.user.oid) {
@@ -103,6 +120,7 @@
             } else {
                 $("#playerColor").text("yellow");
             }
+            setPlayers(data.players);
         }
 
         function checkOver(data) {
@@ -163,6 +181,9 @@
             }
             if (msg.event === "game.join") {
                 resetBoard(msg);
+                // SWD - we should auto live on a game.join server side - I think
+                // and send the events down in the correct order
+                sendCmd("live.game", {gameId: Env.gameId, status: "on"});
             }
             if (msg.event === "game.over") {
                 setTimeout(function () { // simple delay for fall
@@ -171,9 +192,9 @@
             }
             if (msg.event === "game.reset") {
                 resetBoard(msg);
-//                var board = msg.data.state.board;
-//                Env.game = msg.data;
-//                setInfo(msg.data);
+            }
+            if (msg.event === "live.game.user") {
+                $(".uid"+msg.data.uid).find("#playerStatus").text(msg.data.status);
             }
         }
 
@@ -223,14 +244,15 @@
         <div>your color: <span id="playerColor">unknown</span></div>
         <div>whose turn: <span id="whoTurn"></span></div>
         <div>winner: <span id="gameWinner">none</span></div>
-        <div>playing: <span id="gamePlaying"></span></div>
         <button id="gameReset" style="float:right">reset</button>
     </div>
 </div>
 <div class="gameInfoDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv" style="">Players</div>
-    <div class="gameBoxInnerDiv">
-        <div>foo</div>
+    <div class="gameBoxInnerDiv" id="playerList">
+        <div id="playerTemplate" style="display:none">
+            <span id="playerName">name</span><span id="playerStatus" style="float:right">?</span>
+        </div>
     </div>
 </div>
 <div style="clear:both"></div>

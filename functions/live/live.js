@@ -41,9 +41,7 @@ live.user = function (req, res, cb) {
     global.gUsers[ws.uid].liveUser = "on";
   }
 
-  // notify all users that I am on/offline, including me
-  var onoffLine = (status === "on" ? "online" : "offline");
-  var event = sh.event("live.user", {uid: ws.uid, name: req.session.user.get("name"), pic: "",  status: onoffLine});
+  var event = sh.event("live.user", {uid: ws.uid, name: req.session.user.get("name"), pic: "",  status: status});
   global.socket.notifyAll(event);
 
   // notify myself of all users online
@@ -51,7 +49,7 @@ live.user = function (req, res, cb) {
     _.forOwn(global.gUsers, function (info, playerId) {
       if (playerId !== ws.uid && info.liveUser === "on") {
         // short cut the emmitter since we have ws
-        var e = JSON.stringify(sh.event("live.user", {uid: playerId, name: info.name, pic: "", status: "online"}));
+        var e = JSON.stringify(sh.event("live.user", {uid: playerId, name: info.name, pic: "", status: "on"}));
         ws.send(e);
       }
     });
@@ -87,7 +85,7 @@ live.game = function (req, res, cb) {
         name: req.session.user.get("name"),
         pic: "",
         gameId: gameId,
-        status: "online"}));
+        status: "on"}));
       ws.games.push(gameId);
       eventEmitter.on(gameChannel, socketNotify);
 
@@ -106,7 +104,7 @@ live.game = function (req, res, cb) {
               name: userConn.name,
               pic: "",
               gameId: gameId,
-              status: "online"}));
+              status: "on"}));
           }
         });
       });
@@ -118,7 +116,7 @@ live.game = function (req, res, cb) {
       ws.games.splice(idx, 1);
     }
     eventEmitter.removeListener(gameChannel, socketNotify);
-    global.socket.notify(gameId, sh.event("live.game.user", {uid: ws.uid, gameId: gameId, status: "offline"}));
+    global.socket.notify(gameId, sh.event("live.game.user", {uid: ws.uid, gameId: gameId, status: "off"}));
   }
 
   cb(0);
