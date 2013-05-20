@@ -81,7 +81,7 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "live.user") {
-        if (res.data.status === "online") {
+        if (res.data.status === "on") {
             addUser(res.data);
         } else {
             removeUser(res.data.uid);

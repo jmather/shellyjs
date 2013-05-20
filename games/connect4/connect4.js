@@ -192,7 +192,7 @@ connect4.turn = function (req, res, cb) {
 
   state.lastMove = {uid: uid, move: move, color: color};
   res.add(sh.event("game.update", state.lastMove));
-  global.socket.notify(game.get("oid"), sh.event("game.update", state.lastMove));
+  global.socket.notifyUsers(game.get("playerOrder"), sh.event("game.update", state.lastMove));
 
 
   var winSet = [];

@@ -15,29 +15,34 @@ var wss = null;
 global.gUsers = {};
 var gUsers = global.gUsers;
 
+/*
 Socket.notify = function (gameId, data) {
+  console.log("BADDDDDDD");
   shlog.info("notify game: gameId = " + gameId);
-  eventEmitter.emit(sh.channel("game", gameId), data);
 };
+*/
 
 Socket.notifyUser = function (uid, data) {
   shlog.info("notify user", uid);
-  eventEmitter.emit(sh.channel("user", uid), data);
+  if (_.isObject(global.gUsers[uid])) {
+    var userSoc = global.gUsers[uid];
+    if (userSoc.liveUser === "on") {
+      sh.sendWs(userSoc.ws, 0, data);
+    }
+  }
 };
 
 Socket.notifyUsers = function (uids, data) {
   shlog.info("notify users", uids);
   _.forEach(uids, function (uid) {
-    eventEmitter.emit(sh.channel("user", uid), data);
+    Socket.notifyUser(uid, data);
   });
 };
 
 Socket.notifyAll = function (data) {
   shlog.info("notify all users");
   _.forOwn(global.gUsers, function (prop, key) {
-    if (prop.liveUser === "on") {
-      eventEmitter.emit(sh.channel("user", key), data);
-    }
+    Socket.notifyUser(key, data);
   });
 };
 
@@ -52,12 +57,10 @@ function add(data) {
 function sendAll() {
 }
 
-function handleMessage(ws, message, socketNotify) {
+function handleMessage(ws, message) {
   var req = {};
   var res = {
     ws: ws,
-    eventEmitter: eventEmitter,
-    socketNotify: socketNotify,
     add: add,
     sendAll: sendAll
   };
@@ -84,13 +87,12 @@ function handleMessage(ws, message, socketNotify) {
 
         // if socket not registered in gUsers, do it
         if (_.isUndefined(gUsers[ws.uid])) {
-          gUsers[ws.uid] = {name: req.session.user.get("name"), pic: "", status: "on", liveUser: "off", last: new Date().getTime()};
-          // hookup the user channel
-          var userChannel = sh.channel("user", ws.uid);
-          if (eventEmitter.listeners(userChannel).indexOf(socketNotify) === -1) {
-            shlog.info("(" + ws.uid + ") add user channel: " + userChannel);
-            eventEmitter.on(userChannel, socketNotify);
-          }
+          gUsers[ws.uid] = {ws: ws,
+            name: req.session.user.get("name"),
+            pic: "",
+            status: "on",
+            liveUser: "off",
+            last: new Date().getTime()};
         }
       }
     } catch (err) {
@@ -110,26 +112,17 @@ function handleConnect(ws) {
   ws.games = [];
   ws.hbTimer = null;
 
+  var loader = new ShLoader();
+
   var heartBeat = function () {
     sh.sendWs(ws, 0, sh.event("heartbeat", {interval: global.CONF.heartBeat}));
   };
   ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
 
-  // helper functions in valid ws scope
-  var socketNotify = function (message) {
-    shlog.info("(" + ws.uid + ") socket: socketNotify");
-    if (ws.readyState === 1) {
-      // 1 = OPEN - SWD: find this in ws module later
-      sh.sendWs(ws, 0, message);
-    } else {
-      shlog.info("(" + ws.uid + ") socket: dead socket");
-    }
-  };
-
   ws.on("message", function (message) {
     shlog.recv("live - %s", message);
     try {
-      handleMessage(ws, message, socketNotify);
+      handleMessage(ws, message);
     } catch (err) {
       sh.sendWs(ws, 1, sh.error("socket", "message - " + err.message, { message: err.message, stack: err.stack }));
     }
@@ -160,15 +153,17 @@ function handleConnect(ws) {
 
     var userChannel = sh.channel("user", this.uid);
     shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
-    eventEmitter.removeAllListeners(userChannel);
+//    eventEmitter.removeAllListeners(userChannel);
     var self = this;
-    _.each(ws.games, function (game) {
-      var gameChannel = sh.channel("game", game);
-      shlog.info("(" + self.uid + ") socket: close cleanup - " + gameChannel);
-      eventEmitter.removeListener(gameChannel, socketNotify);
-      // since game is still in ws.games - user did not "game.leave" - SWD: we could enum the game.players like on set
-      // userConn may not exist here so can not use it for name
-      global.socket.notify(game, sh.event("live.game.user", {uid: self.uid, name: "", pic: "", gameId: game, status: "off"}));
+    _.each(ws.games, function (gameId) {
+      shlog.info("(" + self.uid + ") socket: close cleanup - " + gameId);
+      // since game is still in ws.games - user did not "game.leave"
+      loader.get("kGame", req.body.gameId, function (error, game) {
+        if (!error) {
+          global.socket.notifyUsers(game.get("playerOrder"),
+            sh.event("live.game.user", {uid: self.uid, name: game.get("players")[self.uid], pic: "", gameId: game, status: "off"}));
+        }
+      });
     });
   });
 }

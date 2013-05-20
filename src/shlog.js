@@ -18,10 +18,10 @@ var gDebug = {
 //	"reg": {},
 //  "admin": {},
 //  "rest": {},
-//  "socket": {},
+  "socket": {},
 //  "games": {},
 //  "shobject": {},
-  "shloader": {},
+//  "shloader": {},
   "shelly": {}
 };
 
