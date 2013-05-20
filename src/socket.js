@@ -15,20 +15,13 @@ var wss = null;
 global.gUsers = {};
 var gUsers = global.gUsers;
 
-/*
-Socket.notify = function (gameId, data) {
-  console.log("BADDDDDDD");
-  shlog.info("notify game: gameId = " + gameId);
-};
-*/
-
 Socket.notifyUser = function (uid, data) {
   shlog.info("notify user", uid);
   if (_.isObject(global.gUsers[uid])) {
     var userSoc = global.gUsers[uid];
-    if (userSoc.liveUser === "on") {
+//    if (userSoc.liveUser === "on") {
       sh.sendWs(userSoc.ws, 0, data);
-    }
+//    }
   }
 };
 
@@ -153,12 +146,11 @@ function handleConnect(ws) {
 
     var userChannel = sh.channel("user", this.uid);
     shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
-//    eventEmitter.removeAllListeners(userChannel);
     var self = this;
     _.each(ws.games, function (gameId) {
       shlog.info("(" + self.uid + ") socket: close cleanup - " + gameId);
       // since game is still in ws.games - user did not "game.leave"
-      loader.get("kGame", req.body.gameId, function (error, game) {
+      loader.get("kGame", gameId, function (error, game) {
         if (!error) {
           global.socket.notifyUsers(game.get("playerOrder"),
             sh.event("live.game.user", {uid: self.uid, name: game.get("players")[self.uid], pic: "", gameId: game, status: "off"}));

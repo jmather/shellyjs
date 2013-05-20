@@ -7,10 +7,10 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var gGameDir = global.gBaseDir + "/games";
 
-var game = exports;
+var Game = exports;
 
-game.desc = "game state and control module";
-game.functions = {
+Game.desc = "game state and control module";
+Game.functions = {
   create: {desc: "create a new game", params: {name: {dtype: "string"}}, security: []},
   start: {desc: "start a game", params: {gameId: {dtype: "string"}}, security: []},
   join: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
@@ -36,7 +36,7 @@ function loadGameModule(name) {
   return require(gameFile);
 }
 
-game.pre = function (req, res, cb) {
+Game.pre = function (req, res, cb) {
   req.env.game = null;
 
   if (req.body.cmd === "game.list"
@@ -79,7 +79,7 @@ game.pre = function (req, res, cb) {
   });
 };
 
-game.post = function (req, rs, cb) {
+Game.post = function (req, rs, cb) {
   shlog.info("game.post");
   return cb(0);
 };
@@ -113,7 +113,7 @@ function addGamePlayingMulti(loader, players, game, cb) {
   });
 }
 
-game.create = function (req, res, cb) {
+Game.create = function (req, res, cb) {
   shlog.info("game.create");
   var uid = req.session.uid;
 
@@ -149,7 +149,7 @@ game.create = function (req, res, cb) {
   req.env.gameModule.create(req, res, cb);
 };
 
-game.start = function (req, res, cb) {
+Game.start = function (req, res, cb) {
   var game = req.env.game;
 
   game.set("status", "playing");
@@ -158,7 +158,7 @@ game.start = function (req, res, cb) {
   return cb(0);
 };
 
-game.end = function (req, res, cb) {
+Game.end = function (req, res, cb) {
   var game = req.env.game;
 
   game.set("status", "over");
@@ -167,7 +167,7 @@ game.end = function (req, res, cb) {
   return cb(0);
 };
 
-game.join = function (req, res, cb) {
+Game.join = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
   var user = req.session.user;
@@ -197,8 +197,9 @@ game.join = function (req, res, cb) {
   });
 };
 
-game.leave = function (req, res, cb) {
+Game.leave = function (req, res, cb) {
   var uid = req.session.uid;
+  var game = req.env.game;
 
   req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {
@@ -214,7 +215,7 @@ game.leave = function (req, res, cb) {
   });
 };
 
-game.kick = function (req, res, cb) {
+Game.kick = function (req, res, cb) {
   var kickId = req.body.kickId;
   var game = req.env.game;
 
@@ -226,7 +227,7 @@ game.kick = function (req, res, cb) {
   return cb(0);
 };
 
-game.turn = function (req, res, cb) {
+Game.turn = function (req, res, cb) {
   var uid = req.session.uid;
   var gameId = req.body.gameId;
   // fast and loose - muse setData before return or sub call
@@ -237,7 +238,7 @@ game.turn = function (req, res, cb) {
     return cb(1);
   }
   if (gameData.status === "over") {
-    res.add(sh.event("game.over", game));
+    res.add(sh.event("game.over", gameData));
     return cb(0);
   }
   if (gameData.whoTurn !== uid) {
@@ -249,7 +250,7 @@ game.turn = function (req, res, cb) {
   if (nextIndex === gameData.playerOrder.length) {
     nextIndex = 0;
   }
-  gameData.whoTurn = game.playerOrder[nextIndex];
+  gameData.whoTurn = gameData.playerOrder[nextIndex];
   gameData.turnsPlayed += 1;
   gameData.status = "playing";  // turn looks valid, game module sets "over"
 
@@ -263,14 +264,14 @@ game.turn = function (req, res, cb) {
       name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
       pic: ""
       }));
-    if (game.status === "over") {
-      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.over", game));
+    if (gameData.status === "over") {
+      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.over", gameData));
     }
     return cb(error);
   });
 };
 
-game.get = function (req, res, cb) {
+Game.get = function (req, res, cb) {
   // SWD - game is bad name for this all over
   var game = req.env.game;
 
@@ -278,7 +279,7 @@ game.get = function (req, res, cb) {
   return cb(0);
 };
 
-game.set = function (req, res, cb) {
+Game.set = function (req, res, cb) {
   var game = req.env.game;
   var newGame = req.body.game;
 
@@ -288,7 +289,7 @@ game.set = function (req, res, cb) {
   return cb(0);
 };
 
-game.reset = function (req, res, cb) {
+Game.reset = function (req, res, cb) {
   var gameData = req.env.game.getData();
 
   gameData.rounds += 1;
@@ -304,9 +305,9 @@ game.reset = function (req, res, cb) {
   req.env.gameModule.reset(req, res, function (error) {
     if (!error) {
       // notify players in game of new state
-      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.reset", game));
+      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.reset", gameData));
       // notify players online of turn change
-      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: game.oid,
+      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
           whoTurn: gameData.whoTurn,
           name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
           pic: ""
@@ -346,7 +347,7 @@ function getInfo(name) {
   return m;
 }
 
-game.list = function (req, res, cb) {
+Game.list = function (req, res, cb) {
   shlog.info("game.list");
 
   var games = {};
@@ -375,7 +376,7 @@ game.list = function (req, res, cb) {
 
 };
 
-game.call = function (req, res, cb) {
+Game.call = function (req, res, cb) {
   shlog.info("game.call - req.body.func");
   var module = req.env.gameModule;
 
@@ -410,7 +411,7 @@ function fillGames(loader, gameList, cb) {
   });
 }
 
-game.playing = function (req, res, cb) {
+Game.playing = function (req, res, cb) {
   var uid = req.session.uid;
 
   req.loader.get("kPlaying", uid, function (error, playing) {
