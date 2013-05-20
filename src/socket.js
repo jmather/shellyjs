@@ -19,9 +19,9 @@ Socket.notifyUser = function (uid, data) {
   shlog.info("notify user", uid);
   if (_.isObject(global.gUsers[uid])) {
     var userSoc = global.gUsers[uid];
-//    if (userSoc.liveUser === "on") {
+    if (userSoc.liveUser === "on") {
       sh.sendWs(userSoc.ws, 0, data);
-//    }
+    }
   }
 };
 

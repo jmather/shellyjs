@@ -15,7 +15,11 @@ Live.functions = {
 };
 
 Live.list = function (req, res, cb) {
-  res.add(sh.event("live.list", global.gUsers));
+  var users = {};
+  _.forOwn(global.gUsers, function (prop, key, obj) {
+    users[key] = _.omit(obj[key], "ws");
+  });
+  res.add(sh.event("live.list", users));
   return cb(0);
 };
 
