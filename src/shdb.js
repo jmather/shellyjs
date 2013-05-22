@@ -16,7 +16,8 @@ var gKeyTypes = {
   kUser: {tpl: "u:%s"},
   kGame: {tpl: "game:%s"},
   kObject: {tpl: "obj:%s"},
-  kPlaying: {tpl: "gp:%s"}
+  kPlaying: {tpl: "gp:%s"},
+  kMessageBank: {tpl: "mb:%s"}
 };
 
 shdb.init = function (cb) {

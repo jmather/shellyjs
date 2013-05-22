@@ -120,10 +120,15 @@ function addMessage(data) {
         $mlog.children(":first").remove();
     }
 
-    color = "black";
+    color = "blue";
     bodyColor = "black";
+    var name = data.name;
+    if (data.from === Env.user.oid) {
+        name = "you";
+        color = "black";
+    }
     var disp = "<div style='font-size:10px;white-space:nowrap;'>";
-    disp += "<span style='color:" + color + ";'>" + data.name + ": </span>";
+    disp += "<span style='color:" + color + ";'>" + name + ": </span>";
     disp += "<span style='color:" + bodyColor + ";'>" + data.message + "</span>";
     disp += "</div>";
     $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
@@ -131,6 +136,7 @@ function addMessage(data) {
 
 function sendMessage(msg) {
     console.log(msg);
+    var data = {from: Env.user.oid, message: msg};
     sendCmd("live.message", {channel: "lobby:0", message: msg});
 }
 
@@ -169,7 +175,9 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "live.message") {
-        addMessage(res.data);
+        for (var i=0; i<res.data.length; i++) {
+            addMessage(res.data[i]);
+        }
         return;
     }
     if (res.event == "match.stats") {
@@ -299,9 +307,9 @@ function init() {
 <div style="clear:both"></div>
 
 <div class="chatLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv"><b>Chat</b></div>
+    <div class="gameBoxHeaderDiv"><b>Messages</b></div>
     <div class="gameBoxInnerDiv" readonly>
-        <div id="chatLog" class="" readonly></div>
+        <div id="chatLog" style="overflow: auto" readonly></div>
         <div class="gameBoxFooterDiv">
             <input id="chatInput" type="text" style="width: 90%;"></input/>
             <button id="sendChat" style="float:right;">send</button>

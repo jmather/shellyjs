@@ -9,7 +9,8 @@ var moduleMap = {
   kPlaying : {module: null, file: "/src/shplaying.js"},
   kGame : {module: null, file: "/src/shgame.js"},
   kEmailMap : {module: null, file: "/src/do/shemailmap.js"},
-  kTokenMap : {module: null, file: "/src/do/shtokenmap.js"}
+  kTokenMap : {module: null, file: "/src/do/shtokenmap.js"},
+  kMessageBank : {module: null, file: "/src/do/shmessagebank.js"}
 };
 
 function ShLoader() {

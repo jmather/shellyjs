@@ -42,6 +42,13 @@ Live.user = function (req, res, cb) {
         res.ws.send(e);
       }
     });
+
+    // send down any messages for channel
+    req.loader.get("kMessageBank", "lobby:0", function (err, ml) {
+      if (!err) {
+        res.add(sh.event("live.message", ml.get("bank")));
+      }
+    });
   }
 
   var event = sh.event("live.user", {uid: res.ws.uid, name: req.session.user.get("name"), pic: "",  status: req.body.status});
@@ -109,10 +116,12 @@ Live.game = function (req, res, cb) {
 Live.message = function (req, res, cb) {
   shlog.info("live.message: ", req.body.channel, req.body.message);
 
-  var event = sh.event("live.message",
-    {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: req.body.message});
+  var msgBlock = {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: req.body.message};
+  var event = sh.event("live.message", [msgBlock]);
   global.socket.notifyAll(event);
 
-//  res.add(sh.event("live.message", {status: "sent"}));
-  return cb(0);
+  req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
+    ml.add(msgBlock);
+    return cb(0);
+  });
 };
