@@ -62,7 +62,7 @@ function setWhoTurn(gameId, whoTurn, profile) {
   } else if (whoTurn === Env.user.oid) {
     $turnSpan.text("");
     $gamePlaying.detach();
-    $gamePlaying.prependTo("#gameList");
+    $gamePlaying.prependTo("#gameMyTurnList");
   } else {
     var name = profile.name;
     if (name.length === 0) {
@@ -71,7 +71,7 @@ function setWhoTurn(gameId, whoTurn, profile) {
     $turnSpan.text(name.substr(0, 12) + "'s");
     $turnSpan.addClass("playerName" + whoTurn);  // helps with name changes
     $gamePlaying.detach();
-    $gamePlaying.appendTo("#gameOppList");
+    $gamePlaying.appendTo("#gameOppTurnList");
   }
 }
 
@@ -101,7 +101,7 @@ function setMyGames(gameList) {
     });
 
     // start it in the game list and let setWhoTurn sort it
-    $("#gameList").append($newGame);
+    $("#gameMyTurnList").append($newGame);
 
     setWhoTurn(gameId, game.whoTurn, game.players[game.whoTurn]);
   }

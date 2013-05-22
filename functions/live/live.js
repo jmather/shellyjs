@@ -11,7 +11,7 @@ Live.functions = {
   list: {desc: "list online users", params: {}, security: []},
   user: {desc: "enable/disable live events for a user", params: {status: {dtype: "string"}}, security: []},
   game: {desc: "enable/disable live events for a user in a game", params: {gameId: {dtype: "string"}, status: {dtype: "string"}}, security: []},
-  message: {desc: "send a message to all online users", params: {message: {dtype: "string"}, scope: {dtype: "string"}, value: {dtype: "string"}}, security: []}
+  message: {desc: "send a message to all online users", params: {channel: {dtype: "string"}, message: {dtype: "string"}}, security: []}
 };
 
 Live.list = function (req, res, cb) {
@@ -107,11 +107,12 @@ Live.game = function (req, res, cb) {
 };
 
 Live.message = function (req, res, cb) {
-  var msg = req.body.message;
+  shlog.info("live.message: ", req.body.channel, req.body.message);
 
-  var event = sh.event("live.message", {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: msg});
+  var event = sh.event("live.message",
+    {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: req.body.message});
   global.socket.notifyAll(event);
 
-  res.add(sh.event("live.message", {status: "sent"}));
+//  res.add(sh.event("live.message", {status: "sent"}));
   return cb(0);
 };

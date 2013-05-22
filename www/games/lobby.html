@@ -13,7 +13,64 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
-    <script language="javascript">
+<style>
+    .playAnyoneDiv {
+        width: 220px;
+    }
+
+    .lobbyUsersDiv {
+        width: 220px;
+    }
+    #userList {
+        height: 307px;
+    }
+    #liveToggle {
+        font-size: 10px;
+    }
+
+    .gameTurnsGroup {  /* container div for turns/done lists */
+        float:left;
+        width:340;
+    }
+    .gameListDiv {  /* all game turns/done lists */
+        width: 340px;
+    }
+    #gameMyTurnList {
+        height: 100px;
+    }
+    #gameOppTurnList {
+        height: 100px;
+    }
+    #gameDoneList {
+        height: 100px;
+    }
+
+    #chatLog {
+        height: 200px;
+    }
+
+    #messageLog {
+        height: 0px;
+    }
+    #showHideLog {
+        font-size: 10px;
+    }
+
+    .chatLogDiv {
+        width: 565px;
+    }
+    #chatLog {
+        height: 100px;
+    }
+    .gameBoxFooterDiv {
+        background: hsla(83, 30.0813%, 65%, 1.0000);
+        border: 1px solid #8da95f;
+        width: 100%;
+    }
+
+</style>
+
+<script language="javascript">
 var Env = {{{EnvJson}}};
 
 function setMatchInfo(matchList) {
@@ -54,6 +111,29 @@ function addUser(profile) {
     $("#userList").append($newGame);
 }
 
+var gMessageCount = 0;
+function addMessage(data) {
+    var $mlog = $("#chatLog");
+    gMessageCount++;
+    if (gMessageCount > gLogLimit) {
+        // remove first child
+        $mlog.children(":first").remove();
+    }
+
+    color = "black";
+    bodyColor = "black";
+    var disp = "<div style='font-size:10px;white-space:nowrap;'>";
+    disp += "<span style='color:" + color + ";'>" + data.name + ": </span>";
+    disp += "<span style='color:" + bodyColor + ";'>" + data.message + "</span>";
+    disp += "</div>";
+    $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
+}
+
+function sendMessage(msg) {
+    console.log(msg);
+    sendCmd("live.message", {channel: "lobby:0", message: msg});
+}
+
 function gameInit(gameName, gameId) {
     var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
     window.location.href = url;
@@ -86,6 +166,10 @@ function processEvent(res, from) {
         } else {
             removeUser(res.data.uid);
         }
+        return;
+    }
+    if (res.event == "live.message") {
+        addMessage(res.data);
         return;
     }
     if (res.event == "match.stats") {
@@ -136,40 +220,26 @@ function init() {
             sendCmd("live.user", {status: "on"});
         }
     });
+    $("#showHideLog").click(function () {
+        if ($(this).text() === "+") {
+            $(this).text("-");
+            $("#messageLog").css("height", "200px");
+        } else {
+            $(this).text("+");
+            $("#messageLog").css("height", "0px");
+        }
+    });
+
+    $("#chatInput").bind('keypress', function(e){
+        if ( e.keyCode == 13 ) {
+            sendMessage($(this).val());
+            $(this).val("");
+        }
+    });
 
     ws.connect(Env.socketUrl);
 }
 </script>
-    <style>
-        .playAnyoneDiv {
-            width: 300px;
-        }
-        .lobbyUsersDiv {
-            width: 300px;
-        }
-        #userList {
-            height: 457px;
-        }
-        #gameOppList {
-            height: 150px;
-        }
-        #gameList {
-            height: 150px;
-        }
-        .gameListDiv {
-            float: left;
-            width: 340px;
-        }
-        #gameDoneList {
-            height: 150px;
-        }
-        #messageLog {
-            height: 200px;
-        }
-        #liveToggle {
-            font-size: 10px;
-        }
-    </style>
 </head>
 <body>
 {{> header}}
@@ -199,9 +269,10 @@ function init() {
     </div>
 </div>
 
+<div class="gameTurnsGroup">
 <div class="gameListDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Your Turn</div>
-    <div id="gameList" class="gameBoxInnerDiv">
+    <div id="gameMyTurnList" class="gameBoxInnerDiv">
         <div id="gameTemplate" style="display:none;">
             <span id="gameName">game-0</span>
             <span id="gameTurn"></span>
@@ -214,7 +285,7 @@ function init() {
 
 <div class="gameListDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv" style="text-align: right;">Their Turn</div>
-    <div id="gameOppList" class="gameBoxInnerDiv">
+    <div id="gameOppTurnList" class="gameBoxInnerDiv">
     </div>
 </div>
 
@@ -223,9 +294,31 @@ function init() {
     <div id="gameDoneList" class="gameBoxInnerDiv">
     </div>
 </div>
+ </div>
 
 <div style="clear:both"></div>
 
+<div class="chatLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv"><b>Chat</b></div>
+    <div class="gameBoxInnerDiv" readonly>
+        <div id="chatLog" class="" readonly></div>
+        <div class="gameBoxFooterDiv">
+            <input id="chatInput" type="text" style="width: 90%;"></input/>
+            <button id="sendChat" style="float:right;">send</button>
+        </div>
+    </div>
+</div>
+
+<div class="messageLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">
+        <b>Message Log</b>
+        <button id="showHideLog" style="float:right;">+</button>
+    </div>
+    <div id="messageLog" class="gameBoxInnerDiv" readonly></div>
+</div>
+
+
+<!-- popup dialog that shows waiting for match -->
 <div class="matchListDiv" style="display:none;">
     <div class="gameBoxHeaderDiv">Game Activity</div>
     <div id="matchList" class="gameBoxInnerDiv">
@@ -236,10 +329,6 @@ function init() {
     </div>
 </div>
 
-<div class="messageLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
-    <div id="messageLog" class="gameBoxInnerDiv" readonly></div>
-</div>
 
 <style>
     .waitOptionDiv {
