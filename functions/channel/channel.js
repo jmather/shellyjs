@@ -13,6 +13,13 @@ Channel.functions = {
   send: {desc: "send a message to all users on channel", params: {channel: {dtype: "string"}, message: {dtype: "string"}}, security: []}
 };
 
+var channelDef = {
+  lobby: {persist: true, maxEvents: 50},
+  games: {persist: true, maxEvents: 50},
+  turns: {persist: false, maxEvents: 0},
+  matches: {persist: false, maxEvents: 0}
+}
+
 if (_.isUndefined(global.channels)) {
   global.channels = {};
 }
