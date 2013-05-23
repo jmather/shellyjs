@@ -13,31 +13,6 @@ var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 var Socket = exports;
 var wss = null;
 
-global.gUsers = {};
-var gUsers = global.gUsers;
-
-Socket.notifyUser = function (uid, data) {
-  shlog.info("notify user", uid);
-  if (_.isObject(global.gUsers[uid])) {
-    var userSoc = global.gUsers[uid];
-    sh.sendWs(userSoc.ws, 0, data);
-  }
-};
-
-Socket.notifyUsers = function (uids, data) {
-  shlog.info("notify users", uids);
-  _.forEach(uids, function (uid) {
-    Socket.notifyUser(uid, data);
-  });
-};
-
-Socket.notifyAll = function (data) {
-  shlog.info("notify all users");
-  _.forOwn(global.gUsers, function (prop, key) {
-    Socket.notifyUser(key, data);
-  });
-};
-
 function add(data) {
   if (data.event === "error") {
     shlog.error(data);
@@ -77,16 +52,6 @@ function handleMessage(ws, message) {
       if (!_.isUndefined(req.session)) {
         ws.uid = req.session.uid;
         ws.name = req.session.user.get("name");
-
-        // if socket not registered in gUsers, do it
-        if (_.isUndefined(gUsers[ws.uid])) {
-          gUsers[ws.uid] = {ws: ws,
-            name: req.session.user.get("name"),
-            pic: "",
-            status: "on",
-            liveUser: "off",
-            last: new Date().getTime()};
-        }
       }
     } catch (err) {
       sh.sendWs(ws, 1, sh.error("socket", "fillSession - " + err.message, { message: err.message, stack: err.stack }));
@@ -133,11 +98,6 @@ function handleConnect(ws) {
       return;
     }
     shlog.info("(" + this.uid + ") socket: close");
-
-    // remove user from global map
-    if (_.isObject(gUsers[this.uid])) {
-      delete gUsers[this.uid];
-    }
 
     _.each(ws.channels, function (value, key) {
       shlog.info("removing", key);

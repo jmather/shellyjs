@@ -46,10 +46,12 @@ Channel.sendOnline = function (ws, channel) {
 
 Channel.list = function (req, res, cb) {
   var users = {};
-  _.forOwn(global.gUsers, function (prop, key, obj) {
-    users[key] = _.omit(obj[key], "ws");
+
+  _.each(global.channels[req.body.channel], function (ws) {
+    users[ws.uid] = {uid: ws.uid, name: ws.name, pic: ""};
   });
-  res.add(sh.event("Channel.list", users));
+
+  res.add(sh.event("channel.list", users));
   return cb(0);
 };
 
