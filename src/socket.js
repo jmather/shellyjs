@@ -77,7 +77,6 @@ function handleMessage(ws, message) {
       if (!_.isUndefined(req.session)) {
         ws.uid = req.session.uid;
         ws.name = req.session.user.get("name");
-        ws.channels = {};
 
         // if socket not registered in gUsers, do it
         if (_.isUndefined(gUsers[ws.uid])) {
@@ -135,6 +134,11 @@ function handleConnect(ws) {
     }
     shlog.info("(" + this.uid + ") socket: close");
 
+    // remove user from global map
+    if (_.isObject(gUsers[this.uid])) {
+      delete gUsers[this.uid];
+    }
+
     _.each(ws.channels, function (value, key) {
       shlog.info("removing", key);
       channel.removeInt(ws, key);
@@ -150,6 +154,7 @@ Socket.start = function () {
   wss.on("connection", function (ws) {
     ws.id = connCount;
     connCount += 1;
+    ws.channels = {};
     try {
       handleConnect(ws);
     } catch (err) {

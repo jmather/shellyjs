@@ -5,6 +5,8 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+
 var match = exports;
 
 match.desc = "match players to the desired game and start them in it";
@@ -62,9 +64,7 @@ match.add = function (req, res, cb) {
         delete global.matchq[name][playerId];
         matchInfo[playerId] = {};
       });
-      _.each(req.body.players, function (playerId) {
-        global.socket.notifyUser(playerId, sh.event("match.made", matchInfo));
-      });
+      channel.sendAll("matches:", req.body.players, sh.event("match.made", matchInfo));
 
       res.add(sh.event("match", matchInfo));
       return cb(0);

@@ -261,11 +261,12 @@ Game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    channel.sendInt("game:" + gameId, sh.event("game.turn.next", {gameId: gameId,
+    var event = sh.event("game.turn.next", {gameId: gameId,
       whoTurn: gameData.whoTurn,
       name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
-      pic: ""
-      }));
+      pic: ""});
+    channel.sendInt("game:" + gameId, event); // send to all in game
+    channel.sendAll("turns:", gameData.playerOrder, event); // send to anyone on turn channel
     if (gameData.status === "over") {
       channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
     }
@@ -309,8 +310,8 @@ Game.reset = function (req, res, cb) {
       // notify players in game of new state
       channel.sendInt("game:" + gameData.oid, sh.event("game.reset", gameData));
 
-      // notify players online of turn change
-      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
+      // notify players on turns channel
+      channel.sendAll("turns:", gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
           whoTurn: gameData.whoTurn,
           name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
           pic: ""

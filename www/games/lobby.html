@@ -113,7 +113,7 @@ function processEvent(res, from) {
         setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
-    if (res.event == "live.user") {
+    if (res.event == "channel.user") {
         if (res.data.status === "on") {
             addUser(res.data);
         } else {
@@ -121,7 +121,7 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == "live.message") {
+    if (res.event == "channel.message") {
         for (var i=0; i<res.data.length; i++) {
             addMessage(res.data[i]);
         }
@@ -146,6 +146,8 @@ function shellyInit() {
     sendCmd("match.stats");
 
     sendCmd("channel.add", {channel: "lobby:0"});
+    sendCmd("channel.add", {channel: "turns:" + Env.user.oid});
+    sendCmd("channel.add", {channel: "matches:" + Env.user.oid});
 }
 
 $(init);
@@ -169,11 +171,11 @@ function init() {
         if ($(this).attr("status") == "on") {
             $(this).text("go online");
             $(this).attr("status", "off");
-            sendCmd("live.user", {status: "off"});
+            sendCmd("channel.remove", {channel: "lobby:0"});
         } else {
             $(this).text("go offline");
             $(this).attr("status", "on");
-            sendCmd("live.user", {status: "on"});
+            sendCmd("channel.add", {channel: "lobby:0"});
         }
     });
 

@@ -29,9 +29,17 @@ Channel.sendInt = function (channel, data) {
   });
 };
 
+Channel.sendAll = function (prefix, ids, data) {
+  shlog.info("sendAll", prefix, ids);
+
+  _.each(ids, function (id) {
+    Channel.sendInt(prefix + id, data);
+  });
+};
+
 Channel.sendOnline = function (ws, channel) {
   _.each(global.channels[channel], function (uws) {
-    var event = sh.event("live.user", {uid: uws.uid, name: uws.name, pic: "",  status: "on"});
+    var event = sh.event("channel.user", {channel: channel, uid: uws.uid, name: uws.name, pic: "",  status: "on"});
     sh.sendWs(ws, 0, event);
   });
 };
@@ -54,20 +62,23 @@ Channel.add = function (req, res, cb) {
   if (_.isUndefined(global.channels[req.body.channel])) {
     global.channels[req.body.channel] = [];
   }
+
+  // notify existing channel of user add
+  var event = sh.event("channel.user", {channel: req.body.channel,
+    uid: res.ws.uid, name: req.session.user.get("name"), pic: "",  status: "on"});
+  Channel.sendInt(req.body.channel, event);
+
+  // add me to the channel
   global.channels[req.body.channel].push(res.ws);
   res.ws.channels[req.body.channel] = "on";  // cross ref so we can call remove on socket close
   shlog.info("add", req.body.channel, global.channels[req.body.channel].length);
 
-  // notify channel of user add
-  var event = sh.event("live.user", {uid: res.ws.uid, name: req.session.user.get("name"), pic: "",  status: "on"});
-  Channel.sendInt(req.body.channel, event);
-
-  // notify me of online users
+  // notify me of online channel users
   Channel.sendOnline(res.ws, req.body.channel);
 
   req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
     if (!err) {
-      res.add(sh.event("live.message", ml.get("bank")));
+      res.add(sh.event("channel.message", ml.get("bank")));
     }
     cb(0);
   });
@@ -79,7 +90,7 @@ Channel.removeInt = function (ws, channel) {
   delete ws.channels[channel];  // remove cross ref as the user removed it
   shlog.info("remove", channel, global.channels[channel].length);
 
-  var event = sh.event("live.user", {uid: ws.uid, name: ws.name, pic: "",  status: "off"});
+  var event = sh.event("channel.user", {channel: channel, uid: ws.uid, name: ws.name, pic: "",  status: "off"});
   Channel.sendInt(channel, event);
 };
 
@@ -102,7 +113,7 @@ Channel.send = function (req, res, cb) {
     name: req.session.user.get("name"),
     pic: "",
     message: req.body.message};
-  var event = sh.event("live.message", [msgBlock]);
+  var event = sh.event("channel.message", [msgBlock]);
 
   Channel.sendInt(req.body.channel, event);
 

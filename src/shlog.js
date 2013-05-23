@@ -9,7 +9,9 @@ var shlog = exports;
 var gDebug = {
 //  "shdb": {},
 //  "shsqlite": {},
-  "live": {},
+//  "live": {},
+//  "socket": {},
+//  "channel": {},
 //  "shutil": {},
 //	"game": {},
 //	"recv": {},
@@ -18,7 +20,6 @@ var gDebug = {
 //	"reg": {},
 //  "admin": {},
 //  "rest": {},
-//  "socket": {},
 //  "games": {},
 //  "shobject": {},
 //  "shloader": {},
