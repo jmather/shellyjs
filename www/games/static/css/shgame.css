@@ -29,6 +29,24 @@ body {
     font-size: 14px;
 }
 
+.gameBoxFooterDiv {
+    background: hsla(83, 30.0813%, 65%, 1.0000);
+    border: 1px solid #8da95f;
+    width: 100%;
+}
+
+/**************** message box display/send layouts */
+.messageLogDiv {
+    width: 565px;
+}
 #messageLog {
-    height: 200px;
+    height: 100px;
+}
+
+/**************** socket/rest logger layout */
+#commLog {
+    height: 0px;
+}
+#showHideLog {
+    font-size: 10px;
 }

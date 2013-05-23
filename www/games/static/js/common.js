@@ -12,7 +12,7 @@ function getURLParameter(name) {
 }
 
 function log(api, type, msg) {
-  var $mlog = $("#messageLog");
+  var $mlog = $("#commLog");
   gLogCount++;
   if (gLogCount > gLogLimit) {
     // remove first child
@@ -172,6 +172,74 @@ function sendRestCmd(cmd, data, cb) {
         cb(1, textStatus);
       }
     })
+}
+
+
+/***********************
+ * Message bank functions
+***********************/
+var gMessageCount = 0;
+var gMessageChannel = "lobby:0";
+
+function messageInit(channel)
+{
+  gMessageChannel = channel;
+  $("#chatInput").bind('keypress', function(e){
+    if ( e.keyCode == 13 ) {
+      sendMessage($(this).val());
+      $(this).val("");
+    }
+  });
+}
+
+function messageReset() {
+  gMessageCount = 0;
+  $(".messageObject").remove();
+}
+
+function addMessage(data) {
+  if(data.channel !== gMessageChannel) {
+    // drop it for now
+    return;
+  }
+
+  var $mlog = $("#messageLog");
+  gMessageCount++;
+  if (gMessageCount > gLogLimit) {
+    // remove first child
+    $mlog.children(":first").remove();
+  }
+
+  color = "blue";
+  bodyColor = "black";
+  var name = data.name;
+  if (data.from === Env.user.oid) {
+    name = "you";
+    color = "black";
+  }
+  var disp = "<div class='messageObject' style='font-size:10px;white-space:nowrap;'>";
+  disp += "<span style='color:" + color + ";'>" + name + ": </span>";
+  disp += "<span style='color:" + bodyColor + ";'>" + data.message + "</span>";
+  disp += "</div>";
+  $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
+}
+
+function sendMessage(msg) {
+  sendCmd("channel.send", {channel: gMessageChannel, message: msg});
+}
+
+
+function commInit()
+{
+  $("#showHideLog").click(function () {
+    if ($(this).text() === "+") {
+      $(this).text("-");
+      $("#commLog").css("height", "200px");
+    } else {
+      $(this).text("+");
+      $("#commLog").css("height", "0px");
+    }
+  });
 }
 
 /*

@@ -3,6 +3,8 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+
 var tictactoe = exports;
 
 var gDefaultBoard = [
@@ -107,7 +109,7 @@ tictactoe.turn = function (req, res, cb) {
     gameBoard[move.x][move.y] = "O";
   }
   state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
-  global.socket.notifyUsers(game.get("playerOrder"), sh.event("game.info", game.getData()));
+  channel.sendInt("game:" + game.get("oid"), sh.event("game.info", game.getData()));
 
   var win = checkWin(gameBoard);
   if (win.winner != "") {
@@ -117,7 +119,7 @@ tictactoe.turn = function (req, res, cb) {
     state.winnerSet = win.set;
     game.set("state", state);
     res.add(sh.event("game.over", game.getData()));
-    global.socket.notifyUsers(game.get("playerOrder"), sh.event("game.over", game.getData()));
+    channel.sendInt("game:" + game.get("oid"), sh.event("game.over", game.getData()));
     return cb(0);
   }
 
@@ -128,7 +130,7 @@ tictactoe.turn = function (req, res, cb) {
     state.winnerSet = null;
     game.set("state", state);
     res.add(sh.event("game.over", game.getData()));
-    global.socket.notifyUsers(game.get("playerOrder"), sh.event("game.over", game.getData()));
+    channel.sendInt("game:" + game.get("oid"), sh.event("game.over", game.getData()));
     return cb(0);
   }
 

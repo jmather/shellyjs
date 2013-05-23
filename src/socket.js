@@ -8,6 +8,7 @@ var eventEmitter = new events.EventEmitter();
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var Socket = exports;
 var wss = null;
@@ -19,9 +20,7 @@ Socket.notifyUser = function (uid, data) {
   shlog.info("notify user", uid);
   if (_.isObject(global.gUsers[uid])) {
     var userSoc = global.gUsers[uid];
-    if (userSoc.liveUser === "on") {
-      sh.sendWs(userSoc.ws, 0, data);
-    }
+    sh.sendWs(userSoc.ws, 0, data);
   }
 };
 
@@ -77,6 +76,8 @@ function handleMessage(ws, message) {
       // if valid user, add to list, if not we are in reg.* call
       if (!_.isUndefined(req.session)) {
         ws.uid = req.session.uid;
+        ws.name = req.session.user.get("name");
+        ws.channels = {};
 
         // if socket not registered in gUsers, do it
         if (_.isUndefined(gUsers[ws.uid])) {
@@ -134,28 +135,9 @@ function handleConnect(ws) {
     }
     shlog.info("(" + this.uid + ") socket: close");
 
-    var userConn = gUsers[this.uid];
-    if (_.isUndefined(userConn)) {
-      shlog.error("socket: uid set, but user not in map", userConn);
-    } else {
-      delete gUsers[this.uid];
-      if (userConn.liveUser === "on") {
-        Socket.notifyAll(sh.event("live.user", {uid: this.uid, name: userConn.name, pic: "", status: "off" }));
-      }
-    }
-
-    var userChannel = sh.channel("user", this.uid);
-    shlog.info("(" + this.uid + ") socket: close cleanup - " + userChannel);
-    var self = this;
-    _.each(ws.games, function (gameId) {
-      shlog.info("(" + self.uid + ") socket: close cleanup - " + gameId);
-      // since game is still in ws.games - user did not "game.leave"
-      loader.get("kGame", gameId, function (error, game) {
-        if (!error) {
-          global.socket.notifyUsers(game.get("playerOrder"),
-            sh.event("live.game.user", {uid: self.uid, name: game.get("players")[self.uid], pic: "", gameId: game, status: "off"}));
-        }
-      });
+    _.each(ws.channels, function (value, key) {
+      shlog.info("removing", key);
+      channel.removeInt(ws, key);
     });
   });
 }
@@ -163,8 +145,11 @@ function handleConnect(ws) {
 Socket.start = function () {
   wss = new WebSocketServer({port: global.CONF.socketPort});
   shlog.info("socketserver listening: " + global.CONF.socketPort);
+  var connCount = 1;
 
   wss.on("connection", function (ws) {
+    ws.id = connCount;
+    connCount += 1;
     try {
       handleConnect(ws);
     } catch (err) {

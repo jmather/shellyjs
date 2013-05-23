@@ -60,7 +60,6 @@ function initGame() {
 				this.z = 3;
         this.requires("Mouse, Gravity, Draggable");
 				this.bind("StopDrag", function() {
-					console.log("STOP");
 					var column = Math.round(this._x / 64);
           this.x = column * 64;
 					this.gravity("stopper");

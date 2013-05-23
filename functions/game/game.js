@@ -5,6 +5,8 @@ var async = require("async");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+
 var gGameDir = global.gBaseDir + "/games";
 
 var Game = exports;
@@ -184,7 +186,7 @@ Game.join = function (req, res, cb) {
   game.setPlayer(uid, "ready");
 
   if (isNew) {
-    global.socket.notifyUsers(game.get("playerOrder"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
+    channel.sendInt("game:" + game.get("oid"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
   }
 
   sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
@@ -208,7 +210,7 @@ Game.leave = function (req, res, cb) {
     }
     playing.removeGame(req.body.gameId);
     if (req.body.game) {
-      global.socket.notifyUsers(game.get("playerOrder"), sh.event("game.user.leave", {gameId: req.body.gameId, uid: uid}));
+      channel.sendInt("game:" + game.get("oid"), sh.event("game.user.leave", {gameId: req.body.gameId, uid: uid}));
     }
     res.add(sh.event("game.leave", req.body.gameId));
     return cb(0);
@@ -259,13 +261,13 @@ Game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    global.socket.notifyUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameId,
+    channel.sendInt("game:" + gameId, sh.event("game.turn.next", {gameId: gameId,
       whoTurn: gameData.whoTurn,
       name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
       pic: ""
       }));
     if (gameData.status === "over") {
-      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.over", gameData));
+      channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
     }
     return cb(error);
   });
@@ -305,7 +307,8 @@ Game.reset = function (req, res, cb) {
   req.env.gameModule.reset(req, res, function (error) {
     if (!error) {
       // notify players in game of new state
-      global.socket.notifyUsers(gameData.playerOrder, sh.event("game.reset", gameData));
+      channel.sendInt("game:" + gameData.oid, sh.event("game.reset", gameData));
+
       // notify players online of turn change
       global.socket.notifyUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
           whoTurn: gameData.whoTurn,

@@ -1,4 +1,3 @@
-var events = require("events");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -98,6 +97,13 @@ Live.game = function (req, res, cb) {
             status: "on"}));
         }
       });
+
+      // send down any messages for channel
+      req.loader.get("kMessageBank", "game:" + req.body.gameId, function (err, ml) {
+        if (!err) {
+          res.add(sh.event("live.message", ml.get("bank")));
+        }
+      });
     } else {
       // remove the gameId
       var idx = res.ws.games.indexOf(req.body.gameId);
@@ -116,9 +122,25 @@ Live.game = function (req, res, cb) {
 Live.message = function (req, res, cb) {
   shlog.info("live.message: ", req.body.channel, req.body.message);
 
-  var msgBlock = {from: req.session.uid, name: req.session.user.get("name"), pic: "", message: req.body.message};
+  var msgBlock = {channel: req.body.channel,
+    from: req.session.uid,
+    name: req.session.user.get("name"),
+    pic: "",
+    message: req.body.message};
   var event = sh.event("live.message", [msgBlock]);
-  global.socket.notifyAll(event);
+
+  var channelParts = req.body.channel.split(":");
+  // SWD beef up the error detect
+  if (channelParts[0] === "lobby") {
+    global.socket.notifyAll(event);
+  } else if (channelParts[0] === "game") {
+    req.loader.exists("kGame", channelParts[1], function (err, game) {
+      if (!err) {
+        console.log(game.get("playerOrder"));
+        global.socket.notifyUsers(game.get("playerOrder"), event);
+      }
+    });
+  }
 
   req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
     ml.add(msgBlock);
