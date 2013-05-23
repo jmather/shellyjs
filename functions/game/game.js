@@ -86,26 +86,27 @@ Game.post = function (req, rs, cb) {
   return cb(0);
 };
 
-function addGamePlaying(loader, uid, game) {
+function addGamePlaying(loader, uid, game, cb) {
   loader.get("kPlaying", uid, function (error, playing) {
     playing.addGame(game);
+    cb();
   });
 }
 
-function removeGamePlaying(loader, uid, game) {
-  loader.loadOrCreate(uid, function (error, playing) {
+function removeGamePlaying(loader, uid, game, cb) {
+  loader.get(uid, function (error, playing) {
     // SWD check error
     if (!error) {
       playing.removeGame(game);
     }
+    cb();
   });
 }
 
 function addGamePlayingMulti(loader, players, game, cb) {
   async.each(players, function (playerId, cb) {
-    addGamePlaying(loader, playerId, game);
+    addGamePlaying(loader, playerId, game, cb);
     // ignore any errors
-    cb();
   }, function (error) {
     if (error) {
       cb(1, error);
@@ -128,9 +129,19 @@ Game.create = function (req, res, cb) {
   // add to request environment
   req.env.game = game;
 
+  // SWD - clean this up
   if (_.isUndefined(req.body.players)) {
-    addGamePlaying(req.loader, uid, game);
-    game.setPlayer(uid, "ready");
+    addGamePlaying(req.loader, uid, game, function (error, data) {
+      game.setPlayer(uid, "ready");
+      sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
+        if (error) {
+          res.add(sh.error("user_info", "unable to load users for this game", data));
+          return cb(1);
+        }
+        // SWD check if create exists
+        req.env.gameModule.create(req, res, cb);
+      });
+    });
   } else {
     _.each(req.body.players, function (playerId) {
       game.setPlayer(playerId, "ready");
@@ -140,15 +151,17 @@ Game.create = function (req, res, cb) {
       if (error) {
         shlog.error("add_players", "unable to add a player", data);
       }
+      sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
+        if (error) {
+          res.add(sh.error("user_info", "unable to load users for this game", data));
+          return cb(1);
+        }
+
+        // SWD check if create exists
+        req.env.gameModule.create(req, res, cb);
+      });
     });
   }
-
-  // just use default game data if create no there
-  if (_.isUndefined(req.env.gameModule.create)) {
-    res.add(sh.event("game.create", game.getData()));
-    return cb(0);
-  }
-  req.env.gameModule.create(req, res, cb);
 };
 
 Game.start = function (req, res, cb) {
@@ -182,20 +195,21 @@ Game.join = function (req, res, cb) {
 
   var isNew = !_.isObject(players[uid]);
 
-  addGamePlaying(req.loader, uid, game);
-  game.setPlayer(uid, "ready");
+  addGamePlaying(req.loader, uid, game, function (error, data) {
+    game.setPlayer(uid, "ready");
 
-  if (isNew) {
-    channel.sendInt("game:" + game.get("oid"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
-  }
-
-  sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
-    if (error) {
-      res.add(sh.error("user_info", "unable to load users for this game", data));
-      return cb(1);
+    if (isNew) {
+      channel.sendInt("game:" + game.get("oid"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
     }
-    res.add(sh.event("game.join", game.getData()));
-    return cb(0);
+
+    sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
+      if (error) {
+        res.add(sh.error("user_info", "unable to load users for this game", data));
+        return cb(1);
+      }
+      res.add(sh.event("game.join", game.getData()));
+      return cb(0);
+    });
   });
 };
 
