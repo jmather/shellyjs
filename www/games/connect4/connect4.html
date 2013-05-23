@@ -190,10 +190,10 @@
             if (msg.event === "game.reset") {
                 resetBoard(msg);
             }
-            if (msg.event === "live.user") {
+            if (msg.event === "channel.user") {
                 $(".uid"+msg.data.uid).find("#playerStatus").text(msg.data.status);
             }
-            if (msg.event == "live.message") {
+            if (msg.event == "channel.message") {
                 for (var i=0; i<msg.data.length; i++) {
                     addMessage(msg.data[i]);
                 }

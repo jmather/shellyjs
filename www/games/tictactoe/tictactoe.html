@@ -206,14 +206,14 @@ function processEvent(res, from) {
         var newGameId = res.data.oid;
         var oldGameId = Env.gameId;
         if (typeof (oldGameId) !== "undefined" && oldGameId != newGameId) {
-            sendCmd("live.game", {gameId: oldGameId, status: "off"})
+            sendCmd("channel.remove", {channel: "game:" + oldGameId})
             Env.players = {};  // reset the player list
         }
         setState(res.data);
-        sendCmd("live.game", {gameId: newGameId, status: "on"})
+        sendCmd("channel.add", {channel: "game:" + newGameId})
         return;
     }
-    if (res.event == "live.game.user") {
+    if (res.event == "channel.user") {
         Env.players[res.data.uid] = res.data;
         var $playerStatus = $(".playerId" + res.data.uid).find("#playerStatus");
         if ($playerStatus.size) {
@@ -320,9 +320,9 @@ function init() {
 </div>
 <div style="clear: both;"></div>
 
-<div class="messageLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
-<div id="messageLog" class="gameBoxInnerDiv" readonly></div>
+<div class="commLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv"<b>Comm Log</b></div>
+<div id="commLog" class="gameBoxInnerDiv" readonly></div>
 </div>
 
 {{> footer}}
