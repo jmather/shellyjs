@@ -37,9 +37,11 @@ function log(api, type, msg) {
   var disp = "<div style='font-size:10px;white-space:nowrap;'>";
   disp += "<span style='color:" + color + ";'>" + api + "-</span>";
   disp += "<span style='color:" + color + ";'>" + type + ": </span>";
-  disp += "<span style='color:" + bodyColor + ";'>" + msg + "</span>";
+  disp += "<span id='cText' style='color:" + bodyColor + ";'></span>";
   disp += "</div>";
-  $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
+  $disp = $(disp);
+  $disp.find("#cText").text(msg);
+  $mlog.append($disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
 }
 
 function showError(msg) {
@@ -186,8 +188,11 @@ function messageInit(channel)
   gMessageChannel = channel;
   $("#chatInput").bind('keypress', function(e){
     if ( e.keyCode == 13 ) {
-      sendMessage($(this).val());
-      $(this).val("");
+      if($(this).val() !== "")
+      {
+        sendMessage($(this).val());
+        $(this).val("");
+      }
     }
   });
 }
@@ -217,11 +222,15 @@ function addMessage(data) {
     name = "you";
     color = "black";
   }
+
   var disp = "<div class='messageObject' style='font-size:10px;white-space:nowrap;'>";
   disp += "<span style='color:" + color + ";'>" + name + ": </span>";
-  disp += "<span style='color:" + bodyColor + ";'>" + data.message + "</span>";
+  disp += "<span id='mText' style='color:" + bodyColor + ";'></span>";
   disp += "</div>";
-  $mlog.append(disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
+  $disp = $(disp);
+  $disp.find("#mText").text(data.message);
+
+  $mlog.append($disp).scrollTop($mlog[0].scrollHeight - $mlog.height());
 }
 
 function sendMessage(msg) {
