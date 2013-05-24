@@ -11,12 +11,12 @@ var shdb = exports;
 var client = require(global.gBaseDir + global.CONF.db.wrapper);
 
 var gKeyTypes = {
-  kObject: {tpl: "obj:%s", file: "/src/shobject.js"},
+  kObject: {tpl: "obj:%s", file: "/src/do/shobject.js"},
   kEmailMap: {tpl: "em:%s", file: "/src/do/shemailmap.js"},
   kTokenMap: {tpl: "tm:%s", file: "/src/do/shtokenmap.js"},
-  kUser: {tpl: "u:%s", file: "/src/shuser.js"},
-  kGame: {tpl: "game:%s", file: "/src/shgame.js"},
-  kPlaying: {tpl: "gp:%s", file: "/src/shplaying.js"},
+  kUser: {tpl: "u:%s", file: "/src/do/shuser.js"},
+  kGame: {tpl: "game:%s", file: "/src/do/shgame.js"},
+  kPlaying: {tpl: "gp:%s", file: "/src/do/shplaying.js"},
   kMessageBank: {tpl: "mb:%s", file: "/src/do/shmessagebank.js"}
 };
 

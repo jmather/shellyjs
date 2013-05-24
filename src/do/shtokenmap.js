@@ -1,6 +1,6 @@
 var util = require("util");
 
-var ShObject = require(global.gBaseDir + "/src/shobject.js");
+var ShObject = require(global.gBaseDir + "/src/do/shobject.js");
 
 function TokenMap() {
   ShObject.call(this);
