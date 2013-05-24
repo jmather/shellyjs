@@ -91,14 +91,11 @@ function handleConnect(ws) {
   });
 
   ws.on("close", function () {
-    clearInterval(this.hbTimer);
-
-    if (_.isUndefined(this.uid) || this.uid === 0) {
-      shlog.info("socket: close - socket never had valid user session");
-      return;
-    }
     shlog.info("(" + this.uid + ") socket: close");
 
+    clearInterval(this.hbTimer);
+
+    // clean up any channels
     _.each(ws.channels, function (value, key) {
       shlog.info("removing", key);
       channel.removeInt(ws, key);

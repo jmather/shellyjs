@@ -3,16 +3,6 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
-var moduleMap = {
-  kObject : {module: null, file: "/src/shobject.js"},
-  kUser : {module: null, file: "/src/shuser.js"},
-  kPlaying : {module: null, file: "/src/shplaying.js"},
-  kGame : {module: null, file: "/src/shgame.js"},
-  kEmailMap : {module: null, file: "/src/do/shemailmap.js"},
-  kTokenMap : {module: null, file: "/src/do/shtokenmap.js"},
-  kMessageBank : {module: null, file: "/src/do/shmessagebank.js"}
-};
-
 function ShLoader() {
   this._db = global.db;
   this._objects = {};
@@ -21,14 +11,14 @@ function ShLoader() {
 module.exports = ShLoader;
 
 ShLoader.prototype.create = function (keyType, params) {
-  if (_.isUndefined(moduleMap[keyType])) {
-    shlog.error("bad key passed to create", keyType);
+  if (!this._db.validKey(keyType)) {
+    shlog.error("bad key passed to create:", keyType);
     return null;
   }
 
   var ShClass = null;
   try {
-    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
+    ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
     shlog.error("unable to load object module", keyType);
     return null;
@@ -44,10 +34,11 @@ ShLoader.prototype.create = function (keyType, params) {
 };
 
 ShLoader.prototype.exists = function (keyType, params, cb) {
-  if (_.isUndefined(moduleMap[keyType])) {
-    cb(1, {message: "bad key"});
+  if (!this._db.validKey(keyType)) {
+    cb(1, {message: "bad object key type", data: keyType});
     return;
   }
+
   // check cache
   var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
@@ -58,9 +49,9 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
 
   var ShClass = null;
   try {
-    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
+    ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
-    cb(1, {message: "unable to load object module", data: moduleMap[keyType]});
+    cb(1, {message: "unable to load object module", data: keyType});
     return;
   }
 
@@ -78,10 +69,11 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
 };
 
 ShLoader.prototype.get = function (keyType, params, cb) {
-  if (_.isUndefined(moduleMap[keyType])) {
-    cb(1, {message: "bad key"});
+  if (!this._db.validKey(keyType)) {
+    cb(1, {message: "bad object key type", data: keyType});
     return;
   }
+
   // check cache
   var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
@@ -92,7 +84,7 @@ ShLoader.prototype.get = function (keyType, params, cb) {
 
   var ShClass = null;
   try {
-    ShClass = require(global.gBaseDir + moduleMap[keyType].file);
+    ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
     cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
     return;
@@ -112,8 +104,8 @@ ShLoader.prototype.get = function (keyType, params, cb) {
 };
 
 ShLoader.prototype.delete = function (keyType, params, cb) {
-  if (_.isUndefined(moduleMap[keyType])) {
-    cb(1, {message: "bad key"});
+  if (!this._db.validKey(keyType)) {
+    cb(1, {message: "bad object key type", data: keyType});
     return;
   }
 

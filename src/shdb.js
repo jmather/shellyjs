@@ -11,13 +11,13 @@ var shdb = exports;
 var client = require(global.gBaseDir + global.CONF.db.wrapper);
 
 var gKeyTypes = {
-  kEmailMap: {tpl: "em:%s"},
-  kTokenMap: {tpl: "tm:%s"},
-  kUser: {tpl: "u:%s"},
-  kGame: {tpl: "game:%s"},
-  kObject: {tpl: "obj:%s"},
-  kPlaying: {tpl: "gp:%s"},
-  kMessageBank: {tpl: "mb:%s"}
+  kObject: {tpl: "obj:%s", file: "/src/shobject.js"},
+  kEmailMap: {tpl: "em:%s", file: "/src/do/shemailmap.js"},
+  kTokenMap: {tpl: "tm:%s", file: "/src/do/shtokenmap.js"},
+  kUser: {tpl: "u:%s", file: "/src/shuser.js"},
+  kGame: {tpl: "game:%s", file: "/src/shgame.js"},
+  kPlaying: {tpl: "gp:%s", file: "/src/shplaying.js"},
+  kMessageBank: {tpl: "mb:%s", file: "/src/do/shmessagebank.js"}
 };
 
 shdb.init = function (cb) {
@@ -59,8 +59,19 @@ function genKey(keyType, params) {
   return key;
 }
 
+shdb.validKey = function (keyType) {
+  return _.isObject(gKeyTypes[keyType]);
+}
+
 shdb.key = function (keyType, params) {
   return genKey(keyType, params);
+};
+
+shdb.moduleFile = function (keyType) {
+  if (!_.isObject(gKeyTypes[keyType])) {
+    return null;
+  }
+  return global.gBaseDir + gKeyTypes[keyType].file;
 };
 
 shdb.kget = function (keyType, params, cb) {
