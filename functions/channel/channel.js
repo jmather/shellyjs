@@ -14,6 +14,7 @@ Channel.functions = {
 };
 
 var channelDef = {
+  user: {persist: true, maxEvents: 50},
   lobby: {persist: true, maxEvents: 50},
   games: {persist: true, maxEvents: 50},
   turns: {persist: false, maxEvents: 0},
@@ -89,7 +90,7 @@ Channel.add = function (req, res, cb) {
     if (!err) {
       res.add(sh.event("channel.message", ml.get("bank")));
     }
-    cb(0);
+    return cb(0);
   });
 };
 
@@ -111,7 +112,7 @@ Channel.remove = function (req, res, cb) {
 
   Channel.removeInt(res.ws, req.body.channel, req.session.user);
 
-  cb(0);
+  return cb(0);
 };
 
 Channel.send = function (req, res, cb) {
@@ -125,6 +126,7 @@ Channel.send = function (req, res, cb) {
   var event = sh.event("channel.message", [msgBlock]);
 
   Channel.sendInt(req.body.channel, event);
+  res.add(sh.event("channel.send", {status: "sent"}));
 
   req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
     ml.add(msgBlock);

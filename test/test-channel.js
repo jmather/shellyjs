@@ -7,9 +7,9 @@ var st = require("./shtest.js");
 
 var gEmail = "test@lgdales.com";
 var gPassword = "foofoo";
-var gOid = "";
+var gChannel = "lobby:0";
 
-describe("module live", function () {
+describe("module channel", function () {
 
   before(function (done) {
     st.init(gEmail, gPassword, function (err, res) {
@@ -17,9 +17,9 @@ describe("module live", function () {
     });
   });
 
-  describe("CMD live.list", function () {
+  describe("CMD channel.list", function () {
     it("list users online", function (done) {
-      st.userCall({cmd: "live.list"},
+      st.userCall({cmd: "channel.list", channel: gChannel},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
           done();
@@ -27,9 +27,9 @@ describe("module live", function () {
     });
   });
 
-  describe("CMD live.message", function () {
-    it("send a messge to a user or game", function (done) {
-      st.userCall({cmd: "live.message", message: "here me foo", scope: "all", value: ""},
+  describe("CMD channel.send", function () {
+    it("send a messge to a channel", function (done) {
+      st.userCall({cmd: "channel.send", channel: gChannel, message: "here me foo"},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
           done();
@@ -37,9 +37,9 @@ describe("module live", function () {
     });
   });
 
-  describe("CMD live.user", function () {
-    it("listen for live user events", function (done) {
-      st.userCall({cmd: "live.user"},
+  describe("CMD channel.add", function () {
+    it("listen for events on this channel", function (done) {
+      st.userCall({cmd: "channel.add", channel: gChannel},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
@@ -47,9 +47,9 @@ describe("module live", function () {
     });
   });
 
-  describe("CMD live.game", function () {
-    it("listen for live game events", function (done) {
-      st.userCall({cmd: "live.game"},
+  describe("CMD channel.remove", function () {
+    it("stop listening for events on this channel", function (done) {
+      st.userCall({cmd: "channel.remove", channel: gChannel},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
