@@ -10,6 +10,7 @@ function Game() {
   ShObject.call(this);
 
   this._keyType = "kGame";
+  this._keyFormat = "game:%s";
   var ts = new Date().getTime();
   this._data = {
     name: "",

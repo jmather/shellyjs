@@ -9,6 +9,7 @@ function EmailMap() {
   ShObject.call(this);
 
   this._keyType = "kEmailMap";
+  this._keyFormat = "em:%s";
   this._data = {
     uid: "",
     password: ""

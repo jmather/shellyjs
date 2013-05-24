@@ -7,6 +7,7 @@ function Playing() {
   ShObject.call(this);
 
   this._keyType = "kPlaying";
+  this._keyFormat = "gp:%s";
   this._data = {
     name: "",
     currentGames: {}

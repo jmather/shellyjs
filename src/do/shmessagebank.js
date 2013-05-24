@@ -7,6 +7,7 @@ function MessageBank() {
   ShObject.call(this);
 
   this._keyType = "kMessageBank";
+  this._keyFormat = "mb:%s";
   this._data = {
     bank: []
   };

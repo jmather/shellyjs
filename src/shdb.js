@@ -1,4 +1,4 @@
-// shdb - module to provide key value db access
+var fs = require("fs");
 var util = require("util");
 var _ = require("lodash");
 
@@ -10,7 +10,7 @@ var shdb = exports;
 
 var client = require(global.gBaseDir + global.CONF.db.wrapper);
 
-var gKeyTypes = {
+var gOldKeyTypes = {
   kObject: {tpl: "obj:%s", file: "/src/do/shobject.js"},
   kEmailMap: {tpl: "em:%s", file: "/src/do/shemailmap.js"},
   kTokenMap: {tpl: "tm:%s", file: "/src/do/shtokenmap.js"},
@@ -20,22 +20,51 @@ var gKeyTypes = {
   kMessageBank: {tpl: "mb:%s", file: "/src/do/shmessagebank.js"}
 };
 
-shdb.init = function (cb) {
-  try {
-    shlog.info("db init");
-    client.init(global.CONF.db.options, function (err) {
-      if (err) {
-        shlog.error(err, global.CONF.db.settings);
-        cb(err);
-      }
-      shlog.info("db initilized");
-      cb(0);
-    });
-  } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
-  }
+var gKeyTypes = {};
 
+function initObjects(cb) {
+  var modules = {};
+  var funcDir = global.gBaseDir + "/src/do";
+  fs.readdir(funcDir, function (err, files) {
+    var error = 0;
+    var fileCount = files.length;
+    files.forEach(function (entry) {
+      var fn = funcDir + "/" + entry;
+      var ObjModule = require(fn);
+      var obj = new ObjModule();
+      if (!_.isUndefined(obj._keyType) && !_.isUndefined(obj._keyFormat)) {
+        gKeyTypes[obj._keyType] = {tpl: obj._keyFormat, file: fn};
+      } else {
+        shlog.info("bad data object missing keyType or keyFormat", fn);
+      }
+    });
+    cb();
+  });
+}
+
+shdb.getKeys = function () {
+  return gKeyTypes;
+}
+
+shdb.init = function (cb) {
+  initObjects(function () {
+    try {
+      shlog.info("object init");
+      _.each(global.db.getKeys(), function (obj, key) { shlog.info("object loaded:", key); });
+
+      shlog.info("db init");
+      client.init(global.CONF.db.options, function (err) {
+        if (err) {
+          shlog.error(err, global.CONF.db.settings);
+          cb(err);
+        }
+        shlog.info("db initilized");
+        cb(0);
+      });
+    } catch (e) {
+      return cb(1, {message: e.message, stack: e.stack});
+    }
+  });
 };
 
 shdb.get = function (key, cb) {
@@ -71,7 +100,7 @@ shdb.moduleFile = function (keyType) {
   if (!_.isObject(gKeyTypes[keyType])) {
     return null;
   }
-  return global.gBaseDir + gKeyTypes[keyType].file;
+  return gKeyTypes[keyType].file;
 };
 
 shdb.kget = function (keyType, params, cb) {

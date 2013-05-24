@@ -9,6 +9,7 @@ function User() {
   ShObject.call(this);
 
   this._keyType = "kUser";
+  this._keyFormat = "u:%s";
   this._data = {
     name: "",
     email: "",

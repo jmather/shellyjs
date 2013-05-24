@@ -7,13 +7,13 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var db = global.db;
 
 function ShObject() {
+  this._keyType = "kObject";
+  this._keyFormat = "obj:%s";
   this._data = {
     oid: "0"
   };
   this._oid = 0;
   this._hash = "";
-
-  this._keyType = "kObject";
   this._key = "";
 }
 
