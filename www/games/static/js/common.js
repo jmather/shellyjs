@@ -150,6 +150,16 @@ function sendCmd(cmd, data) {
   }
 }
 
+function sendRaw(data) {
+  var msg = JSON.stringify(data);
+  try {
+    log("socket", "send-batch", msg);
+    ws.send(msg);
+  } catch(e) {
+    log("socket", "error", e.toString())
+  }
+}
+
 function sendRestCmd(cmd, data, cb) {
   var obj = {};
   obj.session = Env.session;

@@ -1,9 +1,7 @@
 var WebSocketServer = require("ws").Server;
 var util = require("util");
-var events = require("events");
+var async = require("async");
 var _ = require("lodash");
-
-var eventEmitter = new events.EventEmitter();
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
@@ -24,29 +22,24 @@ function add(data) {
 function sendAll() {
 }
 
-function handleMessage(ws, message) {
-  var req = {};
+function handleMessage(ws, loader, message, cb) {
+  var req = {
+    body: message,
+    loader: loader
+  };
   var res = {
     ws: ws,
     add: add,
     sendAll: sendAll
   };
 
-  // fill in req.body
-  try {
-    req.body = JSON.parse(message);
-  } catch (err) {
-    sh.sendWs(ws, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
-    return;
-  }
-  req.loader = new ShLoader();
-
+//  req.loader = new ShLoader();
   // fill in req.session
   sh.fillSession(req, res, function (error, data) {
     try {
       if (error !== 0) {
         res.sendAll();
-        return;
+        return cb(error);
       }
       // if valid user, add to list, if not we are in reg.* call
       if (!_.isUndefined(req.session)) {
@@ -55,11 +48,12 @@ function handleMessage(ws, message) {
       }
     } catch (err) {
       sh.sendWs(ws, 1, sh.error("socket", "fillSession - " + err.message, { message: err.message, stack: err.stack }));
-      return;
+      return cb(1);
     }
     sh.call(req, res, function (error, data) {
-      req.loader.dump();
+//      req.loader.dump();
       res.sendAll();
+      cb(error);
     });  // end sh.call
   });  // end sh.fillSession
 }
@@ -77,12 +71,32 @@ function handleConnect(ws) {
   };
   ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
 
-  ws.on("message", function (message) {
-    shlog.recv("live - %s", message);
+  ws.on("message", function (data) {
+    shlog.recv("live - %s", data);
+    // parse message
+    var message = [];
     try {
-      handleMessage(ws, message);
+      message = JSON.parse(data);
+      if (!_.isArray(message)) {
+        message = [message];
+      }
     } catch (err) {
-      sh.sendWs(ws, 1, sh.error("socket", "message - " + err.message, { message: err.message, stack: err.stack }));
+      sh.sendWs(ws, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
+      return;
+    }
+
+    // process each message with same loader
+    var loader = new ShLoader();
+    try {
+      async.eachSeries(message, function (item, cb) {
+        handleMessage(ws, loader, item, cb);
+      }, function (err) {
+        loader.dump(function (err, data) {
+          console.log("loader stats hits:", loader._cacheHit, "misses:", loader._cacheMiss, "saves:", loader._saves);
+        });
+      });
+    } catch (err1) {
+      sh.sendWs(ws, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
     }
   });  // end ws.on-message
 

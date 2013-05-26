@@ -142,12 +142,21 @@ function processEvent(res, from) {
 }
 
 function shellyInit() {
+    /*
     sendCmd("game.playing");
     sendCmd("match.stats");
-
     sendCmd("channel.add", {channel: "lobby:0"});
     sendCmd("channel.add", {channel: "turns:" + Env.user.oid});
     sendCmd("channel.add", {channel: "matches:" + Env.user.oid});
+    */
+
+    sendRaw([
+        {session: Env.session, cmd: "game.playing"},
+        {session: Env.session, cmd: "match.stats"},
+        {session: Env.session, cmd: "channel.add", channel: "lobby:0"},
+        {session: Env.session, cmd: "channel.add", channel: "turns:" + Env.user.oid},
+        {session: Env.session, cmd: "channel.add", channel: "matches:" + Env.user.oid}
+    ])
 }
 
 $(init);

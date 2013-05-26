@@ -75,7 +75,7 @@ ShObject.prototype.save = function (cb) {
 
   if (currHash === this._hash) {
     shlog.info("ignoring save - object not modified: %s", this._key);
-    cb(0);
+    cb(0, {code: "no_change", message: "object has not be changed"});
     return;
   }
   var now = new Date().getTime();
@@ -85,12 +85,12 @@ ShObject.prototype.save = function (cb) {
   var dataStr = JSON.stringify(this._data);
   db.kset(this._keyType, this._oid, dataStr, function (err, res) {
     if (err !== null) {
-      cb(1, {code: "object_save", message: "unable to save object data", info: {oid: self._oid, err: err, res: res}});
+      cb(2, {code: "save_error", message: "unable to save object data", info: {oid: self._oid, err: err, res: res}});
       return;
     }
     shlog.info("object saved: %s", self._key);
     self._hash = currHash;
-    cb(0);
+    cb(0, {code: "object_saved"});
   });
 };
 

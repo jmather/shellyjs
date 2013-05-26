@@ -6,6 +6,10 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 function ShLoader() {
   this._db = global.db;
   this._objects = {};
+
+  this._cacheHit = 0;
+  this._cacheMiss = 0;
+  this._saves = 0;
 }
 
 module.exports = ShLoader;
@@ -43,9 +47,11 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
   var key = this._db.key(keyType, params);
   if (_.isObject(this._objects[key])) {
     shlog.info("cache hit: %s", key);
+    this._cacheHit += 1;
     cb(0, this._objects[key]);
     return;
   }
+  this._cacheMiss += 1;
 
   var ShClass = null;
   try {
@@ -76,17 +82,20 @@ ShLoader.prototype.get = function (keyType, params, cb) {
 
   // check cache
   var key = this._db.key(keyType, params);
+  shlog.info("get: %s", key);
   if (_.isObject(this._objects[key])) {
+    this._cacheHit += 1;
     shlog.info("cache hit: %s", key);
     cb(0, this._objects[key]);
     return;
   }
+  this._cacheMiss += 1;
 
   var ShClass = null;
   try {
     ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
-    cb(1, {message: "unable to lod module", data: moduleMap[keyType]});
+    cb(1, {message: "unable to lod module", data: keyType});
     return;
   }
 
@@ -95,6 +104,7 @@ ShLoader.prototype.get = function (keyType, params, cb) {
   var obj = new ShClass();
   obj.loadOrCreate(params, function (err, data) {
     if (!err) {
+      shlog.info("cache store: %s", obj._key);
       self._objects[obj._key] = obj;
       cb(0, obj);
       return;
@@ -119,9 +129,14 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
 ShLoader.prototype.dump = function (cb) {
   shlog.info("dump start");
   var self = this;
-  async.each(Object.keys(this._objects), function (key, cb) {
+  async.each(Object.keys(this._objects), function (key, lcb) {
     shlog.info("dumping: %s", key);
-    self._objects[key].save(cb);
+    self._objects[key].save(function (err, data) {
+      if (data.code === "object_saved") {
+        self._saves += 1;
+      }
+      lcb(err);
+    });
   }, function (err) {
     shlog.info("dump complete");
     if (_.isFunction(cb)) {
