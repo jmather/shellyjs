@@ -19,7 +19,7 @@ function add(data) {
 }
 
 function fillSession(sess, req, res, cb) {
-  sh.fillSession2(sess, req, res, function (error, data) {
+  sh.fillSession(sess, req, res, function (error, data) {
     if (req.session.valid) {
       res.ws.uid = req.session.uid;
       res.ws.name = req.session.user.get("name");

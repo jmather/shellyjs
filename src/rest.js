@@ -36,7 +36,7 @@ rest.use(function (req, res, next) {
   res.add = add;
   res.sendAll = sendAll;
 
-  sh.fillSession2(req.body.session, req, res, function (error, data) {
+  sh.fillSession(req.body.session, req, res, function (error, data) {
     // session.valid now used to control access to functions
     return next();
   });

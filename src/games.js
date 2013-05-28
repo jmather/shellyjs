@@ -31,23 +31,16 @@ app.use(function (req, res, next) {
   }
 
   shlog.info("session check", req.path);
-
-  // SWD little clunky to deal with express vs restify diffs
-  req.body = {};
-  req.body.cmd = "games.page";
   if (_.isUndefined(req.cookies.shSession)) {
     shlog.info("redirect - no session");
     res.redirect("/login/index.html");
     return 0;
   }
-  req.body.session = req.cookies.shSession;
-  // SWD req.body is reset when rutes fire
   shlog.info("found cookie shSession: ", req.cookies.shSession);
-//  req.body.session = "1:41:xxxx:0";
 
   // there is no dump and these page do not modify objects
   req.loader = new ShLoader();
-  sh.fillSession(req, res, function (error, data) {
+  sh.fillSession(req.cookies.shSession, req, res, function (error, data) {
     if (error) {
       shlog.info("redirect - bad session");
       res.redirect("/login/index.html");
