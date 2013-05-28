@@ -153,7 +153,7 @@ function shellyInit() {
     sendCmd("channel.add", {channel: "matches:" + Env.user.oid});
     */
 
-    sendRaw({sess: Env.session,
+    sendRaw({session: Env.session,
             msgs: [{cmd: "game.playing"},
                 {cmd: "match.stats"},
                 {cmd: "channel.add", channel: "lobby:0"},

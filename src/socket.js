@@ -57,11 +57,18 @@ function handleConnect(ws) {
     var req = {session: {valid: false}, body: {}, loader: loader};
     var res = {ws: ws, add: add};
 
-    fillSession(packet.sess, req, res, function (err) {
+    var msgs = null;
+    if (_.isArray(packet.msgs)) {
+      msgs = packet.msgs;
+    } else {
+      msgs = [packet];
+    }
+
+    fillSession(packet.session, req, res, function (err) {
       // session.valid now used to control access to functions
       try {
         // process each message with same loader
-        async.eachSeries(packet.msgs, function (item, cb) {
+        async.eachSeries(msgs, function (item, cb) {
           req.body = item;
           sh.call(req, res, function (err, data) {
             cb(err);
