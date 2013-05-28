@@ -139,6 +139,7 @@ ShLoader.prototype.dump = function (cb) {
     });
   }, function (err) {
     shlog.info("dump complete");
+    shlog.info("dump complete:", self._cacheHit, "misses:", self._cacheMiss, "saves:", self._saves);
     if (_.isFunction(cb)) {
       cb(0);
     }

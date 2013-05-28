@@ -122,9 +122,12 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "channel.message") {
-        for (var i=0; i<res.data.length; i++) {
-            addMessage(res.data[i]);
+        for (var i=0; i<res.data.bank.length; i++) {
+            addMessage(res.data.channel, res.data.bank[i]);
         }
+        return;
+    }
+    if (res.event == "channel.send") {
         return;
     }
     if (res.event == "match.stats") {

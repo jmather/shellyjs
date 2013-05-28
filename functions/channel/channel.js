@@ -88,7 +88,7 @@ Channel.add = function (req, res, cb) {
 
   req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
     if (!err) {
-      res.add(sh.event("channel.message", ml.get("bank")));
+      res.add(sh.event("channel.message", {channel: req.body.channel, bank: ml.get("bank")}));
     }
     return cb(0);
   });
@@ -118,12 +118,13 @@ Channel.remove = function (req, res, cb) {
 Channel.send = function (req, res, cb) {
   shlog.info("Channel.message: ", req.body.channel, req.body.message);
 
-  var msgBlock = {channel: req.body.channel,
+  var msgBlock = {
     from: req.session.uid,
     name: req.session.user.get("name"),
     pic: "",
-    message: req.body.message};
-  var event = sh.event("channel.message", [msgBlock]);
+    message: req.body.message
+  };
+  var event = sh.event("channel.message", {channel: req.body.channel, bank: [msgBlock]});
 
   Channel.sendInt(req.body.channel, event);
   res.add(sh.event("channel.send", {status: "sent"}));

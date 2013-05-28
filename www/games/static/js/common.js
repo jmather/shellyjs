@@ -209,8 +209,8 @@ function messageReset() {
   $(".messageObject").remove();
 }
 
-function addMessage(data) {
-  if(data.channel !== gMessageChannel) {
+function addMessage(channel, data) {
+  if(channel !== gMessageChannel) {
     // drop it for now
     return;
   }

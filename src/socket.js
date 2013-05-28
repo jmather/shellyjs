@@ -56,7 +56,6 @@ function handleConnect(ws) {
     var loader = new ShLoader();
     var req = {session: {valid: false}, body: {}, loader: loader};
     var res = {ws: ws, add: add};
-    console.log(packet);
 
     fillSession(packet.sess, req, res, function (err) {
       // ignore any errors as some commands don't require sessions - like reg
@@ -65,13 +64,10 @@ function handleConnect(ws) {
         async.eachSeries(packet.msgs, function (item, cb) {
           req.body = item;
           sh.call(req, res, function (err, data) {
-            console.log("call", item.cmd);
             cb(err);
           });
         }, function (err) {
-          loader.dump(function (err, data) {
-            console.log("loader stats hits:", loader._cacheHit, "misses:", loader._cacheMiss, "saves:", loader._saves);
-          });
+          loader.dump();  // don't wait on dump cb
         });
       } catch (err1) {
         sh.sendWs(ws, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
