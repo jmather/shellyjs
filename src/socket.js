@@ -18,44 +18,15 @@ function add(data) {
   sh.sendWs(this.ws, 0, data);
 }
 
-// no-op as we send right away
-function sendAll() {
-}
-
-function handleMessage(ws, loader, message, cb) {
-  var req = {
-    body: message,
-    loader: loader
-  };
-  var res = {
-    ws: ws,
-    add: add,
-    sendAll: sendAll
-  };
-
-//  req.loader = new ShLoader();
-  // fill in req.session
-  sh.fillSession(req, res, function (error, data) {
-    try {
-      if (error !== 0) {
-        res.sendAll();
-        return cb(error);
-      }
-      // if valid user, add to list, if not we are in reg.* call
-      if (!_.isUndefined(req.session)) {
-        ws.uid = req.session.uid;
-        ws.name = req.session.user.get("name");
-      }
-    } catch (err) {
-      sh.sendWs(ws, 1, sh.error("socket", "fillSession - " + err.message, { message: err.message, stack: err.stack }));
-      return cb(1);
+function fillSession(sess, req, res, cb) {
+  sh.fillSession2(sess, req, res, function (error, data) {
+    if (req.session.valid) {
+      res.ws.uid = req.session.uid;
+      res.ws.name = req.session.user.get("name");
+      return cb(0);
     }
-    sh.call(req, res, function (error, data) {
-//      req.loader.dump();
-      res.sendAll();
-      cb(error);
-    });  // end sh.call
-  });  // end sh.fillSession
+    return cb(1); // no valid session
+  });
 }
 
 function handleConnect(ws) {
@@ -73,31 +44,39 @@ function handleConnect(ws) {
 
   ws.on("message", function (data) {
     shlog.recv("live - %s", data);
-    // parse message
-    var message = [];
+    // parse packet
+    var packet = {};
     try {
-      message = JSON.parse(data);
-      if (!_.isArray(message)) {
-        message = [message];
-      }
+      packet = JSON.parse(data);
     } catch (err) {
       sh.sendWs(ws, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
       return;
     }
 
-    // process each message with same loader
     var loader = new ShLoader();
-    try {
-      async.eachSeries(message, function (item, cb) {
-        handleMessage(ws, loader, item, cb);
-      }, function (err) {
-        loader.dump(function (err, data) {
-          console.log("loader stats hits:", loader._cacheHit, "misses:", loader._cacheMiss, "saves:", loader._saves);
+    var req = {session: {valid: false}, body: {}, loader: loader};
+    var res = {ws: ws, add: add};
+    console.log(packet);
+
+    fillSession(packet.sess, req, res, function (err) {
+      // ignore any errors as some commands don't require sessions - like reg
+      try {
+        // process each message with same loader
+        async.eachSeries(packet.msgs, function (item, cb) {
+          req.body = item;
+          sh.call(req, res, function (err, data) {
+            console.log("call", item.cmd);
+            cb(err);
+          });
+        }, function (err) {
+          loader.dump(function (err, data) {
+            console.log("loader stats hits:", loader._cacheHit, "misses:", loader._cacheMiss, "saves:", loader._saves);
+          });
         });
-      });
-    } catch (err1) {
-      sh.sendWs(ws, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
-    }
+      } catch (err1) {
+        sh.sendWs(ws, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
+      }
+    });
   });  // end ws.on-message
 
   ws.on("error", function (err) {

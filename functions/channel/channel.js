@@ -75,7 +75,7 @@ Channel.add = function (req, res, cb) {
 
   // notify existing channel of user add
   var event = sh.event("channel.user", {channel: req.body.channel,
-    uid: res.ws.uid, name: req.session.user.get("name"), pic: "",  status: "on"});
+    uid: res.ws.uid, name: res.ws.name, pic: "",  status: "on"});
   Channel.sendInt(req.body.channel, event);
 
   // add me to the channel

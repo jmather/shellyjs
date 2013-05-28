@@ -45,6 +45,32 @@ shutil.error = function (code, message, data) {
   return res;
 };
 
+shutil.fillSession2 = function (sess, req, res, cb) {
+  req.session = {valid: false,
+    error: shutil.error("no_session", "missing session data")};
+
+  if (_.isUndefined(sess)) {
+    return cb(1);
+  }
+  if (!session.check(sess)) {
+    req.session.error = shutil.error("bad_session", "bad session data");
+    return cb(1);
+  }
+  var uid = sess.split(":")[1];
+  shlog.info("loading user: uid = " + uid);
+  req.loader.get("kUser", uid, function (error, user) {
+    if (error) {
+      req.session.error = shutil.error("user_load", "unable to load user", {uid: uid, error: error, user: user});
+      return cb(1);
+    }
+    shlog.info("user loaded: " + uid);
+    req.session.valid = true;
+    req.session.uid = uid;
+    req.session.user = user;
+    cb(0);
+  });
+};
+
 shutil.fillSession = function (req, res, cb) {
   if (_.isUndefined(req.body.cmd)) {
     res.add(shutil.error("no_cmd", "missing command data"));
