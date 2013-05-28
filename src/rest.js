@@ -1,4 +1,5 @@
 var express = require("express");
+var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -35,11 +36,8 @@ rest.use(function (req, res, next) {
   res.add = add;
   res.sendAll = sendAll;
 
-  sh.fillSession(req, res, function (error, data) {
-    if (error) {
-      res.sendAll();
-      return 0;
-    }
+  sh.fillSession2(req.body.session, req, res, function (error, data) {
+    // session.valid now used to control access to functions
     return next();
   });
 
@@ -50,9 +48,22 @@ function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
   shlog.recv("rest - %s", JSON.stringify(req.body));
 
-  sh.call(req, res, function (error) {
-    req.loader.dump();
+  // handle the multi msgs case
+  var msgs = null;
+  if (_.isArray(req.body.msgs)) {
+    msgs = req.body.msgs;
+  } else {
+    msgs = [req.body];
+  }
+
+  async.eachSeries(msgs, function (item, cb) {
+    req.body = item;
+    sh.call(req, res, function (err, data) {
+      cb(err);
+    });
+  }, function (err) {
     res.sendAll();
+    req.loader.dump();  // don't wait on dump cb
   });
 }
 

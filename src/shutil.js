@@ -103,11 +103,15 @@ shutil.fillSession = function (req, res, cb) {
 };
 
 shutil.call = function (req, res, cb) {
-  var cmd = req.body.cmd;
-  shlog.info("cmd = " + cmd);
-  var cmdParts = cmd.split(".");
+  if (_.isUndefined(req.body.cmd)) {
+    res.add(shutil.error("module_call", "invalid command", {cmd: req.body.cmd}));
+    return cb(1);
+  }
+
+  shlog.info("cmd = " + req.body.cmd);
+  var cmdParts = req.body.cmd.split(".");
   if (cmdParts.length < 2) {
-    res.add(shutil.error("module_call", "invalid command", {cmd: cmd}));
+    res.add(shutil.error("module_call", "invalid command", {cmd: req.body.cmd}));
     return cb(1);
   }
   var moduleName = cmdParts[0];
@@ -137,6 +141,14 @@ shutil.call = function (req, res, cb) {
     return cb(1);
   }
 
+  // check session required
+  if (!req.session.valid) {
+    if (_.isUndefined(module.functions[funcName].noSession) || !module.functions[funcName].noSession) {
+      res.add(req.session.error);
+      return cb(1);
+    }
+  }
+
   // check function perms
   if (module.functions[funcName].security.length > 0) {
     var hasPerms = _.find(module.functions[funcName].security, function (value) {
@@ -157,7 +169,7 @@ shutil.call = function (req, res, cb) {
     }
     if (_.isUndefined(req.body[key])) {
       this.paramsOk = false;
-      res.add(shutil.error("param_required", "missing required parameter", {cmd: cmd, key: key}));
+      res.add(shutil.error("param_required", "missing required parameter", {cmd: req.body.cmd, key: key}));
       return cb(1);
     }
     var ptype = typeof req.body[key];

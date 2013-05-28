@@ -58,7 +58,7 @@ function handleConnect(ws) {
     var res = {ws: ws, add: add};
 
     fillSession(packet.sess, req, res, function (err) {
-      // ignore any errors as some commands don't require sessions - like reg
+      // session.valid now used to control access to functions
       try {
         // process each message with same loader
         async.eachSeries(packet.msgs, function (item, cb) {

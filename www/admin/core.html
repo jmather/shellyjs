@@ -79,16 +79,19 @@
             console.log(module, func);
             var cmd = module + "." + func;
             var input = {cmd:cmd};
-            if (cmd!="reg.login" && cmd!="reg.check" && cmd!="reg.create")
-            {
+            var funcInfo = Env.modules[module].functions[func];
+            if (typeof(funcInfo.noSession) === "undefined" || funcInfo.nosession === false) {
                 input.session = Env.session;
             }
 
             $("#moduleName").text(module);
             $("#functionName").text(func);
-            var funcInfo = Env.modules[module].functions[func];
             $("#functionDescription").text(funcInfo.desc);
             $("#functionSecurity").text(JSON.stringify(funcInfo.security));
+            if (typeof(funcInfo.noSession) === "undefined") {
+                funcInfo.noSession = false;
+            }
+            $("#functionNoSession").text(funcInfo.noSession);
             var paramInfo = "";
             console.log(funcInfo);
             for (key in funcInfo.params)
@@ -161,7 +164,7 @@
                 } catch (e) {
                     alert("error parsing input: " + e.message);
                 }
-                shCall(input, function (err, data) {
+                shCallRaw(input, function (err, data) {
                     gOutputEdit.set(data);
                 });
             });
@@ -193,6 +196,9 @@
     </tr>
     <tr>
         <td class="nameCell">security:</td><td><div id="functionSecurity">{function_security}</div></td>
+    </tr>
+    <tr>
+        <td class="nameCell">nosession:</td><td><div id="functionNoSession">{function_noSession}</div></td>
     </tr>
 </table>
 <div id="inputEditor"></div>

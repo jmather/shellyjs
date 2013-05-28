@@ -13,16 +13,17 @@ var passwordVersion = 1;
 
 exports.desc = "handles user login and new user registration";
 exports.functions = {
-  create: {desc: "register a user", params: {email: {dtype: "string"}, password: {dtype: "string"}}, security: []},
-  anonymous: {desc: "register an anonymous user", params: {token: {dtype: "string"}}, security: []},
-  upgrade: {desc: "upgrade a user id from anonymous to registered", params: {
-    email: {dtype: "string"},
-    password: {dtype: "string"}
-  }, security: []},
+  create: {desc: "register a user", params: {email: {dtype: "string"}, password: {dtype: "string"}},
+    security: [], noSession: true},
+  anonymous: {desc: "register an anonymous user", params: {token: {dtype: "string"}}, security: [], noSession: true},
   login: {desc: "user login", params: {
     email: {dtype: "string"},
     password: {dtype: "string"},
     role: {dtype: "string", optional: true}
+  }, security: [], noSession: true},
+  upgrade: {desc: "upgrade a user id from anonymous to registered", params: {
+    email: {dtype: "string"},
+    password: {dtype: "string"}
   }, security: []},
 
   remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: ["admin"]},
