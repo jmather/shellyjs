@@ -19,7 +19,7 @@ var channelDef = {
   games: {persist: true, maxEvents: 50},
   turns: {persist: false, maxEvents: 0},
   matches: {persist: false, maxEvents: 0}
-}
+};
 
 if (_.isUndefined(global.channels)) {
   global.channels = {};
