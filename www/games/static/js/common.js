@@ -130,9 +130,6 @@ ws.onerror = function (evt) {
 
 // assumes global ws object
 function sendWs(data) {
-//  var obj = {};
-//  obj.session = Env.session;
-//  obj.msgs = [data];
   data.session = Env.session;
   var msg = JSON.stringify(data);
   log("socket", "send", msg);
@@ -140,6 +137,9 @@ function sendWs(data) {
 }
 
 function sendCmd(cmd, data) {
+  if (typeof(data) === "undefined") {
+    data = {};
+  }
   data.cmd = cmd;
   try {
     sendWs(data);

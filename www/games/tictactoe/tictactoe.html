@@ -258,6 +258,7 @@ function init() {
         sendCmd("game.reset", {gameId: Env.gameId});
     });
 
+    commInit();
     ws.connect(Env.socketUrl);
 }
 </script>
@@ -321,8 +322,8 @@ function init() {
 <div style="clear: both;"></div>
 
 <div class="commLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv"<b>Comm Log</b></div>
-<div id="commLog" class="gameBoxInnerDiv" readonly></div>
+  <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>
+  <div id="commLog" class="gameBoxInnerDiv" readonly></div>
 </div>
 
 {{> footer}}

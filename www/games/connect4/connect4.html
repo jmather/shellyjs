@@ -194,8 +194,8 @@
                 $(".uid"+msg.data.uid).find("#playerStatus").text(msg.data.status);
             }
             if (msg.event == "channel.message") {
-                for (var i=0; i<msg.data.length; i++) {
-                    addMessage(msg.data[i]);
+                for (var i=0; i<msg.data.bank.length; i++) {
+                    addMessage(msg.data.channel, msg.data.bank[i]);
                 }
                 return;
             }
@@ -215,13 +215,6 @@
         function init() {
             $("#shSystem").text("Example");
             $("#shSubTitle").text("Connect 4");
-
-            $(".tictac").click(function () {
-                var id = $(this).attr("id");
-                var x = id.slice(1, 2);
-                var y = id.slice(3, 4);
-                sendCmd("game.turn", {gameId: Env.gameId, move: {x: x, y: y}})
-            });
 
             $("#gameReset").click(function () {
                 sendCmd("game.reset", {gameId: Env.gameId});
