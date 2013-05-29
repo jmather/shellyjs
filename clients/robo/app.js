@@ -37,6 +37,7 @@ function waitForGame() {
 
 ws.on('open', function () {
   sendCmd("channel.add", {channel: "lobby:0"});
+  sendCmd("channel.add", {channel: "matches:" + gUid});
   sendCmd("game.playing");
   gWaitInt = setInterval(waitForGame, 5000);
 });
