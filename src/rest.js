@@ -50,8 +50,8 @@ function respond(req, res, next) {
 
   // handle the multi msgs case
   var msgs = null;
-  if (_.isArray(req.body.msgs)) {
-    msgs = req.body.msgs;
+  if (_.isArray(req.body.batch)) {
+    msgs = req.body.batch;
   } else {
     msgs = [req.body];
   }

@@ -1,6 +1,6 @@
 
 function shCallRaw(packet, cb) {
-  console.log(packet);
+//  console.log(packet);
   $.ajax({
     type: "POST",
     url: Env.restUrl,
@@ -25,7 +25,6 @@ function shCall(cmdData, cb) {
 }
 
 function shMultiCall(cmdData, cb) {
-  var packet = {session: Env.session, msgs: []}
-  packet.msgs.push(cmdData);
+  var packet = {session: Env.session, batch: [cmdData]};
   shCallRaw(packet, cb);
 }

@@ -50,7 +50,7 @@
 //            sendCmd("game.join", {gameId: Env.gameId});
 
             sendRaw({session: Env.session,
-                msgs: [{cmd: "game.join", gameId: Env.gameId},
+                batch: [{cmd: "game.join", gameId: Env.gameId},
                     {cmd: "game.playing"},
                     {cmd: "channel.add", channel: "game:" + Env.gameId},
                     {cmd: "channel.add", channel: "turns:" + Env.user.oid}

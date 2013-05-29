@@ -58,8 +58,8 @@ function handleConnect(ws) {
     var res = {ws: ws, add: add};
 
     var msgs = null;
-    if (_.isArray(packet.msgs)) {
-      msgs = packet.msgs;
+    if (_.isArray(packet.batch)) {
+      msgs = packet.batch;
     } else {
       msgs = [packet];
     }
