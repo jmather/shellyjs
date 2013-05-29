@@ -222,9 +222,7 @@ function processEvent(res, from) {
         return;
     }
     if (res.event === "game.turn.next") {
-        if(res.data.gameId === Env.gameId) {
-            setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
-        } else if (res.data.whoTurn === Env.user.oid) {
+        if (res.data.gameId != Env.gameId && res.data.whoTurn === Env.user.oid) {
             updateMyTurns(res.data.gameId, res.data.gameName, res.data.whoTurn);
         }
     }
