@@ -19,10 +19,15 @@
 	<title>Connect 4</title>
 	<style>
         .gameInfoDiv,
-        .messageLogDiv {
+        .messageLogDiv,
+        .otherTurnsDiv {
             float:left;
             margin-left: 20px;
             width: 250px;
+        }
+
+        #gameMyTurnList {
+            height: 75px;
         }
 
         #cr-stage {
@@ -42,7 +47,14 @@
 
         function shellyInit() {
             messageReset();
-            sendCmd("game.join", {gameId: Env.gameId});
+//            sendCmd("game.join", {gameId: Env.gameId});
+
+            sendRaw({session: Env.session,
+                msgs: [{cmd: "game.join", gameId: Env.gameId},
+                    {cmd: "game.playing"},
+                    {cmd: "channel.add", channel: "game:" + Env.gameId},
+                    {cmd: "channel.add", channel: "turns:" + Env.user.oid}
+                ]});
         }
 
         function fillBoard(board) {
@@ -125,6 +137,45 @@
             setPlayers(data.players);
         }
 
+        function updateMyTurns(gameId, gameName, whoTurn) {
+            if (gameId === Env.gameId) {
+                return;
+            }
+            if (whoTurn !== Env.user.oid) {
+                return;
+            }
+            var $newGame = $("#gameTemplate").clone();
+            $newGame.find("#gameName").text(gameName.substr(0, 6) + "-" + gameId.substr(0, 4) + "..");
+            $newGame.addClass("myGameId" + gameId);
+            $newGame.addClass("activeGame");
+            $newGame.attr("gameId", gameId);
+            $newGame.attr("gameName", gameName);
+            $newGame.css("display", "block");
+
+            $newGame.find("#myGameJoin").click(function () {
+                var gameId = $(this).parent().attr("gameId");
+                var gameName = $(this).parent().attr("gameName");
+                gameInit(gameName, gameId);
+            });
+            $newGame.find("#myGameRemove").click(function (event) {
+                $(event.target).parent().remove();
+                var data = clone(Env.baseParams);
+                data.cmd = "game.leave";
+                data.gameId = $(this).parent().attr("gameId");
+                sendWs(data);
+            });
+
+            // start it in the game list and let setWhoTurn sort it
+            $("#gameMyTurnList").append($newGame);
+        }
+
+        function setMyTurns(gameList) {
+            $(".activeGame").remove();
+            for (gameId in gameList) {
+                updateMyTurns(gameId, gameList[gameId].name, gameList[gameId].whoTurn);
+            }
+        }
+
         function checkOver(data) {
             if(typeof (data.state.winnerSet) === "object") {
                 var wins = data.state.winnerSet;
@@ -176,11 +227,18 @@
                 }
             }
             if (msg.event === "game.turn.next") {
-                setWhoTurn(msg.data.whoTurn);
+                if(msg.data.gameId === Env.gameId) {
+                    setWhoTurn(msg.data.whoTurn);
+                } else if (msg.data.whoTurn === Env.user.oid) {
+                    updateMyTurns(msg.data.gameId, msg.data.gameName, msg.data.whoTurn);
+                }
+            }
+            if (msg.event == "game.playing") {
+                setMyTurns(msg.data);
+                return;
             }
             if (msg.event === "game.join") {
                 resetBoard(msg);
-                sendCmd("channel.add", {channel: "game:" + Env.gameId});
             }
             if (msg.event === "game.over") {
                 setTimeout(function () { // simple delay for fall
@@ -259,6 +317,18 @@
         <div class="gameBoxFooterDiv">
             <input id="chatInput" type="text" style="width: 75%;"></input/>
             <button id="sendChat" style="float:right;">send</button>
+        </div>
+    </div>
+</div>
+<div class="otherTurnsDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Other Turns</div>
+    <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
+        <div id="gameTemplate" style="display:none;">
+            <span id="gameName">game-0</span>
+            <span id="gameTurn"></span>
+            <button style="float:right;" id="myGameRemove">remove</button>
+            <button style="float:right;" id="myGameJoin">play</button>
+            <div style="clear:both"></div>
         </div>
     </div>
 </div>

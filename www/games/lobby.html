@@ -87,11 +87,6 @@ function addUser(profile) {
     $("#userList").append($newGame);
 }
 
-function gameInit(gameName, gameId) {
-    var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
-    window.location.href = url;
-}
-
 function processEvent(res, from) {
     if (typeof(res.event) == "undefined") {
         log(from, "error", "old message: " + JSON.stringify(res));
@@ -154,12 +149,12 @@ function shellyInit() {
     */
 
     sendRaw({session: Env.session,
-            msgs: [{cmd: "game.playing"},
-                {cmd: "match.stats"},
-                {cmd: "channel.add", channel: "lobby:0"},
-                {cmd: "channel.add", channel: "turns:" + Env.user.oid},
-                {cmd: "channel.add", channel: "matches:" + Env.user.oid}
-            ]});
+        msgs: [{cmd: "game.playing"},
+            {cmd: "match.stats"},
+            {cmd: "channel.add", channel: "lobby:0"},
+            {cmd: "channel.add", channel: "turns:" + Env.user.oid},
+            {cmd: "channel.add", channel: "matches:" + Env.user.oid}
+        ]});
 }
 
 $(init);

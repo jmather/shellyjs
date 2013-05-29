@@ -77,6 +77,11 @@ function setWhoTurn(gameId, whoTurn, profile) {
   }
 }
 
+function gameInit(gameName, gameId) {
+  var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
+  window.location.href = url;
+}
+
 function setMyGames(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {

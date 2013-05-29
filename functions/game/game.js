@@ -276,6 +276,7 @@ Game.turn = function (req, res, cb) {
       return cb(error);
     }
     var event = sh.event("game.turn.next", {gameId: gameId,
+      gameName: gameData.name,
       whoTurn: gameData.whoTurn,
       name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
       pic: ""});
@@ -326,6 +327,7 @@ Game.reset = function (req, res, cb) {
 
       // notify players on turns channel
       channel.sendAll("turns:", gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
+          gameName: gameData.name,
           whoTurn: gameData.whoTurn,
           name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
           pic: ""
