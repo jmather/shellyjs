@@ -18,17 +18,6 @@ function add(data) {
   sh.sendWs(this.ws, 0, data);
 }
 
-function fillSession(sess, req, res, cb) {
-  sh.fillSession(sess, req, res, function (error, data) {
-    if (req.session.valid) {
-      res.ws.uid = req.session.uid;
-      res.ws.name = req.session.user.get("name");
-      return cb(0);
-    }
-    return cb(1); // no valid session
-  });
-}
-
 function handleConnect(ws) {
   shlog.info("socket: connect");
   ws.uid = 0;
@@ -53,10 +42,12 @@ function handleConnect(ws) {
       return;
     }
 
+    // setup req/res
     var loader = new ShLoader();
     var req = {session: {valid: false}, body: {}, loader: loader};
     var res = {ws: ws, add: add};
 
+    // handle batch
     var msgs = null;
     if (_.isArray(packet.batch)) {
       msgs = packet.batch;
@@ -64,8 +55,12 @@ function handleConnect(ws) {
       msgs = [packet];
     }
 
-    fillSession(packet.session, req, res, function (err) {
-      // session.valid now used to control access to functions
+    sh.fillSession(packet.session, req, res, function (err) {
+      // req.session.valid now used to control access
+      if (req.session.valid) {
+        res.ws.uid = req.session.uid;
+        res.ws.name = req.session.user.get("name");
+      }
       try {
         // process each message with same loader
         async.eachSeries(msgs, function (item, cb) {
