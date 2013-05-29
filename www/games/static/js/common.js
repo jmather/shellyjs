@@ -53,7 +53,12 @@ function hideError() {
   $("#errorMessage").css("display", "none");
 }
 
-function setWhoTurn(gameId, whoTurn, profile) {
+function gameInit(gameName, gameId) {
+  var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
+  window.location.href = url;
+}
+
+function setLobbyTurn(gameId, whoTurn, profile) {
   $gamePlaying = $(".myGameId" + gameId);
   $turnSpan = $gamePlaying.find("#gameTurn");
   $turnSpan.removeClass("playerName" + whoTurn);
@@ -77,12 +82,7 @@ function setWhoTurn(gameId, whoTurn, profile) {
   }
 }
 
-function gameInit(gameName, gameId) {
-  var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
-  window.location.href = url;
-}
-
-function setMyGames(gameList) {
+function setLobbyGames(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {
     var $newGame = $("#gameTemplate").clone();
@@ -109,8 +109,45 @@ function setMyGames(gameList) {
 
     // start it in the game list and let setWhoTurn sort it
     $("#gameMyTurnList").append($newGame);
+    setLobbyTurn(gameId, game.whoTurn, game.players[game.whoTurn]);
+  }
+}
 
-    setWhoTurn(gameId, game.whoTurn, game.players[game.whoTurn]);
+function updateMyTurns(gameId, gameName, whoTurn) {
+  if (gameId === Env.gameId) {
+    return;
+  }
+  if (whoTurn !== Env.user.oid) {
+    return;
+  }
+  var $newGame = $("#gameTemplate").clone();
+  $newGame.find("#gameName").text(gameName.substr(0, 6) + "-" + gameId.substr(0, 4) + "..");
+  $newGame.addClass("myGameId" + gameId);
+  $newGame.addClass("activeGame");
+  $newGame.attr("gameId", gameId);
+  $newGame.attr("gameName", gameName);
+  $newGame.css("display", "block");
+
+  $newGame.find("#myGameJoin").click(function () {
+    var gameId = $(this).parent().attr("gameId");
+    var gameName = $(this).parent().attr("gameName");
+    gameInit(gameName, gameId);
+  });
+  $newGame.find("#myGameRemove").click(function (event) {
+    $(event.target).parent().remove();
+    var data = clone(Env.baseParams);
+    data.cmd = "game.leave";
+    data.gameId = $(this).parent().attr("gameId");
+    sendWs(data);
+  });
+
+  $("#gameMyTurnList").append($newGame);
+}
+
+function setMyTurns(gameList) {
+  $(".activeGame").remove();
+  for (gameId in gameList) {
+    updateMyTurns(gameId, gameList[gameId].name, gameList[gameId].whoTurn);
   }
 }
 

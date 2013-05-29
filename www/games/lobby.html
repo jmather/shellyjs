@@ -101,11 +101,11 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "game.playing") {
-        setMyGames(res.data);
+        setLobbyGames(res.data);
         return;
     }
     if (res.event == "game.turn.next") {
-        setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
+        setLobbyTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
     if (res.event == "channel.user") {

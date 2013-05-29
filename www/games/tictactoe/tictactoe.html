@@ -21,19 +21,20 @@
         width: 291px;
         float:left;
     }
+    .gamePlayersDiv,
     .gameInfoDiv {
         width: 200px;
     }
-    .gamePlayersDiv {
-        width: 200px;
+
+    .otherTurnsDiv {
+        width: 291px;
     }
-    .gameListDiv {
-        float: left;
-        width: 375px;
+    #gameMyTurnList {
+        overflow: auto;
+        height: 75px;
     }
-    #gameList {
-        height: 100px;
-    }
+
+
     .tictac {
         display: block;
         float: left;
@@ -165,13 +166,7 @@ function clearState() {
     $(".activePlayer").remove();
 }
 
-function gameInit(gameId) {
-    sendCmd("game.join", {gameId: gameId});
-}
-
 function shellyInit() {
-    sendCmd("game.playing");
-
     if (Env.gameId === "0") {
         var lastGame = $.cookie("shLastGame" + Env.user.oid);
         if (typeof (lastGame) === "string") {
@@ -179,7 +174,12 @@ function shellyInit() {
         }
     }
     if (Env.gameId !== "0") {
-        sendCmd("game.join", {gameId: Env.gameId})
+        sendRaw({session: Env.session,
+            batch: [{cmd: "game.join", gameId: Env.gameId},
+                {cmd: "game.playing"},
+                {cmd: "channel.add", channel: "game:" + Env.gameId},
+                {cmd: "channel.add", channel: "turns:" + Env.user.oid}
+            ]});
     }
 }
 
@@ -221,9 +221,12 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == "game.turn.next") {
-        setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
-        return;
+    if (res.event === "game.turn.next") {
+        if(res.data.gameId === Env.gameId) {
+            setWhoTurn(res.data.gameId, res.data.whoTurn, res.data);
+        } else if (res.data.whoTurn === Env.user.oid) {
+            updateMyTurns(res.data.gameId, res.data.gameName, res.data.whoTurn);
+        }
     }
     if (res.event == "game.info"
             || res.event == "game.over"
@@ -232,7 +235,7 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "game.playing") {
-        setMyGames(res.data);
+        setMyTurns(res.data);
         return;
     }
     log(from, "unknown-event", JSON.stringify(res));
@@ -307,18 +310,19 @@ function init() {
 </div>
 <div style="clear: both;"></div>
 
-<div class="gameListDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv" style="">Current Games</div>
-    <div id="gameList" class="gameBoxInnerDiv">
+<div class="otherTurnsDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Other Turns</div>
+    <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
         <div id="gameTemplate" style="display:none;">
             <span id="gameName">game-0</span>
-            (<span id="gameTurn">?</span>)
-            <button id="myGameRemove" style="float:right">remove</button>
-            <button id="myGameJoin" style="float:right">play</button>
+            <span id="gameTurn"></span>
+            <button style="float:right;" id="myGameRemove">remove</button>
+            <button style="float:right;" id="myGameJoin">play</button>
             <div style="clear:both"></div>
         </div>
     </div>
 </div>
+
 <div style="clear: both;"></div>
 
 <div class="commLogDiv gameBoxDiv">
