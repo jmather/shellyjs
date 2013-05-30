@@ -18,8 +18,70 @@ function add(data) {
   sh.sendWs(this.ws, 0, data);
 }
 
+function onMessage(data) {
+  shlog.recv("live - %s", data);
+  // parse packet
+  var packet = {};
+  try {
+    packet = JSON.parse(data);
+  } catch (err) {
+    sh.sendWs(this, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
+    return;
+  }
+
+  // setup req/res
+  var loader = new ShLoader();
+  var req = {session: {valid: false}, body: {}, loader: loader};
+  var res = {ws: this, add: add};
+
+  // handle batch
+  var msgs = null;
+  if (_.isArray(packet.batch)) {
+    msgs = packet.batch;
+  } else {
+    msgs = [packet];
+  }
+
+  sh.fillSession(packet.session, req, res, function (err) {
+    // req.session.valid now used to control access
+    if (req.session.valid) {
+      res.ws.uid = req.session.uid;
+      res.ws.name = req.session.user.get("name");
+    }
+    try {
+      // process each message with same loader
+      async.eachSeries(msgs, function (item, cb) {
+        req.body = item;
+        sh.call(req, res, function (err, data) {
+          cb(err);
+        });
+      }, function (err) {
+        loader.dump();  // don't wait on dump cb
+      });
+    } catch (err1) {
+      sh.sendWs(this, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
+    }
+  });
+}
+
+function onClose() {
+  shlog.info("(" + this.id + ") socket: close");
+
+  clearInterval(this.hbTimer);
+
+  // clean up any channels
+  _.each(this.channels, function (value, key) {
+    shlog.info("removing", key);
+    channel.removeInt(this, key);
+  });
+}
+
+function onError(err) {
+  shlog.error("(" + this.id + ")", err);
+}
+
 function handleConnect(ws) {
-  shlog.info("socket: connect");
+  shlog.info("(" + ws.id + ") socket: connect");
   ws.uid = 0;
   ws.games = [];
   ws.hbTimer = null;
@@ -31,67 +93,9 @@ function handleConnect(ws) {
   };
   ws.hbTimer = setInterval(heartBeat, global.CONF.heartBeat);
 
-  ws.on("message", function (data) {
-    shlog.recv("live - %s", data);
-    // parse packet
-    var packet = {};
-    try {
-      packet = JSON.parse(data);
-    } catch (err) {
-      sh.sendWs(ws, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
-      return;
-    }
-
-    // setup req/res
-    var loader = new ShLoader();
-    var req = {session: {valid: false}, body: {}, loader: loader};
-    var res = {ws: ws, add: add};
-
-    // handle batch
-    var msgs = null;
-    if (_.isArray(packet.batch)) {
-      msgs = packet.batch;
-    } else {
-      msgs = [packet];
-    }
-
-    sh.fillSession(packet.session, req, res, function (err) {
-      // req.session.valid now used to control access
-      if (req.session.valid) {
-        res.ws.uid = req.session.uid;
-        res.ws.name = req.session.user.get("name");
-      }
-      try {
-        // process each message with same loader
-        async.eachSeries(msgs, function (item, cb) {
-          req.body = item;
-          sh.call(req, res, function (err, data) {
-            cb(err);
-          });
-        }, function (err) {
-          loader.dump();  // don't wait on dump cb
-        });
-      } catch (err1) {
-        sh.sendWs(ws, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
-      }
-    });
-  });  // end ws.on-message
-
-  ws.on("error", function (err) {
-    shlog.error("(" + this.uid + ")", err);
-  });
-
-  ws.on("close", function () {
-    shlog.info("(" + this.uid + ") socket: close");
-
-    clearInterval(this.hbTimer);
-
-    // clean up any channels
-    _.each(ws.channels, function (value, key) {
-      shlog.info("removing", key);
-      channel.removeInt(ws, key);
-    });
-  });
+  ws.on("message", onMessage);
+  ws.on("error", onError);
+  ws.on("close", onClose);
 }
 
 Socket.start = function () {

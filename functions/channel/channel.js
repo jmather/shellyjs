@@ -97,8 +97,8 @@ Channel.add = function (req, res, cb) {
 Channel.removeInt = function (ws, channel) {
   var idx = global.channels[channel].indexOf(ws);
   global.channels[channel].splice(idx, 1);
-  delete ws.channels[channel];  // remove cross ref as the user removed it
   shlog.info("remove", channel, global.channels[channel].length);
+  delete ws.channels[channel];  // remove cross ref as the user removed it
 
   var event = sh.event("channel.user", {channel: channel, uid: ws.uid, name: ws.name, pic: "",  status: "off"});
   Channel.sendInt(channel, event);
