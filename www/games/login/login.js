@@ -25,11 +25,11 @@ function doLogin() {
     success: function (res, status) {
       $("#signInLoading").css("display","none");
       debug.info(res);
-      if (res.event === "error") {
-        error(res.message);
-      } else {
+      if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/lobby.html";
+      } else {
+        error(res[0].message);
       }
     },
     error: function (xhr, status, err) {
@@ -62,11 +62,11 @@ function doRegister() {
     success: function (res, status) {
       $("#signInLoading").css("display","none");
       debug.info(res);
-      if (res.event === "error") {
-        error(res.message);
-      } else {
+      if (res[0].event === "reg.create") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/lobby.html";
+      } else {
+        error(res[0].message);
       }
     },
     error: function (xhr, status, err) {
@@ -94,15 +94,15 @@ function doAnonymous() {
     success: function (res, status) {
       $("#signInLoading").css("display","none");
       debug.info(res);
-      if (res.event === "error") {
-        if (res.code === "user_upgraded") {
-          $("#upgradeDiv").css("display", "block");
-        } else {
-          error(res.message);
-        }
-      } else {
+      if (res[0].event === "reg.anonymous") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/lobby.html";
+      } else {
+        if (res[0].code === "user_upgraded") {
+          $("#upgradeDiv").css("display", "block");
+        } else {
+          error(res[0].message);
+        }
       }
     },
     error: function (xhr, status, err) {

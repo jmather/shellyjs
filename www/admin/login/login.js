@@ -26,11 +26,11 @@ function doLogin() {
     success: function (res, status) {
       $("#signInLoading").css("display","none");
       debug.info(res);
-      if (res.event === "error") {
-        error(res.message);
-      } else {
+      if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/index.html";
+      } else {
+        error(res[0].message);
       }
     },
     error: function (xhr, status, err) {
