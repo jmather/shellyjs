@@ -1,15 +1,25 @@
 var path = require("path");
 var os = require("os");
+var fs = require("fs");
 
+var _ = require("lodash");
 var async = require("async");
 
 global.gBaseDir = path.dirname(__dirname);
-try {
-  global.CONF = require(global.gBaseDir + "/config/" + os.hostname() + ".js");
-} catch (e) {
-  console.error("error: unable to load config file:", os.hostname() + ".js");
-  process.exit(1);
+
+// load configs with per machine overrides
+global.CONF = require(global.gBaseDir + "/config/main.js");
+var machineConfigFn = global.gBaseDir + "/config/" + os.hostname() + ".js";
+/*jslint stupid: true */
+if (fs.existsSync(machineConfigFn)) {
+  try {
+    global.CONF = _.merge(global.CONF, require(machineConfigFn));
+  } catch (e) {
+    console.error("error: unable to load config file:", os.hostname() + ".js");
+    process.exit(1);
+  }
 }
+
 global.PACKAGE = require(global.gBaseDir + "/package.json");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
