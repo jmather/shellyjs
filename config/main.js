@@ -14,14 +14,14 @@ config.gamesUrl = "http://" + config.dnsName + ":" + config.gamesPort;
 // socket options
 config.socketPort = 5110;
 config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
-config.heartBeat = 300 * 1000;
+config.heartBeat = 30 * 1000;
 
 // db
 config.db = {};
-//config.db.wrapper = "/src/db/shredis.js";
-//config.db.options = {};
 config.db.wrapper = "/src/db/shsqlite.js";
 config.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
+//config.db.wrapper = "/src/db/shredis.js";
+//config.db.options = {};
 
 // default admin
 config.DEFAULT_ADMIN_NAME = "shelly";
