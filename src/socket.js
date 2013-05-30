@@ -73,7 +73,7 @@ function onClose() {
   _.each(this.channels, function (value, key) {
     shlog.info("removing", key);
     channel.removeInt(this, key);
-  });
+  }, this);
 }
 
 function onError(err) {
