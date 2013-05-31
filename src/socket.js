@@ -52,9 +52,7 @@ function onMessage(data) {
       // process each message with same loader
       async.eachSeries(msgs, function (item, cb) {
         req.body = item;
-        sh.call(req, res, function (err, data) {
-          cb(err);
-        });
+        sh.call(req, res, cb);
       }, function (err) {
         loader.dump();  // don't wait on dump cb
       });
