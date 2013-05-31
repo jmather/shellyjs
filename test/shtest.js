@@ -44,18 +44,16 @@ shtest.session = function (utype) {
 
 shtest.init = function (email, password, cb) {
   var self = this;
-  this.call({cmd: "reg.login", email: "shelly", password: ""},
-    function (err, res) {
+  this.call({cmd: "reg.login", email: "shelly", password: ""}, function (err, res) {
       if (err) {
         cb(err, res);
         return;
       }
       gAdminSession = res.body.data.session;
 
-      // SWD probably want to add reg.create, just to be sure it is there
-
-      self.call({cmd: "reg.login", email: email, password: password},
-        function (err, res) {
+      self.call({cmd: "reg.create", email: email, password: password}, function (err, res) {
+        // ignore error for already exists and just try login
+        self.call({cmd: "reg.login", email: email, password: password}, function (err, res) {
           if (err) {
             cb(err, res);
             return;
@@ -63,6 +61,7 @@ shtest.init = function (email, password, cb) {
           gUserSession = res.body.data.session;
           cb(err, res);
         });
+      });
     });
 }
 
