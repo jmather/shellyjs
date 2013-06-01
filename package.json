@@ -5,6 +5,10 @@
   "description": "a game server",
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/sdale511/shelly.git"
+  },
   "dependencies": {
     "sqlite3": "2.1.7",
     "redis": "0.8.3",
