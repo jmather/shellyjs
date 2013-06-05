@@ -1,5 +1,6 @@
 var path = require("path");
 var util = require("util");
+var cluster = require("cluster");
 var _ = require("lodash");
 
 var stackTrace = require("stack-trace");
@@ -21,12 +22,18 @@ var gDebug = {
 //  "shutil": {},
 //	"recv": {},
 //	"send": {},
+//  "appc": {},
   "shelly": {}
 };
 
 var winston = require("winston");
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, { colorize: true, timestamp: false });
+
+shlog.workerId = 0;
+if (cluster.worker !== null){
+  shlog.workerId = cluster.worker.id;
+}
 
 shlog.log = function () {
   // SWD likely disable module filter for prod
@@ -43,7 +50,7 @@ shlog.log = function () {
 
   if (level === "error" || !_.isUndefined(gDebug[callerName])) {
 //		var msg = util.format("%d - %s", process.pid, util.format.apply(this, args));
-    var msg = util.format("%s - %s", callerName, util.format.apply(this, args));
+    var msg = util.format("%d %s - %s", shlog.workerId, callerName, util.format.apply(this, args));
     winston.log(level, msg);
   }
 };
