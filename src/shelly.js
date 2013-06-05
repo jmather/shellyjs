@@ -26,9 +26,10 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 shlog.info("loaded:", new Date());
 shlog.info("config:", global.CONF);
 
-
 global.db = require(global.gBaseDir + "/src/shdb.js");
 global.socket = null;
+
+var gChannel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var shelly = exports;
 
@@ -93,6 +94,21 @@ shelly.shutdown = function () {
       process.exit(0);
     });
 };
+
+shelly.send = function (msg) {
+  if (msg.cmd === "who.query") {
+    gChannel.returnOnline(msg.channel, msg.wid, msg.fromWsid);
+    return;
+  }
+  if (msg.cmd === "who.return") {
+    gChannel.sendDirect(msg.toWsid, msg.data);
+    return;
+  }
+  if (msg.cmd === "forward") {
+    gChannel.sendInt(msg.channel, msg.data, false); // do not forward to cluster
+    return;
+  }
+}
 
 process.on("uncaughtException", function (error) {
   shlog.error("uncaughtException", error.stack);

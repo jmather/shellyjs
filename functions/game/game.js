@@ -72,8 +72,11 @@ Game.pre = function (req, res, cb) {
       shlog.info("game.pre: setting game:" + gameName + " = " + gameId);
       req.env.gameModule = loadGameModule(gameName);
     } catch (e) {
-      res.add(sh.error("game_require", "unable to load game module", {name: gameName, message: e.message}));
-      return cb(1);
+      // special case this so we can always remove a bad game
+      if (req.body.cmd !== "game.leave") {
+        res.add(sh.error("game_require", "unable to load game module", {name: gameName, message: e.message}));
+        return cb(1);
+      }
     }
 
     req.env.game = game;
@@ -216,6 +219,8 @@ Game.join = function (req, res, cb) {
 Game.leave = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
+  // NOTE: req.env.gameModule needs to be checked in this function if used
+  // we always want to be able to remove a game, even if it doesn't load
 
   req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {

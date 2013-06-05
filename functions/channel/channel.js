@@ -1,3 +1,4 @@
+var cluster = require("cluster");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -25,7 +26,29 @@ if (_.isUndefined(global.channels)) {
   global.channels = {};
 }
 
-Channel.sendInt = function (channel, data) {
+// send directly to user using socket id in global map
+// might this go in socket module
+Channel.sendDirect = function (wsId, data) {
+  var ws = global.sockets[wsId];
+  if (_.isUndefined(ws)) {
+    shlog.info("global socket not found:", wsId);
+    return false;
+  }
+  try {
+    sh.sendWs(ws, 0, data);
+  } catch (e) {
+    shlog.info("global socket dead:", wsId);
+    return false;
+  }
+  return true;
+};
+
+Channel.sendInt = function (channel, data, forward) {
+  // default forward on to cluster
+  if (cluster.isWorker && (_.isUndefined(forward) || forward === true)) {
+    process.send({cmd: "forward", wid: cluster.worker.id, toWid: "all", channel: channel, data: data});
+  }
+
   global.channels[channel] = _.filter(global.channels[channel], function (ws) {
     try {
       sh.sendWs(ws, 0, data);
@@ -37,6 +60,7 @@ Channel.sendInt = function (channel, data) {
   });
 };
 
+// send to all in "ids" list by prepending the "prefix"
 Channel.sendAll = function (prefix, ids, data) {
   shlog.info("sendAll", prefix, ids);
 
@@ -45,13 +69,34 @@ Channel.sendAll = function (prefix, ids, data) {
   });
 };
 
+// notify the current socket of users on this channel
 Channel.sendOnline = function (ws, channel) {
+  if (cluster.isWorker) {
+    process.send({cmd: "who.query", wid: cluster.worker.id, toWid: "all", channel: channel, fromUid: ws.uid,
+      fromWsid: ws.id});
+  }
+
   _.each(global.channels[channel], function (uws) {
     var event = sh.event("channel.user", {channel: channel, uid: uws.uid, name: uws.name, pic: "",  status: "on"});
     sh.sendWs(ws, 0, event);
   });
 };
 
+// notify the calling worker of any users on this channel
+// only called in cluster mode
+Channel.returnOnline = function (channel, fromWid, toWsid) {
+  if (!cluster.isWorker) {
+    shlog.error("function can only be called in cluster mode");
+    return;
+  }
+  _.each(global.channels[channel], function (uws) {
+    var event = sh.event("channel.user", {channel: channel, uid: uws.uid, name: uws.name, pic: "",  status: "on"});
+    process.send({cmd: "who.return", wid: cluster.worker.id, toWid: fromWid, toWsid: toWsid, data: event});
+  });
+};
+
+// SWD must fix this to also send cluster command
+// this will be more like an add that fires a bunch of channel.list messages to caller
 Channel.list = function (req, res, cb) {
   var users = {};
 
@@ -84,6 +129,8 @@ Channel.add = function (req, res, cb) {
   shlog.info("add", req.body.channel, global.channels[req.body.channel].length);
 
   // notify me of online channel users
+  // SWD might want to put flag on channels that realy need this
+  // as it generates a lot of presence traffic
   Channel.sendOnline(res.ws, req.body.channel);
 
   req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
@@ -102,6 +149,8 @@ Channel.removeInt = function (ws, channel) {
 
   var event = sh.event("channel.user", {channel: channel, uid: ws.uid, name: ws.name, pic: "",  status: "off"});
   Channel.sendInt(channel, event);
+
+  return event;
 };
 
 Channel.remove = function (req, res, cb) {
@@ -110,7 +159,9 @@ Channel.remove = function (req, res, cb) {
     return cb(1);
   }
 
-  Channel.removeInt(res.ws, req.body.channel, req.session.user);
+  // send to myself for house keeping, removeInt does the channel send
+  var event = Channel.removeInt(res.ws, req.body.channel, req.session.user);
+  res.add(event);
 
   return cb(0);
 };

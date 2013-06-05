@@ -47,10 +47,10 @@
 
         function shellyInit() {
             messageReset();
-//            sendCmd("game.join", {gameId: Env.gameId});
 
             sendRaw({session: Env.session,
-                batch: [{cmd: "game.join", gameId: Env.gameId},
+                batch: [{cmd: "system.connInfo"},
+                    {cmd: "game.join", gameId: Env.gameId},
                     {cmd: "game.playing"},
                     {cmd: "channel.add", channel: "game:" + Env.gameId},
                     {cmd: "channel.add", channel: "turns:" + Env.user.oid}
@@ -216,6 +216,10 @@
                 for (var i=0; i<msg.data.bank.length; i++) {
                     addMessage(msg.data.channel, msg.data.bank[i]);
                 }
+                return;
+            }
+            if (msg.event == "system.connInfo") {
+                console.log("wid:", msg.data.wid);
                 return;
             }
         }

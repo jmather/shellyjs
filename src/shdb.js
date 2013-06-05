@@ -44,7 +44,7 @@ function initObjects(cb) {
 
 shdb.getKeys = function () {
   return gKeyTypes;
-}
+};
 
 shdb.init = function (cb) {
   initObjects(function () {
@@ -90,7 +90,7 @@ function genKey(keyType, params) {
 
 shdb.validKey = function (keyType) {
   return _.isObject(gKeyTypes[keyType]);
-}
+};
 
 shdb.key = function (keyType, params) {
   return genKey(keyType, params);
@@ -168,6 +168,15 @@ shdb.kdelete = function (keyType, params, cb) {
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
     return;
+  }
+};
+
+shdb.popOrPush = function (queueName, minMatches, data, cb) {
+  shlog.info("popOrPush:", queueName);
+  try {
+    client.popOrPush(queueName, minMatches, data, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
   }
 };
 

@@ -134,22 +134,20 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "match.add") {
+        $("#dialog").dialog();
+        return;
+    }
+    if (res.event == "system.connInfo") {
+        console.log("wid:", res.data.wid);
         return;
     }
     log(from, "unknown-event", JSON.stringify(res));
 }
 
 function shellyInit() {
-    /*
-    sendCmd("game.playing");
-    sendCmd("match.stats");
-    sendCmd("channel.add", {channel: "lobby:0"});
-    sendCmd("channel.add", {channel: "turns:" + Env.user.oid});
-    sendCmd("channel.add", {channel: "matches:" + Env.user.oid});
-    */
-
     sendRaw({session: Env.session,
-        batch: [{cmd: "game.playing"},
+        batch: [{cmd: "system.connInfo"},
+            {cmd: "game.playing"},
             {cmd: "match.stats"},
             {cmd: "channel.add", channel: "lobby:0"},
             {cmd: "channel.add", channel: "turns:" + Env.user.oid},
@@ -172,7 +170,6 @@ function init() {
     });
     $("#gameConnect4").click(function () {
         sendCmd("match.add", {name: "connect4"});
-        $("#dialog").dialog();
     });
     $("#liveToggle").click(function () {
         if ($(this).attr("status") == "on") {
