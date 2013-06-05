@@ -80,7 +80,7 @@
             var cmd = module + "." + func;
             var input = {cmd:cmd};
             var funcInfo = Env.modules[module].functions[func];
-            if (typeof(funcInfo.noSession) === "undefined" || funcInfo.nosession === false) {
+            if (typeof(funcInfo.noSession) === "undefined" || funcInfo.noSession === false) {
                 input.session = Env.session;
             }
 
@@ -93,7 +93,6 @@
             }
             $("#functionNoSession").text(funcInfo.noSession);
             var paramInfo = "";
-            console.log(funcInfo);
             for (key in funcInfo.params)
             {
                 var dtype = funcInfo.params[key].dtype;
