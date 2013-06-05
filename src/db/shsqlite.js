@@ -44,6 +44,39 @@ shSqlite.del = function (key, cb) {
   this.client.run("DELETE FROM store WHERE key = ?", key, cb);
 };
 
+shSqlite.dequeue = function (queueName, uid, cb) {
+  var self = this;
+  this.client.serialize(function () {
+    self.client.run("BEGIN");
+    self.get(queueName, function (err, row) {
+      if (row === null) {
+        // nothing to dequeue
+        self.client.run("COMMIT", function (err) {
+          return cb(0);
+        });
+        return;
+      }
+      var infoOld = JSON.parse(row);
+      var infoNew = _.filter(infoOld, function (item) {
+        return item.uid !== uid;
+      });
+      if (infoOld.length === infoNew.length) {
+        // nothing to dequeue
+        self.client.run("COMMIT", function (err) {
+          return cb(0);
+        });
+        return;
+      }
+      self.set(queueName, JSON.stringify(infoNew), function (err) {
+        shlog.info("set", queueName, err);
+        self.client.run("COMMIT", function (err) {
+          cb(0);
+        });
+      });
+    });
+  });
+};
+
 shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
   var self = this;
   this.client.serialize(function () {
@@ -52,7 +85,7 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
       if (row === null) {
         // nothing in queue - set it
         self.set(queueName, JSON.stringify([data]), function (err) {
-          console.log("set", queueName, err);
+          shlog.info("set", queueName, err);
           self.client.run("COMMIT", function (err) {
             cb(0, null);
           });
@@ -62,12 +95,11 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
       var info = JSON.parse(row);
 
       // check user already in queue
-      console.log(info);
-      var me = _.first(info, function (user) {
-        return user.uid === data.uid;
+      var found = _.first(info, function (item) {
+        return item.uid === data.uid;
       });
-      if (me.length !== 0) {
-        console.log("user queued already", queueName, data.uid, me);
+      if (found.length !== 0) {
+        shlog.info("user queued already", queueName, data.uid, found);
         self.client.run("COMMIT", function (err) {
           return cb(2, null);
         });
@@ -77,7 +109,7 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
       if (info.length + 1 < minMatches) {
         info.push(data);
         self.set(queueName, JSON.stringify(info), function (err) {
-          console.log("add user to existing queue", queueName, err);
+          shlog.info("add user to existing queue", queueName, err);
           self.client.run("COMMIT", function (err) {
             cb(0, null);
           });
@@ -87,14 +119,14 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
 
       // match made - send list back
       self.del(queueName, function (err) {
-        console.log("clear queue", queueName, err);
+        shlog.info("clear queue", queueName, err);
         self.client.run("COMMIT", function (err) {
           cb(0, info);
         });
       });
     });
   });
-}
+};
 
 shSqlite.close = function (cb) {
   this.client.close(cb);

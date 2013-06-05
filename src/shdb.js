@@ -171,6 +171,15 @@ shdb.kdelete = function (keyType, params, cb) {
   }
 };
 
+shdb.dequeue = function (queueName, uid, cb) {
+  shlog.info("dequeue:", queueName, uid);
+  try {
+    client.dequeue(queueName, uid, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+}
+
 shdb.popOrPush = function (queueName, minMatches, data, cb) {
   shlog.info("popOrPush:", queueName);
   try {

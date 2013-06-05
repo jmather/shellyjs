@@ -13,18 +13,12 @@ match.desc = "match players to the desired game and start them in it";
 match.functions = {
   add: {desc: "add caller to the game matcher", params: {name: {dtype: "string"}}, security: []},
   remove: {desc: "remove caller from the game matcher", params: {name: {dtype: "string"}}, security: []},
-  stats: {desc: "list the match stats for all games", params: {}, security: []},
-  list: {desc: "list the match players for all games", params: {}, security: []}
+  list: {desc: "list the match players for a game", params: {name: {dtype: "string"}}, security: []},
+  info: {desc: "list the games avaliable", params: {}, security: []},
+  stats: {desc: "list the match stats for all games", params: {}, security: []}
 };
 
 // SWD: just init a global game queue for now, handles reload
-/*
-if (_.isUndefined(global.matchq)) {
-  global.matchq = {};
-  global.matchq.tictactoe = {};
-  global.matchq.connect4 = {};
-}
-*/
 if (_.isUndefined(global.matchInfo)) {
   global.matchInfo = {};
   global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
@@ -42,8 +36,7 @@ match.add = function (req, res, cb) {
 
   var ts = new Date().getTime();
   var playerInfo = {uid: uid, posted: ts};
-  global.db.popOrPush(req.body.name, global.matchInfo[name].minPlayers, playerInfo, function (err, match) {
-    console.log("match popOrPush", err, match);
+  global.db.popOrPush(name, global.matchInfo[name].minPlayers, playerInfo, function (err, match) {
     if (err === 2) {
       res.add(sh.error("match_added", "player is already being matched", {uid: uid, name: name}));
       return cb(err);
@@ -59,7 +52,6 @@ match.add = function (req, res, cb) {
     req.body.cmd = "game.create";     // change the command, req.param.name is already set
     req.body.players = [match[0].uid];   // add the waiting user
     req.body.players.push(uid);       // add the current user
-    console.log("players", req.body.players);
 
     global.matchInfo[name].lastCreated = new Date().getTime();
     global.matchInfo[name].created += 1;
@@ -92,10 +84,31 @@ match.remove = function (req, res, cb) {
     return cb(1);
   }
 
-  global.db.dequeue(uid, function (err) {
+  global.db.dequeue(name, uid, function (err) {
     res.add(sh.event("match.remove"));
     return cb(0);
   });
+};
+
+match.list = function (req, res, cb) {
+  if (_.isUndefined(global.matchInfo[req.body.name])) {
+    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    return cb(1);
+  }
+
+  global.db.get(req.body.name, function (err, data) {
+    if (err) {
+      res.add(sh.error("no_list", "unable to get match list", {name: req.body.name}));
+      return cb(1);
+    }
+    res.add(sh.event("match.list", JSON.parse(data)));
+    return cb(0);
+  });
+};
+
+match.info = function (req, res, cb) {
+  res.add(sh.event("match.info", global.matchInfo));
+  cb(0);
 };
 
 // SWD - figure out how to store these globally
@@ -104,11 +117,7 @@ match.stats = function (req, res, cb) {
 //  _.forOwn(global.matchq, function (gameq, idx) {
 //    global.matchInfo[idx].waiting = Object.keys(gameq).length;
 //  });
-  res.add(sh.event("match.stats", global.matchInfo));
+  res.add(sh.event("match.stats", {}));
   return cb(0);
 };
 
-match.list = function (req, res, cb) {
-  res.add(sh.event("match.list", global.matchInfo));
-  cb(0);
-};
