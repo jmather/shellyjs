@@ -1,3 +1,5 @@
+var cluster = require("cluster");
+var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
@@ -8,7 +10,29 @@ system.functions = {
   stats: {desc: "get all server stats", params: {}, security: ["admin"]},
   config: {desc: "get all server settings", params: {}, security: ["admin"]},
   rawGet: {desc: "get an object given any key", params: {key: {dtype: "string"}}, security: ["admin"]},
-  rawSet: {desc: "set an object given any key", params: {key: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]}
+  rawSet: {desc: "set an object given any key", params: {key: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]},
+  connInfo: {desc: "return info about connection", params: {}, security: []}
+};
+
+system.connInfo = function (req, res, cb) {
+  shlog.info("system.connInfo");
+
+  var wid = 0;
+  if (cluster.isWorker) {
+    wid = cluster.worker.id;
+  }
+  var wsid = 0;
+  if (_.isObject(res.ws)) {
+    wsid = res.ws.id;
+  }
+
+  var data = {
+    wid: wid,
+    wsid: wsid
+  };
+
+  res.add(sh.event("system.connInfo", data));
+  return cb(0);
 };
 
 system.stats = function (req, res, cb) {
