@@ -11,6 +11,10 @@ var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 var Socket = exports;
 var wss = null;
 
+if (_.isUndefined(global.sockets)) {
+  global.sockets = {};
+}
+
 function add(data) {
   if (data.event === "error") {
     shlog.error(data);
@@ -72,6 +76,8 @@ function onClose() {
     shlog.info("removing", key);
     channel.removeInt(this, key);
   }, this);
+
+  delete global.sockets[this.id]; // remove from global index
 }
 
 function onError(err) {
@@ -105,6 +111,7 @@ Socket.start = function () {
     ws.id = connCount;
     connCount += 1;
     ws.channels = {};
+    global.sockets[ws.id] = ws; // register in global index
     try {
       handleConnect(ws);
     } catch (err) {
