@@ -2,6 +2,7 @@ var cluster = require("cluster");
 var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var stats = require(global.gBaseDir + "/src/shstats.js");
 
 var system = exports;
 
@@ -38,8 +39,10 @@ system.connInfo = function (req, res, cb) {
 system.stats = function (req, res, cb) {
   shlog.info("system.stats");
 
-  res.add(sh.event("system.stats", {stats: "here"}));
-  return cb(0);
+  stats.get(null, null, function(err, stats) {
+    res.add(sh.event("system.stats", stats));
+    return cb(0);
+  });
 };
 
 system.config = function (req, res, cb) {
