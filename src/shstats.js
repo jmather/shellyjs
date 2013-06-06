@@ -1,4 +1,4 @@
-var gStats = require(global.gBaseDir + "/src/stats/shstatsmem.js");
+var gStats = require(global.gBaseDir + global.CONF.STATS.WRAPPER);
 
 var shstats = exports;
 
@@ -15,8 +15,15 @@ shstats.stamp = function (domain, key, ts) {
 };
 
 shstats.get = function (domain, key, cb) {
+  gStats.incr("stats", "numGets");
+
   try {
-    gStats.get(domain, key, cb);
+    gStats.get(domain, key, function (err, data) {
+      var stats = {};
+      stats[domain] = {};
+      stats[domain][key] = data;
+      cb(err, stats);
+    });
   } catch (e) {
     cb(1);
   }

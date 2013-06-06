@@ -171,6 +171,24 @@ shdb.kdelete = function (keyType, params, cb) {
   }
 };
 
+shdb.incr = function (key, amount, cb) {
+  shlog.info("incr:", key, amount);
+  try {
+    client.incr(key, amount, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+}
+
+shdb.decr = function (key, amount, cb) {
+  shlog.info("decr:", key, amount);
+  try {
+    client.decr(key, amount, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+}
+
 shdb.dequeue = function (queueName, uid, cb) {
   shlog.info("dequeue:", queueName, uid);
   try {

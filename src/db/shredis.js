@@ -34,8 +34,13 @@ shRedis.del = function (key, cb) {
   client.del(key, cb);
 };
 
-shRedis.incrby = function (key, amount, cb) {
-  shlog.info("del", key);
+shRedis.incr = function (key, amount, cb) {
+  shlog.info("incr", key);
+  client.incrby(key, amount, cb);
+};
+
+shRedis.decr = function (key, amount, cb) {
+  shlog.info("decr", key);
   client.incrby(key, amount, cb);
 };
 

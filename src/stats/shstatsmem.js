@@ -41,8 +41,6 @@ shstats.stamp = function (domain, key, ts) {
 };
 
 shstats.get = function (domain, key, cb) {
-  this.incr("stats", "numCalls");
-
   if (!_.isString(domain)) {
     return cb(0, global.stats);
   }

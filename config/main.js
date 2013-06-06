@@ -18,10 +18,15 @@ config.heartBeat = 30 * 1000;
 
 // db
 config.db = {};
-config.db.wrapper = "/src/db/shsqlite.js";
-config.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
-//config.db.wrapper = "/src/db/shredis.js";
-//config.db.options = {};
+//config.db.wrapper = "/src/db/shsqlite.js";
+//config.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
+config.db.wrapper = "/src/db/shredis.js";
+config.db.options = {};
+
+// stats
+config.STATS = {};
+//config.STATS.WRAPPER = "/src/stats/shstatsmem.js";
+config.STATS.WRAPPER = "/src/stats/shstatsredis.js";
 
 // default admin
 config.DEFAULT_ADMIN_NAME = "shelly";

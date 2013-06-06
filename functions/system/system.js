@@ -39,7 +39,7 @@ system.connInfo = function (req, res, cb) {
 system.stats = function (req, res, cb) {
   shlog.info("system.stats");
 
-  stats.get(null, null, function(err, stats) {
+  stats.get("stats", "numGets", function(err, stats) {
     res.add(sh.event("system.stats", stats));
     return cb(0);
   });
