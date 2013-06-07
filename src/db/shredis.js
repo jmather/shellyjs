@@ -1,3 +1,4 @@
+var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var shRedis = exports;
@@ -42,6 +43,80 @@ shRedis.incr = function (key, amount, cb) {
 shRedis.decr = function (key, amount, cb) {
   shlog.info("decr", key);
   client.incrby(key, amount, cb);
+};
+
+shRedis.dequeue = function (queueName, uid, cb) {
+  client.watch(queueName);
+  client.get(queueName, function (err, row) {
+    if (row === null) {
+      // nothing to dequeue
+      return cb(0);
+    }
+    var infoOld = JSON.parse(row);
+    var infoNew = _.filter(infoOld, function (item) {
+      return item.uid !== uid;
+    });
+    if (infoOld.length === infoNew.length) {
+      // nothing to dequeue
+      return cb(0);
+    }
+    var multi = self.client.multi();
+    multi.set(queueName, JSON.stringify(infoNew));
+    multi.exec(function (err, replies) {
+      shlog.info("dequeue - save", queueName, err, replies);
+      if (replies === -1) {
+        // must try again
+        return cb(-1);
+      }
+      return cb(0);
+    });
+  });
+};
+
+shRedis.popOrPush = function (queueName, minMatches, data, cb) {
+  client.watch(queueName);
+  this.get(queueName, function (err, row) {
+    var multi = client.multi();
+    if (row === null) {
+      // nothing in queue - set it
+      multi.set(queueName, JSON.stringify([data]));
+      multi.exec(function (err, replies) {
+        shlog.info("popOrPush empty - set", queueName, err, replies);
+        return cb(0, null);
+      });
+      return;
+    }
+    var info = JSON.parse(row);
+
+    // check user already in queue
+    var found = _.first(info, function (item) {
+      return item.uid === data.uid;
+    });
+    console.log(found);
+    if (found.length !== 0) {
+      shlog.info("user queued already", queueName, data.uid, found);
+      // SWD do we need to unwatch?
+      multi.discard();
+      return cb(2, null);
+    }
+    // check min matches against current list + me
+    if (info.length + 1 < minMatches) {
+      info.push(data);
+      multi.set(queueName, JSON.stringify(info));
+      multi.exec(function (err, replies) {
+        shlog.info("add user to existing queue", queueName, err, replies);
+        cb(0, null);
+      });
+      return;
+    }
+
+    // match made - send list back
+    multi.del(queueName);
+    multi.exec(function (err, replies) {
+      shlog.info("clear queue", queueName, err, replies);
+      cb(0, info);
+    });
+  });
 };
 
 shRedis.close = function (cb) {
