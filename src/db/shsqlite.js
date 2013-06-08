@@ -16,7 +16,7 @@ shSqlite.init = function (options, cb) {
       _this.client = new sqlite3.cached.Database(_this.options.filename, cb1);
     },
     function (cb1) {
-      var sql = "CREATE TABLE IF NOT EXISTS store (key TEXT PRIMARY KEY,value TEXT)";
+      var sql = "CREATE TABLE IF NOT EXISTS store (key TEXT PRIMARY KEY, value TEXT)";
       _this.client.run(sql, cb1);
     }
   ], cb);
@@ -30,11 +30,10 @@ shSqlite.get = function (key, cb) {
   });
 };
 
-
 shSqlite.set = function (key, value, cb) {
   shlog.info("set", key, value);
 
-  this.client.run("REPLACE INTO store VALUES (?,?)", key, value, cb);
+  this.client.run("REPLACE INTO store VALUES (?, ?)", key, value, cb);
 };
 
 
@@ -42,6 +41,33 @@ shSqlite.del = function (key, cb) {
   shlog.info("del", key);
 
   this.client.run("DELETE FROM store WHERE key = ?", key, cb);
+};
+
+shSqlite.decr = function (key, amount, cb) {
+  shlog.info("decr", key);
+
+  var self = this;
+  this.client.run("UPDATE store SET value = value - ? WHERE key = ?", amount, key, function (err) {
+    if (err) {
+      self.client.run("INSERT INTO store VALUES (?, ?)", key, amount, cb);
+      return;
+    }
+    cb(err);
+  });
+};
+
+shSqlite.incr = function (key, amount, cb) {
+  shlog.info("incr", key);
+
+  var self = this;
+  this.client.run("UPDATE store SET value = value + ? WHERE key = ?", amount, key, function (err) {
+    console.log("sqlite incr", err);
+    if (err) {
+      self.client.run("INSERT INTO store VALUES (?, ?)", key, amount, cb);
+      return;
+    }
+    cb(err);
+  });
 };
 
 shSqlite.dequeue = function (queueName, uid, cb) {
