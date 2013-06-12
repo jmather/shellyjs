@@ -5,6 +5,8 @@ var _ = require("lodash");
 var shelly = require(__dirname + "/shelly.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
+var shCluster = require(global.gBaseDir + "/src/shcluster.js");
+
 // received message from worker
 function workerMessage(msg) {
   shlog.info("master recv:", JSON.stringify(msg));
@@ -28,14 +30,21 @@ function workerMessage(msg) {
 }
 
 if (cluster.isMaster) {
-  var i = 0;
-  for (i = 0; i < 2; i++) {
-    var p = cluster.fork();
-    p.on("message", workerMessage);
-  }
+  shCluster.init(function (err, data) {
+    var i = 0;
+    for (i = 0; i < 2; i++) {
+      var p = cluster.fork();
+      p.on("message", workerMessage);
+    }
+  });
 } else {
-//  var shelly = require(__dirname + "/shelly.js");
-  shelly.start();
+  shCluster.init(function (err, data) {
+    if (!err) {
+      shelly.start();
+    } else {
+      shlog.error("unable to initialise the cluster", err, data);
+    }
+  });
 }
 
 // receive master message

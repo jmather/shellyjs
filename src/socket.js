@@ -54,7 +54,7 @@ function onMessage(data) {
       req.loader.get("kLocate", req.session.uid, function (err, locate) {
         locate.set("oid", req.session.uid);
         locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
-        locate.set("serverId", global.CONF.SERVERID);
+        locate.set("clusterId", global.cluster.clusterId);
         locate.set("workerId", shlog.workerId);
         locate.set("socketId", res.ws.id);
         shlog.info("locate set", locate.getData());

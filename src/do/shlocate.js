@@ -13,7 +13,7 @@ function ShLocate() {
   this._data = {
     oid: "",
     serverUrl: "",
-    serverId: null,
+    clusterId: null,
     workerId: null,
     socketId: null
   };
