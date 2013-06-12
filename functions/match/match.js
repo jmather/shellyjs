@@ -14,6 +14,7 @@ match.functions = {
   add: {desc: "add caller to the game matcher", params: {name: {dtype: "string"}}, security: []},
   remove: {desc: "remove caller from the game matcher", params: {name: {dtype: "string"}}, security: []},
   list: {desc: "list the match players for a game", params: {name: {dtype: "string"}}, security: []},
+  count: {desc: "count the users waiting for a game", params: {name: {dtype: "string"}}, security: []},
   info: {desc: "list the games avaliable", params: {}, security: []},
   stats: {desc: "list the match stats for all games", params: {}, security: []}
 };
@@ -102,6 +103,23 @@ match.list = function (req, res, cb) {
       return cb(1);
     }
     res.add(sh.event("match.list", JSON.parse(data)));
+    return cb(0);
+  });
+};
+
+match.count = function (req, res, cb) {
+  if (_.isUndefined(global.matchInfo[req.body.name])) {
+    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    return cb(1);
+  }
+
+  global.db.get(req.body.name, function (err, data) {
+    if (err) {
+      res.add(sh.error("no_list", "unable to get match list", {name: req.body.name}));
+      return cb(1);
+    }
+    var queue = JSON.parse(data);
+    res.add(sh.event("match.count", {name: req.body.name, waiting: queue.length}));
     return cb(0);
   });
 };

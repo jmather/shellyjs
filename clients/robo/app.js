@@ -32,7 +32,7 @@ function sendCmd(cmd, params) {
 }
 
 function waitForGame() {
-  sendCmd("match.stats", {name: "tictactoe"});
+  sendCmd("match.count", {name: "tictactoe"});
 }
 
 ws.on('open', function () {
@@ -70,8 +70,8 @@ ws.on('message', function (message) {
     console.error("unabel to parse message");
     return;
   }
-  if (msg.event === "match.stats") {
-    if (msg.data["tictactoe"].waiting > 0) {
+  if (msg.event === "match.count") {
+    if (msg.data.waiting > 0) {
       sendCmd("match.add", {name: "tictactoe"});
     }
   } else if (msg.event === "match.made") {
