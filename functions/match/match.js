@@ -119,7 +119,11 @@ match.count = function (req, res, cb) {
       return cb(1);
     }
     var queue = JSON.parse(data);
-    res.add(sh.event("match.count", {name: req.body.name, waiting: queue.length}));
+    var count = 0;
+    if (queue !== null) {
+      count = queue.length;
+    }
+    res.add(sh.event("match.count", {name: req.body.name, waiting: count}));
     return cb(0);
   });
 };
