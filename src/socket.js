@@ -51,6 +51,14 @@ function onMessage(data) {
     if (req.session.valid) {
       res.ws.uid = req.session.uid;
       res.ws.name = req.session.user.get("name");
+      req.loader.get("kLocate", req.session.uid, function (err, locate) {
+        locate.set("oid", req.session.uid);
+        locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
+        locate.set("serverId", global.CONF.SERVERID);
+        locate.set("workerId", shlog.workerId);
+        locate.set("socketId", res.ws.id);
+        shlog.info("locate set", locate.getData());
+      });
     }
     try {
       // process each message with same loader
@@ -70,6 +78,12 @@ function onClose() {
   shlog.info("(" + this.id + ") socket: close");
 
   clearInterval(this.hbTimer);
+
+  // clean up the global locator if there
+  if (_.isString(this.uid)) {
+    global.db.kdelete("kLocate", this.uid);
+    // don't for response
+  }
 
   // clean up any channels
   _.each(this.channels, function (value, key) {

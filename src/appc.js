@@ -5,18 +5,24 @@ var _ = require("lodash");
 var shelly = require(__dirname + "/shelly.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
-// receive worker message
+// received message from worker
 function workerMessage(msg) {
   shlog.info("master recv:", JSON.stringify(msg));
 
-  // forward to all workers, except sender
+  // SWD must adjust socket   connect and close to set cluster ID and server IP
+  // check to see if it's a global channel
+  // if so check if the user is on another cluster
+  // if so send to that cluster
+
   if (msg.toWid === "all") {
+    // forward to all workers, except sender
     _.each(cluster.workers, function (worker, wid) {
       if (parseInt(wid, 10) !== msg.wid) {
         worker.process.send(msg);
       }
     });
   } else {
+    // forward just to workerId
     cluster.workers[msg.toWid].send(msg);
   }
 }
@@ -39,13 +45,13 @@ process.on("message", function (msg) {
 });
 
 cluster.on("online", function (worker) {
-  console.log("worker online:", worker.id);
+  shlog.info("worker online:", worker.id);
 });
 
 cluster.on("disconnect", function (worker) {
-  console.log("worker disconnect:", worker.id);
+  shlog.info("worker disconnect:", worker.id);
 });
 
 cluster.on("exit", function (worker) {
-  console.log("worker disconnect:", worker.id);
+  shlog.info("worker disconnect:", worker.id);
 });

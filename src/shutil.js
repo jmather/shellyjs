@@ -15,6 +15,14 @@ shutil.uuid = function () {
   return uuid.v1();
 };
 
+shutil.modString = function (str, m) {
+  var sum = 0;
+  _.each(str, function (c) {
+    sum += c.charCodeAt(0);
+  });
+  return sum % m;
+};
+
 shutil.channel = function (name, id) {
   return "notify." + name + "." + id;
 };

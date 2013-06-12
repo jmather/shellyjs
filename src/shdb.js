@@ -10,19 +10,11 @@ var shdb = exports;
 
 var client = require(global.gBaseDir + global.CONF.db.wrapper);
 
-var gOldKeyTypes = {
-  kObject: {tpl: "obj:%s", file: "/src/do/shobject.js"},
-  kEmailMap: {tpl: "em:%s", file: "/src/do/shemailmap.js"},
-  kTokenMap: {tpl: "tm:%s", file: "/src/do/shtokenmap.js"},
-  kUser: {tpl: "u:%s", file: "/src/do/shuser.js"},
-  kGame: {tpl: "game:%s", file: "/src/do/shgame.js"},
-  kPlaying: {tpl: "gp:%s", file: "/src/do/shplaying.js"},
-  kMessageBank: {tpl: "mb:%s", file: "/src/do/shmessagebank.js"}
-};
-
 var gKeyTypes = {};
 
 function initObjects(cb) {
+  shlog.info("object init");
+
   var modules = {};
   var funcDir = global.gBaseDir + "/src/do";
   fs.readdir(funcDir, function (err, files) {
@@ -34,6 +26,7 @@ function initObjects(cb) {
       var obj = new ObjModule();
       if (!_.isUndefined(obj._keyType) && !_.isUndefined(obj._keyFormat)) {
         gKeyTypes[obj._keyType] = {tpl: obj._keyFormat, file: fn};
+        shlog.info("object factory:", obj._keyType, fn);
       } else {
         shlog.info("bad data object missing keyType or keyFormat", fn);
       }
@@ -49,9 +42,6 @@ shdb.getKeys = function () {
 shdb.init = function (cb) {
   initObjects(function () {
     try {
-      shlog.info("object init");
-      _.each(global.db.getKeys(), function (obj, key) { shlog.info("object loaded:", key); });
-
       shlog.info("db init");
       client.init(global.CONF.db.options, function (err) {
         if (err) {
@@ -69,7 +59,7 @@ shdb.init = function (cb) {
 
 shdb.get = function (key, cb) {
   try {
-    shlog.info(key, cb);
+    shlog.info("get", key);
     client.get(key, cb);
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});

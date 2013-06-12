@@ -31,7 +31,7 @@ winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, { colorize: true, timestamp: false });
 
 shlog.workerId = 0;
-if (cluster.worker !== null){
+if (cluster.worker !== null) {
   shlog.workerId = cluster.worker.id;
 }
 

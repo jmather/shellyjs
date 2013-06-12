@@ -1,5 +1,6 @@
 var config = exports;
 
+config.SERVERID = 0;
 config.dnsName = "localhost";
 
 config.adminPort = 5100;
