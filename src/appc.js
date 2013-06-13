@@ -1,7 +1,7 @@
 var cluster = require("cluster");
 var _ = require("lodash");
 
-// need shelly before log - SWD change this depend
+// need shelly before log - this inits all config and other globals
 var shelly = require(__dirname + "/shelly.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
@@ -38,13 +38,7 @@ if (cluster.isMaster) {
     }
   });
 } else {
-  shCluster.init(function (err, data) {
-    if (!err) {
-      shelly.start();
-    } else {
-      shlog.error("unable to initialise the cluster", err, data);
-    }
-  });
+  shelly.start();
 }
 
 // receive master message
@@ -62,5 +56,22 @@ cluster.on("disconnect", function (worker) {
 });
 
 cluster.on("exit", function (worker) {
-  shlog.info("worker disconnect:", worker.id);
+  shlog.info("worker exit:", worker.id);
 });
+
+if (cluster.isMaster) {
+  // listen for these also to unreg the server
+  process.on("uncaughtException", function (error) {
+    shlog.error("master uncaughtException", error.stack);
+  });
+
+  process.on("SIGINT", function () {
+    shlog.info("master SIGINT - graceful shutdown");
+    shCluster.shutdown();
+  });
+
+  process.on("SIGQUIT", function () {
+    shlog.info("master SIGQUIT - graceful shutdown");
+    shCluster.shutdown();
+  });
+}

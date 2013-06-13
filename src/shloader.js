@@ -3,8 +3,12 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
-function ShLoader() {
-  this._db = global.db;
+function ShLoader(db) {
+  if (_.isObject(db)) {
+    this._db = db;
+  } else {
+    this._db = global.db;
+  }
   this._objects = {};
 
   this._cacheHit = 0;

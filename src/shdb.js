@@ -9,6 +9,7 @@ var gDbScope = "dev:";
 var shdb = exports;
 
 var client = require(global.gBaseDir + global.CONF.db.wrapper);
+shdb.driver = client.driver;
 
 var gKeyTypes = {};
 
@@ -168,7 +169,7 @@ shdb.incr = function (key, amount, cb) {
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
   }
-}
+};
 
 shdb.decr = function (key, amount, cb) {
   shlog.info("decr:", key, amount);
@@ -177,7 +178,7 @@ shdb.decr = function (key, amount, cb) {
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
   }
-}
+};
 
 shdb.dequeue = function (queueName, uid, cb) {
   shlog.info("dequeue:", queueName, uid);
@@ -186,7 +187,7 @@ shdb.dequeue = function (queueName, uid, cb) {
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
   }
-}
+};
 
 shdb.popOrPush = function (queueName, minMatches, data, cb) {
   shlog.info("popOrPush:", queueName);

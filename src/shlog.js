@@ -22,7 +22,9 @@ var gDebug = {
 //  "shutil": {},
 //	"recv": {},
 //	"send": {},
+//  "shcluster": {},
 //  "appc": {},
+//  "app": {},
   "shelly": {}
 };
 

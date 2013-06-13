@@ -21,6 +21,12 @@ if (fs.existsSync(machineConfigFn)) {
 }
 
 global.PACKAGE = require(global.gBaseDir + "/package.json");
+var clusterInfoFn = global.gBaseDir + "/config/cluster.json";
+if (fs.existsSync(clusterInfoFn)) {
+  global.cluster = require(clusterInfoFn);
+} else {
+  global.cluster = {clusterId: "0"};
+}
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 shlog.info("loaded:", new Date());
@@ -38,6 +44,20 @@ var rest = null;
 var games = null;
 
 shelly.start = function () {
+  // handle all the exit cases
+  process.on("uncaughtException", function (error) {
+    shlog.error("uncaughtException", error.stack);
+  });
+  process.on("SIGINT", function () {
+    shlog.info("SIGINT - graceful shutdown");
+    shelly.shutdown();
+  });
+
+  process.on("SIGQUIT", function () {
+    shlog.info("SIGQUIT - graceful shutdown");
+    shelly.shutdown();
+  });
+
   shlog.info("starting db");
   global.db.init(function (err) {
     if (!err) {
@@ -108,18 +128,4 @@ shelly.send = function (msg) {
     gChannel.sendInt(msg.channel, msg.data, false); // do not forward to cluster
     return;
   }
-}
-
-process.on("uncaughtException", function (error) {
-  shlog.error("uncaughtException", error.stack);
-});
-
-process.on("SIGINT", function () {
-  shlog.info("SIGINT - graceful shutdown");
-  shelly.shutdown();
-});
-
-process.on("SIGQUIT", function () {
-  shlog.info("SIGQUIT - graceful shutdown");
-  shelly.shutdown();
-});
+};

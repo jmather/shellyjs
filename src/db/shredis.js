@@ -6,6 +6,8 @@ var shRedis = exports;
 var redis = require("redis");
 var client = redis.createClient();
 
+shRedis.driver = client;
+
 // if you"d like to select database 3, instead of 0 (default), call
 // client.select(3, function() { /* ... */ });
 
