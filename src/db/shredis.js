@@ -62,7 +62,7 @@ shRedis.dequeue = function (queueName, uid, cb) {
       // nothing to dequeue
       return cb(0);
     }
-    var multi = self.client.multi();
+    var multi = client.multi();
     multi.set(queueName, JSON.stringify(infoNew));
     multi.exec(function (err, replies) {
       shlog.info("dequeue - save", queueName, err, replies);

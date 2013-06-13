@@ -7,14 +7,14 @@ var st = require("./shtest.js");
 
 var gEmail = "test@lgdales.com";
 var gPassword = "foofoo";
-var gOid = "";
+var gGameName = "tictactoe";
 
 describe("module match", function () {
 
   before(function (done) {
     st.init(gEmail, gPassword, function (err, res) {
       // clear the game queue
-      st.userCall({cmd: "match.remove", name: "tictactoe"},
+      st.userCall({cmd: "match.remove", name: gGameName},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
           done();
@@ -23,8 +23,8 @@ describe("module match", function () {
   });
 
   describe("CMD match.list", function () {
-    it("list all game queues", function (done) {
-      st.userCall({cmd: "match.list"},
+    it("list game queue", function (done) {
+      st.userCall({cmd: "match.list", name: gGameName},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
           done();
@@ -34,7 +34,7 @@ describe("module match", function () {
 
   describe("CMD match.add", function () {
     it("add a user to a game queue", function (done) {
-      st.userCall({cmd: "match.add", name: "tictactoe"},
+      st.userCall({cmd: "match.add", name: gGameName},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
           done();
@@ -42,11 +42,13 @@ describe("module match", function () {
     });
 
     it("verify user is in game queue", function (done) {
-      st.userCall({cmd: "match.list", name: "tictactoe"},
+      st.userCall({cmd: "match.list", name: gGameName},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
-          res.body.data.should.have.property("tictactoe");
-          res.body.data.tictactoe.should.have.property(st.uid("user"));
+          var me = _.find(res.body.data, function (user) {
+            return user.uid === st.uid("user");
+          });
+          should.exist(me);
           done();
         });
     });
@@ -81,8 +83,9 @@ describe("module match", function () {
       st.userCall({cmd: "match.list", name: "tictactoe"},
         function (err, res) {
           res.body.should.not.have.property("event", "error");
-          res.body.data.should.have.property("tictactoe");
-          res.body.data.tictactoe.should.not.have.property(st.uid("user"));
+          _.each(res.body.data, function (user) {
+            user.should.not.have.property("uid", st.uid("user"));
+          });
           done();
         });
     });
