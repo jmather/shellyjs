@@ -55,7 +55,7 @@ system.config = function (req, res, cb) {
 system.rawGet = function (req, res, cb) {
   global.db.get(req.body.key, function (err, data) {
     if (err) {
-      res.add(sh.error("object_get", "unable to et object", data));
+      res.add(sh.error("object_get", "unable to get object", data));
       return cb(1);
     }
     res.add(sh.event("system.rawGet", JSON.parse(data)));
