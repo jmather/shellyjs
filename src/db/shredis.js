@@ -66,9 +66,9 @@ shRedis.dequeue = function (queueName, uid, cb) {
     multi.set(queueName, JSON.stringify(infoNew));
     multi.exec(function (err, replies) {
       shlog.info("dequeue - save", queueName, err, replies);
-      if (replies === -1) {
+      if (replies === null) {
         // must try again
-        return cb(-1);
+        return cb(3);
       }
       return cb(0);
     });
@@ -77,12 +77,16 @@ shRedis.dequeue = function (queueName, uid, cb) {
 
 shRedis.popOrPush = function (queueName, minMatches, data, cb) {
   client.watch(queueName);
-  this.get(queueName, function (err, row) {
+  client.get(queueName, function (err, row) {
     var multi = client.multi();
     if (row === null) {
       // nothing in queue - set it
       multi.set(queueName, JSON.stringify([data]));
       multi.exec(function (err, replies) {
+        if (replies === null) {
+          shlog.error("no set - object modified", queueName, err, replies);
+          return cb(3, null);
+        }
         shlog.info("popOrPush empty - set", queueName, err, replies);
         return cb(0, null);
       });
@@ -94,7 +98,6 @@ shRedis.popOrPush = function (queueName, minMatches, data, cb) {
     var found = _.first(info, function (item) {
       return item.uid === data.uid;
     });
-    console.log(found);
     if (found.length !== 0) {
       shlog.info("user queued already", queueName, data.uid, found);
       // SWD do we need to unwatch?
@@ -106,6 +109,10 @@ shRedis.popOrPush = function (queueName, minMatches, data, cb) {
       info.push(data);
       multi.set(queueName, JSON.stringify(info));
       multi.exec(function (err, replies) {
+        if (replies === null) {
+          shlog.error("no add - object modified", queueName, err, replies);
+          return cb(3, null);
+        }
         shlog.info("add user to existing queue", queueName, err, replies);
         cb(0, null);
       });
@@ -115,6 +122,10 @@ shRedis.popOrPush = function (queueName, minMatches, data, cb) {
     // match made - send list back
     multi.del(queueName);
     multi.exec(function (err, replies) {
+      if (replies === null) {
+        shlog.error("no del - object modified", queueName, err, replies);
+        return cb(3, null);
+      }
       shlog.info("clear queue", queueName, err, replies);
       cb(0, info);
     });

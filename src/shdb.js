@@ -183,7 +183,21 @@ shdb.decr = function (key, amount, cb) {
 shdb.dequeue = function (queueName, uid, cb) {
   shlog.info("dequeue:", queueName, uid);
   try {
-    client.dequeue(queueName, uid, cb);
+    client.dequeue(queueName, uid, function(err, rdata) {
+      if (err === 3) { // retry 1
+        shlog.error("dequeue: txn failed, retry 1", queueName);
+        client.dequeue(queueName, uid, function(err, rdata) {
+          if (err === 3) { // retry 2
+            shlog.error("dequeue: txn failed, retry 2", queueName);
+            client.dequeue(queueName, uid, cb);
+            return;
+          }
+          return cb(err, rdata);
+        });
+        return;
+      }
+      return cb(err, rdata);
+    });
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
   }
@@ -192,7 +206,21 @@ shdb.dequeue = function (queueName, uid, cb) {
 shdb.popOrPush = function (queueName, minMatches, data, cb) {
   shlog.info("popOrPush:", queueName);
   try {
-    client.popOrPush(queueName, minMatches, data, cb);
+    client.popOrPush(queueName, minMatches, data, function (err, rdata) {
+      if (err === 3) { // retry 1
+        shlog.error("popOrPush: txn failed, retry 1", queueName);
+        client.popOrPush(queueName, minMatches, data, function (err, rdata) {
+          if (err === 3) { // retry 2
+            shlog.error("popOrPush: txn failed, retry 2", queueName);
+            client.popOrPush(queueName, minMatches, data, cb);
+            return;
+          }
+          return cb(err, rdata);
+        });
+        return;
+      }
+      return cb(err, rdata);
+    });
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
   }

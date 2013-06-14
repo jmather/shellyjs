@@ -12,6 +12,7 @@ var gDebug = {
 //  "shobject": {},
 //  "shdb": {},
 //  "shsqlite": {},
+//  "shredis": {},
 //  "socket": {},
 //  "rest": {},
 //  "admin": {},

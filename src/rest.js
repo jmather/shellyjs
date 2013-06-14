@@ -62,8 +62,10 @@ function respond(req, res, next) {
       cb(err);
     });
   }, function (err) {
-    res.sendAll();
-    req.loader.dump();  // don't wait on dump cb
+    // wait on dump to avoid any timing issues in fast test runs
+    req.loader.dump(function (err) {
+      res.sendAll();
+    });
   });
 }
 

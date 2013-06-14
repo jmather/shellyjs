@@ -88,15 +88,29 @@ describe("basic user create and game play", function () {
           done();
         });
     });
+    it("dequeue user1", function (done) {
+      gConn1.call("match.remove", {name: "tictactoe"},
+        function (err, res) {
+          res[0].should.not.have.property("event", "error");
+          done();
+        });
+    });
   });
 
   describe("setup user2", function () {
     it("register user2", function (done) {
-      gConn1.call("reg.create", {email: gEmail2, password: gPassword},
+      gConn2.call("reg.create", {email: gEmail2, password: gPassword},
         function (err, res) {
           res[0].should.not.have.property("event", "error");
           gConn2.setSession(res[0].data.session);
           gConns[gConn2.uid()] = gConn2;
+          done();
+        });
+    });
+    it("dequeue user2", function (done) {
+      gConn2.call("match.remove", {name: "tictactoe"},
+        function (err, res) {
+          res[0].should.not.have.property("event", "error");
           done();
         });
     });
@@ -106,7 +120,7 @@ describe("basic user create and game play", function () {
     it("user1 match", function (done) {
       gConn1.call("match.add", {name: "tictactoe"},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "match.add");
           res[0].data.should.have.property("uid", gConn1.uid());
           done();
         });
@@ -115,7 +129,8 @@ describe("basic user create and game play", function () {
       gConn2.call("match.add", {name: "tictactoe"},
         function (err, res) {
           // res[0] is create message
-          res[1].should.not.have.property("event", "error");
+          should.exist(res[1]);
+          res[1].should.have.property("event", "match.made");
           res[1].data.should.have.property("gameId");
           gGameId = res[1].data.gameId;
           done();

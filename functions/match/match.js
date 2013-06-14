@@ -70,7 +70,7 @@ match.add = function (req, res, cb) {
       });
       channel.sendAll("matches:", req.body.players, sh.event("match.made", matchInfo));
 
-      res.add(sh.event("match", matchInfo));
+      res.add(sh.event("match.made", matchInfo));
       return cb(0);
     });
   });
