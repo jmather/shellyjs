@@ -51,7 +51,7 @@ function onMessage(data) {
     if (req.session.valid) {
       res.ws.uid = req.session.uid;
       res.ws.name = req.session.user.get("name");
-      req.loader.get("kLocate", req.session.uid, function (err, locate) {
+      loader.get("kLocate", req.session.uid, function (err, locate) {
         locate.set("oid", req.session.uid);
         locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
         locate.set("clusterId", global.cluster.clusterId);

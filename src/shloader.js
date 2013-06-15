@@ -41,21 +41,27 @@ ShLoader.prototype.create = function (keyType, params) {
   return obj;
 };
 
-ShLoader.prototype.exists = function (keyType, params, cb) {
+ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
     cb(1, {message: "bad object key type", data: keyType});
     return;
   }
+  var opts = {checkCache: true};
+  if (_.isObject(opts)) {
+    opts = _.merge(opts, pOpts);
+  }
 
   // check cache
-  var key = this._db.key(keyType, params);
-  if (_.isObject(this._objects[key])) {
-    shlog.info("cache hit: %s", key);
-    this._cacheHit += 1;
-    cb(0, this._objects[key]);
-    return;
+  if (opts.checkCache) {
+    var key = this._db.key(keyType, params);
+    if (_.isObject(this._objects[key])) {
+      shlog.info("cache hit: %s", key);
+      this._cacheHit += 1;
+      cb(0, this._objects[key]);
+      return;
+    }
+    this._cacheMiss += 1;
   }
-  this._cacheMiss += 1;
 
   var ShClass = null;
   try {
@@ -78,22 +84,28 @@ ShLoader.prototype.exists = function (keyType, params, cb) {
   });
 };
 
-ShLoader.prototype.get = function (keyType, params, cb) {
+ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
     cb(1, {message: "bad object key type", data: keyType});
     return;
   }
+  var opts = {checkCache: true};
+  if (_.isObject(opts)) {
+    opts = _.merge(opts, pOpts);
+  }
 
   // check cache
-  var key = this._db.key(keyType, params);
-  shlog.info("get: %s", key);
-  if (_.isObject(this._objects[key])) {
-    this._cacheHit += 1;
-    shlog.info("cache hit: %s", key);
-    cb(0, this._objects[key]);
-    return;
+  if (opts.checkCache) {
+    var key = this._db.key(keyType, params);
+    shlog.info("get: %s", key);
+    if (_.isObject(this._objects[key])) {
+      this._cacheHit += 1;
+      shlog.info("cache hit: %s", key);
+      cb(0, this._objects[key]);
+      return;
+    }
+    this._cacheMiss += 1;
   }
-  this._cacheMiss += 1;
 
   var ShClass = null;
   try {

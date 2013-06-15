@@ -9,7 +9,7 @@ function ShLocate() {
   ShObject.call(this);
 
   this._keyType = "kLocate";
-  this._keyFormat = "l:%s";
+  this._keyFormat = "loc:%s";
   this._data = {
     oid: "",
     serverUrl: "",

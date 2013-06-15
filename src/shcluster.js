@@ -14,12 +14,12 @@ var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var ShCluster = exports;
 
 var db = require(global.gBaseDir + "/src/shdb.js");
-var loader = new ShLoader(db);
+var gLoader = new ShLoader(db);
 var driver = global.db.driver;
 var gServer = null;
 
 ShCluster.init = function (cb) {
-  var clusterInfoFn = __dirname + "/../config/cluster.json";
+  var clusterInfoFn = global.configBase + "/cluster.json";
   var clusterInfo = {};
   if (!fs.existsSync(clusterInfoFn)) {
     clusterInfo.clusterId = shutil.uuid();
@@ -39,19 +39,16 @@ ShCluster.init = function (cb) {
   shlog.info("cluster id:", global.cluster);
 
   db.init(function (err) {
-    loader.get("kServer", global.cluster.clusterId, function (err, server) {
+    gLoader.get("kServer", global.cluster.clusterId, function (err, server) {
       server.set("ip", "localhost");
       server.set("port", global.CONF.clusterPort);
       shlog.info("set server info", server.getData());
 
       driver.sadd("serverList", global.cluster.clusterId, function (err) {
-        loader.dump();
+        gLoader.dump();
         if (err) {
           return cb(err, clusterInfo);
         }
-        ShCluster.servers(function (err, data) {
-          // just a test
-        });
 
         // start dnode
         gServer = dnode({
@@ -81,11 +78,11 @@ ShCluster.shutdown = function () {
     },
     function (cb) {
       shlog.info("delete server object");
-      loader.delete("kServer", global.cluster.clusterId, cb);
+      gLoader.delete("kServer", global.cluster.clusterId, cb);
     },
     function (cb) {
       shlog.info("dumping loader");
-      loader.dump(cb);
+      gLoader.dump(cb);
     }
   ],
     function (err, results) {
@@ -103,10 +100,10 @@ ShCluster.servers = function (cb) {
     }
     async.each(servers,
       function (item, lcb) {
-        loader.get("kServer", item, function (err, server) {
+        gLoader.get("kServer", item, function (err, server) {
           serverList[item] = server.getData();
           lcb(0);
-        });
+        }, {checkCache: false});
       },
       function (err) {
         if (err) {
@@ -115,4 +112,11 @@ ShCluster.servers = function (cb) {
         cb(0, serverList);
       });
   });
+};
+
+
+ShCluster.locate = function (uid, cb) {
+  gLoader.exists("kLocate", uid, function (err, locateInfo) {
+    cb(err, locateInfo);
+  }, {checkCache: false});
 };

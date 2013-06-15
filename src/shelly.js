@@ -7,9 +7,14 @@ var async = require("async");
 
 global.gBaseDir = path.dirname(__dirname);
 
+global.configBase = global.gBaseDir + "/config";
+if (_.isString(process.argv[2])) {
+  global.configBase = process.argv[2];
+}
+
 // load configs with per machine overrides
-global.CONF = require(global.gBaseDir + "/config/main.js");
-var machineConfigFn = global.gBaseDir + "/config/" + os.hostname() + ".js";
+global.CONF = require(global.configBase + "/main.js");
+var machineConfigFn = global.configBase + "/" + os.hostname() + ".js";
 /*jslint stupid: true */
 if (fs.existsSync(machineConfigFn)) {
   try {
@@ -21,7 +26,7 @@ if (fs.existsSync(machineConfigFn)) {
 }
 
 global.PACKAGE = require(global.gBaseDir + "/package.json");
-var clusterInfoFn = global.gBaseDir + "/config/cluster.json";
+var clusterInfoFn = global.configBase + "/cluster.json";
 if (fs.existsSync(clusterInfoFn)) {
   global.cluster = require(clusterInfoFn);
 } else {
@@ -30,6 +35,7 @@ if (fs.existsSync(clusterInfoFn)) {
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 shlog.info("loaded:", new Date());
+shlog.info("configBase:", global.configBase);
 shlog.info("config:", global.CONF);
 
 global.db = require(global.gBaseDir + "/src/shdb.js");
