@@ -17,6 +17,9 @@ config.socketPort = 5110;
 config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
 config.heartBeat = 30 * 1000;
 
+// cluster options
+config.clusterPort = 5151;
+
 // db
 config.db = {};
 //config.db.wrapper = "/src/db/shsqlite.js";

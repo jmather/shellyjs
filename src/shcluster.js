@@ -2,6 +2,7 @@ var fs = require("fs");
 var _ = require("lodash");
 var async = require("async");
 var uuid = require("node-uuid");
+var dnode = require('dnode');
 
 var shutil = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
@@ -15,6 +16,7 @@ var ShCluster = exports;
 var db = require(global.gBaseDir + "/src/shdb.js");
 var loader = new ShLoader(db);
 var driver = global.db.driver;
+var gServer = null;
 
 ShCluster.init = function (cb) {
   var clusterInfoFn = __dirname + "/../config/cluster.json";
@@ -38,18 +40,34 @@ ShCluster.init = function (cb) {
 
   db.init(function (err) {
     loader.get("kServer", global.cluster.clusterId, function (err, server) {
-      console.log(server);
-      server.set("clusterId", global.cluster.clusterId);
       server.set("ip", "localhost");
-      server.set("port", 5103);
+      server.set("port", global.CONF.clusterPort);
+      shlog.info("set server info", server.getData());
 
       driver.sadd("serverList", global.cluster.clusterId, function (err) {
-        console.log("serverList sadd", err);
-        driver.smembers("serverList", function (err, data) {
-          console.log("smembers", err, data);
-          loader.dump();
-          return cb(0, clusterInfo);
+        loader.dump();
+        if (err) {
+          return cb(err, clusterInfo);
+        }
+        ShCluster.servers(function (err, data) {
+          // just a test
         });
+
+        // start dnode
+        gServer = dnode({
+          transform : function (s, cb) {
+            console.log("cluster recv", s);
+            cb("ack");
+          },
+          event : function (s, cb) {
+            console.log("cluster event recv", s);
+            cb("ack-event");
+          }
+        });
+        shlog.info("starting cluster server on:", global.CONF.clusterPort);
+        gServer.listen(global.CONF.clusterPort);
+
+        return cb(0, clusterInfo);
       });
     });
   });
@@ -71,7 +89,30 @@ ShCluster.shutdown = function () {
     }
   ],
     function (err, results) {
-      shlog.info("done.");
+      shlog.info("shutdown done.");
       process.exit(0);
     });
+};
+
+ShCluster.servers = function (cb) {
+  var serverList = {};
+  driver.smembers("serverList", function (err, servers) {
+    shlog.info("smembers err:", err, "data:", servers);
+    if (err) {
+      return cb(err, servers);
+    }
+    async.each(servers,
+      function (item, lcb) {
+        loader.get("kServer", item, function (err, server) {
+          serverList[item] = server.getData();
+          lcb(0);
+        });
+      },
+      function (err) {
+        if (err) {
+          return cb(err, null);
+        }
+        cb(0, serverList);
+      });
+  });
 };

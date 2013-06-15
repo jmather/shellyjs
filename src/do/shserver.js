@@ -11,7 +11,6 @@ function ShServer() {
   this._keyType = "kServer";
   this._keyFormat = "serv:%s";
   this._data = {
-    clusterId: "",
     ip: "",
     port: 0
   };
