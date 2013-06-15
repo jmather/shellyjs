@@ -27,50 +27,52 @@ shtest.call = function (data, cb) {
 shtest.uid = function (utype) {
   if (utype === "user") {
     return gUserSession.split(":")[1];
-  } else if (utype === "admin") {
+  }
+  if (utype === "admin") {
     return gAdminSession.split(":")[1];
   }
   return "";
-}
+};
 
 shtest.session = function (utype) {
   if (utype === "user") {
     return gUserSession;
-  } else if (utype === "admin") {
+  }
+  if (utype === "admin") {
     return gAdminSession;
   }
   return "";
-}
+};
 
 shtest.init = function (email, password, cb) {
   var self = this;
   this.call({cmd: "reg.login", email: "shelly", password: ""}, function (err, res) {
-      if (err) {
-        cb(err, res);
-        return;
-      }
-      gAdminSession = res.body.data.session;
+    if (err) {
+      cb(err, res);
+      return;
+    }
+    gAdminSession = res.body.data.session;
 
-      self.call({cmd: "reg.create", email: email, password: password}, function (err, res) {
-        // ignore error for already exists and just try login
-        self.call({cmd: "reg.login", email: email, password: password}, function (err, res) {
-          if (err) {
-            cb(err, res);
-            return;
-          }
-          gUserSession = res.body.data.session;
+    self.call({cmd: "reg.create", email: email, password: password}, function (err, res) {
+      // ignore error for already exists and just try login
+      self.call({cmd: "reg.login", email: email, password: password}, function (err, res) {
+        if (err) {
           cb(err, res);
-        });
+          return;
+        }
+        gUserSession = res.body.data.session;
+        cb(err, res);
       });
     });
-}
+  });
+};
 
 shtest.adminCall = function (data, cb) {
   data.session = gAdminSession;
   this.call(data, cb);
-}
+};
 
 shtest.userCall = function (data, cb) {
   data.session = gUserSession;
   this.call(data, cb);
-}
+};
