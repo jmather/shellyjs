@@ -22,6 +22,20 @@ function add(data) {
   sh.sendWs(this.ws, 0, data);
 }
 
+function makeCalls(msgs, req, res) {
+  try {
+    // process each message with same loader
+    async.eachSeries(msgs, function (item, cb) {
+      req.body = item;
+      sh.call(req, res, cb);
+    }, function (err) {
+      req.loader.dump();  // don't wait on dump cb
+    });
+  } catch (err1) {
+    res.add(sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
+  }
+}
+
 function onMessage(data) {
   shlog.recv("live - %s", data);
   // parse packet
@@ -46,32 +60,29 @@ function onMessage(data) {
     msgs = [packet];
   }
 
-  sh.fillSession(packet.session, req, res, function (err) {
-    // req.session.valid now used to control access
-    if (req.session.valid) {
-      res.ws.uid = req.session.uid;
-      res.ws.name = req.session.user.get("name");
-      loader.get("kLocate", req.session.uid, function (err, locate) {
-        locate.set("oid", req.session.uid);
-        locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
-        locate.set("clusterId", global.cluster.clusterId);
-        locate.set("workerId", shlog.workerId);
-        locate.set("socketId", res.ws.id);
-        shlog.info("locate set", locate.getData());
-      });
-    }
-    try {
-      // process each message with same loader
-      async.eachSeries(msgs, function (item, cb) {
-        req.body = item;
-        sh.call(req, res, cb);
-      }, function (err) {
-        loader.dump();  // don't wait on dump cb
-      });
-    } catch (err1) {
-      sh.sendWs(this, 1, sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
-    }
-  });
+  if (_.isObject(res.ws.session)) {
+    // SWD: we must refresh the user data so it doesn't get stale
+    req.session = res.ws.session;
+    makeCalls(msgs, req, res);
+  } else {
+    sh.fillSession(packet.session, req, res, function (err) {
+      // req.session.valid now used to control access
+      if (req.session.valid) {
+        res.ws.session = req.session;   // SWD now storing session in ws so we can remove the ws.uid and ws.name
+        res.ws.uid = req.session.uid;
+        res.ws.name = req.session.user.get("name");
+        loader.get("kLocate", req.session.uid, function (err, locate) {
+          locate.set("oid", req.session.uid);
+          locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
+          locate.set("clusterId", global.cluster.clusterId);
+          locate.set("workerId", shlog.workerId);
+          locate.set("socketId", res.ws.id);
+          shlog.info("locate set", locate.getData());
+        });
+      }
+      makeCalls(msgs, req, res);
+    });
+  }
 }
 
 function onClose() {
