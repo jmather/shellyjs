@@ -130,8 +130,14 @@ shelly.send = function (msg) {
     gChannel.sendDirect(msg.toWsid, msg.data);
     return;
   }
+  if (msg.cmd === "user.direct") {
+    shlog.info("msg", msg)
+    gChannel.sendDirect(msg.toWsid, msg.data);
+    return;
+  }
   if (msg.cmd === "forward") {
     gChannel.sendInt(msg.channel, msg.data, false); // do not forward to cluster
     return;
   }
+  shlog.error("bad_message", "unknown command", msg);
 };

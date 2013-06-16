@@ -1,8 +1,9 @@
 var fs = require("fs");
+var cluster = require("cluster");
 var _ = require("lodash");
 var async = require("async");
 var uuid = require("node-uuid");
-var dnode = require('dnode');
+var dnode = require("dnode");
 
 var shutil = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
@@ -52,12 +53,13 @@ ShCluster.init = function (cb) {
 
         // start dnode
         gServer = dnode({
-          transform : function (s, cb) {
-            console.log("cluster recv", s);
-            cb("ack");
-          },
-          event : function (s, cb) {
-            console.log("cluster event recv", s);
+          event : function (msg, cb) {
+            console.log("cluster event recv", msg);
+            // cmd = direct.user
+            // toWid = workerId
+            // toWsid = websocket id of user
+            // data = object to forward to user socket
+            cluster.workers[msg.toWid].send(msg);
             cb("ack-event");
           }
         });
@@ -70,14 +72,55 @@ ShCluster.init = function (cb) {
   });
 };
 
+ShCluster.sendCluster = function (clusterId, data, cb) {
+  gLoader.get("kServer", clusterId, function (err, server) {
+    if (err) {
+      shlog.error("bad_clusterid", "cannot find cluster id", clusterId);
+      return cb(1, "bad_clusterId");
+    }
+    shlog.info("send:", clusterId, data);
+    var d = dnode.connect(server.get("port"));
+    d.on('remote', function (remote) {
+      remote.event(data, function (s) {
+        console.log('response => ' + s);
+        d.end();
+        cb(0, s);
+      });
+    });
+  }, {checkCache: false});
+};
+
+ShCluster.sendUser = function (uid, data, cb) {
+  var self = this;
+  gLoader.get("kLocate", uid, function (err, locate) {
+    if (err) {
+      shlog.error("user_offline", "user is offline", uid);
+      return cb(1, "user_offline");
+    }
+    var msg = {};
+    msg.cmd = "user.direct";
+    msg.clusterId = locate.get("clusterId");
+    msg.toWid = locate.get("workerId");
+    msg.toWsid = locate.get("socketId");
+    msg.data = data;
+    shlog.info("send remote:", msg);
+    self.sendCluster(msg.clusterId, msg, cb);
+  }, {checkCache: false});
+};
+
 ShCluster.shutdown = function () {
   async.series([
     function (cb) {
-      shlog.info("delete server object");
+      shlog.info("stopping cluster server");
+      gServer.end();
+      cb(0);
+    },
+    function (cb) {
+      shlog.info("delete server from serverList");
       driver.srem("serverList", global.cluster.clusterId, cb);
     },
     function (cb) {
-      shlog.info("delete server object");
+      shlog.info("delete kServer object");
       gLoader.delete("kServer", global.cluster.clusterId, cb);
     },
     function (cb) {
