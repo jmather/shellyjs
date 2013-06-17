@@ -10,7 +10,8 @@ cluster.desc = "cluster information, statistics, and settings";
 cluster.functions = {
   servers: {desc: "get all server in cluster", params: {}, security: ["admin"]},
   locate: {desc: "locate a user in the cluster", params: {uid: {dtype: "string"}}, security: ["admin"]},
-  sendUser: {desc: "send a message to any user", params: {uid: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]}
+  sendUser: {desc: "send a message to any user", params: {uid: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]},
+  home: {desc: "hash the oid to get the home cluster server", params: {oid: {dtype: "string"}}, security: []}
 };
 
 cluster.servers = function (req, res, cb) {
@@ -48,6 +49,19 @@ cluster.sendUser = function (req, res, cb) {
       return cb(err);
     }
     res.add(sh.event("cluster.send", data));
+    return cb(0);
+  });
+};
+
+cluster.home = function (req, res, cb) {
+  shlog.info("cluster.home");
+
+  shcluster.home(req.body.oid, function (err, data) {
+    if (err) {
+      res.add(sh.error("cluster_home", "unable to locate a server for this oid", data));
+      return cb(err);
+    }
+    res.add(sh.event("cluster.home", data));
     return cb(0);
   });
 };

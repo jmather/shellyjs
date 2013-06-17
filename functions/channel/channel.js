@@ -3,6 +3,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var shcluster = require(global.gBaseDir + "/src/shcluster");
 
 var Channel = exports;
 
@@ -70,6 +71,9 @@ Channel.sendAll = function (prefix, ids, data) {
 
   _.each(ids, function (id) {
     Channel.sendInt(prefix + id, data);
+    shcluster.sendUser(id, data, function (err, data) {
+      // ignore the returns for now
+    });
   });
 };
 

@@ -18,7 +18,7 @@ config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
 config.heartBeat = 30 * 1000;
 
 // cluster options
-config.clusterPort = 5152;
+config.clusterUrl = "tcp://localhost:5152";
 
 // db
 config.db = {};
