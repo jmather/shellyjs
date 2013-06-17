@@ -16,6 +16,7 @@ var gDebug = {
 //  "socket": {},
 //  "rest": {},
 //  "admin": {},
+//  "games": {},
 //  "channel": {},
 //	"game": {},
 //	"user": {},

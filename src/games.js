@@ -9,6 +9,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var shcluster = require(global.gBaseDir + "/src/shcluster.js");
 
 var commonStatic = global.gBaseDir + "/www/common";
 var gamesBase = global.gBaseDir + "/www/games";
@@ -79,12 +80,29 @@ function createEnv(req) {
   return map;
 }
 
+function renderPage(req, res, env) {
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
+    partials: {header: "header", footer: "footer", gameNav: "gamenav"}});
+}
+
 app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var env = createEnv(req);
 
-  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", gameNav: "gamenav"}});
+  if (_.isString(req.query.gameId)) {
+    shcluster.home(req.query.gameId, function (err, server) {
+      if (err) {
+        // throw error
+        return;
+      }
+      env.socketUrl = server.socketUrl;
+      shlog.info("setting serverUrl:", env.socketUrl);
+      renderPage(req, res, env);
+    });
+  } else {
+    // just render with current serverUrl
+    renderPage(req, res, env);
+  }
 });
 
 app.use("/", express.static(gamesBase));  // catch all for any example js files
