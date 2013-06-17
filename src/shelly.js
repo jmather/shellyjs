@@ -28,7 +28,7 @@ if (fs.existsSync(machineConfigFn)) {
 }
 
 global.PACKAGE = require(global.gBaseDir + "/package.json");
-var serverInfoFn = global.configBase + "/cluster.json";
+var serverInfoFn = global.configBase + "/server.json";
 if (fs.existsSync(serverInfoFn)) {
   global.server = require(serverInfoFn);
 } else {

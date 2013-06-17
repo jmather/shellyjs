@@ -21,7 +21,7 @@ var driver = global.db.driver;
 var gServer = null;
 
 ShCluster.init = function (cb) {
-  var serverInfoFn = global.configBase + "/cluster.json";
+  var serverInfoFn = global.configBase + "/server.json";
   var serverInfo = {};
   if (!fs.existsSync(serverInfoFn)) {
     serverInfo.serverId = shutil.uuid();
