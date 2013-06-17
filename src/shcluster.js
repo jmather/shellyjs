@@ -21,35 +21,35 @@ var driver = global.db.driver;
 var gServer = null;
 
 ShCluster.init = function (cb) {
-  var clusterInfoFn = global.configBase + "/cluster.json";
-  var clusterInfo = {};
-  if (!fs.existsSync(clusterInfoFn)) {
-    clusterInfo.clusterId = shutil.uuid();
-    fs.writeFile(clusterInfoFn, JSON.stringify(clusterInfo), function (err) {
+  var serverInfoFn = global.configBase + "/cluster.json";
+  var serverInfo = {};
+  if (!fs.existsSync(serverInfoFn)) {
+    serverInfo.serverId = shutil.uuid();
+    fs.writeFile(serverInfoFn, JSON.stringify(serverInfo), function (err) {
       if (err) {
         console.log(err);
       } else {
         console.log("The file was saved!");
       }
-      return cb(err, clusterInfo);
+      return cb(err, serverInfo);
     });
   } else {
-    clusterInfo = require(clusterInfoFn);
+    serverInfo = require(serverInfoFn);
   }
 
-  global.cluster = clusterInfo;
-  shlog.info("cluster id:", global.cluster);
+  global.server = serverInfo;
+  shlog.info("cluster id:", global.server);
 
   db.init(function (err) {
-    gLoader.get("kServer", global.cluster.clusterId, function (err, server) {
+    gLoader.get("kServer", global.server.serverId, function (err, server) {
       server.set("clusterUrl", global.CONF.clusterUrl);
       server.set("socketUrl", global.CONF.socketUrl);
       shlog.info("set server info", server.getData());
 
-      driver.sadd("serverList", global.cluster.clusterId, function (err) {
+      driver.sadd("serverList", global.server.serverId, function (err) {
         gLoader.dump();
         if (err) {
-          return cb(err, clusterInfo);
+          return cb(err, serverInfo);
         }
 
         // start dnode
@@ -68,7 +68,7 @@ ShCluster.init = function (cb) {
         shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
         gServer.listen(urlParts.port, urlParts.hostName);
 
-        return cb(0, clusterInfo);
+        return cb(0, serverInfo);
       });
     });
   });
@@ -83,11 +83,11 @@ ShCluster.shutdown = function () {
     },
     function (cb) {
       shlog.info("delete server from serverList");
-      driver.srem("serverList", global.cluster.clusterId, cb);
+      driver.srem("serverList", global.server.serverId, cb);
     },
     function (cb) {
       shlog.info("delete kServer object");
-      gLoader.delete("kServer", global.cluster.clusterId, cb);
+      gLoader.delete("kServer", global.server.serverId, cb);
     },
     function (cb) {
       shlog.info("dumping loader");
@@ -129,14 +129,14 @@ ShCluster.locate = function (uid, cb) {
   }, {checkCache: false});
 };
 
-ShCluster.sendCluster = function (clusterId, data, cb) {
-  gLoader.exists("kServer", clusterId, function (err, server) {
+ShCluster.sendCluster = function (serverId, data, cb) {
+  gLoader.exists("kServer", serverId, function (err, server) {
     if (err) {
-      shlog.error("bad_clusterid", "cannot find cluster id", clusterId);
-      return cb(1, "bad_clusterId");
+      shlog.error("bad_serverId", "cannot find cluster id", serverId);
+      return cb(1, "bad_serverId");
     }
     var urlParts = url.parse(server.get("clusterUrl"));
-    shlog.info("send:", clusterId, urlParts.hostname, urlParts.port, data);
+    shlog.info("send:", serverId, urlParts.hostname, urlParts.port, data);
     var d = dnode.connect(urlParts.port, urlParts.hostname);
     d.on('remote', function (remote) {
       remote.event(data, function (s) {
@@ -157,12 +157,12 @@ ShCluster.sendUser = function (uid, data, cb) {
     }
     var msg = {};
     msg.cmd = "user.direct";
-    msg.clusterId = locate.get("clusterId");
+    msg.serverId = locate.get("serverId");
     msg.toWid = locate.get("workerId");
     msg.toWsid = locate.get("socketId");
     msg.data = data;
     shlog.info("send remote:", msg);
-    self.sendCluster(msg.clusterId, msg, cb);
+    self.sendCluster(msg.serverId, msg, cb);
   }, {checkCache: false});
 };
 
@@ -175,11 +175,11 @@ ShCluster.home = function (oid, cb) {
       return cb(err, servers);
     }
     var idx = shutil.modString(oid, servers.length);
-    var clusterId = servers[idx];
-    gLoader.get("kServer", clusterId, function (err, server) {
+    var serverId = servers[idx];
+    gLoader.get("kServer", serverId, function (err, server) {
       if (err) {
-        shlog.error("bad_clusterid", "cannot find cluster id", clusterId);
-        return cb(1, "bad_clusterId");
+        shlog.error("bad_serverId", "cannot find cluster id", serverId);
+        return cb(1, "bad_serverId");
       }
       shlog.info("server home", oid, idx, server.getData());
       return cb(0, server.getData());

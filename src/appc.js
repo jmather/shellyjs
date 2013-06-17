@@ -1,6 +1,8 @@
 var cluster = require("cluster");
 var _ = require("lodash");
 
+global.CLUSTER = true;
+
 // need shelly before log - this inits all config and other globals
 var shelly = require(__dirname + "/shelly.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");

@@ -7,6 +7,8 @@ var async = require("async");
 
 global.gBaseDir = path.dirname(__dirname);
 
+if (_.isUndefined(global.CLUSTER)) { global.CLUSTER = false; }
+
 global.configBase = global.gBaseDir + "/config";
 if (_.isString(process.argv[2])) {
   global.configBase = process.argv[2];
@@ -26,15 +28,16 @@ if (fs.existsSync(machineConfigFn)) {
 }
 
 global.PACKAGE = require(global.gBaseDir + "/package.json");
-var clusterInfoFn = global.configBase + "/cluster.json";
-if (fs.existsSync(clusterInfoFn)) {
-  global.cluster = require(clusterInfoFn);
+var serverInfoFn = global.configBase + "/cluster.json";
+if (fs.existsSync(serverInfoFn)) {
+  global.server = require(serverInfoFn);
 } else {
-  global.cluster = {clusterId: "0"};
+  global.server = {serverId: "0"};
 }
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 shlog.info("loaded:", new Date());
+shlog.info("CLUSTER:", global.CLUSTER);
 shlog.info("configBase:", global.configBase);
 shlog.info("config:", global.CONF);
 

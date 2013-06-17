@@ -71,9 +71,11 @@ Channel.sendAll = function (prefix, ids, data) {
 
   _.each(ids, function (id) {
     Channel.sendInt(prefix + id, data);
-    shcluster.sendUser(id, data, function (err, data) {
-      // ignore the returns for now
-    });
+    if (global.CLUSTER) {
+      shcluster.sendUser(id, data, function (err, data) {
+        // ignore the returns for now
+      });
+    }
   });
 };
 

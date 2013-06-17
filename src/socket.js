@@ -71,14 +71,16 @@ function onMessage(data) {
         res.ws.session = req.session;   // SWD now storing session in ws so we can remove the ws.uid and ws.name
         res.ws.uid = req.session.uid;
         res.ws.name = req.session.user.get("name");
-        loader.get("kLocate", req.session.uid, function (err, locate) {
-          locate.set("oid", req.session.uid);
-          locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
-          locate.set("clusterId", global.cluster.clusterId);
-          locate.set("workerId", shlog.workerId);
-          locate.set("socketId", res.ws.id);
-          shlog.info("locate set", locate.getData());
-        });
+        if (global.CLUSTER) {
+          loader.get("kLocate", req.session.uid, function (err, locate) {
+            locate.set("oid", req.session.uid);
+            locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
+            locate.set("serverId", global.server.serverId);
+            locate.set("workerId", shlog.workerId);
+            locate.set("socketId", res.ws.id);
+            shlog.info("locate set", locate.getData());
+          });
+        }
       }
       makeCalls(msgs, req, res);
     });
@@ -91,7 +93,7 @@ function onClose() {
   clearInterval(this.hbTimer);
 
   // clean up the global locator if there
-  if (_.isString(this.uid)) {
+  if (global.CLUSTER && _.isString(this.uid)) {
     global.db.kdelete("kLocate", this.uid);
     // don't for response
   }
