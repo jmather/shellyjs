@@ -9,14 +9,25 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
 
-// received message from worker
-function workerMessage(msg) {
+var gStats = {};
+
+// master received message from worker
+function onWorkerMessage(msg) {
   shlog.info("master recv:", JSON.stringify(msg));
 
   // SWD must adjust socket   connect and close to set cluster ID and server IP
   // check to see if it's a global channel
   // if so check if the user is on another cluster
   // if so send to that cluster
+
+  if (msg.cmd === "stat") {
+    if (_.isUndefined(gStats[msg.key])) {
+      gStats[msg.key] = {};
+    }
+    gStats[msg.key][msg.wid] = msg.count;
+    console.log("gStats", gStats);
+    return;
+  }
 
   if (msg.toWid === "all") {
     // forward to all workers, except sender
@@ -36,7 +47,7 @@ if (cluster.isMaster) {
     var i = 0;
     for (i = 0; i < 2; i++) {
       var p = cluster.fork();
-      p.on("message", workerMessage);
+      p.on("message", onWorkerMessage);
     }
   });
 } else {

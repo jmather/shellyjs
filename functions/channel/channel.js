@@ -108,13 +108,13 @@ Channel.returnOnline = function (channel, fromWid, toWsid) {
 // SWD must fix this to also send cluster command
 // this will be more like an add that fires a bunch of channel.list messages to caller
 Channel.list = function (req, res, cb) {
-  var users = {};
+  var channels = {};
 
-  _.each(global.channels[req.body.channel], function (ws) {
-    users[ws.uid] = {uid: ws.uid, name: ws.name, pic: ""};
+  _.each(global.channels, function (wsList, name) {
+    channels[name] = wsList.length;
   });
 
-  res.add(sh.event("channel.list", users));
+  res.add(sh.event("channel.list", channels));
   return cb(0);
 };
 
@@ -138,6 +138,12 @@ Channel.add = function (req, res, cb) {
   res.ws.channels[req.body.channel] = "on";  // cross ref so we can call remove on socket close
   shlog.info("add", req.body.channel, global.channels[req.body.channel].length);
 
+  // update master stats for channel
+  if (cluster.isWorker) {
+    process.send({cmd: "stat", wid: cluster.worker.id,
+      key: req.body.channel, count: global.channels[req.body.channel].length});
+  }
+
   // notify me of online channel users
   // SWD might want to put flag on channels that realy need this
   // as it generates a lot of presence traffic
@@ -159,6 +165,11 @@ Channel.removeInt = function (ws, channel) {
 
   var event = sh.event("channel.user", {channel: channel, uid: ws.uid, name: ws.name, pic: "",  status: "off"});
   Channel.sendInt(channel, event);
+
+  // update master stats for channel
+  if (cluster.isWorker) {
+    process.send({cmd: "stat", wid: cluster.worker.id, key: channel, count: global.channels[channel].length});
+  }
 
   return event;
 };
