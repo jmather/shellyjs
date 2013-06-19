@@ -36,7 +36,7 @@ ShCluster.init = function (cb) {
         // start dnode
         gServer = dnode({
           event : function (msg, cb) {
-            shlog.info("server event recv: %j", msg);
+            shlog.debug("server event recv: %j", msg);
             // cmd = direct.user
             // toWid = workerId
             // toWsid = websocket id of user
@@ -54,7 +54,7 @@ ShCluster.init = function (cb) {
               return;
             }
             cluster.workers[msg.toWid].send(msg);
-            cb("ack-event");
+            cb("ok");
           }
         });
         var urlParts = url.parse(global.CONF.clusterUrl);
@@ -129,11 +129,11 @@ ShCluster.sendCluster = function (serverId, data, cb) {
       return cb(1, "bad_serverId");
     }
     var urlParts = url.parse(server.get("clusterUrl"));
-    shlog.info("send:", serverId, urlParts.hostname, urlParts.port, data);
+    shlog.debug("send:", serverId, urlParts.hostname, urlParts.port, data);
     var d = dnode.connect(urlParts.port, urlParts.hostname);
     d.on('remote', function (remote) {
       remote.event(data, function (s) {
-        console.log('response => ' + s);
+        shlog.debug("response:" + s);
         d.end();
         cb(0, s);
       });
@@ -159,14 +159,14 @@ ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
   msg.toWid = locateInfo.get("workerId");
   msg.toWsid = locateInfo.get("socketId");
   msg.data = data;
-  shlog.info("send remote:", msg);
+  shlog.debug("send remote:", msg);
   this.sendCluster(msg.serverId, msg, cb);
 };
 
 ShCluster.home = function (oid, cb) {
   var self = this;
   gDriver.smembers("serverList", function (err, servers) {
-    shlog.info("smembers err:", err, "data:", servers);
+    shlog.debug("smembers err: %s, data: %j", err, servers);
     if (err) {
       return cb(err, servers);
     }
@@ -177,7 +177,8 @@ ShCluster.home = function (oid, cb) {
         shlog.error("bad_serverId", "cannot find cluster id", serverId);
         return cb(1, "bad_serverId");
       }
-      shlog.info("server home", oid, idx, server.getData());
+      shlog.info("get home server oid: %s, idx: %s", oid, idx);
+      shlog.debug("get home server data: %j", server.getData());
       return cb(0, server.getData());
     }, {checkCache: false});
   });
