@@ -21,25 +21,6 @@ var driver = global.db.driver;
 var gServer = null;
 
 ShCluster.init = function (cb) {
-  var serverInfoFn = global.configBase + "/server.json";
-  var serverInfo = {};
-  if (!fs.existsSync(serverInfoFn)) {
-    serverInfo.serverId = shutil.uuid();
-    fs.writeFile(serverInfoFn, JSON.stringify(serverInfo), function (err) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("The file was saved!");
-      }
-      return cb(err, serverInfo);
-    });
-  } else {
-    serverInfo = require(serverInfoFn);
-  }
-
-  global.server = serverInfo;
-  shlog.info("cluster id:", global.server);
-
   db.init(function (err) {
     gLoader.get("kServer", global.server.serverId, function (err, server) {
       server.set("clusterUrl", global.CONF.clusterUrl);
@@ -49,7 +30,7 @@ ShCluster.init = function (cb) {
       driver.sadd("serverList", global.server.serverId, function (err) {
         gLoader.dump();
         if (err) {
-          return cb(err, serverInfo);
+          return cb(err, "unable to save to server list");
         }
 
         // start dnode
@@ -68,7 +49,7 @@ ShCluster.init = function (cb) {
         shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
         gServer.listen(urlParts.port, urlParts.hostName);
 
-        return cb(0, serverInfo);
+        return cb(0, null);
       });
     });
   });

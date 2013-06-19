@@ -28,16 +28,11 @@ if (fs.existsSync(machineConfigFn)) {
 }
 
 global.PACKAGE = require(global.gBaseDir + "/package.json");
-var serverInfoFn = global.configBase + "/server.json";
-if (fs.existsSync(serverInfoFn)) {
-  global.server = require(serverInfoFn);
-} else {
-  global.server = {serverId: "0"};
-}
+global.server = serverInfo();
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 shlog.info("loaded:", new Date());
-shlog.info("CLUSTER:", global.CLUSTER);
+shlog.info("server:", global.server);
 shlog.info("configBase:", global.configBase);
 shlog.info("config:", global.CONF);
 
@@ -143,4 +138,18 @@ shelly.send = function (msg) {
     return;
   }
   shlog.error("bad_message", "unknown command", msg);
+};
+
+/*jslint stupid: true */
+// OK as this is only called once during startup
+function serverInfo() {
+  var serverInfoFn = global.configBase + "/server.json";
+  var serverData = {};
+  if (!fs.existsSync(serverInfoFn)) {
+    serverData.serverId = shutil.uuid();
+    fs.writeFileSync(serverInfoFn, JSON.stringify(serverInfo));
+  } else {
+    serverData = require(serverInfoFn);
+  }
+  return serverData;
 };
