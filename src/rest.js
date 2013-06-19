@@ -18,7 +18,7 @@ function add(data) {
     this.msgs = [];
   }
   if (data.event === "error") {
-    shlog.error(data);  // log all errors
+    shlog.error("send %j", data);  // log all errors
   }
   this.msgs.push(data);
 }
@@ -81,7 +81,7 @@ rest.use(function (err, req, res, next) {
   }
 
   res.status(500);
-  shlog.error("rest error", err, err.stack);
+  shlog.error("rest error %s %j", err, err.stack);
   res.send(sh.error("rest_api", err.message, { message: err.message, stack: err.stack }));
 });
 
