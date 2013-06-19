@@ -1,8 +1,6 @@
 var cluster = require("cluster");
 var _ = require("lodash");
 
-global.CLUSTER = true;
-
 // need shelly before log - this inits all config and other globals
 var shelly = require(__dirname + "/shelly.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -45,7 +43,7 @@ function onWorkerMessage(msg) {
 if (cluster.isMaster) {
   shCluster.init(function (err, data) {
     var i = 0;
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < global.CONF.NUM_WORKERS; i += 1) {
       var p = cluster.fork();
       p.on("message", onWorkerMessage);
     }

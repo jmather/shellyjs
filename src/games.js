@@ -89,7 +89,7 @@ app.get("*.html", function (req, res) {
   shlog.info("%s %s", req.method, req.url);
   var env = createEnv(req);
 
-  if (global.CLUSTER && _.isString(req.query.gameId)) {
+  if (_.isString(req.query.gameId)) {
     shcluster.home(req.query.gameId, function (err, server) {
       if (err) {
         // throw error

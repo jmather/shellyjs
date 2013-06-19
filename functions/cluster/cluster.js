@@ -16,10 +16,6 @@ cluster.functions = {
 
 cluster.servers = function (req, res, cb) {
   shlog.info("cluster.servers");
-  if (!global.CLUSTER) {
-    res.add(sh.error("cluster_disabled", "cluster is not enabled on this server"));
-    return cb(1);
-  }
 
   shcluster.servers(function (err, data) {
     if (err) {
@@ -33,10 +29,6 @@ cluster.servers = function (req, res, cb) {
 
 cluster.locate = function (req, res, cb) {
   shlog.info("cluster.locate");
-  if (!global.CLUSTER) {
-    res.add(sh.error("cluster_disabled", "cluster is not enabled on this server"));
-    return cb(1);
-  }
 
   shcluster.locate(req.body.uid, function (err, locate) {
     if (err) {
@@ -50,10 +42,6 @@ cluster.locate = function (req, res, cb) {
 
 cluster.sendUser = function (req, res, cb) {
   shlog.info("cluster.send");
-  if (!global.CLUSTER) {
-    res.add(sh.error("cluster_disabled", "cluster is not enabled on this server"));
-    return cb(1);
-  }
 
   shcluster.sendUser(req.body.uid, req.body.data, function (err, data) {
     if (err) {
@@ -67,10 +55,6 @@ cluster.sendUser = function (req, res, cb) {
 
 cluster.home = function (req, res, cb) {
   shlog.info("cluster.home");
-  if (!global.CLUSTER) {
-    res.add(sh.error("cluster_disabled", "cluster is not enabled on this server"));
-    return cb(1);
-  }
 
   shcluster.home(req.body.oid, function (err, data) {
     if (err) {

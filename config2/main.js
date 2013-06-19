@@ -18,6 +18,7 @@ config.heartBeat = 30 * 1000;
 
 // cluster options
 config.clusterUrl = "tcp://localhost:5152";
+config.NUM_WORKERS = 2;
 
 // db
 config.db = {};

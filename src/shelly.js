@@ -7,8 +7,6 @@ var async = require("async");
 
 global.gBaseDir = path.dirname(__dirname);
 
-if (_.isUndefined(global.CLUSTER)) { global.CLUSTER = false; }
-
 global.configBase = global.gBaseDir + "/config";
 if (_.isString(process.argv[2])) {
   global.configBase = process.argv[2];

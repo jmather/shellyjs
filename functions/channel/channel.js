@@ -70,12 +70,11 @@ Channel.sendAll = function (prefix, ids, data) {
   shlog.info("sendAll", prefix, ids);
 
   _.each(ids, function (id) {
+    //SWD: this will get fixed with move to dispatch
     Channel.sendInt(prefix + id, data);
-    if (global.CLUSTER) {
-      shcluster.sendUser(id, data, function (err, data) {
-        // ignore the returns for now
-      });
-    }
+    shcluster.sendUser(id, data, function (err, data) {
+      // ignore the returns for now
+    });
   });
 };
 
