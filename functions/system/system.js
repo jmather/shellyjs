@@ -18,17 +18,14 @@ system.functions = {
 system.connInfo = function (req, res, cb) {
   shlog.info("system.connInfo");
 
-  var wid = 0;
-  if (cluster.isWorker) {
-    wid = cluster.worker.id;
-  }
   var wsid = 0;
   if (_.isObject(res.ws)) {
     wsid = res.ws.id;
   }
 
   var data = {
-    wid: wid,
+    serverId: global.server.serverId,
+    wid: cluster.worker.id,
     wsid: wsid
   };
 

@@ -24,6 +24,7 @@ var gDebug = {
 //  "shutil": {},
 //	"recv": {},
 //	"send": {},
+//  "dispatch": {},
 //  "shcluster": {},
 //  "appc": {},
 //  "app": {},
@@ -32,7 +33,15 @@ var gDebug = {
 
 var winston = require("winston");
 winston.remove(winston.transports.Console);
-winston.add(winston.transports.Console, { colorize: true, timestamp: false });
+winston.add(winston.transports.Console, { level: "info", colorize: true, timestamp: false });
+// emerg      system is unusable
+// alert      action must be taken immediately
+// crit       critical conditions
+// err        error conditions
+// warning    warning conditions
+// notice     normal, but significant, condition
+// info       informational message
+// debug      debug-level message
 
 shlog.workerId = 0;
 if (cluster.worker !== null) {
@@ -53,10 +62,18 @@ shlog.log = function () {
   var level = args.shift();
 
   if (level === "error" || !_.isUndefined(gDebug[callerName])) {
-//		var msg = util.format("%d - %s", process.pid, util.format.apply(this, args));
     var msg = util.format("%d %s - %s", shlog.workerId, callerName, util.format.apply(this, args));
+//    if (msg.length > 80) {
+//      msg = msg.substr(0, 80) + "...";
+//    }
     winston.log(level, msg);
   }
+};
+
+shlog.debug = function () {
+  var args = Array.prototype.slice.call(arguments);
+  args.unshift("debug");
+  this.log.apply(this, args);
 };
 
 shlog.info = function () {

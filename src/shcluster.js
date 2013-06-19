@@ -15,19 +15,19 @@ var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
 var ShCluster = exports;
 
-var db = require(global.gBaseDir + "/src/shdb.js");
-var gLoader = new ShLoader(db);
-var driver = global.db.driver;
+var gDb = require(global.gBaseDir + "/src/shdb.js");
+var gLoader = new ShLoader(gDb);
+var gDriver = gDb.driver;
 var gServer = null;
 
 ShCluster.init = function (cb) {
-  db.init(function (err) {
+  gDb.init(function (err) {
     gLoader.get("kServer", global.server.serverId, function (err, server) {
       server.set("clusterUrl", global.CONF.clusterUrl);
       server.set("socketUrl", global.CONF.socketUrl);
       shlog.info("set server info", server.getData());
 
-      driver.sadd("serverList", global.server.serverId, function (err) {
+      gDriver.sadd("serverList", global.server.serverId, function (err) {
         gLoader.dump();
         if (err) {
           return cb(err, "unable to save to server list");
@@ -36,11 +36,23 @@ ShCluster.init = function (cb) {
         // start dnode
         gServer = dnode({
           event : function (msg, cb) {
-            console.log("cluster event recv", msg);
+            shlog.info("server event recv: %j", msg);
             // cmd = direct.user
             // toWid = workerId
             // toWsid = websocket id of user
             // data = object to forward to user socket
+            if (_.isUndefined(msg.cmd)) {
+              shlog.error("server event: bad command %j", msg);
+              return;
+            }
+            if (_.isUndefined(msg.toWsid)) {
+              shlog.error("server event: socket id %j", msg);
+              return;
+            }
+            if (_.isUndefined(msg.toWid) || _.isUndefined(cluster.workers[msg.toWid])) {
+              shlog.error("server event: bad worker id %j", msg);
+              return;
+            }
             cluster.workers[msg.toWid].send(msg);
             cb("ack-event");
           }
@@ -64,7 +76,7 @@ ShCluster.shutdown = function () {
     },
     function (cb) {
       shlog.info("delete server from serverList");
-      driver.srem("serverList", global.server.serverId, cb);
+      gDriver.srem("serverList", global.server.serverId, cb);
     },
     function (cb) {
       shlog.info("delete kServer object");
@@ -83,7 +95,7 @@ ShCluster.shutdown = function () {
 
 ShCluster.servers = function (cb) {
   var serverList = {};
-  driver.smembers("serverList", function (err, servers) {
+  gDriver.smembers("serverList", function (err, servers) {
     shlog.info("smembers err:", err, "data:", servers);
     if (err) {
       return cb(err, servers);
@@ -131,26 +143,29 @@ ShCluster.sendCluster = function (serverId, data, cb) {
 
 ShCluster.sendUser = function (uid, data, cb) {
   var self = this;
-  gLoader.exists("kLocate", uid, function (err, locate) {
+  gLoader.exists("kLocate", uid, function (err, locateInfo) {
     if (err) {
       shlog.error("user_offline", "user is offline", uid);
       return cb(1, "user_offline");
     }
-    var msg = {};
-    msg.cmd = "user.direct";
-    msg.serverId = locate.get("serverId");
-    msg.toWid = locate.get("workerId");
-    msg.toWsid = locate.get("socketId");
-    msg.data = data;
-    shlog.info("send remote:", msg);
-    self.sendCluster(msg.serverId, msg, cb);
+    self.sendUserWithLocate(locateInfo, cb);
   }, {checkCache: false});
 };
 
+ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
+  var msg = {};
+  msg.cmd = "user.direct";
+  msg.serverId = locateInfo.get("serverId");
+  msg.toWid = locateInfo.get("workerId");
+  msg.toWsid = locateInfo.get("socketId");
+  msg.data = data;
+  shlog.info("send remote:", msg);
+  this.sendCluster(msg.serverId, msg, cb);
+};
 
 ShCluster.home = function (oid, cb) {
   var self = this;
-  driver.smembers("serverList", function (err, servers) {
+  gDriver.smembers("serverList", function (err, servers) {
     shlog.info("smembers err:", err, "data:", servers);
     if (err) {
       return cb(err, servers);
@@ -166,4 +181,4 @@ ShCluster.home = function (oid, cb) {
       return cb(0, server.getData());
     }, {checkCache: false});
   });
-}
+};

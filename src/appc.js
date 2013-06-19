@@ -11,19 +11,14 @@ var gStats = {};
 
 // master received message from worker
 function onWorkerMessage(msg) {
-  shlog.info("master recv:", JSON.stringify(msg));
-
-  // SWD must adjust socket   connect and close to set cluster ID and server IP
-  // check to see if it's a global channel
-  // if so check if the user is on another cluster
-  // if so send to that cluster
+  shlog.info("master recv: %j", msg);
 
   if (msg.cmd === "stat") {
     if (_.isUndefined(gStats[msg.key])) {
       gStats[msg.key] = {};
     }
     gStats[msg.key][msg.wid] = msg.count;
-    console.log("gStats", gStats);
+//    console.log("gStats", JSON.stringify(gStats));
     return;
   }
 
@@ -52,10 +47,9 @@ if (cluster.isMaster) {
   shelly.start();
 }
 
-// receive master message
+// receive message from master
 process.on("message", function (msg) {
-  shlog.info("worker recv:", JSON.stringify(msg));
-  shelly.send(msg);
+  shelly.onMessage(msg);
 });
 
 cluster.on("online", function (worker) {

@@ -46,7 +46,7 @@ rest.use(function (req, res, next) {
 
 function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
-  shlog.recv("rest - %s", JSON.stringify(req.body));
+  shlog.recv("rest - %j", req.body);
 
   // handle the multi msgs case
   var msgs = null;

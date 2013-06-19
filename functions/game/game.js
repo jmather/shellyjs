@@ -4,6 +4,7 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var dispatch = require(global.gBaseDir + "/src/dispatch.js");
 
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
@@ -285,8 +286,7 @@ Game.turn = function (req, res, cb) {
       whoTurn: gameData.whoTurn,
       name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
       pic: ""});
-    channel.sendInt("game:" + gameId, event); // send to all in game
-    channel.sendAll("turns:", gameData.playerOrder, event); // send to anyone on turn channel
+    dispatch.sendUsers(gameData.playerOrder, event); // send to all players
     if (gameData.status === "over") {
       channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
     }
@@ -330,8 +330,8 @@ Game.reset = function (req, res, cb) {
       // notify players in game of new state
       channel.sendInt("game:" + gameData.oid, sh.event("game.reset", gameData));
 
-      // notify players on turns channel
-      channel.sendAll("turns:", gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
+      // notify all players
+      dispatch.sendUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
           gameName: gameData.name,
           whoTurn: gameData.whoTurn,
           name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),

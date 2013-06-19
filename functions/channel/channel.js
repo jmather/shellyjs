@@ -3,7 +3,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var shcluster = require(global.gBaseDir + "/src/shcluster");
+var dispatch = require(global.gBaseDir + "/src/dispatch.js");
 
 var Channel = exports;
 
@@ -18,9 +18,7 @@ Channel.functions = {
 var channelDef = {
   user: {persist: true, maxEvents: 50},
   lobby: {persist: true, maxEvents: 50},
-  games: {persist: true, maxEvents: 50},
-  turns: {persist: false, maxEvents: 0},
-  matches: {persist: false, maxEvents: 0}
+  games: {persist: true, maxEvents: 50}
 };
 
 if (_.isUndefined(global.channels)) {
@@ -50,7 +48,7 @@ Channel.sendDirect = function (wsId, data) {
 
 Channel.sendInt = function (channel, data, forward) {
   // default forward on to cluster
-  if (cluster.isWorker && (_.isUndefined(forward) || forward === true)) {
+  if (_.isUndefined(forward) || forward === true) {
     process.send({cmd: "forward", wid: cluster.worker.id, toWid: "all", channel: channel, data: data});
   }
 
@@ -65,25 +63,10 @@ Channel.sendInt = function (channel, data, forward) {
   });
 };
 
-// send to all in "ids" list by prepending the "prefix"
-Channel.sendAll = function (prefix, ids, data) {
-  shlog.info("sendAll", prefix, ids);
-
-  _.each(ids, function (id) {
-    //SWD: this will get fixed with move to dispatch
-    Channel.sendInt(prefix + id, data);
-    shcluster.sendUser(id, data, function (err, data) {
-      // ignore the returns for now
-    });
-  });
-};
-
 // notify the current socket of users on this channel
 Channel.sendOnline = function (ws, channel) {
-  if (cluster.isWorker) {
-    process.send({cmd: "who.query", wid: cluster.worker.id, toWid: "all", channel: channel, fromUid: ws.uid,
-      fromWsid: ws.id});
-  }
+  process.send({cmd: "who.query", wid: cluster.worker.id, toWid: "all", channel: channel, fromUid: ws.uid,
+    fromWsid: ws.id});
 
   _.each(global.channels[channel], function (uws) {
     var event = sh.event("channel.user", {channel: channel, uid: uws.uid, name: uws.name, pic: "",  status: "on"});
@@ -94,10 +77,6 @@ Channel.sendOnline = function (ws, channel) {
 // notify the calling worker of any users on this channel
 // only called in cluster mode
 Channel.returnOnline = function (channel, fromWid, toWsid) {
-  if (!cluster.isWorker) {
-    shlog.error("function can only be called in cluster mode");
-    return;
-  }
   _.each(global.channels[channel], function (uws) {
     var event = sh.event("channel.user", {channel: channel, uid: uws.uid, name: uws.name, pic: "",  status: "on"});
     process.send({cmd: "who.return", wid: cluster.worker.id, toWid: fromWid, toWsid: toWsid, data: event});
@@ -138,7 +117,7 @@ Channel.add = function (req, res, cb) {
   shlog.info("add", req.body.channel, global.channels[req.body.channel].length);
 
   // update master stats for channel
-  if (cluster.isWorker) {
+  if (req.body.channel.substr(0, 6) === "lobby:") {
     process.send({cmd: "stat", wid: cluster.worker.id,
       key: req.body.channel, count: global.channels[req.body.channel].length});
   }
@@ -166,7 +145,7 @@ Channel.removeInt = function (ws, channel) {
   Channel.sendInt(channel, event);
 
   // update master stats for channel
-  if (cluster.isWorker) {
+  if (channel.substr(0, 6) === "lobby:") {
     process.send({cmd: "stat", wid: cluster.worker.id, key: channel, count: global.channels[channel].length});
   }
 

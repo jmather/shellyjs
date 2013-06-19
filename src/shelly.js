@@ -24,8 +24,22 @@ if (fs.existsSync(machineConfigFn)) {
     process.exit(1);
   }
 }
-
 global.PACKAGE = require(global.gBaseDir + "/package.json");
+
+var shutil = require(global.gBaseDir + "/src/shutil.js");
+/*jslint stupid: true */
+// OK as this is only called once during startup
+function serverInfo() {
+  var serverInfoFn = global.configBase + "/server.json";
+  var serverData = {};
+  if (!fs.existsSync(serverInfoFn)) {
+    serverData.serverId = shutil.uuid();
+    fs.writeFileSync(serverInfoFn, JSON.stringify(serverInfo));
+  } else {
+    serverData = require(serverInfoFn);
+  }
+  return serverData;
+}
 global.server = serverInfo();
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -117,7 +131,8 @@ shelly.shutdown = function () {
     });
 };
 
-shelly.send = function (msg) {
+shelly.onMessage = function (msg) {
+  shlog.debug("onMessage: %j", msg);
   if (msg.cmd === "who.query") {
     gChannel.returnOnline(msg.channel, msg.wid, msg.fromWsid);
     return;
@@ -127,7 +142,6 @@ shelly.send = function (msg) {
     return;
   }
   if (msg.cmd === "user.direct") {
-    shlog.info("msg", msg)
     gChannel.sendDirect(msg.toWsid, msg.data);
     return;
   }
@@ -136,18 +150,4 @@ shelly.send = function (msg) {
     return;
   }
   shlog.error("bad_message", "unknown command", msg);
-};
-
-/*jslint stupid: true */
-// OK as this is only called once during startup
-function serverInfo() {
-  var serverInfoFn = global.configBase + "/server.json";
-  var serverData = {};
-  if (!fs.existsSync(serverInfoFn)) {
-    serverData.serverId = shutil.uuid();
-    fs.writeFileSync(serverInfoFn, JSON.stringify(serverInfo));
-  } else {
-    serverData = require(serverInfoFn);
-  }
-  return serverData;
 };

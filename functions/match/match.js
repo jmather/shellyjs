@@ -4,8 +4,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var dispatch = require(global.gBaseDir + "/src/dispatch.js");
 
 var match = exports;
 
@@ -68,7 +67,7 @@ match.add = function (req, res, cb) {
       _.each(req.body.players, function (playerId) {
         matchInfo[playerId] = {};
       });
-      channel.sendAll("matches:", req.body.players, sh.event("match.made", matchInfo));
+      dispatch.sendUsers(req.body.players, sh.event("match.made", matchInfo));
 
       res.add(sh.event("match.made", matchInfo));
       return cb(0);
