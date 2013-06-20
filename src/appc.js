@@ -14,11 +14,7 @@ function onWorkerMessage(msg) {
   shlog.info("master recv: %j", msg);
 
   if (msg.cmd === "stat") {
-    if (_.isUndefined(gStats[msg.key])) {
-      gStats[msg.key] = {};
-    }
-    gStats[msg.key][msg.wid] = msg.count;
-//    console.log("gStats", JSON.stringify(gStats));
+    shCluster.setStat(msg.key, msg.wid, msg.count);
     return;
   }
 

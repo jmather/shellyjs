@@ -10,6 +10,7 @@ var Channel = exports;
 Channel.desc = "game state and control module";
 Channel.functions = {
   list: {desc: "list online users", params: {channel: {dtype: "string"}}, security: []},
+  find: {desc: "find an availible channel", params: {channel: {dtype: "string"}}, security: []},
   add: {desc: "add this socket to the channel", params: {channel: {dtype: "string"}}, security: []},
   remove: {desc: "remove this socket from the channel", params: {channel: {dtype: "string"}}, security: []},
   send: {desc: "send a message to all users on channel", params: {channel: {dtype: "string"}, message: {dtype: "string"}}, security: []}
@@ -94,6 +95,21 @@ Channel.list = function (req, res, cb) {
 
   res.add(sh.event("channel.list", channels));
   return cb(0);
+};
+
+Channel.find = function (req, res, cb) {
+  var channels = {};
+
+  var msg = {cmd: "channel.count", channel: req.body.channel};
+  dispatch.sendServers(msg, function (err, data) {
+//  dispatch.sendServer(global.server.serverId, msg, function (err, data) {
+    if (err) {
+      res.add(sh.error("no_channel_count", "could not return channel count for " + req.body.channel), data);
+      return cb(err);
+    }
+    res.add(sh.event("channel.find", data));
+    return cb(err);
+  });
 };
 
 Channel.add = function (req, res, cb) {

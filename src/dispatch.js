@@ -80,7 +80,16 @@ dispatch.sendUsers = function (ids, data) {
   });
 };
 
-
 dispatch.sendChannel = function (channel, data, cb) {
   return cb(0);
-}
+};
+
+dispatch.sendServer = function (serverId, data, cb) {
+  // SWD check for serverId === current server
+  shcluster.sendServer(serverId, data, cb);
+};
+
+dispatch.sendServers = function (data, cb) {
+  // SWD check for serverId === current server
+  shcluster.sendServers(data, cb);
+};

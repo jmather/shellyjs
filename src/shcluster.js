@@ -8,10 +8,11 @@ var dnode = require("dnode");
 
 var shutil = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
-//var shdb = require(__dirname + "/shdb.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
-// sync ok - only done on cluster startup
+if (_.isUndefined(global.gServerStats)) {
+  global.gServerStats = {};
+}
 
 var ShCluster = exports;
 
@@ -21,6 +22,7 @@ var gDriver = gDb.driver;
 var gServer = null;
 
 ShCluster.init = function (cb) {
+  var self = this;
   gDb.init(function (err) {
     gLoader.get("kServer", global.server.serverId, function (err, server) {
       server.set("clusterUrl", global.CONF.clusterUrl);
@@ -37,6 +39,14 @@ ShCluster.init = function (cb) {
         gServer = dnode({
           event : function (msg, cb) {
             shlog.debug("server event recv: %j", msg);
+
+            if (msg.cmd === "channel.count") {
+              var ret = {};
+              ret[msg.channel] = self.getStat(msg.channel);
+              cb(ret);
+              return;
+            }
+
             // cmd = direct.user
             // toWid = workerId
             // toWsid = websocket id of user
@@ -93,8 +103,24 @@ ShCluster.shutdown = function () {
     });
 };
 
+ShCluster.setStat = function (key, wid, value) {
+  if (_.isUndefined(global.gServerStats[key])) {
+    global.gServerStats[key] = {};
+  }
+  global.gServerStats[key][wid] = value;
+  shlog.info("server stats: %s:%s = %s", key, wid, value);
+};
+
+ShCluster.getStat = function (key) {
+  var ret = 0;
+  _.each(global.gServerStats[key], function (value, wid) {
+    ret += value;
+  });
+  return ret;
+};
+
 ShCluster.servers = function (cb) {
-  var serverList = {};
+  var serverList = [];
   gDriver.smembers("serverList", function (err, servers) {
     shlog.info("smembers err:", err, "data:", servers);
     if (err) {
@@ -122,7 +148,7 @@ ShCluster.locate = function (uid, cb) {
   }, {checkCache: false});
 };
 
-ShCluster.sendCluster = function (serverId, data, cb) {
+ShCluster.sendServer = function (serverId, data, cb) {
   gLoader.exists("kServer", serverId, function (err, server) {
     if (err) {
       shlog.error("bad_serverId", "cannot find cluster id", serverId);
@@ -132,13 +158,35 @@ ShCluster.sendCluster = function (serverId, data, cb) {
     shlog.debug("send:", serverId, urlParts.hostname, urlParts.port, data);
     var d = dnode.connect(urlParts.port, urlParts.hostname);
     d.on('remote', function (remote) {
-      remote.event(data, function (s) {
-        shlog.debug("response:" + s);
+      remote.event(data, function (data) {
+        shlog.debug("response: %j", data);
         d.end();
-        cb(0, s);
+        cb(0, data);
       });
     });
   }, {checkCache: false});
+};
+
+ShCluster.sendServers = function (data, cb) {
+  var ret = {};
+  var self = this;
+  var serverList = [];
+  gDriver.smembers("serverList", function (err, servers) {
+    if (err) {
+      return cb(err, servers)
+    }
+    async.each(servers, function (serverId, lcb) {
+      self.sendServer(serverId, data, function (err, data) {
+        if (!err) {
+          ret[serverId] = data;
+        }
+        lcb(0); // ingore any errors
+      });
+    }, function (error) {
+      // ingore any errors
+      cb(0, ret);
+    });
+  });
 };
 
 ShCluster.sendUser = function (uid, data, cb) {
@@ -160,7 +208,7 @@ ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
   msg.toWsid = locateInfo.get("socketId");
   msg.data = data;
   shlog.debug("send remote:", msg);
-  this.sendCluster(msg.serverId, msg, cb);
+  this.sendServer(msg.serverId, msg, cb);
 };
 
 ShCluster.home = function (oid, cb) {

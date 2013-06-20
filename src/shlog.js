@@ -33,6 +33,7 @@ var gDebug = {
 
 var winston = require("winston");
 winston.remove(winston.transports.Console);
+//winston.add(winston.transports.Console, { level: "debug", colorize: true, timestamp: false });
 winston.add(winston.transports.Console, { level: "info", colorize: true, timestamp: false });
 // emerg      system is unusable
 // alert      action must be taken immediately
