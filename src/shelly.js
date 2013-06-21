@@ -34,7 +34,7 @@ function serverInfo() {
   var serverData = {};
   if (!fs.existsSync(serverInfoFn)) {
     serverData.serverId = shutil.uuid();
-    fs.writeFileSync(serverInfoFn, JSON.stringify(serverInfo));
+    fs.writeFileSync(serverInfoFn, JSON.stringify(serverData));
   } else {
     serverData = require(serverInfoFn);
   }
