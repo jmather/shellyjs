@@ -5,6 +5,7 @@ var async = require("async");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
+var shcluster = require(global.gBaseDir + "/src/shcluster.js");
 
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
@@ -418,14 +419,19 @@ Game.call = function (req, res, cb) {
 function fillGames(loader, gameList, cb) {
   var gameIds = Object.keys(gameList);
   async.each(gameIds, function (gameId, lcb) {
-    loader.get("kGame", gameId, function (error, game) {
-      if (error) {
-        lcb(game);
-        return;
+    loader.get("kGame", gameId, function (err, game) {
+      if (err) {
+        return lcb(game);
       }
       gameList[gameId].whoTurn = game.get("whoTurn");
       gameList[gameId].players = game.get("players");
-      lcb();
+      shcluster.home(gameId, function (err, server) {
+        if (err) {
+          return lcb(err);
+        }
+        gameList[gameId].socketUrl = server.socketUrl;
+        lcb();
+      });
     });
   }, function (error) {
     if (error) {

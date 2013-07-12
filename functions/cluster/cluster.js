@@ -32,7 +32,7 @@ cluster.locate = function (req, res, cb) {
 
   shcluster.locate(req.body.uid, function (err, locate) {
     if (err) {
-      res.add(sh.error("cluster_locate", "unable to get user location", err, locate));
+      res.add(sh.error("cluster_locate", "unable to get user location", {uid: req.body.uid, error: err, info: locate}));
       return cb(1);
     }
     res.add(sh.event("cluster.location", locate.getData()));

@@ -27,7 +27,7 @@ if (_.isUndefined(global.channels)) {
 }
 
 // send directly to user using socket id in global map
-// might this go in socket module
+// might this go in socket module?
 Channel.sendDirect = function (wsId, data) {
   if (_.isUndefined(data)) {
     shlog.info("bad send data:", data);
@@ -139,7 +139,7 @@ Channel.add = function (req, res, cb) {
   }
 
   // notify me of online channel users
-  // SWD might want to put flag on channels that realy need this
+  // SWD might want to put flag on channels that really need this
   // as it generates a lot of presence traffic
   Channel.sendOnline(res.ws, req.body.channel);
 
