@@ -88,7 +88,7 @@ rest.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var restServer = rest.listen(global.C.restPort, function () {
+var restServer = rest.listen(global.C.REST_PORT, function () {
   shlog.info("rest server listening: %s", global.C.restPort);
 });
 

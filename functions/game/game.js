@@ -429,7 +429,7 @@ function fillGames(loader, gameList, cb) {
         if (err) {
           return lcb(err);
         }
-        gameList[gameId].socketUrl = server.socketUrl;
+        gameList[gameId].SOCKET_URL = server.SOCKET_URL;
         lcb();
       });
     });

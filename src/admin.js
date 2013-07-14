@@ -79,8 +79,8 @@ app.get("/login/*.html", function (req, res) {
   var env = {};
   env.version = global.PACKAGE.version;
   env.token = req.cookies.shToken;
-  env.restUrl = global.C.restUrl;
-  env.socketUrl = global.C.socketUrl;
+  env.restUrl = global.C.REST_URL;
+  env.socketUrl = global.C.SOCKET_URL;
   env.nextUuid = sh.uuid();
   res.render(req.url.substring(1), {Env: env, EnvJson: JSON.stringify(env),
     partials: {header: "header", footer: "footer"}});
@@ -91,9 +91,9 @@ app.get("/login/*.html", function (req, res) {
 function createEnv(req) {
   var map = {};
   map.version = global.PACKAGE.version;
-  map.gamesUrl = global.C.gamesUrl;
-  map.restUrl = global.C.restUrl;
-  map.socketUrl = global.C.socketUrl;
+  map.gamesUrl = global.C.GAMES_URL;
+  map.restUrl = global.C.REST_URL;
+  map.socketUrl = global.C.SOCKET_URL;
   map.user = req.session.user.getData();
   map.session = req.cookies.shSession;
   map.token = req.cookies.shToken;
@@ -132,7 +132,7 @@ app.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var adminServer = app.listen(global.C.adminPort, function () {
+var adminServer = app.listen(global.C.ADMIN_PORT, function () {
   shlog.info("admin server listening: %d", adminServer.address().port);
 });
 

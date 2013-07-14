@@ -1,23 +1,23 @@
 
-global.CDEF("dnsName", "localhost");
+global.CDEF("DNS_NAME", "localhost");
 
-global.CDEF("adminPort", 5100);
-global.CDEF("adminUrl", "http://" + global.C.dnsName + ":" + global.C.adminPort);
+global.CDEF("ADMIN_PORT", 5100);
+global.CDEF("ADMIN_URL", "http://" + global.C.DNS_NAME + ":" + global.C.ADMIN_PORT);
 
-global.CDEF("restPort", 5101);
-global.CDEF("restUrl", "http://" + global.C.dnsName + ":" + global.C.restPort + "/api");
+global.CDEF("REST_PORT", 5101);
+global.CDEF("REST_URL", "http://" + global.C.DNS_NAME + ":" + global.C.REST_PORT + "/api");
 
 // example game html server
-global.CDEF("gamesPort", 5102);
-global.CDEF("gamesUrl", "http://" + global.C.dnsName + ":" + global.C.gamesPort);
+global.CDEF("GAMES_PORT", 5102);
+global.CDEF("GAMES_URL", "http://" + global.C.DNS_NAME + ":" + global.C.GAMES_PORT);
 
 // socket options
-global.CDEF("socketPort", 5110);
-global.CDEF("socketUrl", "ws://" + global.C.dnsName + ":" + global.C.socketPort);
-global.CDEF("heartBeat", 30 * 1000);
+global.CDEF("SOCKET_PORT", 5110);
+global.CDEF("SOCKET_URL", "ws://" + global.C.DNS_NAME + ":" + global.C.SOCKET_PORT);
+global.CDEF("HEART_BEAT", 30 * 1000);
 
 // cluster options
-global.CDEF("clusterUrl", "tcp://localhost:5151");
+global.CDEF("CLUSTER_URL", "tcp://localhost:5151");
 global.CDEF("NUM_WORKERS", 2);
 
 // db

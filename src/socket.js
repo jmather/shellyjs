@@ -118,9 +118,9 @@ function handleConnect(ws) {
   var loader = new ShLoader();
 
   var heartBeat = function () {
-    sh.sendWs(ws, 0, sh.event("heartbeat", {interval: global.C.heartBeat}));
+    sh.sendWs(ws, 0, sh.event("heartbeat", {interval: global.C.HEART_BEAT}));
   };
-  ws.hbTimer = setInterval(heartBeat, global.C.heartBeat);
+  ws.hbTimer = setInterval(heartBeat, global.C.HEART_BEAT);
 
   ws.on("message", onMessage);
   ws.on("error", onError);
@@ -128,8 +128,8 @@ function handleConnect(ws) {
 }
 
 Socket.start = function () {
-  wss = new WebSocketServer({port: global.C.socketPort});
-  shlog.info("socketserver listening: " + global.C.socketPort);
+  wss = new WebSocketServer({port: global.C.SOCKET_PORT});
+  shlog.info("socketserver listening: " + global.C.SOCKET_PORT);
   var connCount = 1;
 
   wss.on("connection", function (ws) {

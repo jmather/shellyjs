@@ -12,12 +12,12 @@ config.gamesPort = 6102;
 config.gamesUrl = "http://" + config.dnsName + ":" + config.gamesPort;
 
 // socket options
-config.socketPort = 6110;
-config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
-config.heartBeat = 30 * 1000;
+config.SOCKET_PORT = 6110;
+config.SOCKET_URL = "ws://" + config.dnsName + ":" + config.SOCKET_PORT;
+config.HEART_BEAT = 30 * 1000;
 
 // cluster options
-config.clusterUrl = "tcp://localhost:5152";
+config.CLUSTER_URL = "tcp://localhost:5152";
 config.NUM_WORKERS = 2;
 
 // db

@@ -25,8 +25,8 @@ ShCluster.init = function (cb) {
   var self = this;
   gDb.init(function (err) {
     gLoader.get("kServer", global.server.serverId, function (err, server) {
-      server.set("clusterUrl", global.C.clusterUrl);
-      server.set("socketUrl", global.C.socketUrl);
+      server.set("clusterUrl", global.C.CLUSTER_URL);
+      server.set("socketUrl", global.C.SOCKET_URL);
       shlog.info("set server info", server.getData());
 
       gDriver.sadd("serverList", global.server.serverId, function (err) {
@@ -67,7 +67,7 @@ ShCluster.init = function (cb) {
             cb("ok");
           }
         });
-        var urlParts = url.parse(global.C.clusterUrl);
+        var urlParts = url.parse(global.C.CLUSTER_URL);
         shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
         gServer.listen(urlParts.port, urlParts.hostName);
 

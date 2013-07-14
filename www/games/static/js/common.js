@@ -154,8 +154,8 @@ function setMyTurns(gameList) {
 var ws = new ReconnectingWebSocket();
 //        ws.debug = true;
 ws.onopen = function (evt) {
-  console.log("serverUrl:", Env.socketUrl);
-  log("socket", "onopen", Env.socketUrl);
+  console.log("serverUrl:", Env.SOCKET_URL);
+  log("socket", "onopen", Env.SOCKET_URL);
   shellyInit();
 }
 ws.onmessage = function (evt) {
