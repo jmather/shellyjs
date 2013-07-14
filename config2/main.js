@@ -1,37 +1,12 @@
-var config = exports;
 
-config.dnsName = "localhost";
-
-config.adminPort = 6100;
-config.adminUrl = "http://" + config.dnsName + ":" + config.adminPort;
-
-config.restPort = 6101;
-config.restUrl = "http://" + config.dnsName + ":" + config.restPort + "/api";
-
-config.gamesPort = 6102;
-config.gamesUrl = "http://" + config.dnsName + ":" + config.gamesPort;
-
-// socket options
-config.SOCKET_PORT = 6110;
-config.SOCKET_URL = "ws://" + config.dnsName + ":" + config.SOCKET_PORT;
-config.HEART_BEAT = 30 * 1000;
+global.CDEF("ADMIN_PORT", 6100);
+global.CDEF("REST_PORT", 6101);
+global.CDEF("GAMES_PORT", 6102);
+global.CDEF("SOCKET_PORT", 6110);
 
 // cluster options
-config.CLUSTER_URL = "tcp://localhost:5152";
-config.NUM_WORKERS = 2;
+global.CDEF("CLUSTER_URL", "tcp://localhost:6151");
+global.CDEF("NUM_WORKERS", 1);
 
-// db
-config.db = {};
-//config.db.wrapper = "/src/db/shsqlite.js";
-//config.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
-config.db.wrapper = "/src/db/shredis.js";
-config.db.options = {};
-
-// stats
-config.STATS = {};
-//config.STATS.WRAPPER = "/src/stats/shstatsmem.js";
-config.STATS.WRAPPER = "/src/stats/shstatsredis.js";
-
-// default admin
-config.DEFAULT_ADMIN_NAME = "shelly";
-config.DEFAULT_ADMIN_PASSWORD = "";
+// pick up all the other default configs
+require(__dirname + "/../config/main.js");
