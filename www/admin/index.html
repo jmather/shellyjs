@@ -22,7 +22,7 @@
 
             shCall({cmd: "system.config"}, function (err, res) {
                 $("#baseDir").text(res.data.gBaseDir);
-                $("#config").text(JSON.stringify(res.data.CONF, undefined, 2))
+                $("#config").text(JSON.stringify(res.data.CONFIG, undefined, 2))
                 $("#package").text(JSON.stringify(res.data.PACKAGE, undefined, 2))
             })
         }
@@ -37,7 +37,7 @@
     gBaseDir = <span id="baseDir"></span>
 </div>
 <div>
-    CONF = <pre id="config"></pre>
+    CONFIG = <pre id="config"></pre>
 </div>
 <div>
     PACKAGE = <pre id="package"></pre>
