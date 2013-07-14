@@ -109,7 +109,7 @@ exports.login = function (req, res, cb) {
   var password = sanitize(req.body.password).trim();
   shlog.info("login attempt:", email);
   try {
-    if (email !== global.CONF.DEFAULT_ADMIN_NAME) {
+    if (email !== global.C.DEFAULT_ADMIN_NAME) {
       check(email, 102).isEmail();
     }
   } catch (e) {

@@ -45,7 +45,7 @@ system.stats = function (req, res, cb) {
 system.config = function (req, res, cb) {
   shlog.info("system.config");
 
-  res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONF: global.CONF, PACKAGE: global.PACKAGE}));
+  res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONF: global.C, PACKAGE: global.PACKAGE}));
   return cb(0);
 };
 

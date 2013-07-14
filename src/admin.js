@@ -20,7 +20,7 @@ shlog.info("admin directory: " + adminBase);
 // ensure admin user
 var reg = require(global.gBaseDir + "/functions/reg/reg.js");
 var loader = new ShLoader();
-reg.verifyUser(loader, global.CONF.DEFAULT_ADMIN_NAME, global.CONF.DEFAULT_ADMIN_PASSWORD, function (error, data) {
+reg.verifyUser(loader, global.C.DEFAULT_ADMIN_NAME, global.C.DEFAULT_ADMIN_PASSWORD, function (error, data) {
   if (error) {
     shlog.error("unable to load or create default admin", data);
   }
@@ -79,8 +79,8 @@ app.get("/login/*.html", function (req, res) {
   var env = {};
   env.version = global.PACKAGE.version;
   env.token = req.cookies.shToken;
-  env.restUrl = global.CONF.restUrl;
-  env.socketUrl = global.CONF.socketUrl;
+  env.restUrl = global.C.restUrl;
+  env.socketUrl = global.C.socketUrl;
   env.nextUuid = sh.uuid();
   res.render(req.url.substring(1), {Env: env, EnvJson: JSON.stringify(env),
     partials: {header: "header", footer: "footer"}});
@@ -91,9 +91,9 @@ app.get("/login/*.html", function (req, res) {
 function createEnv(req) {
   var map = {};
   map.version = global.PACKAGE.version;
-  map.gamesUrl = global.CONF.gamesUrl;
-  map.restUrl = global.CONF.restUrl;
-  map.socketUrl = global.CONF.socketUrl;
+  map.gamesUrl = global.C.gamesUrl;
+  map.restUrl = global.C.restUrl;
+  map.socketUrl = global.C.socketUrl;
   map.user = req.session.user.getData();
   map.session = req.cookies.shSession;
   map.token = req.cookies.shToken;
@@ -132,7 +132,7 @@ app.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var adminServer = app.listen(global.CONF.adminPort, function () {
+var adminServer = app.listen(global.C.adminPort, function () {
   shlog.info("admin server listening: %d", adminServer.address().port);
 });
 

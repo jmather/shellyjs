@@ -34,7 +34,7 @@ function onWorkerMessage(msg) {
 if (cluster.isMaster) {
   shCluster.init(function (err, data) {
     var i = 0;
-    for (i = 0; i < global.CONF.NUM_WORKERS; i += 1) {
+    for (i = 0; i < global.C.NUM_WORKERS; i += 1) {
       var p = cluster.fork();
       p.on("message", onWorkerMessage);
     }

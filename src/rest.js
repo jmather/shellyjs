@@ -88,8 +88,8 @@ rest.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var restServer = rest.listen(global.CONF.restPort, function () {
-  shlog.info("rest server listening: %s", global.CONF.restPort);
+var restServer = rest.listen(global.C.restPort, function () {
+  shlog.info("rest server listening: %s", global.C.restPort);
 });
 
 restServer.on("error", function (err) {

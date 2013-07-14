@@ -16,7 +16,9 @@ if (_.isString(process.argv[2])) {
 
 global.C = {};
 global.CDEF = function (name, value) {
-  global.C[name] = global.C[name] || value;
+  if (_.isUndefined(global.C[name])) {
+    global.C[name] = value;
+  }
 };
 // load configs with per machine overrides
 var machineConfigFn = global.configBase + "/" + os.hostname() + ".js";
@@ -25,7 +27,6 @@ if (fs.existsSync(machineConfigFn)) {
   require(machineConfigFn);
 }
 require(global.configBase + "/main.js");
-global.CONF = global.C;  // SWD remove this
 global.PACKAGE = require(global.gBaseDir + "/package.json");
 
 var shutil = require(global.gBaseDir + "/src/shutil.js");
@@ -49,7 +50,7 @@ if (cluster.isMaster) {
   shlog.info("loaded:", new Date());
   shlog.info("server:", global.server);
   shlog.info("configBase:", global.configBase);
-  shlog.info("config:", global.CONF);
+  shlog.info("config:", global.C);
 }
 
 global.db = require(global.gBaseDir + "/src/shdb.js");
