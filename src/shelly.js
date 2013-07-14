@@ -1,3 +1,4 @@
+var cluster = require("cluster");
 var path = require("path");
 var os = require("os");
 var fs = require("fs");
@@ -8,22 +9,23 @@ var async = require("async");
 global.gBaseDir = path.dirname(__dirname);
 
 global.configBase = global.gBaseDir + "/config";
+// first param alters config dir
 if (_.isString(process.argv[2])) {
   global.configBase = process.argv[2];
 }
 
+global.C = {};
+global.CDEF = function (name, value) {
+  global.C[name] = global.C[name] || value;
+};
 // load configs with per machine overrides
-global.CONF = require(global.configBase + "/main.js");
 var machineConfigFn = global.configBase + "/" + os.hostname() + ".js";
 /*jslint stupid: true */
 if (fs.existsSync(machineConfigFn)) {
-  try {
-    global.CONF = _.merge(global.CONF, require(machineConfigFn));
-  } catch (e) {
-    console.error("error: unable to load config file:", os.hostname() + ".js");
-    process.exit(1);
-  }
+  require(machineConfigFn);
 }
+require(global.configBase + "/main.js");
+global.CONF = global.C;  // SWD remove this
 global.PACKAGE = require(global.gBaseDir + "/package.json");
 
 var shutil = require(global.gBaseDir + "/src/shutil.js");
@@ -43,10 +45,12 @@ function serverInfo() {
 global.server = serverInfo();
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
-shlog.info("loaded:", new Date());
-shlog.info("server:", global.server);
-shlog.info("configBase:", global.configBase);
-shlog.info("config:", global.CONF);
+if (cluster.isMaster) {
+  shlog.info("loaded:", new Date());
+  shlog.info("server:", global.server);
+  shlog.info("configBase:", global.configBase);
+  shlog.info("config:", global.CONF);
+}
 
 global.db = require(global.gBaseDir + "/src/shdb.js");
 global.socket = null;

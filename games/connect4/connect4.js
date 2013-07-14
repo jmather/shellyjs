@@ -3,6 +3,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
+var dispatch = require(global.gBaseDir + "/src/dispatch.js");
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var connect4 = exports;
@@ -194,7 +195,8 @@ connect4.turn = function (req, res, cb) {
 
   state.lastMove = {uid: uid, move: move, color: color};
   res.add(sh.event("game.update", state.lastMove));
-  channel.sendInt("game:" + game.get("oid"), sh.event("game.update", state.lastMove));
+//  channel.sendInt("game:" + game.get("oid"), sh.event("game.update", state.lastMove));
+  dispatch.sendUsers(game.get("playerOrder"), sh.event("game.update", state.lastMove), req.session.uid);
 
   var winSet = [];
   var win = checkWin(state.board, color, move.x, move.y, winSet);

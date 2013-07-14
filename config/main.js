@@ -1,37 +1,35 @@
-var config = exports;
 
-config.dnsName = "localhost";
+global.CDEF("dnsName", "localhost");
 
-config.adminPort = 5100;
-config.adminUrl = "http://" + config.dnsName + ":" + config.adminPort;
+global.CDEF("adminPort", 5100);
+global.CDEF("adminUrl", "http://" + global.C.dnsName + ":" + global.C.adminPort);
 
-config.restPort = 5101;
-config.restUrl = "http://" + config.dnsName + ":" + config.restPort + "/api";
+global.CDEF("restPort", 5101);
+global.CDEF("restUrl", "http://" + global.C.dnsName + ":" + global.C.restPort + "/api");
 
-config.gamesPort = 5102;
-config.gamesUrl = "http://" + config.dnsName + ":" + config.gamesPort;
+// example game html server
+global.CDEF("gamesPort", 5102);
+global.CDEF("gamesUrl", "http://" + global.C.dnsName + ":" + global.C.gamesPort);
 
 // socket options
-config.socketPort = 5110;
-config.socketUrl = "ws://" + config.dnsName + ":" + config.socketPort;
-config.heartBeat = 30 * 1000;
+global.CDEF("socketPort", 5110);
+global.CDEF("socketUrl", "ws://" + global.C.dnsName + ":" + global.C.socketPort);
+global.CDEF("heartBeat", 30 * 1000);
 
 // cluster options
-config.clusterUrl = "tcp://localhost:5151";
-config.NUM_WORKERS = 2;
+global.CDEF("clusterUrl", "tcp://localhost:5151");
+global.CDEF("NUM_WORKERS", 2);
 
 // db
-config.db = {};
-//config.db.wrapper = "/src/db/shsqlite.js";
-//config.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
-config.db.wrapper = "/src/db/shredis.js";
-config.db.options = {};
+global.CDEF("DB_WRAPPER", "/src/db/shredis.js");
+global.CDEF("DB_OPTIONS", {});
+//global.C.db.wrapper = "/src/db/shsqlite.js";
+//global.C.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
 
 // stats
-config.STATS = {};
-//config.STATS.WRAPPER = "/src/stats/shstatsmem.js";
-config.STATS.WRAPPER = "/src/stats/shstatsredis.js";
+global.CDEF("STATS_WRAPPER", "/src/stats/shstatsredis.js");
+//global.CDEF("STATS_WRAPPER", "/src/stats/shstatsmem.js";
 
 // default admin
-config.DEFAULT_ADMIN_NAME = "shelly";
-config.DEFAULT_ADMIN_PASSWORD = "";
+global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
+global.CDEF("DEFALUT_ADMIN_PASSWORD", "");

@@ -23,7 +23,7 @@ dispatch.init = function (cb) {
     if (err) {
       return cb(err);
     }
-    gLoader = new ShLoader(db);
+    gLoader = new ShLoader(gDb);
     gDriver = gDb.driver;
     return cb(err);
   });
@@ -49,7 +49,7 @@ dispatch.shutdown = function (cb) {
 dispatch.sendUser = function (uid, data, cb) {
   shcluster.locate(uid, function (err, locateInfo) {
     if (err) {
-      return cb(err, "user is not online")
+      return cb(err, "user is not online");
     }
     var l = locateInfo.getData();
     if (l.serverId === global.server.serverId) {
@@ -70,13 +70,21 @@ dispatch.sendUser = function (uid, data, cb) {
   });
 };
 
-dispatch.sendUsers = function (ids, data) {
-  shlog.info("sendUsers:", ids);
+dispatch.sendUsers = function (ids, data, excludeIds) {
+  shlog.info("sendUsers:", ids, excludeIds);
+  if (_.isString(excludeIds)) {
+    excludeIds = [excludeIds];
+  }
+  if (_.isUndefined(excludeIds)) {
+    excludeIds = [];
+  }
 
   _.each(ids, function (id) {
-    dispatch.sendUser(id, data, function (err, data) {
-      // ignore for now
-    });
+    if (!_.contains(excludeIds, id)) {
+      dispatch.sendUser(id, data, function (err, data) {
+        // ignore for now
+      });
+    }
   });
 };
 

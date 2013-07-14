@@ -1,4 +1,4 @@
-var gStats = require(global.gBaseDir + global.CONF.STATS.WRAPPER);
+var gStats = require(global.gBaseDir + global.C.STATS_WRAPPER);
 
 var shstats = exports;
 

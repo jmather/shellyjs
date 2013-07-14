@@ -253,7 +253,6 @@ Game.kick = function (req, res, cb) {
 Game.turn = function (req, res, cb) {
   var uid = req.session.uid;
   var gameId = req.body.gameId;
-  // fast and loose - muse setData before return or sub call
   var gameData = req.env.game.getData();
 
   if (Object.keys(gameData.players).length < gameData.minPlayers) {
@@ -282,21 +281,22 @@ Game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    var event = sh.event("game.turn.next", {gameId: gameId,
-      gameName: gameData.name,
-      whoTurn: gameData.whoTurn,
-      name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
-      pic: ""});
-    dispatch.sendUsers(gameData.playerOrder, event); // send to all players
     if (gameData.status === "over") {
-      channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
+      dispatch.sendUsers(gameData.playerOrder, sh.event("game.over", gameData), req.session.uid);
+//      channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
+    } else {
+      var event = sh.event("game.turn.next", {gameId: gameId,
+        gameName: gameData.name,
+        whoTurn: gameData.whoTurn,
+        name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
+        pic: ""});
+      dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // send to all players
     }
     return cb(error);
   });
 };
 
 Game.get = function (req, res, cb) {
-  // SWD - game is bad name for this all over
   var game = req.env.game;
 
   res.add(sh.event("game.info", game.getData()));
@@ -305,9 +305,9 @@ Game.get = function (req, res, cb) {
 
 Game.set = function (req, res, cb) {
   var game = req.env.game;
-  var newGame = req.body.game;
+  var newGameData = req.body.game;
 
-  game.setData(newGame);
+  game.setData(newGameData);
 
   res.add(sh.event("game.info", game.getData()));
   return cb(0);

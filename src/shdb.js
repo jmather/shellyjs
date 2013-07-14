@@ -8,7 +8,7 @@ var gDbScope = "dev:";
 
 var shdb = exports;
 
-var client = require(global.gBaseDir + global.CONF.db.wrapper);
+var client = require(global.gBaseDir + global.CONF.DB_WRAPPER);
 shdb.driver = client.driver;
 
 var gKeyTypes = {};
@@ -44,7 +44,7 @@ shdb.init = function (cb) {
   initObjects(function () {
     try {
       shlog.info("db init");
-      client.init(global.CONF.db.options, function (err) {
+      client.init(global.CONF.DB_OPTIONS, function (err) {
         if (err) {
           shlog.error(err, global.CONF.db.settings);
           cb(err);
