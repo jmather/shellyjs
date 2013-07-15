@@ -36,8 +36,7 @@ function waitForGame() {
 }
 
 ws.on('open', function () {
-  sendCmd("channel.add", {channel: "lobby:0"});
-  sendCmd("channel.add", {channel: "matches:" + gUid});
+  sendCmd("channel2.add", {channel: "lobby:0"});
   sendCmd("game.playing");
   gWaitInt = setInterval(waitForGame, 5000);
 });
@@ -76,7 +75,7 @@ ws.on('message', function (message) {
     }
   } else if (msg.event === "match.made") {
     sendCmd("game.join", {gameId: msg.data.gameId});
-    sendCmd("channel.add", {channel: "game:" + msg.data.gameId});
+    sendCmd("channel2.add", {channel: "game:" + msg.data.gameId});
   } else if (msg.event === "game.info"
     || msg.event === "game.reset"
     || msg.event === "game.join") {
@@ -87,7 +86,7 @@ ws.on('message', function (message) {
     }
   } else if (msg.event === "game.playing") {
     _.each(msg.data, function (gameInfo, gameId) {
-      sendCmd("channel.add", {channel: "game:" + gameId});
+      sendCmd("channel2.add", {channel: "game:" + gameId});
       if(gameInfo.whoTurn === gUid) {
         sendCmd("game.get", {gameId: gameId});  // trigger a move base on gameBoard
       }
