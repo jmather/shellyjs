@@ -6,7 +6,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 var Socket = exports;
 var wss = null;
@@ -91,7 +91,7 @@ function onClose() {
   clearInterval(this.hbTimer);
 
   // clean up the global locator if there
-  if (global.CLUSTER && _.isString(this.uid)) {
+  if (_.isString(this.uid)) {
     global.db.kdelete("kLocate", this.uid);
     // don't for response
   }
@@ -99,7 +99,7 @@ function onClose() {
   // clean up any channels
   _.each(this.channels, function (value, key) {
     shlog.info("removing", key);
-    channel.removeInt(this, key);
+    channel.removeInt(key, this.uid);
   }, this);
 
   delete global.sockets[this.id]; // remove from global index

@@ -149,7 +149,7 @@ function shellyInit() {
         batch: [{cmd: "system.connInfo"},
             {cmd: "game.playing"},
             {cmd: "match.stats"},
-            {cmd: "channel.add", channel: "lobby:0"}
+            {cmd: "channel2.add", channel: "lobby:0"}
         ]});
 }
 
@@ -173,11 +173,11 @@ function init() {
         if ($(this).attr("status") == "on") {
             $(this).text("go online");
             $(this).attr("status", "off");
-            sendCmd("channel.remove", {channel: "lobby:0"});
+            sendCmd("channel2.remove", {channel: "lobby:0"});
         } else {
             $(this).text("go offline");
             $(this).attr("status", "on");
-            sendCmd("channel.add", {channel: "lobby:0"});
+            sendCmd("channel2.add", {channel: "lobby:0"});
         }
     });
 

@@ -56,6 +56,8 @@ function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("Profile");
 
+    commInit();
+
     window.addEventListener("load", function () {
         new FastClick(document.body);
     }, false);
@@ -172,9 +174,9 @@ function init() {
 </div>
 <div style="clear:both"></div>
 
-<div class="messageLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv"<b>Message Log</b></div>
-    <div id="messageLog" class="gameBoxInnerDiv" readonly></div>
+<div class="commLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>
+    <div id="commLog" class="gameBoxInnerDiv" readonly></div>
 </div>
 
 {{> footer}}

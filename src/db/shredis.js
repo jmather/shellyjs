@@ -47,6 +47,21 @@ shRedis.decr = function (key, amount, cb) {
   client.incrby(key, amount, cb);
 };
 
+shRedis.sadd = function (key, value, cb) {
+  shlog.info("sadd", key);
+  client.sadd(key, value, cb);
+};
+
+shRedis.srem = function (key, value, cb) {
+  shlog.info("srem", key);
+  client.srem(key, value, cb);
+};
+
+shRedis.smembers = function (key, cb) {
+  shlog.info("smembers", key);
+  client.smembers(key, cb);
+};
+
 shRedis.dequeue = function (queueName, uid, cb) {
   client.watch(queueName);
   client.get(queueName, function (err, row) {

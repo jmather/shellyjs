@@ -52,7 +52,7 @@
                 batch: [{cmd: "system.connInfo"},
                     {cmd: "game.join", gameId: Env.gameId},
                     {cmd: "game.playing"},
-                    {cmd: "channel.add", channel: "game:" + Env.gameId}
+                    {cmd: "channel2.add", channel: "game:" + Env.gameId}
                 ]});
         }
 
@@ -248,7 +248,7 @@
             Crafty.scene("game");
             Crafty.canvas.context.font = "40px Arial";
 
-            ws.connect(Env.SOCKET_URL);
+            ws.connect(Env.socketUrl);
         }
     </script>
 </head>

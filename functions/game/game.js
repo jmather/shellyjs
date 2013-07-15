@@ -4,10 +4,10 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var dispatch = require(global.gBaseDir + "/src/dispatch.js");
 var shcluster = require(global.gBaseDir + "/src/shcluster.js");
 
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var dispatch = require(global.gBaseDir + "/src/dispatch.js");
+var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 var gGameDir = global.gBaseDir + "/games";
 
@@ -282,9 +282,9 @@ Game.turn = function (req, res, cb) {
       return cb(error);
     }
     if (gameData.status === "over") {
-      dispatch.sendUsers(gameData.playerOrder, sh.event("game.over", gameData), req.session.uid);
-//      channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
+      channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
     } else {
+      // turn.next sent to all users online
       var event = sh.event("game.turn.next", {gameId: gameId,
         gameName: gameData.name,
         whoTurn: gameData.whoTurn,
@@ -328,7 +328,6 @@ Game.reset = function (req, res, cb) {
 
   req.env.gameModule.reset(req, res, function (error) {
     if (!error) {
-      // notify players in game of new state
       channel.sendInt("game:" + gameData.oid, sh.event("game.reset", gameData));
 
       // notify all players

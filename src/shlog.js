@@ -18,6 +18,7 @@ var gDebug = {
 //  "admin": {},
 //  "games": {},
 //  "channel": {},
+//  "channel2": {},
 //	"game": {},
 //	"user": {},
 //	"reg": {},

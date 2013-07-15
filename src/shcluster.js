@@ -120,7 +120,7 @@ ShCluster.getStat = function (key) {
 };
 
 ShCluster.servers = function (cb) {
-  var serverList = [];
+  var serverList = {};
   gDriver.smembers("serverList", function (err, servers) {
     shlog.info("smembers err:", err, "data:", servers);
     if (err) {

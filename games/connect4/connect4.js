@@ -3,8 +3,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var dispatch = require(global.gBaseDir + "/src/dispatch.js");
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 var connect4 = exports;
 
@@ -15,9 +14,10 @@ var RED = 1;
 
 connect4.create = function (req, res, cb) {
   var board = [];
-  for (var i = 0; i < 7; i++) {
+  var i, j;
+  for (i = 0; i < 7; i += 1) {
     board[i] = []; //init board
-    for (var j = 0; j < 6; j++) {
+    for (j = 0; j < 6; j += 1) {
       board[i][j] = EMPTY; //set it to empty
     }
   }
@@ -40,9 +40,10 @@ connect4.create = function (req, res, cb) {
 
 connect4.reset = function (req, res, cb) {
   var state = req.env.game.get("state");
-  for (var i = 0; i < 7; i++) {
+  var i, j;
+  for (i = 0; i < 7; i += 1) {
     state.board[i] = []; //init board
-    for (var j = 0; j < 6; j++) {
+    for (j = 0; j < 6; j += 1) {
       state.board[i][j] = EMPTY; //set it to empty
     }
   }
@@ -54,8 +55,9 @@ connect4.reset = function (req, res, cb) {
 };
 
 function checkFull(gb) {
-  for (var i = 0; i < 7; i++) {
-    for (var j = 0; j < 6; j++) {
+  var i, j;
+  for (i = 0; i < 7; i += 1) {
+    for (j = 0; j < 6; j += 1) {
       if (gb[i][j] === EMPTY) {
         return false;
       }
@@ -65,9 +67,12 @@ function checkFull(gb) {
 }
 
 function checkVertical(board, turn, column, row, winSet) {
-  if (row < 3) return false;
-  for (var i = row; i > row - 4; i--) {
-    if (board[column][i] != turn) {
+  if (row < 3) {
+    return false;
+  }
+  var i;
+  for (i = row; i > row - 4; i -= 1) {
+    if (board[column][i] !== turn) {
       winSet.length = 0;
       return false;
     }
@@ -80,18 +85,24 @@ function checkHorizontal(board, turn, column, row, winSet) {
   var counter = 1;
   winSet.push({x: column, y: row});
 
-  for (var i = column - 1; i >= 0; i--) {
-    if (board[i][row] != turn) break;
+  var i;
+  for (i = column - 1; i >= 0; i -= 1) {
+    if (board[i][row] !== turn) {
+      break;
+    }
     winSet.push({x: i, y: row});
-    counter++;
+    counter += 1;
   }
 
-  for (var j = column + 1; j < 7; j++) {
-    if (board[j][row] != turn) break;
+  var j;
+  for (j = column + 1; j < 7; j += 1) {
+    if (board[j][row] !== turn) {
+      break;
+    }
     winSet.push({x: j, y: row});
-    counter++;
+    counter += 1;
   }
-  if(winSet.length < 4) {
+  if (winSet.length < 4) {
     winSet.length = 0;
   }
   return counter >= 4;
@@ -104,29 +115,31 @@ function checkLeftDiagonal(board, turn, column, row, winSet) {
   winSet.push({x: column, y: row});
 
   while (tmp_row >= 0 && tmp_column >= 0) {
-    if (board[tmp_column][tmp_row] == turn) {
+    if (board[tmp_column][tmp_row] === turn) {
       winSet.push({x: tmp_column, y: tmp_row});
-      counter++;
-      tmp_row--;
-      tmp_column--;
-    } else break;
+      counter += 1;
+      tmp_row -= 1;
+      tmp_column -= 1;
+    } else {
+      break;
+    }
   }
 
   row += 1;
   column += 1;
 
   while (row < 6 && column < 7) {
-    if (board[column][row] == turn) {
-      winSet.push({x: column, y: row})
-      counter++;
-      row++;
-      column++;
+    if (board[column][row] === turn) {
+      winSet.push({x: column, y: row});
+      counter += 1;
+      row += 1;
+      column += 1;
     } else {
       break;
     }
   }
 
-  if(winSet.length < 4) {
+  if (winSet.length < 4) {
     winSet.length = 0;
   }
   return counter >= 4;
@@ -139,27 +152,31 @@ function checkRightDiagonal(board, turn, column, row, winSet) {
   winSet.push({x: column, y: row});
 
   while (tmp_row < 6 && tmp_column >= 0) {
-    if (board[tmp_column][tmp_row] == turn) {
+    if (board[tmp_column][tmp_row] === turn) {
       winSet.push({x: tmp_column, y: tmp_row});
-      counter++;
-      tmp_row++;
-      tmp_column--;
-    } else break;
+      counter += 1;
+      tmp_row += 1;
+      tmp_column -= 1;
+    } else {
+      break;
+    }
   }
 
   row -= 1;
   column += 1;
 
   while (row >= 0 && column < 7) {
-    if (board[column][row] == turn) {
+    if (board[column][row] === turn) {
       winSet.push({x: column, y: row});
-      counter++;
-      row--;
-      column++;
-    } else break;
+      counter += 1;
+      row -= 1;
+      column += 1;
+    } else {
+      break;
+    }
   }
 
-  if(winSet.length < 4) {
+  if (winSet.length < 4) {
     winSet.length = 0;
   }
   return counter >= 4;
@@ -167,10 +184,10 @@ function checkRightDiagonal(board, turn, column, row, winSet) {
 
 function checkWin(board, turn, column, row, winSet) {
 
-  if (checkVertical(board, turn, column, row, winSet)) return true;
-  if (checkHorizontal(board, turn, column, row, winSet)) return true;
-  if (checkLeftDiagonal(board, turn, column, row, winSet)) return true;
-  if (checkRightDiagonal(board, turn, column, row, winSet)) return true;
+  if (checkVertical(board, turn, column, row, winSet)) { return true; }
+  if (checkHorizontal(board, turn, column, row, winSet)) { return true; }
+  if (checkLeftDiagonal(board, turn, column, row, winSet)) { return true; }
+  if (checkRightDiagonal(board, turn, column, row, winSet)) { return true; }
 
   return false;
 }
@@ -188,15 +205,15 @@ connect4.turn = function (req, res, cb) {
   }
 
   var color = YELLOW;
-  if (state.reds == uid) {
+  if (state.reds === uid) {
     color = RED;
   }
   board[move.x][move.y] = color;
 
   state.lastMove = {uid: uid, move: move, color: color};
-  res.add(sh.event("game.update", state.lastMove));
-//  channel.sendInt("game:" + game.get("oid"), sh.event("game.update", state.lastMove));
-  dispatch.sendUsers(game.get("playerOrder"), sh.event("game.update", state.lastMove), req.session.uid);
+  var event = sh.event("game.update", state.lastMove);
+  res.add(event);
+  channel.sendInt("game:" + game.get("oid"), event);
 
   var winSet = [];
   var win = checkWin(state.board, color, move.x, move.y, winSet);
@@ -219,4 +236,4 @@ connect4.turn = function (req, res, cb) {
   }
 
   return cb(0);
-}
+};

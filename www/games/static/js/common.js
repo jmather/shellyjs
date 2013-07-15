@@ -154,8 +154,8 @@ function setMyTurns(gameList) {
 var ws = new ReconnectingWebSocket();
 //        ws.debug = true;
 ws.onopen = function (evt) {
-  console.log("serverUrl:", Env.SOCKET_URL);
-  log("socket", "onopen", Env.SOCKET_URL);
+  console.log("serverUrl:", Env.socketUrl);
+  log("socket", "onopen", Env.socketUrl);
   shellyInit();
 }
 ws.onmessage = function (evt) {
@@ -246,6 +246,13 @@ function messageInit(channel)
       }
     }
   });
+  $("#sendChat").click(function(){
+    if($("#chatInput").val() !== "")
+    {
+      sendMessage($("#chatInput").val());
+      $("#chatInput").val("");
+    }
+  });
 }
 
 function messageReset() {
@@ -285,7 +292,7 @@ function addMessage(channel, data) {
 }
 
 function sendMessage(msg) {
-  sendCmd("channel.send", {channel: gMessageChannel, message: msg});
+  sendCmd("channel2.send", {channel: gMessageChannel, message: msg});
 }
 
 

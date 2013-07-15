@@ -1,2 +1,2 @@
 
-global.CDEF("NUM_WORKERS", 1);
+global.CDEF("NUM_WORKERS", 2);

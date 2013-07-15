@@ -8,21 +8,21 @@ var cluster = exports;
 
 cluster.desc = "cluster information, statistics, and settings";
 cluster.functions = {
-  servers: {desc: "get all server in cluster", params: {}, security: ["admin"]},
+  servers: {desc: "get all servers in cluster", params: {}, security: ["admin"]},
   locate: {desc: "locate a user in the cluster", params: {uid: {dtype: "string"}}, security: ["admin"]},
   sendUser: {desc: "send a message to any user", params: {uid: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]},
-  home: {desc: "hash the oid to get the home cluster server", params: {oid: {dtype: "string"}}, security: []}
+  home: {desc: "hash any string to get a home cluster server", params: {oid: {dtype: "string"}}, security: []}
 };
 
 cluster.servers = function (req, res, cb) {
   shlog.info("cluster.servers");
 
-  shcluster.servers(function (err, data) {
+  shcluster.servers(function (err, serverList) {
     if (err) {
-      res.add(sh.error("cluster_servers", "unable to get server list", err, data));
+      res.add(sh.error("cluster_servers", "unable to get server list", serverList));
       return cb(1);
     }
-    res.add(sh.event("cluster.servers", data));
+    res.add(sh.event("cluster.servers", serverList));
     return cb(0);
   });
 };

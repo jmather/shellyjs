@@ -180,6 +180,34 @@ shdb.decr = function (key, amount, cb) {
   }
 };
 
+shdb.sadd = function (key, value, cb) {
+  shlog.info("sadd", key);
+  try {
+    client.sadd(key, value, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+};
+
+shdb.srem = function (key, value, cb) {
+  shlog.info("srem", key);
+  try {
+    client.srem(key, value, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+};
+
+shdb.smembers = function (key, cb) {
+  shlog.info("smembers", key);
+  try {
+    client.smembers(key, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+};
+
+
 shdb.dequeue = function (queueName, uid, cb) {
   shlog.info("dequeue:", queueName, uid);
   try {

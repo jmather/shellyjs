@@ -56,7 +56,7 @@ if (cluster.isMaster) {
 global.db = require(global.gBaseDir + "/src/shdb.js");
 global.socket = null;
 
-var gChannel = require(global.gBaseDir + "/functions/channel/channel.js");
+var gChannel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 var shelly = exports;
 
@@ -117,6 +117,7 @@ shelly.shutdown = function () {
       }
       if (global.socket) {
         shlog.info("shutting down socket");
+        // SWD - be nice to call close on all sockets in the global list and remove the locator records
         global.socket.close(function () { global.socket = null; cb(0); });
       } else { cb(0); }
     },
@@ -138,20 +139,8 @@ shelly.shutdown = function () {
 
 shelly.onMessage = function (msg) {
   shlog.debug("onMessage: %j", msg);
-  if (msg.cmd === "who.query") {
-    gChannel.returnOnline(msg.channel, msg.wid, msg.fromWsid);
-    return;
-  }
-  if (msg.cmd === "who.return") {
-    gChannel.sendDirect(msg.toWsid, msg.data);
-    return;
-  }
   if (msg.cmd === "user.direct") {
     gChannel.sendDirect(msg.toWsid, msg.data);
-    return;
-  }
-  if (msg.cmd === "forward") {
-    gChannel.sendInt(msg.channel, msg.data, false); // do not forward to cluster
     return;
   }
   shlog.error("bad_message", "unknown command", msg);

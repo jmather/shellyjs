@@ -3,7 +3,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 var tictactoe = exports;
 
@@ -43,8 +43,9 @@ tictactoe.reset = function (req, res, cb) {
 
 function checkFull(gb) {
   var res = true;
-  for (var i = 0; i < 3; i++) {
-    for (var j = 0; j < 3; j++) {
+  var i, j;
+  for (i = 0; i < 3; i += 1) {
+    for (j = 0; j < 3; j += 1) {
       if (gb[i][j] === "") {
         return false;
       }
@@ -57,16 +58,17 @@ function checkWin(gb) {
   var res = {winner: "", set: null};
 
   shlog.log("checkWin");
-  for (var i = 0; i < 3; i++) {
-    if (gb[i][0] == gb[i][1] && gb[i][0] == gb[i][2]) {
-      if (gb[i][0] != "") {
+  var i;
+  for (i = 0; i < 3; i += 1) {
+    if (gb[i][0] === gb[i][1] && gb[i][0] === gb[i][2]) {
+      if (gb[i][0] !== "") {
         res.winner = gb[i][0];
         res.set = ["x" + i + "y0", "x" + i + "y1", "x" + i + "y2"];
         return res;
       }
     }
-    if (gb[0][i] == gb[1][i] && gb[0][i] == gb[2][i]) {
-      if (gb[0][i] != "") {
+    if (gb[0][i] === gb[1][i] && gb[0][i] === gb[2][i]) {
+      if (gb[0][i] !== "") {
         res.winner = gb[0][i];
         res.set = ["x0y" + i, "x1y" + i, "x2y" + i];
         return res;
@@ -74,15 +76,15 @@ function checkWin(gb) {
     }
   }
 
-  if (gb[0][0] == gb[1][1] && gb[0][0] == gb[2][2]) {
-    if (gb[1][1] != "") {
+  if (gb[0][0] === gb[1][1] && gb[0][0] === gb[2][2]) {
+    if (gb[1][1] !== "") {
       res.winner = gb[1][1];
       res.set = ["x0y0", "x1y1", "x2y2"];
       return res;
     }
   }
-  if (gb[0][2] == gb[1][1] && gb[0][2] == gb[2][0]) {
-    if (gb[1][1] != "") {
+  if (gb[0][2] === gb[1][1] && gb[0][2] === gb[2][0]) {
+    if (gb[1][1] !== "") {
       res.winner = gb[1][1];
       res.set = ["x0y2", "x1y1", "x2y0"];
       return res;
@@ -98,12 +100,12 @@ tictactoe.turn = function (req, res, cb) {
   var state = req.env.game.get("state");
   var gameBoard = state.gameBoard;
 
-  if (gameBoard[move.x][move.y] != "") {
+  if (gameBoard[move.x][move.y] !== "") {
     res.add(sh.error("move_bad", "this square has been taken"));
     return cb(1);
   }
 
-  if (state.xes == uid) {
+  if (state.xes === uid) {
     gameBoard[move.x][move.y] = "X";
   } else {
     gameBoard[move.x][move.y] = "O";
@@ -112,14 +114,13 @@ tictactoe.turn = function (req, res, cb) {
   channel.sendInt("game:" + game.get("oid"), sh.event("game.info", game.getData()));
 
   var win = checkWin(gameBoard);
-  if (win.winner != "") {
+  if (win.winner !== "") {
     game.set("status", "over");
     game.set("whoTurn", "");
     state.winner = uid;
     state.winnerSet = win.set;
     game.set("state", state);
     res.add(sh.event("game.over", game.getData()));
-    channel.sendInt("game:" + game.get("oid"), sh.event("game.over", game.getData()));
     return cb(0);
   }
 
@@ -130,11 +131,10 @@ tictactoe.turn = function (req, res, cb) {
     state.winnerSet = null;
     game.set("state", state);
     res.add(sh.event("game.over", game.getData()));
-    channel.sendInt("game:" + game.get("oid"), sh.event("game.over", game.getData()));
     return cb(0);
   }
 
   // send back the updated board
   res.add(sh.event("game.info", game.getData()));
   return cb(0);
-}
+};
