@@ -152,11 +152,14 @@ function setMyTurns(gameList) {
 }
 
 var ws = new ReconnectingWebSocket();
-//        ws.debug = true;
+// ws.debug = true;
 ws.onopen = function (evt) {
   console.log("serverUrl:", Env.socketUrl);
   log("socket", "onopen", Env.socketUrl);
   shellyInit();
+  try {
+    $("#serverConnectDlg").dialog("close");
+  } catch (e) {}
 }
 ws.onmessage = function (evt) {
   var received_msg = evt.data;
@@ -166,6 +169,7 @@ ws.onmessage = function (evt) {
 }
 ws.onclose = function (evt) {
   log("socket", "onclose", JSON.stringify(evt));
+  $("#serverConnectDlg").dialog({modal: true, height: 110});
 }
 ws.onerror = function (evt) {
   log("socket", "error", JSON.stringify(evt));

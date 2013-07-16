@@ -261,28 +261,25 @@ function init() {
     <div id="commLog" class="gameBoxInnerDiv" readonly></div>
 </div>
 
-
 <!-- popup dialog that shows waiting for match -->
-<div class="matchListDiv" style="display:none;">
-    <div class="gameBoxHeaderDiv">Game Activity</div>
-    <div id="matchList" class="gameBoxInnerDiv">
-        <div id="matchTemplate" style="display:none;">
-            <span id="matchName">game0</span> =
-            <span id="matchTime">time</span>
-        </div>
-    </div>
-</div>
-
-
 <style>
     .waitOptionDiv {
         margin: 10px;
+    }
+    .ui-dialog-titlebar {
+        display: none;
     }
 </style>
 <div id="dialog" style="display:none" title="Ready to Play">
     <div class="waitOptionDiv">waiting for user to join you...</div>
     <div class="waitOptionDiv">Or give us your email and we will notify you.</div>
     <div class="waitOptionDiv">Or come back later.</div>
+</div>
+
+<!-- modal dialog for server disconnected -->
+<div id="serverConnectDlg" style="height: 150px; display:none">
+    <div class="waitOptionDiv">Lost contact with server.</div>
+    <div class="waitOptionDiv">Reconnecting...</div>
 </div>
 
 {{> footer}}
