@@ -12,10 +12,10 @@ function ShLocate() {
   this._keyFormat = "loc:%s";
   this._data = {
     oid: "",
-    serverUrl: "",
     serverId: null,
     workerId: null,
-    socketId: null
+    socketId: null,
+    name: "player0"
   };
 }
 

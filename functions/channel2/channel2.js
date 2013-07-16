@@ -69,13 +69,12 @@ Channel.add = function (req, res, cb) {
     res.add(sh.event("channel.add", data));
     res.ws.channels[req.body.channel] = "on";  // cross ref so we can call remove on socket close
 
-    // notify the list of users I'm on
+    // notify me and the channel users I'm on
     var event = sh.event("channel.user", {channel: req.body.channel, uid: res.ws.uid, name: res.ws.name, status: "on"});
-    Channel.sendInt(req.body.channel, event, function (err, uidList) {
-
+    Channel.sendInt(req.body.channel, event, function (err, locateList) {
       // send me a list of current users
-      _.each(uidList, function (uid) {
-        var event = sh.event("channel.user", {channel: req.body.channel, uid: uid, name: uid, status: "on"});
+      _.each(locateList, function (locateInfo, uid) {
+        var event = sh.event("channel.user", {channel: req.body.channel, uid: uid, name: locateInfo.name, status: "on"});
         res.add(event);
       });
 
@@ -88,29 +87,6 @@ Channel.add = function (req, res, cb) {
       });
     });
   });
-
-/*
-  // notify existing channel of user add
- var event = sh.event("channel.user", {channel: req.body.channel,
- uid: res.ws.uid, name: res.ws.name, pic: "",  status: "on"});
-  Channel.sendInt(req.body.channel, event);
-
-  // add me to the channel
-  global.channels[req.body.channel].push(res.ws);
-  res.ws.channels[req.body.channel] = "on";  // cross ref so we can call remove on socket close
-  shlog.info("add", req.body.channel, global.channels[req.body.channel].length);
-
-  // update master stats for channel
-  if (req.body.channel.substr(0, 6) === "lobby:") {
-    process.send({cmd: "stat", wid: cluster.worker.id,
-      key: req.body.channel, count: global.channels[req.body.channel].length});
-  }
-
-  // notify me of online channel users
-  // SWD might want to put flag on channels that really need this
-  // as it generates a lot of presence traffic
-  Channel.sendOnline(res.ws, req.body.channel);
-*/
 };
 
 Channel.removeInt = function (channel, uid, cb) {
@@ -151,10 +127,12 @@ Channel.sendInt = function (channel, event, cb) {
     if (err) {
       return cb(1);
     }
-    dispatch.sendUsers(uidList, event);
-    if (_.isFunction(cb)) {
-      return cb(0, uidList);
-    }
+
+    dispatch.sendUsers(uidList, event, null, function (err, locateList) {
+      if (_.isFunction(cb)) {
+        return cb(0, locateList);
+      }
+    });
   });
 };
 

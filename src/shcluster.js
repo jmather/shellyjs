@@ -142,6 +142,18 @@ ShCluster.servers = function (cb) {
   });
 };
 
+ShCluster.setLocate = function (user, socketId, cb) {
+  gLoader.get("kLocate", user.get("oid"), function (err, locate) {
+    locate.set("oid", user.get("oid"));
+    locate.set("name", user.get("name"));
+    locate.set("serverId", global.server.serverId);
+    locate.set("workerId", shlog.workerId);
+    locate.set("socketId", socketId);
+    shlog.info("locate set", locate.getData());
+    locate.save(cb);
+  });
+};
+
 ShCluster.locate = function (uid, cb) {
   gLoader.exists("kLocate", uid, function (err, locateInfo) {
     cb(err, locateInfo);

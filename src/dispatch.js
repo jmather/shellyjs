@@ -57,33 +57,49 @@ dispatch.sendUser = function (uid, data, cb) {
       if (l.workerId === cluster.worker.id) {
         shlog.info("sendUser - local socket:", l.socketId);
         channel.sendDirect(l.socketId, data);
-        return cb(0);
+        return cb(0, locateInfo);
       }
       shlog.info("sendUser - local cluster workerId:", l.workerId, "socketId:", l.socketId);
       process.send({cmd: "user.direct", wid: cluster.worker.id, toWid: l.workerId, toWsid: l.socketId, data: data});
-      return cb(0);
+      return cb(0, locateInfo);
     }
 
     // user is on different server
     shlog.info("sendUser - remote server:", l.serverId, "workerId:", l.workerId, "socketId:", l.socketId);
-    shcluster.sendUserWithLocate(locateInfo, data, cb);
+    shcluster.sendUserWithLocate(locateInfo, data, function (err, data) {
+      // SWD ignore the error for now
+      return cb(0, locateInfo);
+    });
   });
 };
 
-dispatch.sendUsers = function (ids, data, excludeIds) {
-  shlog.info("sendUsers:", ids, excludeIds);
+dispatch.sendUsers = function (uids, data, excludeIds, cb) {
+  shlog.info("sendUsers:", uids, excludeIds);
   if (_.isString(excludeIds)) {
     excludeIds = [excludeIds];
   }
-  if (_.isUndefined(excludeIds)) {
+  if (_.isUndefined(excludeIds) || excludeIds === null) {
     excludeIds = [];
   }
 
-  _.each(ids, function (id) {
-    if (!_.contains(excludeIds, id)) {
-      dispatch.sendUser(id, data, function (err, data) {
-        // ignore for now
+  var locateList = {};
+  async.each(uids, function (uid, lcb) {
+    if (!_.contains(excludeIds, uid)) {
+      dispatch.sendUser(uid, data, function (err, locateInfo) {
+        if (err) {
+          shlog.info("bad user send", err, locateInfo);
+          return lcb();
+        }
+        locateList[uid] = locateInfo.getData();
+        return lcb();
       });
+    }
+  }, function (error) {
+    if (_.isFunction(cb)) {
+      if (error) {
+        return cb(1, error);
+      }
+      return cb(0, locateList);
     }
   });
 };

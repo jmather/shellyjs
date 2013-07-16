@@ -61,7 +61,6 @@ shSqlite.incr = function (key, amount, cb) {
 
   var self = this;
   this.client.run("UPDATE store SET value = value + ? WHERE key = ?", amount, key, function (err) {
-    console.log("sqlite incr", err);
     if (err) {
       self.client.run("INSERT INTO store VALUES (?, ?)", key, amount, cb);
       return;

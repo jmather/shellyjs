@@ -6,6 +6,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var shcluster = require(global.gBaseDir + "/src/shcluster.js");
 var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 var Socket = exports;
@@ -71,16 +72,13 @@ function onMessage(data) {
         res.ws.session = req.session;   // SWD now storing session in ws so we can remove the ws.uid and ws.name
         res.ws.uid = req.session.uid;
         res.ws.name = req.session.user.get("name");
-        loader.get("kLocate", req.session.uid, function (err, locate) {
-          locate.set("oid", req.session.uid);
-          locate.set("serverUrl", res.ws.upgradeReq.headers.origin);
-          locate.set("serverId", global.server.serverId);
-          locate.set("workerId", shlog.workerId);
-          locate.set("socketId", res.ws.id);
-          shlog.info("locate set", locate.getData());
+        shcluster.setLocate(req.session.user, res.ws.id, function (err, data) {
+          makeCalls(msgs, req, res);
         });
+      } else {
+        // some calls don't require session
+        makeCalls(msgs, req, res);
       }
-      makeCalls(msgs, req, res);
     });
   }
 }
