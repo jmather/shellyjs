@@ -177,7 +177,7 @@ function shellyInit() {
         sendRaw({session: Env.session,
             batch: [{cmd: "game.join", gameId: Env.gameId},
                 {cmd: "game.playing"},
-                {cmd: "channel.add", channel: "game:" + Env.gameId}
+                {cmd: "channel2.add", channel: "game:" + Env.gameId}
             ]});
     }
 }
@@ -209,7 +209,6 @@ function processEvent(res, from) {
             Env.players = {};  // reset the player list
         }
         setState(res.data);
-        sendCmd("channel.add", {channel: "game:" + newGameId})
         return;
     }
     if (res.event == "channel.user") {
