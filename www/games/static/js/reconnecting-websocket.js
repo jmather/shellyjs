@@ -115,6 +115,7 @@ function ReconnectingWebSocket(protocols) {
                     self.onclose(event);
                 }
                 setTimeout(function() {
+                    self.onerror(event);
                     connect(true);
                 }, self.reconnectInterval);
             }
@@ -136,7 +137,7 @@ function ReconnectingWebSocket(protocols) {
 
     this.connect = function(url) {
       self.url = url;
-      self.URL = url
+      self.URL = url;
       connect(url);
     }
 

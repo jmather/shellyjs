@@ -152,7 +152,7 @@ function setMyTurns(gameList) {
 }
 
 var ws = new ReconnectingWebSocket();
-// ws.debug = true;
+//ws.debug = true;
 ws.onopen = function (evt) {
   console.log("serverUrl:", Env.socketUrl);
   log("socket", "onopen", Env.socketUrl);
@@ -169,10 +169,10 @@ ws.onmessage = function (evt) {
 }
 ws.onclose = function (evt) {
   log("socket", "onclose", JSON.stringify(evt));
-  $("#serverConnectDlg").dialog({modal: true, height: 110});
 }
 ws.onerror = function (evt) {
   log("socket", "error", JSON.stringify(evt));
+  $("#serverConnectDlg").dialog({modal: true, height: 110});
 }
 
 // assumes global ws object
