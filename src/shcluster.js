@@ -77,29 +77,42 @@ ShCluster.init = function (cb) {
   });
 };
 
+var loopUntilNoWorkers = function () {
+  if (Object.keys(cluster.workers).length > 0) {
+    shlog.info("there are still " + Object.keys(cluster.workers).length + " workers...");
+    setTimeout(loopUntilNoWorkers, 1000);
+  } else {
+    shlog.info("all workers gone, shutdown complete");
+    process.exit();
+  }
+};
+
 ShCluster.shutdown = function () {
   async.series([
     function (cb) {
-      shlog.info("stopping cluster server");
+      shlog.info("shutdown: cluster socket server");
       gServer.end();
       cb(0);
     },
     function (cb) {
-      shlog.info("delete server from serverList");
+      shlog.info("shutdown: delete server from serverList");
       gDriver.srem("serverList", global.server.serverId, cb);
     },
     function (cb) {
-      shlog.info("delete kServer object");
+      shlog.info("shutdown: delete kServer object");
       gLoader.delete("kServer", global.server.serverId, cb);
     },
     function (cb) {
-      shlog.info("dumping loader");
+      shlog.info("shutdown: dumping loader");
       gLoader.dump(cb);
     }
   ],
     function (err, results) {
-      shlog.info("shutdown done.");
-      process.exit(0);
+      shlog.info("cluster length " + Object.keys(cluster.workers).length);
+      Object.keys(cluster.workers).forEach(function (id) {
+        cluster.workers[id].send({cmd: "shelly.stop"});
+      });
+      setTimeout(loopUntilNoWorkers, 1000);
     });
 };
 

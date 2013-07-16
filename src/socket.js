@@ -149,9 +149,17 @@ Socket.start = function () {
 
 Socket.close = function (cb) {
   try {
+    _.each(global.sockets, function (ws, socketId) {
+      shlog.info("shutdown socketId:", socketId);
+      ws.close(1001, "server going down");
+    });
     wss.close();
+    // wait 3 sec for socket close events
+    // SWD set this as config param
+    setTimeout(function () {
+      cb();
+    }, 3000);
   } catch (e) {
-    // do not care ws lib does not allow bind check via address() call
+    cb();
   }
-  cb();
 };

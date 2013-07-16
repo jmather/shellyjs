@@ -69,14 +69,13 @@ shelly.start = function () {
   process.on("uncaughtException", function (error) {
     shlog.error("uncaughtException", error.stack);
   });
+
   process.on("SIGINT", function () {
-    shlog.info("SIGINT - graceful shutdown");
-    shelly.shutdown();
+    // ignore as master process sends shutdown message and waits
   });
 
   process.on("SIGQUIT", function () {
-    shlog.info("SIGQUIT - graceful shutdown");
-    shelly.shutdown();
+    // ignore as master process sends shutdown message and waits
   });
 
   shlog.info("starting db");
@@ -117,7 +116,6 @@ shelly.shutdown = function () {
       }
       if (global.socket) {
         shlog.info("shutting down socket");
-        // SWD - be nice to call close on all sockets in the global list and remove the locator records
         global.socket.close(function () { global.socket = null; cb(0); });
       } else { cb(0); }
     },
@@ -141,6 +139,10 @@ shelly.onMessage = function (msg) {
   shlog.debug("onMessage: %j", msg);
   if (msg.cmd === "user.direct") {
     gChannel.sendDirect(msg.toWsid, msg.data);
+    return;
+  }
+  if (msg.cmd === "shelly.stop") {
+    this.shutdown();
     return;
   }
   shlog.error("bad_message", "unknown command", msg);
