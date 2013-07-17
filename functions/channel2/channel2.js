@@ -70,11 +70,21 @@ Channel.add = function (req, res, cb) {
     res.ws.channels[req.body.channel] = "on";  // cross ref so we can call remove on socket close
 
     // notify me and the channel users I'm on
-    var event = sh.event("channel.user", {channel: req.body.channel, uid: res.ws.uid, name: res.ws.name, status: "on"});
+    var event = sh.event("channel.user", {channel: req.body.channel, uid: req.session.uid,
+      name: req.session.user.get("name"),
+      pict: req.session.user.get("pict"),
+      gender: req.session.user.get("gender"),
+      age: req.session.user.get("age"),
+      status: "on"});
     Channel.sendInt(req.body.channel, event, function (err, locateList) {
       // send me a list of current users
       _.each(locateList, function (locateInfo, uid) {
-        var event = sh.event("channel.user", {channel: req.body.channel, uid: uid, name: locateInfo.name, status: "on"});
+        var event = sh.event("channel.user", {channel: req.body.channel, uid: uid,
+          name: locateInfo.name,
+          pict: locateInfo.pict,
+          gender: locateInfo.gender,
+          age: locateInfo.age,
+          status: "on"});
         res.add(event);
       });
 

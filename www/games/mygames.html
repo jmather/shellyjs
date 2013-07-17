@@ -27,17 +27,22 @@
     #liveToggle {
         font-size: 10px;
     }
-    .suggestedUsersDiv {
-        float: left;
-        width: 220px;
-    }
-    #suggestedUserList {
-        height: 358px;
-    }
 
-    .userPictImg {
-        width: 30px;
-        height: 30px;
+    .gameTurnsGroup {  /* container div for turns/done lists */
+        float:left;
+        width:340;
+    }
+    .gameListDiv {  /* all game turns/done lists */
+        width: 340px;
+    }
+    #gameMyTurnList {
+        height: 100px;
+    }
+    #gameOppTurnList {
+        height: 100px;
+    }
+    #gameDoneList {
+        height: 100px;
     }
 </style>
 
@@ -69,9 +74,6 @@ function addUser(profile) {
     var $newGame = $("#userTemplate").clone();
     $newGame.find("#userName").text(profile.name);
     $newGame.find("#userName").addClass("playerName" + profile.uid);
-    $newGame.find("#userPict").attr("src", profile.pict);
-    $newGame.find("#userGender").text(profile.gender);
-    $newGame.find("#userAge").text(profile.age);
     $newGame.addClass("userId" + profile.uid);
     $newGame.addClass("activeUser");
     $newGame.attr("uid", profile.uid);
@@ -98,8 +100,15 @@ function processEvent(res, from) {
     if (res.event == "heartbeat") {
         return;
     }
+    if (res.event == "game.playing") {
+        setLobbyGames(res.data);
+        return;
+    }
+    if (res.event == "game.turn.next") {
+        setLobbyTurn(res.data.gameId, res.data.whoTurn, res.data);
+        return;
+    }
     if (res.event == "channel.user") {
-        console.log(res.data);
         if (res.data.status === "on") {
             addUser(res.data);
         } else {
@@ -138,15 +147,14 @@ function processEvent(res, from) {
 function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
-            {cmd: "match.stats"},
-            {cmd: "channel2.add", channel: "lobby:0"}
+            {cmd: "game.playing"}
         ]});
 }
 
 $(init);
 function init() {
     $("#shSystem").text("Example");
-    $("#shSubTitle").text("Lobby");
+    $("#shSubTitle").text("My Games");
 
     window.addEventListener("load", function () {
         new FastClick(document.body);
@@ -159,20 +167,9 @@ function init() {
     $("#gameConnect4").click(function () {
         sendCmd("match.add", {name: "connect4"});
     });
-    $("#liveToggle").click(function () {
-        if ($(this).attr("status") == "on") {
-            $(this).text("go online");
-            $(this).attr("status", "off");
-            sendCmd("channel2.remove", {channel: "lobby:0"});
-        } else {
-            $(this).text("go offline");
-            $(this).attr("status", "on");
-            sendCmd("channel2.add", {channel: "lobby:0"});
-        }
-    });
 
     commInit();
-    messageInit("lobby:0");
+//    messageInit("lobby:0");
 
     ws.connect(Env.socketUrl);
 }
@@ -184,54 +181,34 @@ function init() {
 
 <div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
 
-<div style="float:left; margin-bottom: 5px;">
-    <div class="playAnyoneDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv">Random Player</div>
-        <div id="playNowList" class="gameBoxInnerDiv">
-            <button id="gameTicTacToe">Tic Tac Toe</button>
-            <button id="gameConnect4">Connect 4</button>
-        </div>
-    </div>
-    <div class="lobbyUsersDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv">Online Players
-            <button id="liveToggle" style="float:right" status="on">go offline</button>
-        </div>
-        <div id="userList" class="gameBoxInnerDiv">
-            <div id="userTemplate" style="display:none;">
-                <span id="userName"></span>
-                <span id="userGender"></span>
-                <span id="userAge"></span>
-                <img id="userPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
-                <button id="userOffer" style="float:right">offer</button>
-                <div style="clear:both"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="suggestedUsersDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Suggested Opponents</div>
-    <div id="suggestedUserList" class="gameBoxInnerDiv">
-        <div id="suggestedUserTemplate" style="display:none;">
-            <span id="suggestedUuserName"></span>
-            <button id="suggestedUserOffer" style="float:right">challenge</button>
+<div class="gameTurnsGroup">
+<div class="gameListDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Your Turn</div>
+    <div id="gameMyTurnList" class="gameBoxInnerDiv">
+        <div id="gameTemplate" style="display:none;">
+            <span id="gameName">game-0</span>
+            <span id="gameTurn"></span>
+            <button style="float:right;" id="myGameRemove">remove</button>
+            <button style="float:right;" id="myGameJoin">play</button>
             <div style="clear:both"></div>
         </div>
     </div>
 </div>
 
-<div style="clear:both"></div>
-
-<div class="messageLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Messages</div>
-    <div class="gameBoxInnerDiv" readonly>
-        <div id="messageLog" style="overflow: auto" readonly></div>
-        <div class="gameBoxFooterDiv">
-            <input id="chatInput" type="text" style="width: 90%;"></input/>
-            <button id="sendChat" style="float:right;">send</button>
-        </div>
+<div class="gameListDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv" style="text-align: right;">Their Turn</div>
+    <div id="gameOppTurnList" class="gameBoxInnerDiv">
     </div>
 </div>
+
+<div class="gameListDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv" style="text-align: center">Finished Games</div>
+    <div id="gameDoneList" class="gameBoxInnerDiv">
+    </div>
+</div>
+ </div>
+
+<div style="clear:both"></div>
 
 <div class="commLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>

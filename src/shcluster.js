@@ -159,6 +159,9 @@ ShCluster.setLocate = function (user, socketId, cb) {
   gLoader.get("kLocate", user.get("oid"), function (err, locate) {
     locate.set("oid", user.get("oid"));
     locate.set("name", user.get("name"));
+    locate.set("pict", user.get("pict"));
+    locate.set("gender", user.get("gender"));
+    locate.set("age", user.get("age"));
     locate.set("serverId", global.server.serverId);
     locate.set("workerId", shlog.workerId);
     locate.set("socketId", socketId);

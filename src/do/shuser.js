@@ -1,4 +1,5 @@
 var util = require("util");
+var crypto = require("crypto");
 var _ = require("lodash");
 
 var sh = require(global.gBaseDir + "/src/shutil.js");
@@ -12,8 +13,9 @@ function User() {
   this._keyFormat = "u:%s";
   this._data = {
     name: "",
+    pict: "",
     email: "",
-    age: "0",
+    age: 0,
     gender: "",
     roles: []
   };
@@ -29,6 +31,9 @@ User.prototype.loadOrCreate = function (uid, cb) {
       if (self._data.name.length === 0) {
         self._data.name = "player-" + uid.substr(0, 4);
       }
+      // SWD - always set this for now
+      var hash = crypto.createHash("md5").update(self._data.email).digest("hex");
+      self._data.pict = "http://gravatar.com/avatar/" + hash + "?d=mm";
     }
     cb(err, self);
   });
@@ -39,7 +44,7 @@ User.prototype.setData = function (data) {
   if (!_.isUndefined(data.roles)) {
     this._data.roles = data.roles;
   }
-}
+};
 
 User.prototype.hasRole = function (role) {
   return _.contains(this._data.roles, role);
