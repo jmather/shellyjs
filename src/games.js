@@ -81,7 +81,7 @@ function createEnv(req) {
 
 function renderPage(req, res, env) {
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", gameNav: "gamenav"}});
+    partials: {header: "header", footer: "footer", gameNav: "gamenav", errorBox: "errorbox"}});
 }
 
 app.get("*.html", function (req, res) {
@@ -107,7 +107,7 @@ app.use(function (err, req, res, next) {
 
   res.status(500);
   res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", adminNav: "gamenav"}});
+    partials: {header: "header", footer: "footer", adminNav: "gamenav", errorBox: "errorbox"}});
 });
 
 

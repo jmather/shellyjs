@@ -119,6 +119,11 @@ function addUser(profile) {
     $newGame.attr("uid", profile.uid);
     $newGame.css("display", "block");
 
+    if (profile.uid === Env.user.oid) {
+        $newGame.find("#userName").text("me");
+        $newGame.find("#userChallenge").css("display", "none");
+    }
+
     $newGame.find("#userChallenge").click(function () {
         var toUid =$(this).parent().attr("uid");
         sendCmd("challenge.make", {toUid: toUid, game: "connect4"});
@@ -228,8 +233,7 @@ function init() {
 <body>
 {{> header}}
 {{> gameNav}}
-
-<div id="errorMessage" style="display:none;width:100%;background:pink;color:red;">error</div>
+{{> errorBox }}
 
 <div style="float:left; margin-bottom: 5px;">
     <div class="playAnyoneDiv gameBoxDiv">

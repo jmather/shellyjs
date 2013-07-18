@@ -124,3 +124,21 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
     font-size: 12px;
     z-index: 10;
 }
+
+#errorMessage {
+    padding-left: 5px;
+    padding-right: 5px;
+    border-style: ridge;
+    border-color: red;
+    border-width: 3px;
+    display:none;
+    width:80%;
+    height:20px;
+    background:pink;
+    color:red;
+}
+
+#errorDismiss {
+    float:right;
+    font-size:12px;
+}

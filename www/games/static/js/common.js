@@ -46,7 +46,7 @@ function log(api, type, msg) {
 
 function showError(msg) {
   $("#errorMessage").css("display", "block");
-  $("#errorMessage").text(msg);
+  $("#errorText").text("Oops: " + msg);
 }
 
 function hideError() {
@@ -184,6 +184,7 @@ function sendWs(data) {
 }
 
 function sendCmd(cmd, data) {
+  hideError();
   if (typeof(data) === "undefined") {
     data = {};
   }
@@ -206,6 +207,7 @@ function sendRaw(data) {
 }
 
 function sendRestCmd(cmd, data, cb) {
+  hideError();
   var obj = {};
   obj.session = Env.session;
   obj.cmd = cmd;
