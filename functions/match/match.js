@@ -18,13 +18,6 @@ match.functions = {
   stats: {desc: "list the match stats for all games", params: {}, security: []}
 };
 
-// SWD: just init a global game queue for now, handles reload
-if (_.isUndefined(global.matchInfo)) {
-  global.matchInfo = {};
-  global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
-  global.matchInfo.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/index.html"};
-}
-
 match.add = function (req, res, cb) {
   var uid = req.session.uid;
   var name = req.body.name;

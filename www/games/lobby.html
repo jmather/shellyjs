@@ -14,10 +14,13 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
 <style>
+    .userBtn {
+        font-size: 10px;
+    }
+
     .playAnyoneDiv {
         width: 220px;
     }
-
     .lobbyUsersDiv {
         width: 220px;
     }
@@ -27,6 +30,7 @@
     #liveToggle {
         font-size: 10px;
     }
+
     .suggestedUsersDiv {
         float: left;
         width: 220px;
@@ -35,26 +39,64 @@
         height: 358px;
     }
 
+    .challengesDiv {
+        float: left;
+        width: 225px;
+    }
+    #challengeList {
+        height: 358px;
+    }
+
     .userPictImg {
         width: 30px;
         height: 30px;
+    }
+
+    .userAttr {
+        margin-left: 5px;
     }
 </style>
 
 <script language="javascript">
 var Env = {{{EnvJson}}};
 
-function setMatchInfo(matchList) {
-    $(".activeMatch").remove();
-    for (gameName in matchList) {
-        var $newGame = $("#matchTemplate").clone();
-        $newGame.find("#matchName").text(gameName);
-        $newGame.find("#matchTime").text(prettyDate(matchList[gameName].lastCreated));
-        $newGame.attr("gameName", gameName);
-        $newGame.addClass("activeMatch");
-        $newGame.css("display", "block");
+function addChallenge(chId, challenge) {
+    if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
+        return;
+    }
+    var $newChallenge = $("#challengeTemplate").clone();
+    $newChallenge.find("#challengerName").text(challenge.data.name);
+    $newChallenge.find("#challengerAge").text(challenge.data.age);
+    $newChallenge.find("#challengerGender").text(challenge.data.gender);
+    $newChallenge.find("#challengeGame").text(challenge.game);
+    $newChallenge.find("#challengerPict").attr("src", challenge.data.pict);
+    $newChallenge.addClass("activeChallenge");
+    $newChallenge.attr("id", chId);
+    $newChallenge.css("display", "block");
 
-        $("#matchList").append($newGame);
+    $newChallenge.find("#challengeAccept").attr("chId", chId);
+    $newChallenge.find("#challengeDecline").attr("chId", chId);
+
+    $newChallenge.find("#challengeAccept").click(function () {
+        var chId =$(this).attr("chId");
+        console.log("accept", chId);
+        sendCmd("challenge.accept", {chId: chId});
+        $("#" + chId.replace(":", "\\:")).remove();
+    });
+    $newChallenge.find("#challengeDecline").click(function () {
+        var chId =$(this).attr("chId");
+        console.log("decline", chId);
+        sendCmd("challenge.decline", {chId: chId});
+        $("#" + chId.replace(":", "\\:")).remove();
+    });
+
+    $("#challengeList").append($newChallenge);
+}
+
+function setChallengeInfo(challengeList) {
+    $(".activeChallenge").remove();
+    for (chId in challengeList.recieved) {
+        addChallenge(chId, challengeList.recieved[chId]);
     }
 }
 
@@ -77,9 +119,10 @@ function addUser(profile) {
     $newGame.attr("uid", profile.uid);
     $newGame.css("display", "block");
 
-    $newGame.find("#userOffer").click(function () {
-        alert("not implemented");
-//                var gameId = $(this).parent().attr("gameId");
+    $newGame.find("#userChallenge").click(function () {
+        var toUid =$(this).parent().attr("uid");
+        sendCmd("challenge.make", {toUid: toUid, game: "connect4"});
+
     });
 
     $("#userList").append($newGame);
@@ -116,8 +159,12 @@ function processEvent(res, from) {
     if (res.event == "channel.send") {
         return;
     }
-    if (res.event == "match.stats") {
-        setMatchInfo(res.data);
+    if (res.event == "challenge.list") {
+        setChallengeInfo(res.data);
+        return;
+    }
+    if (res.event == "challenge.send") {
+        addChallenge(res.data.chId, res.data.challenge);
         return;
     }
     if (res.event == "match.made") {
@@ -138,7 +185,7 @@ function processEvent(res, from) {
 function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
-            {cmd: "match.stats"},
+            {cmd: "challenge.list"},
             {cmd: "channel2.add", channel: "lobby:0"}
         ]});
 }
@@ -202,7 +249,7 @@ function init() {
                 <span id="userName"></span>
                 <span id="userGender"></span>
                 <span id="userAge"></span>
-                <button id="userOffer" style="float:right">offer</button>
+                <button id="userChallenge" style="float:right">challenge</button>
                 <div style="clear:both"></div>
             </div>
         </div>
@@ -213,8 +260,33 @@ function init() {
     <div class="gameBoxHeaderDiv">Suggested Opponents</div>
     <div id="suggestedUserList" class="gameBoxInnerDiv">
         <div id="suggestedUserTemplate" style="display:none;">
-            <span id="suggestedUuserName"></span>
+            <span id="suggestedUserName"></span>
             <button id="suggestedUserOffer" style="float:right">challenge</button>
+            <div style="clear:both"></div>
+        </div>
+    </div>
+</div>
+
+<div class="challengesDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Challenges</div>
+    <div id="challengeList" class="gameBoxInnerDiv">
+        <div id="challengeTemplate" style="display:none;">
+            <div style="width: 30px; float:left">
+                <img id="challengerPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
+            </div>
+            <div style="width:190px; float:left">
+                <div>
+                    <span id="challengerName" class="userAttr" style="float:left">player</span>
+                    <button id="challengeAccept" class="UserBtn" style="float:right">accept</button>
+                    <button id="challengeDecline" class="UserBtn" style="float:right">decline</button>
+                </div>
+                <div style="clear:both"></div>
+                <div>
+                    <span id="challengerGender" class="userAttr" style="float:left">U</span>
+                    <span id="challengerAge" class="userAttr" style="float:left">0</span>
+                    <span id="challengeGame" class="userAttr" style="float:right">unknown</span>
+                </div>
+            </div>
             <div style="clear:both"></div>
         </div>
     </div>
@@ -227,7 +299,7 @@ function init() {
     <div class="gameBoxInnerDiv" readonly>
         <div id="messageLog" style="overflow: auto" readonly></div>
         <div class="gameBoxFooterDiv">
-            <input id="chatInput" type="text" style="width: 90%;"></input/>
+            <input id="chatInput" type="text" style="width: 90%;"></input>
             <button id="sendChat" style="float:right;">send</button>
         </div>
     </div>
