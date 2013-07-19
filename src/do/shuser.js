@@ -49,3 +49,14 @@ User.prototype.setData = function (data) {
 User.prototype.hasRole = function (role) {
   return _.contains(this._data.roles, role);
 };
+
+User.prototype.profile = function () {
+  var profile = {
+    uid: this._data.oid,
+    name: this._data.name,
+    age: this._data.age,
+    gender: this._data.gender,
+    pict: this._data.pict
+  };
+  return profile;
+};

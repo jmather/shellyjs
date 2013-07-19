@@ -100,12 +100,12 @@ function setChallengeInfo(challengeList) {
     }
 }
 
-function removeUser(uid) {
-    $(".userId" + uid).remove();
+function removeUser(listName, uid) {
+    $(".userId" + listName + uid).remove();
 }
 
-function addUser(profile) {
-    if ($(".userId" + profile.uid).size() > 0) {
+function addUser(listName, profile) {
+    if ($(".userId" +listName + profile.uid).size() > 0) {
         return;
     }
     var $newGame = $("#userTemplate").clone();
@@ -114,8 +114,8 @@ function addUser(profile) {
     $newGame.find("#userPict").attr("src", profile.pict);
     $newGame.find("#userGender").text(profile.gender);
     $newGame.find("#userAge").text(profile.age);
-    $newGame.addClass("userId" + profile.uid);
-    $newGame.addClass("activeUser");
+    $newGame.addClass("activeUser" + listName);
+    $newGame.addClass("userId" + listName + profile.uid);
     $newGame.attr("uid", profile.uid);
     $newGame.css("display", "block");
 
@@ -130,7 +130,15 @@ function addUser(profile) {
 
     });
 
-    $("#userList").append($newGame);
+    // userList or suggestList
+    $("#" + listName).append($newGame);
+}
+
+function setUserInfo(listName, profiles) {
+    $(".activeUser" + listName).remove();
+    for (uid in profiles) {
+        addUser(listName, profiles[uid]);
+    }
 }
 
 function processEvent(res, from) {
@@ -146,12 +154,14 @@ function processEvent(res, from) {
     if (res.event == "heartbeat") {
         return;
     }
+    if (res.event == "suggest.list") {
+        setUserInfo("suggestedUserList", res.data);
+    }
     if (res.event == "channel.user") {
-        console.log(res.data);
         if (res.data.status === "on") {
-            addUser(res.data);
+            addUser("userList", res.data);
         } else {
-            removeUser(res.data.uid);
+            removeUser("userList", res.data.uid);
         }
         return;
     }
@@ -162,6 +172,10 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "channel.send") {
+        return;
+    }
+    if (res.event == "suggest.list") {
+        setSuggestInfo(res.data);
         return;
     }
     if (res.event == "challenge.list") {
@@ -195,6 +209,7 @@ function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
             {cmd: "challenge.list"},
+            {cmd: "suggest.list", limit: 10},
             {cmd: "channel2.add", channel: "lobby:0"}
         ]});
 }
