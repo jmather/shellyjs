@@ -154,9 +154,6 @@ function processEvent(res, from) {
     if (res.event == "heartbeat") {
         return;
     }
-    if (res.event == "suggest.list") {
-        setUserInfo("suggestedUserList", res.data);
-    }
     if (res.event == "channel.user") {
         if (res.data.status === "on") {
             addUser("userList", res.data);
@@ -175,7 +172,7 @@ function processEvent(res, from) {
         return;
     }
     if (res.event == "suggest.list") {
-        setSuggestInfo(res.data);
+        setUserInfo("suggestedUserList", res.data);
         return;
     }
     if (res.event == "challenge.list") {
