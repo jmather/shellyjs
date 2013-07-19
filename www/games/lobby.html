@@ -172,6 +172,10 @@ function processEvent(res, from) {
         addChallenge(res.data.chId, res.data.challenge);
         return;
     }
+    if (res.event == "challenge.start") {
+        gameInit(res.data.gameName, res.data.gameId);
+        return;
+    }
     if (res.event == "match.made") {
         gameInit(res.data.gameName, res.data.gameId);
         return;

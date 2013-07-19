@@ -62,9 +62,27 @@ Challenge.accept = function (req, res, cb) {
       res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
       return cb(err);
     }
-    challenges.removeRecieved(req.body.chId);
-    // create a game and forward the user to the game url;
-    res.add(sh.event("challenge.accept", {chId: req.body.chId}));
+
+    var challenge = challenges.get("recieved")[req.body.chId];
+
+    req.body.cmd = "game.create";     // change the command so we can forward
+    req.body.name = challenge.game;
+    req.body.players = [req.session.uid, challenge.fromUid];
+    sh.call(req, res, function (error) {
+      if (error) {
+        return cb(error);
+      }
+      challenges.removeRecieved(req.body.chId);
+
+      var startInfo = {};
+      startInfo.gameName = req.env.game.get("name");
+      startInfo.gameId = req.env.game.get("oid");
+      dispatch.sendUsers(req.body.players, sh.event("challenge.start", startInfo));
+
+      res.add(sh.event("challenge.accept", {chId: req.body.chId}));
+      return cb(0);
+    });
+
     return cb(0);
   });
 };
