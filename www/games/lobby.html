@@ -55,6 +55,11 @@
     .userAttr {
         margin-left: 5px;
     }
+
+    .challengeEmailDiv {
+        width: 300px;
+    }
+
 </style>
 
 <script language="javascript">
@@ -238,6 +243,15 @@ function init() {
             sendCmd("channel2.add", {channel: "lobby:0"});
         }
     });
+    $("#sendEmail").click(function(){
+        if($("#emailInput").val() !== "")
+        {
+            console.log("sending email challenge:", $("#emailInput").val());
+
+            $("#emailInput").val("");
+        }
+    });
+
 
     commInit();
     messageInit("lobby:0");
@@ -314,12 +328,20 @@ function init() {
 
 <div style="clear:both"></div>
 
+<div class="challengeEmailDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Challenge By Email</div>
+    <div class="gameBoxInnerDiv" readonly>
+        <input id="emailInput" type="text" style="width:240px;"></input>
+        <button id="sendEmail" style="float:right;">send</button>
+    </div>
+</div>
+
 <div class="messageLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Messages</div>
     <div class="gameBoxInnerDiv" readonly>
         <div id="messageLog" style="overflow: auto" readonly></div>
         <div class="gameBoxFooterDiv">
-            <input id="chatInput" type="text" style="width: 90%;"></input>
+            <input id="chatInput" type="text" style="width:90%;"></input>
             <button id="sendChat" style="float:right;">send</button>
         </div>
     </div>

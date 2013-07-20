@@ -5,6 +5,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
+var mailer = require(global.gBaseDir + "/src/shmail.js");
 
 var Challenge = exports;
 
@@ -15,7 +16,9 @@ Challenge.functions = {
   decline: {desc: "decline a challenge from a user", params: {chId: {dtype: "string"}}, security: []},
   withdraw: {desc: "remove a challenge made to a user", params: {chId: {dtype: "string"}}, security: []},
   list: {desc: "list all challenges for the current user", params: {}, security: []},
-  alist: {desc: "list all challenges for the given user", params: {uid: {dtype: "string"}}, security: ["admin"]}
+  alist: {desc: "list all challenges for the given user", params: {uid: {dtype: "string"}}, security: ["admin"]},
+  email: {desc: "email a challenge", params: {email: {dtype: "string"}}, security: []},
+  jobs: {desc: "list the current job queue", params: {}, security: ["admin"]}
 };
 
 Challenge.make = function (req, res, cb) {
@@ -122,6 +125,41 @@ Challenge.alist = function (req, res, cb) {
       return cb(err);
     }
     res.add(sh.event("challenge.list", challenges.getData()));
+    return cb(0);
+  });
+};
+
+Challenge.email = function (req, res, cb) {
+  if (global.C.EMAIL_QUEUE) {
+    // queue the email for the consumer worker to process it
+    var msg = {email: req.body.email, template: "challenge"};
+    global.db.sadd("jobs:email", JSON.stringify(msg), function (err, data) {
+      return cb(0);
+    });
+  }
+
+  var locals = {
+    email: "scott@lgdales.com",
+//    email: req.body.email,
+    subject: "Shelly Game Challenge",
+    name: "pitty the fool",
+    resetUrl: "http;//localhost:3000/password_rest/000000000001|afdaevdae353"
+  };
+  mailer.send("challenge", locals, function (err, responseStatus, html, text) {
+    if (err) {
+      res.add(sh.error("challenge.email", "error sending challenge email", {email: req.body.email,
+        name: err.name, message: err.message}));
+      return cb(err);
+    }
+    res.add(sh.event("challenge.email", {status: "sent", response: responseStatus}));
+    // vs. queued
+    return cb(0);
+  });
+};
+
+Challenge.jobs = function (req, res, cb) {
+  global.db.smembers("jobs:email", function (err, data) {
+    res.add(sh.event("challenge.jobs", data));
     return cb(0);
   });
 };
