@@ -13,6 +13,8 @@ var gDebug = {
 //  "shdb": {},
 //  "shsqlite": {},
 //  "shredis": {},
+//  "shmail": {},
+//  "shmailer": {},
 //  "socket": {},
 //  "rest": {},
 //  "admin": {},

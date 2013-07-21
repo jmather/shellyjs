@@ -190,9 +190,18 @@ shdb.sadd = function (key, value, cb) {
 };
 
 shdb.srem = function (key, value, cb) {
-  shlog.info("srem", key);
+  shlog.info("srem", key, value);
   try {
     client.srem(key, value, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+};
+
+shdb.spop = function (key, cb) {
+  shlog.info("spop");
+  try {
+    client.spop(key, cb);
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
   }

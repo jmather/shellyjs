@@ -35,10 +35,11 @@ global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
 global.CDEF("DEFALUT_ADMIN_PASSWORD", "");
 
 // email settings
-global.CDEF("EMAIL_QUEUE", false);
+global.CDEF("EMAIL_QUEUE", true);
 global.CDEF("EMAIL_DEFAULT_FROM", "Game Shelly <shelly@gameshelly.com>");
 global.CDEF("EMAIL_TRANSPORT", "SMTP");
 global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "XXXX", pass: "XXXX"}});
 //global.CDEF("EMAIL_TRANSPORT", "SES");
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {AWSAccessKeyID: "XXXX", AWSSecretKey: "XXXX"});
+//global.CDEF("EMAIL_TRANSPORT", "SMTP");
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Postmark", auth: {user: "XXXX", pass: "XXXX"}});

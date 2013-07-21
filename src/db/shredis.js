@@ -53,8 +53,13 @@ shRedis.sadd = function (key, value, cb) {
 };
 
 shRedis.srem = function (key, value, cb) {
-  shlog.info("srem", key);
+  shlog.info("srem", key, value);
   client.srem(key, value, cb);
+};
+
+shRedis.spop = function (key, cb) {
+  shlog.info("spop", key);
+  client.spop(key, cb);
 };
 
 shRedis.smembers = function (key, cb) {

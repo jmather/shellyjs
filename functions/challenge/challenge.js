@@ -1,11 +1,10 @@
-var events = require("events");
 var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
-var mailer = require(global.gBaseDir + "/src/shmail.js");
+var mailer = require(global.gBaseDir + "/src/shmailer.js");
 
 var Challenge = exports;
 
@@ -130,35 +129,42 @@ Challenge.alist = function (req, res, cb) {
 };
 
 Challenge.email = function (req, res, cb) {
+  // get uid from email name - creates one if not there
+  // call challenge.make with that uid
+  // url in email will have email + hashed uid+email for access to account
+
+  req.body.email = "scott@lgdales.com";
+  var emailInfo = {email: req.body.email, template: "challenge"};
+
   if (global.C.EMAIL_QUEUE) {
     // queue the email for the consumer worker to process it
-    var msg = {email: req.body.email, template: "challenge"};
-    global.db.sadd("jobs:email", JSON.stringify(msg), function (err, data) {
+    mailer.queueEmail(emailInfo, function (err, data) {
+      if (err) {
+        res.add(sh.error("challenge.email", "error queueing email", data));
+        return cb(err);
+      }
+      res.add(sh.event("challenge.email", {status: "queued"}));
+      return cb(0);
+    });
+  } else {
+    // send the email directly
+    mailer.sendEmail(emailInfo, function (err, data) {
+      if (err) {
+        res.add(sh.error("challenge.email", "error sending challenge email", data));
+        return cb(err);
+      }
+      res.add(sh.event("challenge.email", {status: "sent", info: data}));
       return cb(0);
     });
   }
-
-  var locals = {
-    email: "scott@lgdales.com",
-//    email: req.body.email,
-    subject: "Shelly Game Challenge",
-    name: "pitty the fool",
-    resetUrl: "http;//localhost:3000/password_rest/000000000001|afdaevdae353"
-  };
-  mailer.send("challenge", locals, function (err, responseStatus, html, text) {
-    if (err) {
-      res.add(sh.error("challenge.email", "error sending challenge email", {email: req.body.email,
-        name: err.name, message: err.message}));
-      return cb(err);
-    }
-    res.add(sh.event("challenge.email", {status: "sent", response: responseStatus}));
-    // vs. queued
-    return cb(0);
-  });
 };
 
 Challenge.jobs = function (req, res, cb) {
-  global.db.smembers("jobs:email", function (err, data) {
+  mailer.queueList(function (err, data) {
+    if (err) {
+      res.add(sh.error("challenge.jobs", "error getting job queue", data));
+      return cb(err);
+    }
     res.add(sh.event("challenge.jobs", data));
     return cb(0);
   });

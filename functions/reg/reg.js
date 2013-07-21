@@ -270,14 +270,14 @@ exports.create = function (req, res, cb) {
   req.loader.exists("kEmailMap", email, function (error, em) {
     if (!error) {
       res.add(sh.error("email_used", "this email is already registered", {email: email}));
-      return cb(1);
+      return cb(2, em);
     }
     // create the user
     em = createEmailReg(req.loader, sh.uuid(), email, password);
     req.loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
         res.add(sh.error("user_get", "unable to load user", user));
-        return cb(1);
+        return cb(3);
       }
       user.set("email", email);
       user.set("name", email.split("@")[0]);

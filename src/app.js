@@ -6,6 +6,7 @@ var shelly = require(__dirname + "/shelly.js");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
+var mailer = require(global.gBaseDir + "/src/shmailer.js");
 
 var gStats = {};
 
@@ -43,9 +44,18 @@ if (cluster.isMaster) {
       var p = cluster.fork();
       p.on("message", onWorkerMessage);
     }
+    // fork a mail processor
+    if (global.C.EMAIL_QUEUE) {
+      p = cluster.fork({WTYPE: "mailer"});
+      p.on("message", onWorkerMessage);
+    }
   });
 } else {
-  shelly.start();
+  if (process.env.WTYPE === "mailer") {
+    mailer.start();
+  } else {
+    shelly.start();
+  }
 }
 
 // receive message from master
