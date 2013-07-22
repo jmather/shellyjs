@@ -1,8 +1,10 @@
+var querystring = require("querystring");
 var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var session = require(global.gBaseDir + "/src/session.js");
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
 var mailer = require(global.gBaseDir + "/src/shmailer.js");
 
@@ -138,7 +140,7 @@ function sendEmail(req, res, cb) {
       toProfile: challengeUser.profile(),
       subject: req.session.user.get("name") + " has challenged you to " + req.body.game,
       gameName: req.body.game,
-      playUrl: global.C.GAMES_URL + "/lobby.html",
+      playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify({"s": session.create(challengeUser.get("oid"))}),
       template: "challenge"};
     shlog.info(emailInfo);
 

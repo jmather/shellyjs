@@ -32,6 +32,12 @@ function sendLoop() {
     var emailInfo = JSON.parse(data);
     shlog.info("sending:", emailInfo.email);
     shmailer.sendEmail(emailInfo, function (err, data) {
+      if (err) {
+        // add back to set
+        global.db.sadd("jobs:email", data, function (err, data) {
+          // ignore for now
+        });
+      }
       shlog.info("sent:", err, data);
     });
     sendLoop();
