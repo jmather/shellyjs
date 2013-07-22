@@ -65,6 +65,13 @@
 <script language="javascript">
 var Env = {{{EnvJson}}};
 
+var psession = getURLParameter("s");
+if (psession !== null) {
+    console.log("session", psession);
+    Env.session = psession;
+    $.cookie("shSession", psession, {path: "/", expires: 365});
+}
+
 function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
         return;
@@ -210,10 +217,12 @@ function processEvent(res, from) {
 function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
+            {cmd: "user.get"},
             {cmd: "challenge.list"},
             {cmd: "suggest.list", limit: 10},
             {cmd: "channel2.add", channel: "lobby:0"}
         ]});
+    messageInit("lobby:0");
 }
 
 $(init);
@@ -256,7 +265,6 @@ function init() {
 
 
     commInit();
-    messageInit("lobby:0");
 
     ws.connect(Env.socketUrl);
 }

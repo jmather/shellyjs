@@ -17,7 +17,7 @@ global.matchInfo.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreat
 
 // master received message from worker
 function onWorkerMessage(msg) {
-  shlog.info("master recv: %j", msg);
+  shlog.debug("master recv: %j", msg);
 
   if (msg.cmd === "stat") {
     shCluster.setStat(msg.key, msg.wid, msg.count);
