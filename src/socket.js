@@ -16,11 +16,27 @@ if (_.isUndefined(global.sockets)) {
   global.sockets = {};
 }
 
+// res.add - adds event or error to output stream
 function add(data) {
-  if (data.event === "error") {
-    shlog.error(data);
+  if (_.isUndefined(this.msgs)) {
+    this.msgs = [];
   }
-  sh.sendWs(this.ws, 0, data);
+  this.msgs.push(data);
+}
+
+// res.send - sends all events or errors
+function sendAll() {
+  sh.sendWs(this.ws, 0, this.msgs);
+  _.each(this.msgs, function (data) {
+    if (data.event === "error") {
+      shlog.error("send %j", data);  // log all errors
+    }
+  });
+  this.msgs = [];
+}
+
+function clear() {
+  this.msgs = [];
 }
 
 function makeCalls(msgs, req, res) {
@@ -35,6 +51,7 @@ function makeCalls(msgs, req, res) {
   } catch (err1) {
     res.add(sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
   }
+  res.sendAll();
 }
 
 function onMessage(data) {
@@ -51,7 +68,7 @@ function onMessage(data) {
   // setup req/res
   var loader = new ShLoader();
   var req = {session: {valid: false}, body: {}, loader: loader};
-  var res = {ws: this, add: add};
+  var res = {ws: this, add: add, sendAll: sendAll, clear: clear};
 
   // handle batch
   var msgs = null;

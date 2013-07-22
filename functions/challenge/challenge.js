@@ -16,7 +16,7 @@ Challenge.functions = {
   withdraw: {desc: "remove a challenge made to a user", params: {chId: {dtype: "string"}}, security: []},
   list: {desc: "list all challenges for the current user", params: {}, security: []},
   alist: {desc: "list all challenges for the given user", params: {uid: {dtype: "string"}}, security: ["admin"]},
-  email: {desc: "email a challenge", params: {email: {dtype: "string"}}, security: []},
+  email: {desc: "email a challenge", params: {email: {dtype: "string"}, game: {dtype: "string"}}, security: []},
   jobs: {desc: "list the current job queue", params: {}, security: ["admin"]}
 };
 
@@ -128,11 +128,7 @@ Challenge.alist = function (req, res, cb) {
   });
 };
 
-Challenge.email = function (req, res, cb) {
-  // get uid from email name - creates one if not there
-  // call challenge.make with that uid
-  // url in email will have email + hashed uid+email for access to account
-
+function sendEmail(req, res, cb) {
   req.body.email = "scott@lgdales.com";
   var emailInfo = {email: req.body.email, template: "challenge"};
 
@@ -157,6 +153,30 @@ Challenge.email = function (req, res, cb) {
       return cb(0);
     });
   }
+}
+
+Challenge.email = function (req, res, cb) {
+  // get uid from email name - creates one if not there
+  req.body.cmd = "reg.create";
+  req.body.password = "XXXXXX";
+  req.body.toUid = null;
+  sh.call(req, res, function (error, data) {
+    if (error && error !== 2) {
+      return cb(error);
+    }
+    if (error === 2) {
+      console.log("user already created", data.get("uid"));
+      req.body.toUid = data.get("uid");
+      res.clear();
+    }
+    req.body.cmd = "challenge.make";
+    sh.call(req, res, function (error, data) {
+      if (error) {
+        return cb(error);
+      }
+      sendEmail(req, res, cb);
+    });
+  });
 };
 
 Challenge.jobs = function (req, res, cb) {

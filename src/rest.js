@@ -17,15 +17,21 @@ function add(data) {
   if (_.isUndefined(this.msgs)) {
     this.msgs = [];
   }
-  if (data.event === "error") {
-    shlog.error("send %j", data);  // log all errors
-  }
   this.msgs.push(data);
 }
 
 // res.send - sends all events or errors
 function sendAll() {
   this.send(this.msgs);
+  _.each(this.msgs, function (data) {
+    if (data.event === "error") {
+      shlog.error("send %j", data);  // log all errors
+    }
+  });  
+  this.msgs = [];
+}
+
+function clear() {
   this.msgs = [];
 }
 
@@ -35,6 +41,7 @@ rest.use(function (req, res, next) {
   req.loader = new ShLoader();
   res.add = add;
   res.sendAll = sendAll;
+  res.clear = clear;
 
   sh.fillSession(req.body.session, req, res, function (error, data) {
     // session.valid now used to control access to functions

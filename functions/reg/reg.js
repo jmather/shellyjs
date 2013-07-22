@@ -286,7 +286,7 @@ exports.create = function (req, res, cb) {
       out.uid = em.get("uid");
       out.session = session.create(em.get("uid"));
       res.add(sh.event("reg.create", out));
-      return cb(0);
+      return cb(0, user);
     });
   });
 };
