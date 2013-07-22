@@ -40,8 +40,9 @@ function onWorkerMessage(msg) {
 if (cluster.isMaster) {
   shCluster.init(function (err, data) {
     var i = 0;
+    var p = null;
     for (i = 0; i < global.C.NUM_WORKERS; i += 1) {
-      var p = cluster.fork();
+      p = cluster.fork();
       p.on("message", onWorkerMessage);
     }
     // fork a mail processor
@@ -52,6 +53,7 @@ if (cluster.isMaster) {
   });
 } else {
   if (process.env.WTYPE === "mailer") {
+    shlog.info("starting mailer");
     mailer.start();
   } else {
     shelly.start();
@@ -64,15 +66,15 @@ process.on("message", function (msg) {
 });
 
 cluster.on("online", function (worker) {
-  shlog.info("worker online:", worker.id);
+  shlog.debug("worker online:", worker.id);
 });
 
 cluster.on("disconnect", function (worker) {
-  shlog.info("worker disconnect:", worker.id);
+  shlog.debug("worker disconnect:", worker.id);
 });
 
 cluster.on("exit", function (worker) {
-  shlog.info("worker exit:", worker.id);
+  shlog.debug("worker exit:", worker.id);
 });
 
 if (cluster.isMaster) {

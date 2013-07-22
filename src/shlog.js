@@ -29,9 +29,8 @@ var gDebug = {
 //	"send": {},
 //  "dispatch": {},
 //  "shcluster": {},
-//  "appc": {},
-//  "app": {},
-  "shelly": {}
+  "shelly": {},
+  "app": {}
 };
 
 var winston = require("winston");
