@@ -26,11 +26,12 @@ function add(data) {
 
 // res.send - sends all events or errors
 function sendAll() {
-  sh.sendWs(this.ws, 0, this.msgs);
+  var self = this;
   _.each(this.msgs, function (data) {
     if (data.event === "error") {
       shlog.error("send %j", data);  // log all errors
     }
+    sh.sendWs(self.ws, 0, data);
   });
   this.msgs = [];
 }
@@ -47,11 +48,11 @@ function makeCalls(msgs, req, res) {
       sh.call(req, res, cb);
     }, function (err) {
       req.loader.dump();  // don't wait on dump cb
+      res.sendAll();
     });
   } catch (err1) {
     res.add(sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
   }
-  res.sendAll();
 }
 
 function onMessage(data) {

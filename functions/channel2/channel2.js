@@ -69,7 +69,7 @@ Channel.add = function (req, res, cb) {
     res.add(sh.event("channel.add", data));
     res.ws.channels[req.body.channel] = "on";  // cross ref so we can call remove on socket close
 
-    // notify me and the channel users I'm on
+    // notify me and the channel users that I'm on
     var event = sh.event("channel.user", {channel: req.body.channel, uid: req.session.uid,
       name: req.session.user.get("name"),
       pict: req.session.user.get("pict"),

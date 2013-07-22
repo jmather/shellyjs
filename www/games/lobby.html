@@ -244,9 +244,11 @@ function init() {
         }
     });
     $("#sendEmail").click(function(){
-        if($("#emailInput").val() !== "")
+        var email = $("#emailInput").val();
+        if(email !== "")
         {
-            console.log("sending email challenge:", $("#emailInput").val());
+            console.log("sending email challenge:", email);
+            sendCmd("challenge.email", {email: email, game: "connect4"});
 
             $("#emailInput").val("");
         }
