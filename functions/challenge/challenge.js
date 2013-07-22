@@ -140,7 +140,7 @@ function sendEmail(req, res, cb) {
       gameName: req.body.game,
       playUrl: global.C.GAMES_URL + "/lobby.html",
       template: "challenge"};
-    console.log(emailInfo);
+    shlog.info(emailInfo);
 
     if (global.C.EMAIL_QUEUE) {
       // queue the email for the consumer worker to process it
@@ -176,9 +176,13 @@ Challenge.email = function (req, res, cb) {
       return cb(error);
     }
     if (error === 2) {
-      console.log("user already created", data.get("uid"));
+      shlog.info("user already created", data.get("uid"));
+      // existing email map object
       req.body.toUid = data.get("uid");
       res.clear();
+    } else {
+      // user object
+      req.body.toUid = data.get("oid");
     }
     req.body.cmd = "challenge.make";
     sh.call(req, res, function (error, data) {

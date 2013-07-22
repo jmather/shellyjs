@@ -20,6 +20,12 @@ global.CDEF = function (name, value) {
     global.C[name] = value;
   }
 };
+// load configs with private key and per machine overrides
+/*jslint stupid: true */
+var keyConfigFn = global.configBase + "/keys.js";
+if (fs.existsSync(keyConfigFn)) {
+  require(keyConfigFn);
+}
 // load configs with per machine overrides
 var machineConfigFn = global.configBase + "/" + os.hostname() + ".js";
 /*jslint stupid: true */

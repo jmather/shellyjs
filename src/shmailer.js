@@ -42,8 +42,8 @@ shmailer.queueEmail = function (emailInfo, cb) {
   global.db.sadd("jobs:email", JSON.stringify(emailInfo), cb);
 };
 
-shmailer.queueList = function (emailInfo, cb) {
-  global.db.smembers("jobs:email", JSON.stringify(emailInfo), cb);
+shmailer.queueList = function (cb) {
+  global.db.smembers("jobs:email", cb);
 };
 
 shmailer.start = function () {
