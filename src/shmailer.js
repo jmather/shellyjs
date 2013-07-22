@@ -18,7 +18,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
     }
     return cb(0, {error: err, status: responseStatus});
   });
-}
+};
 
 function sendLoop() {
   global.db.spop("jobs:email", function (err, data) {
@@ -40,11 +40,11 @@ function sendLoop() {
 
 shmailer.queueEmail = function (emailInfo, cb) {
   global.db.sadd("jobs:email", JSON.stringify(emailInfo), cb);
-}
+};
 
-shmailer.queueList = function (emaiInfo, cb) {
+shmailer.queueList = function (emailInfo, cb) {
   global.db.smembers("jobs:email", JSON.stringify(emailInfo), cb);
-}
+};
 
 shmailer.start = function () {
   process.on("uncaughtException", function (error) {
