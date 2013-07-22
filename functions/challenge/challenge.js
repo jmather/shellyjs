@@ -129,30 +129,41 @@ Challenge.alist = function (req, res, cb) {
 };
 
 function sendEmail(req, res, cb) {
-  req.body.email = "scott@lgdales.com";
-  var emailInfo = {email: req.body.email, template: "challenge"};
+  req.loader.exists("kUser", req.body.toUid, function (err, challengeUser) {
+    if (err) {
+      res.add(sh.error("challenge.email", "unable to load challenge user", challengeUser));
+      return cb(1);
+    }
+    var emailInfo = {email: req.body.email, fromProfile: req.session.user.profile(),
+      toProfile: challengeUser.profile(),
+      subject: req.session.user.get("name") + " has challenged you to " + req.body.game,
+      gameName: req.body.game,
+      playUrl: global.C.GAMES_URL + "/lobby.html",
+      template: "challenge"};
+    console.log(emailInfo);
 
-  if (global.C.EMAIL_QUEUE) {
-    // queue the email for the consumer worker to process it
-    mailer.queueEmail(emailInfo, function (err, data) {
-      if (err) {
-        res.add(sh.error("challenge.email", "error queueing email", data));
-        return cb(err);
-      }
-      res.add(sh.event("challenge.email", {status: "queued"}));
-      return cb(0);
-    });
-  } else {
-    // send the email directly
-    mailer.sendEmail(emailInfo, function (err, data) {
-      if (err) {
-        res.add(sh.error("challenge.email", "error sending challenge email", data));
-        return cb(err);
-      }
-      res.add(sh.event("challenge.email", {status: "sent", info: data}));
-      return cb(0);
-    });
-  }
+    if (global.C.EMAIL_QUEUE) {
+      // queue the email for the consumer worker to process it
+      mailer.queueEmail(emailInfo, function (err, data) {
+        if (err) {
+          res.add(sh.error("challenge.email", "error queueing email", data));
+          return cb(err);
+        }
+        res.add(sh.event("challenge.email", {status: "queued"}));
+        return cb(0);
+      });
+    } else {
+      // send the email directly
+      mailer.sendEmail(emailInfo, function (err, data) {
+        if (err) {
+          res.add(sh.error("challenge.email", "error sending challenge email", data));
+          return cb(err);
+        }
+        res.add(sh.event("challenge.email", {status: "sent", info: data}));
+        return cb(0);
+      });
+    }
+  });
 }
 
 Challenge.email = function (req, res, cb) {

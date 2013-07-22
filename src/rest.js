@@ -27,7 +27,7 @@ function sendAll() {
     if (data.event === "error") {
       shlog.error("send %j", data);  // log all errors
     }
-  });  
+  });
   this.msgs = [];
 }
 

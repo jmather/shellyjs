@@ -10,7 +10,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
     name: "pitty the fool",
     resetUrl: "http;//localhost:3000/password_rest/000000000001|afdaevdae353"
   };
-  mailer.send("challenge", locals, function (err, responseStatus, html, text) {
+  mailer.send("challenge", emailInfo, function (err, responseStatus, html, text) {
     if (err) {
       var errorInfo = {code: err.name, message: err.message, emailInfo: emailInfo};
       shlog.error(errorInfo);

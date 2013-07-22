@@ -15,6 +15,9 @@ var EmailAddressRequiredError = new Error('email address required');
 var defaultTransport = nodemailer.createTransport(global.C.EMAIL_TRANSPORT, global.C.EMAIL_TRANSPORT_SERVICE);
 
 shmail.send = function (templateName, locals, fn) {
+  // SWD force send to me
+  locals.email = "scott@lgdales.com";
+
   // make sure that we have an user email
   if (!locals.email) {
     return fn(EmailAddressRequiredError);
