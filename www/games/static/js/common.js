@@ -9,6 +9,15 @@ function getURLParameter(name) {
   return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
 }
 
+function setSession() {
+  var psession = getURLParameter("s");
+  if (psession !== null) {
+    console.log("session set", psession);
+    Env.session = psession;
+//    $.cookie("shSession", psession, {path: "/", expires: 365});
+  }
+}
+
 function log(api, type, msg) {
   var $mlog = $("#commLog");
   gLogCount++;
@@ -163,6 +172,10 @@ ws.onmessage = function (evt) {
   var received_msg = evt.data;
   log("socket", "onmessage", evt.data);
   var msg = JSON.parse(evt.data);
+  if (msg.event == "user.get") {
+    Env.user = msg.data;
+    $("#shUserName").text(Env.user.name);
+  }
   processEvent(msg, "socket");
 }
 ws.onclose = function (evt) {

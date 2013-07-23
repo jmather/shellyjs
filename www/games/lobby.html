@@ -64,13 +64,7 @@
 
 <script language="javascript">
 var Env = {{{EnvJson}}};
-
-var psession = getURLParameter("s");
-if (psession !== null) {
-    console.log("session", psession);
-    Env.session = psession;
-    $.cookie("shSession", psession, {path: "/", expires: 365});
-}
+setSession();
 
 function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
@@ -265,7 +259,6 @@ function init() {
 
 
     commInit();
-
     ws.connect(Env.socketUrl);
 }
 </script>

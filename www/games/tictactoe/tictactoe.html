@@ -60,12 +60,13 @@
 </style>
 <script language="javascript">
 var Env = {{{EnvJson}}};
+setSession();
 
 Env.players = {};
 Env.gameId = "0";
 
 var pgameId = getURLParameter("gameId");
-if (pgameId != "null") {
+if (pgameId !== null) {
     Env.gameId = pgameId.toString();
 }
 
@@ -175,7 +176,8 @@ function shellyInit() {
     }
     if (Env.gameId !== "0") {
         sendRaw({session: Env.session,
-            batch: [{cmd: "game.join", gameId: Env.gameId},
+            batch: [ {cmd: "user.get"},
+                {cmd: "game.join", gameId: Env.gameId},
                 {cmd: "game.playing"},
                 {cmd: "channel2.add", channel: "game:" + Env.gameId}
             ]});
