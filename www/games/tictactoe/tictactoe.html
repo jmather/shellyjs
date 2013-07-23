@@ -60,7 +60,6 @@
 </style>
 <script language="javascript">
 var Env = {{{EnvJson}}};
-setSession();
 
 Env.players = {};
 Env.gameId = "0";
@@ -176,8 +175,7 @@ function shellyInit() {
     }
     if (Env.gameId !== "0") {
         sendRaw({session: Env.session,
-            batch: [ {cmd: "user.get"},
-                {cmd: "game.join", gameId: Env.gameId},
+            batch: [ {cmd: "game.join", gameId: Env.gameId},
                 {cmd: "game.playing"},
                 {cmd: "channel2.add", channel: "game:" + Env.gameId}
             ]});

@@ -50,6 +50,7 @@ Challenge.make = function (req, res, cb) {
         age: req.session.user.get("age"),
         pict: req.session.user.get("pict")
       });
+      res.chRecievedId = chId;
       dispatch.sendUser(req.body.toUid,
         sh.event("challenge.send", {chId: chId, challenge: challenges.get("recieved")[chId]}),
         function (err, data) {
@@ -141,6 +142,9 @@ function sendEmail(req, res, cb) {
       subject: req.session.user.get("name") + " has challenged you to " + req.body.game,
       gameName: req.body.game,
       playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify({"s": session.create(challengeUser.get("oid"))}),
+      challengeUrl: global.C.GAMES_URL + "/challenges.html?" + querystring.stringify(
+        {"s": session.create(challengeUser.get("oid")), "chId": res.chRecievedId}
+      ),
       template: "challenge"};
     shlog.info(emailInfo);
 

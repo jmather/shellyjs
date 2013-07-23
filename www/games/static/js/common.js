@@ -14,7 +14,7 @@ function setSession() {
   if (psession !== null) {
     console.log("session set", psession);
     Env.session = psession;
-//    $.cookie("shSession", psession, {path: "/", expires: 365});
+    $.cookie("shSession", psession, {path: "/", expires: 365});
   }
 }
 

@@ -38,7 +38,6 @@
 	</style>
     <script language="javascript">
         var Env = {{{EnvJson}}};
-        setSession();
 
         Env.gameId = "0";
         var pgameId = getURLParameter("gameId");
@@ -51,7 +50,6 @@
 
             sendRaw({session: Env.session,
                 batch: [{cmd: "system.connInfo"},
-                    {cmd: "user.get"},
                     {cmd: "game.join", gameId: Env.gameId},
                     {cmd: "game.playing"},
                     {cmd: "channel2.add", channel: "game:" + Env.gameId}
