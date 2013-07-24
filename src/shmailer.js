@@ -10,7 +10,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
     name: "pitty the fool",
     resetUrl: "http;//localhost:3000/password_rest/000000000001|afdaevdae353"
   };
-  mailer.send("challenge", emailInfo, function (err, responseStatus, html, text) {
+  mailer.send(emailInfo.template, emailInfo, function (err, responseStatus, html, text) {
     if (err) {
       var errorInfo = {code: err.name, message: err.message, emailInfo: emailInfo};
       shlog.error(errorInfo);
@@ -30,11 +30,13 @@ function sendLoop() {
     }
 
     var emailInfo = JSON.parse(data);
-    shlog.info("sending:", emailInfo.email);
+    shlog.info("sending:", emailInfo.email, emailInfo.template);
+    emailInfo.timeSent = new Date().getTime();
     shmailer.sendEmail(emailInfo, function (err, data) {
       if (err) {
         // add back to set
-        global.db.sadd("jobs:email", data, function (err, data) {
+        emailInfo.retries += 1;
+        global.db.sadd("jobs:email", JSON.stringify(emailInfo), function (err, data) {
           // ignore for now
         });
       }
@@ -45,6 +47,8 @@ function sendLoop() {
 }
 
 shmailer.queueEmail = function (emailInfo, cb) {
+  emailInfo.timeQueued = new Date().getTime();
+  emailInfo.retries = 0;
   global.db.sadd("jobs:email", JSON.stringify(emailInfo), cb);
 };
 

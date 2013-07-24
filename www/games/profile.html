@@ -127,11 +127,15 @@ function init() {
             width: 500px;
         }
         #profileContent {
-            height: 200px;
+            height: 230px;
         }
 
         .userTd {
             text-align: right;
+        }
+        #pict {
+            height: 50px;
+            with: 50px;
         }
     </style>
 </head>
@@ -164,7 +168,8 @@ function init() {
             <tr><td class="userTd">name:</td><td><span id="name" class="profileEditSpan">{{Env.user.name}}</span></td></tr>
             <tr><td class="userTd">gender:</td><td><span id="gender" class="profileEditSpan">{{Env.user.gender}}</span></td></tr>
             <tr><td class="userTd">age:</td><td><span id="age" class="profileEditSpan">{{Env.user.age}}</span></td></tr>
-            <tr><td class="userTd">token:</td><td><span id="token">{{Env.token}}</span></td></tr>
+            <tr><td class="userTd">picture:</td><td><img id="pict" src="{{Env.user.pict}}"</img></td></tr>
+            <tr><td class="userTd">device id:</td><td><span id="token">{{Env.token}}</span></td></tr>
         </table>
         <button id="saveProfile" style="float:right">save</button>
         <button id="editProfile" style="float:right">edit</button>

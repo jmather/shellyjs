@@ -13,7 +13,7 @@ var gStats = {};
 // SWD: this need to moved to a config file
 global.matchInfo = {};
 global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
-global.matchInfo.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/index.html"};
+global.matchInfo.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/connect4.html"};
 
 // master received message from worker
 function onWorkerMessage(msg) {

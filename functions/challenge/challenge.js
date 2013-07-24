@@ -61,6 +61,51 @@ Challenge.make = function (req, res, cb) {
   });
 };
 
+function sendEmail(emailInfo, req, res, cb) {
+  if (global.C.EMAIL_QUEUE) {
+    // queue the email for the consumer worker to process it
+    mailer.queueEmail(emailInfo, function (err, data) {
+      if (err) {
+        res.add(sh.error(req.body.cmd, "error queueing email", data));
+        return cb(err);
+      }
+      res.add(sh.event(req.body.cmd, {status: "queued"}));
+      return cb(0);
+    });
+  } else {
+    // send the email directly
+    mailer.sendEmail(emailInfo, function (err, data) {
+      if (err) {
+        res.add(sh.error(req.body.cmd, "error sending challenge email", data));
+        return cb(err);
+      }
+      res.add(sh.event(req.body.cmd, {status: "sent", info: data}));
+      return cb(0);
+    });
+  }
+}
+
+function sendAccept(req, res, cb) {
+  req.loader.exists("kUser", req.body.toUid, function (err, challengeUser) {
+    if (err) {
+      res.add(sh.error("challenge.accept", "unable to load challenge user", challengeUser));
+      return cb(1);
+    }
+    var emailInfo = {email: challengeUser.get("email"), fromProfile: req.session.user.profile(),
+      toProfile: challengeUser.profile(),
+      subject: req.session.user.get("name") + " accepted your challenge to play " + req.env.game.get("name"),
+      gameName: req.env.game.get("name"),
+      playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify({"s": session.create(challengeUser.get("oid"))}),
+      gameUrl: global.C.GAMES_URL + global.matchInfo[req.env.game.get("name")].url + "?" + querystring.stringify(
+        {"s": session.create(challengeUser.get("oid")), "gameId": req.env.game.get("oid")}
+      ),
+      template: "accepted"};
+    shlog.info(emailInfo);
+
+    sendEmail(emailInfo, req, res, cb);
+  });
+}
+
 Challenge.accept = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
@@ -85,10 +130,9 @@ Challenge.accept = function (req, res, cb) {
       dispatch.sendUsers(req.body.players, sh.event("challenge.start", startInfo));
 
       res.add(sh.event("challenge.accept", {chId: req.body.chId}));
-      return cb(0);
+      req.body.toUid = challenge.fromUid;  // send the notif back to creating user
+      sendAccept(req, res, cb);
     });
-
-    return cb(0);
   });
 };
 
@@ -131,7 +175,7 @@ Challenge.alist = function (req, res, cb) {
   });
 };
 
-function sendEmail(req, res, cb) {
+function sendChallenge(req, res, cb) {
   req.loader.exists("kUser", req.body.toUid, function (err, challengeUser) {
     if (err) {
       res.add(sh.error("challenge.email", "unable to load challenge user", challengeUser));
@@ -148,27 +192,7 @@ function sendEmail(req, res, cb) {
       template: "challenge"};
     shlog.info(emailInfo);
 
-    if (global.C.EMAIL_QUEUE) {
-      // queue the email for the consumer worker to process it
-      mailer.queueEmail(emailInfo, function (err, data) {
-        if (err) {
-          res.add(sh.error("challenge.email", "error queueing email", data));
-          return cb(err);
-        }
-        res.add(sh.event("challenge.email", {status: "queued"}));
-        return cb(0);
-      });
-    } else {
-      // send the email directly
-      mailer.sendEmail(emailInfo, function (err, data) {
-        if (err) {
-          res.add(sh.error("challenge.email", "error sending challenge email", data));
-          return cb(err);
-        }
-        res.add(sh.event("challenge.email", {status: "sent", info: data}));
-        return cb(0);
-      });
-    }
+    sendEmail(emailInfo, req, res, cb);
   });
 }
 
@@ -195,7 +219,8 @@ Challenge.email = function (req, res, cb) {
       if (error) {
         return cb(error);
       }
-      sendEmail(req, res, cb);
+      req.body.cmd = "challenge.email";  // flip back for sendEmail response
+      sendChallenge(req, res, cb);
     });
   });
 };
