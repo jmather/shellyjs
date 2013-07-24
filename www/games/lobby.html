@@ -212,7 +212,7 @@ function shellyInit() {
         batch: [{cmd: "system.connInfo"},
             {cmd: "challenge.list"},
             {cmd: "suggest.list", limit: 10},
-            {cmd: "channel2.add", channel: "lobby:0"}
+            {cmd: "channel.add", channel: "lobby:0"}
         ]});
     messageInit("lobby:0");
 }
@@ -237,11 +237,11 @@ function init() {
         if ($(this).attr("status") == "on") {
             $(this).text("go online");
             $(this).attr("status", "off");
-            sendCmd("channel2.remove", {channel: "lobby:0"});
+            sendCmd("channel.remove", {channel: "lobby:0"});
         } else {
             $(this).text("go offline");
             $(this).attr("status", "on");
-            sendCmd("channel2.add", {channel: "lobby:0"});
+            sendCmd("channel.add", {channel: "lobby:0"});
         }
     });
     $("#sendEmail").click(function(){

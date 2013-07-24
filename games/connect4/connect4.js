@@ -3,7 +3,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var connect4 = exports;
 

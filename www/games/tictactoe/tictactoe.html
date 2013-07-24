@@ -177,7 +177,7 @@ function shellyInit() {
         sendRaw({session: Env.session,
             batch: [ {cmd: "game.join", gameId: Env.gameId},
                 {cmd: "game.playing"},
-                {cmd: "channel2.add", channel: "game:" + Env.gameId}
+                {cmd: "channel.add", channel: "game:" + Env.gameId}
             ]});
     }
 }

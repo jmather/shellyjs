@@ -20,7 +20,7 @@ var gDebug = {
 //  "admin": {},
 //  "games": {},
 //  "channel": {},
-//  "channel2": {},
+//  "channel": {},
 //	"game": {},
 //	"user": {},
 //	"reg": {},

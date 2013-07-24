@@ -7,7 +7,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var shcluster = require(global.gBaseDir + "/src/shcluster.js");
-var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var Socket = exports;
 var wss = null;

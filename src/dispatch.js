@@ -9,7 +9,7 @@ var shlog = require(__dirname + "/shlog.js");
 var shcluster = require(__dirname + "/shcluster.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var socket = require(global.gBaseDir + "/src/socket.js");
-var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 // sync ok - only done on cluster startup
 

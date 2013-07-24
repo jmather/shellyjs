@@ -7,7 +7,7 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 var shcluster = require(global.gBaseDir + "/src/shcluster.js");
 
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
-var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
+var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var gGameDir = global.gBaseDir + "/games";
 

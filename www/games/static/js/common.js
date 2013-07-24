@@ -309,7 +309,7 @@ function addMessage(channel, data) {
 }
 
 function sendMessage(msg) {
-  sendCmd("channel2.send", {channel: gMessageChannel, message: msg});
+  sendCmd("channel.send", {channel: gMessageChannel, message: msg});
 }
 
 
