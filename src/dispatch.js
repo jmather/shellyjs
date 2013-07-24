@@ -8,6 +8,7 @@ var shutil = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
 var shcluster = require(__dirname + "/shcluster.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var socket = require(global.gBaseDir + "/src/socket.js");
 var channel = require(global.gBaseDir + "/functions/channel2/channel2.js");
 
 // sync ok - only done on cluster startup
@@ -56,7 +57,7 @@ dispatch.sendUser = function (uid, data, cb) {
       // user is on this server
       if (l.workerId === cluster.worker.id) {
         shlog.info("sendUser - local socket:", l.socketId);
-        channel.sendDirect(l.socketId, data);
+        socket.sendDirect(l.socketId, data);
         return cb(0, locateInfo);
       }
       shlog.info("sendUser - local cluster workerId:", l.workerId, "socketId:", l.socketId);

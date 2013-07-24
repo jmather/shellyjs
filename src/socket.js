@@ -16,6 +16,26 @@ if (_.isUndefined(global.sockets)) {
   global.sockets = {};
 }
 
+// send directly to user using socket id in global map
+Socket.sendDirect = function (wsId, data) {
+  if (_.isUndefined(data)) {
+    shlog.info("bad send data:", data);
+    return false;
+  }
+  var ws = global.sockets[wsId];
+  if (_.isUndefined(ws)) {
+    shlog.info("global socket not found:", wsId);
+    return false;
+  }
+  try {
+    sh.sendWs(ws, 0, data);
+  } catch (e) {
+    shlog.info("global socket dead:", wsId, e);
+    return false;
+  }
+  return true;
+};
+
 // res.add - adds event or error to output stream
 function add(data) {
   if (_.isUndefined(this.msgs)) {

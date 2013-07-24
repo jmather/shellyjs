@@ -21,27 +21,6 @@ var channelDef = {
   games: {persist: true, maxEvents: 50}
 };
 
-// send directly to user using socket id in global map
-// might this go in socket module?
-Channel.sendDirect = function (wsId, data) {
-  if (_.isUndefined(data)) {
-    shlog.info("bad send data:", data);
-    return false;
-  }
-  var ws = global.sockets[wsId];
-  if (_.isUndefined(ws)) {
-    shlog.info("global socket not found:", wsId);
-    return false;
-  }
-  try {
-    sh.sendWs(ws, 0, data);
-  } catch (e) {
-    shlog.info("global socket dead:", wsId, e);
-    return false;
-  }
-  return true;
-};
-
 Channel.list = function (req, res, cb) {
   global.db.smembers(req.body.channel, function (err, data) {
     if (err) {

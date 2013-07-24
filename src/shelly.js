@@ -62,7 +62,7 @@ if (cluster.isMaster) {
 global.db = require(global.gBaseDir + "/src/shdb.js");
 global.socket = null;
 
-var gChannel = require(global.gBaseDir + "/functions/channel2/channel2.js");
+var socket = require(global.gBaseDir + "/src/socket.js");
 
 var shelly = exports;
 
@@ -144,7 +144,7 @@ shelly.shutdown = function () {
 shelly.onMessage = function (msg) {
   shlog.debug("onMessage: %j", msg);
   if (msg.cmd === "user.direct") {
-    gChannel.sendDirect(msg.toWsid, msg.data);
+    socket.sendDirect(msg.toWsid, msg.data);
     return;
   }
   if (msg.cmd === "shelly.stop") {
