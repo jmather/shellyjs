@@ -188,9 +188,9 @@ function init() {
 
     $("#matchAdd").click(function () {
         if ($(this).is(":checked")) {
-            sendCmd("match.add2", {name: "connect4"});
+            sendCmd("match.add", {name: "connect4"});
         } else {
-            sendCmd("match.remove2", {name: "connect4"});
+            sendCmd("match.remove", {name: "connect4"});
         }
     });
 
