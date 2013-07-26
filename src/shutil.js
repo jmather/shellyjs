@@ -117,6 +117,9 @@ shutil.call = function (req, res, cb) {
   // check session required
   if (!req.session.valid) {
     if (_.isUndefined(module.functions[funcName].noSession) || !module.functions[funcName].noSession) {
+      if (_.isUndefined(req.session.error)) {
+        req.session.error = shutil.error("invalid_session", "no session data");
+      }
       res.add(req.session.error);
       return cb(1);
     }

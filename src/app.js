@@ -7,6 +7,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
 var mailer = require(global.gBaseDir + "/src/shmailer.js");
+var matcher = require(global.gBaseDir + "/src/shmatcher.js");
 
 var gStats = {};
 
@@ -50,11 +51,17 @@ if (cluster.isMaster) {
       p = cluster.fork({WTYPE: "mailer"});
       p.on("message", onWorkerMessage);
     }
+    // fork a match processor
+    p = cluster.fork({WTYPE: "matcher"});
+    p.on("message", onWorkerMessage);
   });
 } else {
   if (process.env.WTYPE === "mailer") {
     shlog.info("starting mailer");
     mailer.start();
+  } else if (process.env.WTYPE === "matcher") {
+    shlog.info("starting matcher");
+    matcher.start();
   } else {
     shelly.start();
   }

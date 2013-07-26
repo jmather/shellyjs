@@ -57,6 +57,11 @@ shRedis.srem = function (key, value, cb) {
   client.srem(key, value, cb);
 };
 
+shRedis.scard = function (key, cb) {
+  shlog.info("scard", key);
+  client.scard(key, cb);
+};
+
 shRedis.spop = function (key, cb) {
   shlog.info("spop", key);
   client.spop(key, cb);

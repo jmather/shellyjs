@@ -29,6 +29,11 @@ ShCluster.init = function (cb) {
       server.set("socketUrl", global.C.SOCKET_URL);
       shlog.info("set server info", server.getData());
 
+      // only start add the server record and start dnode server if we are master
+      if (cluster.isWorker) {
+        return cb(0);
+      }
+
       gDriver.sadd("serverList", global.server.serverId, function (err) {
         gLoader.dump();
         if (err) {

@@ -198,6 +198,15 @@ shdb.srem = function (key, value, cb) {
   }
 };
 
+shdb.scard = function (key, cb) {
+  shlog.info("scard", key);
+  try {
+    client.scard(key, cb);
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+  }
+};
+
 shdb.spop = function (key, cb) {
   shlog.info("spop");
   try {

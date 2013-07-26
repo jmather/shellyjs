@@ -15,6 +15,7 @@ var gDebug = {
 //  "shredis": {},
 //  "shmail": {},
 //  "shmailer": {},
+//  "shmatcher": {},
 //  "socket": {},
 //  "rest": {},
 //  "admin": {},

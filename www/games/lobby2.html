@@ -14,50 +14,26 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
 <style>
-    .userBtn {
-        font-size: 10px;
-    }
-
-    .playAnyoneDiv {
-        width: 220px;
-    }
-    .lobbyUsersDiv {
-        width: 220px;
-    }
-    #userList {
-        height: 307px;
-    }
-    #liveToggle {
-        font-size: 10px;
-    }
-
     .suggestedUsersDiv {
         float: left;
-        width: 220px;
+        width: 460px;
     }
     #suggestedUserList {
         height: 358px;
     }
-
-    .challengesDiv {
-        float: left;
-        width: 225px;
+    .FilterListDiv {
+        font-size: 10px;
     }
-    #challengeList {
-        height: 358px;
+    .FilterSelect {
+        font-size: 10px;
     }
-
     .userPictImg {
         width: 30px;
         height: 30px;
     }
 
-    .userAttr {
-        margin-left: 5px;
-    }
-
     .challengeEmailDiv {
-        width: 300px;
+        width: 460px;
     }
 
 </style>
@@ -167,15 +143,6 @@ function processEvent(res, from) {
         }
         return;
     }
-    if (res.event == "channel.message") {
-        for (var i=0; i<res.data.bank.length; i++) {
-            addMessage(res.data.channel, res.data.bank[i]);
-        }
-        return;
-    }
-    if (res.event == "channel.send") {
-        return;
-    }
     if (res.event == "suggest.list") {
         setUserInfo("suggestedUserList", res.data);
         return;
@@ -192,14 +159,6 @@ function processEvent(res, from) {
         gameInit(res.data.gameName, res.data.gameId);
         return;
     }
-    if (res.event == "match.made") {
-        gameInit(res.data.gameName, res.data.gameId);
-        return;
-    }
-    if (res.event == "match.add") {
-        $("#dialog").dialog();
-        return;
-    }
     if (res.event == "system.connInfo") {
         console.log("wid:", res.data.wid);
         return;
@@ -211,6 +170,7 @@ function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
             {cmd: "challenge.list"},
+            {cmd: "suggest.add"},
             {cmd: "suggest.list", limit: 10},
             {cmd: "channel.add", channel: "lobby:0"}
         ]});
@@ -220,19 +180,20 @@ function shellyInit() {
 $(init);
 function init() {
     $("#shSystem").text("Example");
-    $("#shSubTitle").text("Lobby");
+    $("#shSubTitle").text("Connect4 Lobby");
 
     window.addEventListener("load", function () {
         new FastClick(document.body);
     }, false);
 
-    $("#gameTicTacToe").click(function () {
-        sendCmd("match.add", {name: "tictactoe"});
-        $("#dialog").dialog();
+    $("#matchAdd").click(function () {
+        if ($(this).is(":checked")) {
+            sendCmd("match.add2", {name: "connect4"});
+        } else {
+            sendCmd("match.remove2", {name: "connect4"});
+        }
     });
-    $("#gameConnect4").click(function () {
-        sendCmd("match.add", {name: "connect4"});
-    });
+
     $("#liveToggle").click(function () {
         if ($(this).attr("status") == "on") {
             $(this).text("go online");
@@ -266,82 +227,68 @@ function init() {
 {{> gameNav}}
 {{> errorBox }}
 
-<div style="float:left; margin-bottom: 5px;">
-    <div class="playAnyoneDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv">Random Player</div>
-        <div id="playNowList" class="gameBoxInnerDiv">
-            <button id="gameTicTacToe">Tic Tac Toe</button>
-            <button id="gameConnect4">Connect 4</button>
-        </div>
+<div class="challengeEmailDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">I Got Next</div>
+    <div class="gameBoxInnerDiv" readonly style="text-align: center;">
+        <input id="matchAdd" type="checkbox">Give me the next available opponent</input>
     </div>
-    <div class="lobbyUsersDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv">Online Players
-            <button id="liveToggle" style="float:right" status="on">go offline</button>
-        </div>
-        <div id="userList" class="gameBoxInnerDiv">
-            <div id="userTemplate" style="display:none;">
-                <img id="userPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
-                <span id="userName"></span>
-                <span id="userGender"></span>
-                <span id="userAge"></span>
-                <button id="userChallenge" style="float:right">challenge</button>
-                <div style="clear:both"></div>
-            </div>
-        </div>
+</div>
+
+<div class="challengeEmailDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Challenge By Email</div>
+    <div class="gameBoxInnerDiv" readonly>
+        <input id="emailInput" type="text" style="width:400px;"></input>
+        <button id="sendEmail" style="float:right;">send</button>
     </div>
 </div>
 
 <div class="suggestedUsersDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Suggested Opponents</div>
-    <div id="suggestedUserList" class="gameBoxInnerDiv">
+    <div class="gameBoxHeaderDiv">
+        <div>Challenge Someone</div>
+        <div class="FilterListDiv">
+            Level:
+            <select class="FilterSelect">
+                <option value="any">Any</option>
+                <option value="beginner">beginner</option>
+                <option value="intermediate">intermediate</option>
+                <option value="advanced">advanced</option>
+                <option value="pro">pro</option>
+            </select>
+            Gender:
+            <select class="FilterSelect">
+                <option value="any">Any</option>
+                <option value="male">M</option>
+                <option value="female">F</option>
+            </select>
+            Age:
+            <select class="FilterSelect">
+                <option value="any">Any</option>
+                <option value="10s">10s</option>
+                <option value="20s">20s</option>
+                <option value="30s">30s</option>
+                <option value="40s">40s</option>
+                <option value="50s">50s</option>
+                <option value="60s">60s</option>
+                <option value="70s">70s</option>
+                <option value="80s">80s</option>
+                <option value="90s">90s</option>
+                <option value="100s">100s</option>
+            </select>
+        </div>
     </div>
-</div>
-
-<div class="challengesDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Challenges</div>
-    <div id="challengeList" class="gameBoxInnerDiv">
-        <div id="challengeTemplate" style="display:none;">
-            <div style="width: 30px; float:left">
-                <img id="challengerPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
-            </div>
-            <div style="width:190px; float:left">
-                <div>
-                    <span id="challengerName" class="userAttr" style="float:left">player</span>
-                    <button id="challengeAccept" class="UserBtn" style="float:right">accept</button>
-                    <button id="challengeDecline" class="UserBtn" style="float:right">decline</button>
-                </div>
-                <div style="clear:both"></div>
-                <div>
-                    <span id="challengerGender" class="userAttr" style="float:left">U</span>
-                    <span id="challengerAge" class="userAttr" style="float:left">0</span>
-                    <span id="challengeGame" class="userAttr" style="float:right">unknown</span>
-                </div>
-            </div>
+    <div id="suggestedUserList" class="gameBoxInnerDiv">
+        <div id="userTemplate" style="display:block;">
+            <img id="userPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
+            <span id="userName">Anyone</span>
+            <span id="userGender"></span>
+            <span id="userAge"></span>
+            <button id="userChallenge" style="float:right">challenge</button>
             <div style="clear:both"></div>
         </div>
     </div>
 </div>
 
 <div style="clear:both"></div>
-
-<div class="challengeEmailDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Challenge By Email</div>
-    <div class="gameBoxInnerDiv" readonly>
-        <input id="emailInput" type="text" style="width:240px;"></input>
-        <button id="sendEmail" style="float:right;">send</button>
-    </div>
-</div>
-
-<div class="messageLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Messages</div>
-    <div class="gameBoxInnerDiv" readonly>
-        <div id="messageLog" style="overflow: auto" readonly></div>
-        <div class="gameBoxFooterDiv">
-            <input id="chatInput" type="text" style="width:90%;"></input>
-            <button id="sendChat" style="float:right;">send</button>
-        </div>
-    </div>
-</div>
 
 <div class="commLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>

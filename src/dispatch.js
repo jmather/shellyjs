@@ -50,7 +50,7 @@ dispatch.shutdown = function (cb) {
 dispatch.sendUser = function (uid, data, cb) {
   shcluster.locate(uid, function (err, locateInfo) {
     if (err) {
-      return cb(err, "user is not online");
+      return cb(err, "user is not online: " + uid);
     }
     var l = locateInfo.getData();
     if (l.serverId === global.server.serverId) {
