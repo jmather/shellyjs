@@ -14,8 +14,11 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
 <style>
+    .matchAddDiv {
+        width: 460px;
+    }
+
     .suggestedUsersDiv {
-        float: left;
         width: 460px;
     }
     #suggestedUserList {
@@ -34,6 +37,11 @@
 
     .challengeEmailDiv {
         width: 460px;
+    }
+
+    .challengesDiv {
+        width: 250px;
+        float: left;
     }
 
 </style>
@@ -143,6 +151,11 @@ function processEvent(res, from) {
         }
         return;
     }
+    if (res.event == "match.add") {
+        $("#matchAdd").css("display", "none");
+        $("#matchLooking").css("display", "block");
+        return;
+    }
     if (res.event == "suggest.list") {
         setUserInfo("suggestedUserList", res.data);
         return;
@@ -187,11 +200,7 @@ function init() {
     }, false);
 
     $("#matchAdd").click(function () {
-        if ($(this).is(":checked")) {
-            sendCmd("match.add", {name: "connect4"});
-        } else {
-            sendCmd("match.remove", {name: "connect4"});
-        }
+        sendCmd("match.add", {name: "connect4"});
     });
 
     $("#liveToggle").click(function () {
@@ -227,24 +236,30 @@ function init() {
 {{> gameNav}}
 {{> errorBox }}
 
-<div class="challengeEmailDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">I Got Next</div>
+<div style="float:left">
+<div class="matchAddDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Find me a game with:</div>
     <div class="gameBoxInnerDiv" readonly style="text-align: center;">
-        <input id="matchAdd" type="checkbox">Give me the next available opponent</input>
+        <button id="matchAdd" >Next Available Opponent</button>
+        <div id="matchLooking" style="display: none;">
+            <div>Currently looking for an opponent for you.</div>
+            <div>Challenge some friends below while you wait.</div>
+        </div>
     </div>
 </div>
 
 <div class="challengeEmailDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Challenge By Email</div>
+    <div class="gameBoxHeaderDiv">Challenge by email</div>
     <div class="gameBoxInnerDiv" readonly>
         <input id="emailInput" type="text" style="width:400px;"></input>
         <button id="sendEmail" style="float:right;">send</button>
+        <div style="clear:both"></div>
     </div>
 </div>
 
 <div class="suggestedUsersDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">
-        <div>Challenge Someone</div>
+        <div>Challenge someone</div>
         <div class="FilterListDiv">
             Level:
             <select class="FilterSelect">
@@ -287,9 +302,9 @@ function init() {
         </div>
     </div>
 </div>
+</div>
 
 <div style="clear:both"></div>
-
 <div class="commLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>
     <div id="commLog" class="gameBoxInnerDiv" readonly></div>

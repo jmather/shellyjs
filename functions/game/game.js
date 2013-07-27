@@ -290,7 +290,8 @@ Game.turn = function (req, res, cb) {
         whoTurn: gameData.whoTurn,
         name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
         pic: ""});
-      dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // send to all players
+      res.add(event); // send to me
+      dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // send to all other players
     }
     return cb(error);
   });
