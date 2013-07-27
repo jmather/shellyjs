@@ -95,7 +95,9 @@ function sendAccept(req, res, cb) {
       toProfile: challengeUser.profile(),
       subject: req.session.user.get("name") + " accepted your challenge to play " + req.env.game.get("name"),
       gameName: req.env.game.get("name"),
-      playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify({"s": session.create(challengeUser.get("oid"))}),
+      playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify(
+        {"s": session.create(challengeUser.get("oid")), "gn": req.env.game.get("name")}
+      ),
       gameUrl: global.C.GAMES_URL + global.games[req.env.game.get("name")].url + "?" + querystring.stringify(
         {"s": session.create(challengeUser.get("oid")), "gameId": req.env.game.get("oid")}
       ),
@@ -185,7 +187,9 @@ function sendChallenge(req, res, cb) {
       toProfile: challengeUser.profile(),
       subject: req.session.user.get("name") + " has challenged you to " + req.body.game,
       gameName: req.body.game,
-      playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify({"s": session.create(challengeUser.get("oid"))}),
+      playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify(
+        {"s": session.create(challengeUser.get("oid")), "gn": req.body.game}
+      ),
       challengeUrl: global.C.GAMES_URL + "/challenges.html?" + querystring.stringify(
         {"s": session.create(challengeUser.get("oid")), "chId": res.chRecievedId}
       ),
