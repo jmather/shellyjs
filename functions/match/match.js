@@ -19,7 +19,7 @@ match.functions = {
 };
 
 match.add = function (req, res, cb) {
-  if (_.isUndefined(global.matchInfo[req.body.name])) {
+  if (_.isUndefined(global.games[req.body.name])) {
     res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
     return cb(1);
   }
@@ -35,7 +35,7 @@ match.add = function (req, res, cb) {
 };
 
 match.remove = function (req, res, cb) {
-  if (_.isUndefined(global.matchInfo[req.body.name])) {
+  if (_.isUndefined(global.games[req.body.name])) {
     res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
     return cb(1);
   }
@@ -51,7 +51,7 @@ match.remove = function (req, res, cb) {
 };
 
 match.list = function (req, res, cb) {
-  if (_.isUndefined(global.matchInfo[req.body.name])) {
+  if (_.isUndefined(global.games[req.body.name])) {
     res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
     return cb(1);
   }
@@ -67,7 +67,7 @@ match.list = function (req, res, cb) {
 };
 
 match.count = function (req, res, cb) {
-  if (_.isUndefined(global.matchInfo[req.body.name])) {
+  if (_.isUndefined(global.games[req.body.name])) {
     res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
     return cb(1);
   }
@@ -83,7 +83,7 @@ match.count = function (req, res, cb) {
 };
 
 match.info = function (req, res, cb) {
-  res.add(sh.event("match.info", global.matchInfo));
+  res.add(sh.event("match.info", global.games));
   cb(0);
 };
 
@@ -91,7 +91,7 @@ match.info = function (req, res, cb) {
 match.stats = function (req, res, cb) {
 //  var counts = {};
 //  _.forOwn(global.matchq, function (gameq, idx) {
-//    global.matchInfo[idx].waiting = Object.keys(gameq).length;
+//    global.games[idx].waiting = Object.keys(gameq).length;
 //  });
   res.add(sh.event("match.stats", {}));
   return cb(0);

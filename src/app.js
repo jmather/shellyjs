@@ -12,9 +12,9 @@ var matcher = require(global.gBaseDir + "/src/shmatcher.js");
 var gStats = {};
 
 // SWD: this need to moved to a config file
-global.matchInfo = {};
-global.matchInfo.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
-global.matchInfo.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/connect4.html"};
+global.games = {};
+global.games.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
+global.games.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/connect4.html"};
 
 // master received message from worker
 function onWorkerMessage(msg) {
@@ -54,10 +54,10 @@ if (cluster.isMaster) {
     // fork a match processor
     // SWD: should these just fork the shmatcher module directly
     // SWD: loop this over the global matchInfo
-    p = cluster.fork({WTYPE: "matcher", GAMENAME: "connect4"});
-    p.on("message", onWorkerMessage);
-    p = cluster.fork({WTYPE: "matcher", GAMENAME: "tictactoe"});
-    p.on("message", onWorkerMessage);
+    _.each(global.games, function (gameInfo, gameName) {
+      p = cluster.fork({WTYPE: "matcher", GAMENAME: gameName});
+      p.on("message", onWorkerMessage);
+    });
   });
 } else {
   if (process.env.WTYPE === "mailer") {

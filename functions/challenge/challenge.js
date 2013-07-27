@@ -23,7 +23,7 @@ Challenge.functions = {
 };
 
 Challenge.make = function (req, res, cb) {
-  if (_.isUndefined(global.matchInfo[req.body.game])) {
+  if (_.isUndefined(global.games[req.body.game])) {
     res.add(sh.error("bad_game", "unknown game", {game: req.body.game}));
     return cb(1);
   }
@@ -96,7 +96,7 @@ function sendAccept(req, res, cb) {
       subject: req.session.user.get("name") + " accepted your challenge to play " + req.env.game.get("name"),
       gameName: req.env.game.get("name"),
       playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify({"s": session.create(challengeUser.get("oid"))}),
-      gameUrl: global.C.GAMES_URL + global.matchInfo[req.env.game.get("name")].url + "?" + querystring.stringify(
+      gameUrl: global.C.GAMES_URL + global.games[req.env.game.get("name")].url + "?" + querystring.stringify(
         {"s": session.create(challengeUser.get("oid")), "gameId": req.env.game.get("oid")}
       ),
       template: "accepted"};
