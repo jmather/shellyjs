@@ -6,7 +6,13 @@
     <link rel="stylesheet" href="/common/jquery-ui-1.10.2/css/smoothness/jquery-ui.css" />
     <script src="/common/jquery-1.9.1.js"></script>
     <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
+    <style>
+        .ErrorPre {
+            word-wrap: break-word;
+        }
+    </style>
     <script>
         var Env = {{{EnvJson}}};
 
@@ -14,9 +20,8 @@
         function init() {
             $("#shSystem").text("Games");
             $("#shSubTitle").text("Error");
-
-            $("#errorMessage").text(Env.error.message);
-            $("#errorStack").text(Env.error.stack);
+            $("#pageErrorMessage").text(Env.error.message);
+            $("#pageErrorStack").text(Env.error.stack);
         }
     </script>
 
@@ -25,8 +30,8 @@
 {{> header}}
 {{> adminNav}}
 
-<div>Error: <pre id="errorMessage"></pre></div>
-<div>Stack: <pre id="errorStack"></pre></div>
+<div>Error: <pre id="pageErrorMessage"></pre></div>
+<div>Stack: <pre id="pageErrorStack" class="ErrorPre"></pre></div>
 
 {{> footer}}
 </body>
