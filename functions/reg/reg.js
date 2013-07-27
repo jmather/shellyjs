@@ -228,6 +228,8 @@ exports.upgrade = function (req, res, cb) {
     }
     // set the email for the user
     req.session.user.set("email", email);
+    req.session.user.set("name", email.split("@")[0]);
+
     // create the email map
     createEmailReg(req.loader, req.session.uid, email, password);
     res.add(sh.event("reg.upgrade", req.session.user.getData()));

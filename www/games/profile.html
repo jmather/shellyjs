@@ -43,12 +43,35 @@ function updateProfile(user) {
 
     if (typeof (Env.user.email) !== "undefined" && Env.user.email.length > 0) {
         $(".anonymousDiv").css("display", "none");
-        $("#emailRow").css("display", "");
     } else {
         $(".anonymousDiv").css("display", "block");
-        $("#emailRow").css("display", "none");
     }
     $("#email").text(Env.user.email);
+    $("#name").text(Env.user.name);
+    $("#shUserName").text(Env.user.name);
+}
+
+function doRegister() {
+    hideError();
+
+    var regData = {};
+    regData.email = $("#regEmail").val();
+    regData.password = $("#regPassword").val();
+    if (regData.password !== $("#regPasswordVerify").val()) {
+        showError("passwords do not match");
+        return;
+    }
+    console.log(regData);
+    var res = sendRestCmd("reg.upgrade", regData, function (error, data) {
+        if (!error) {
+            console.log(data);
+            if (data.event === "error") {
+                showError(data.message);
+            } else {
+                updateProfile(data.data);
+            }
+        }
+    });
 }
 
 $(init);
@@ -90,32 +113,20 @@ function init() {
         console.log(saveData);
         var res = sendRestCmd("user.set", {user: saveData}, function (error, data) {
             if(!error) {
-                $("#shUserNameSpan").text(data.data.name);
+                $("#shUserName").text(data.data.name);
             }
         });
     });
 
     $("#registerNow").click(function () {
-        hideError();
+        doRegister();
+    });
 
-        var regData = {};
-        regData.email = $("#regEmail").val();
-        regData.password = $("#regPassword").val();
-        if (regData.password !== $("#regPasswordVerify").val()) {
-            showError("passwords do not match");
-            return;
+    $(".CredsInput").on('keyup', function(e) {
+        if (e.which == 13) {
+            doUpgrade();
+            e.preventDefault();
         }
-        console.log(regData);
-        var res = sendRestCmd("reg.upgrade", regData, function (error, data) {
-            if(!error) {
-                console.log(data);
-                if (data.event === "error") {
-                    showError(data.message);
-                } else {
-                    updateProfile(data.data);
-                }
-            }
-        });
     });
 }
 </script>
