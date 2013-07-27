@@ -1,6 +1,18 @@
 body {
     background-color: #ffffff;
 }
+
+.WordWrap {
+    white-space: pre-wrap;      /* CSS3 */
+    white-space: -moz-pre-wrap; /* Firefox */
+    white-space: -pre-wrap;     /* Opera <7 */
+    white-space: -o-pre-wrap;   /* Opera 7 */
+    word-wrap: break-word;      /* IE */
+
+    padding-left: 1.5em;
+    text-indent:-1.5em;
+}
+
 /**************** admin fixed nav menu */
 #shMenu {
     background: hsla(83, 30.0813%, 51.7647%, .9);
