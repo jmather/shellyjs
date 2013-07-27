@@ -17,10 +17,35 @@
     <script language="javascript">
 var Env = {{{EnvJson}}};
 
+
+function addGame(gameName, gameInfo) {
+    console.log(gameName);
+    var $newGame= $("#gameTemplate").clone();
+    $newGame.find("#gameName").text(gameName);
+    $newGame.find("#gamePlayBtn").attr("gn", gameName);
+
+    $newGame.find("#gamePlayBtn").click(function () {
+        var gameName =$(this).attr("gn");
+        var url = "/lobby.html?gn=" + gameName;
+        window.location.href = url;
+    });
+
+    $newGame.css("display", "block");
+    $("#gameList").append($newGame);
+}
+
+function showGames() {
+    for (var gameName in Env.games) {
+        addGame(gameName, Env.games[gameName]);
+    }
+}
+
 $(init);
 function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("Home");
+
+    showGames();
 
     commInit();
 
@@ -37,15 +62,17 @@ function init() {
 {{> gameNav}}
 {{> errorBox}}
 
-<div class="gameBoxDiv" style="float:left;">
-    <div class="gameBoxHeaderDiv">Game 1</div>
-    <div class="gameBoxInnerDiv">
-        Nice game to play
+<div id="gameList">
+    <div id="gameTemplate" class="gameBoxDiv" style="display: none; float:left;">
+        <div id="gameName" class="gameBoxHeaderDiv">Game 1</div>
+        <div class="gameBoxInnerDiv">
+            Nice game to play
+            <button id="gamePlayBtn">play</button>
+        </div>
     </div>
 </div>
 
 <div style="clear:both"></div>
-
 <div class="commLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>
     <div id="commLog" class="gameBoxInnerDiv" readonly></div>

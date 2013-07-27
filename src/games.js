@@ -73,9 +73,10 @@ function createEnv(req) {
   map.gamesUrl = global.C.GAMES_URL;
   map.restUrl = global.C.REST_URL;
   map.socketUrl = global.C.SOCKET_URL;
-  map.user = req.session.user.getData();
   map.session = req.cookies.shSession;
   map.token = req.cookies.shToken;
+  map.games = global.games;
+  map.user = req.session.user.getData();
   return map;
 }
 
