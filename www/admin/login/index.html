@@ -25,6 +25,13 @@ function init() {
         e.preventDefault();
         return false;
     });
+
+    $(".CredsInput").on('keyup', function(e) {
+        if (e.which == 13) {
+            doLogin();
+            e.preventDefault();
+        }
+    });
 }
 
 </script>
@@ -83,8 +90,8 @@ button {
         <div class="gameBoxHeaderDiv" style="">Login</div>
 		<div id="signInForm" class="gameBoxInnerDiv" style="text-align: center">
             <table>
-                <tr><td>User:</td><td><input type="email" id="email" name="email"/></td></tr>
-                <tr><td>Password:</td><td><input type="password" id="pass" name="email"/></td></tr>
+                <tr><td>User:</td><td><input type="email" id="email" name="email" class="CredsInput"/></td></tr>
+                <tr><td>Password:</td><td><input type="password" id="pass" name="email" class="CredsInput"/></td></tr>
             </table>
             <div class="loginConfig">
                 <button id="loginBtn">Login</button><br/>
