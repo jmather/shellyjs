@@ -52,7 +52,11 @@ if (cluster.isMaster) {
       p.on("message", onWorkerMessage);
     }
     // fork a match processor
-    p = cluster.fork({WTYPE: "matcher"});
+    // SWD: should these just fork the shmatcher module directly
+    // SWD: loop this over the global matchInfo
+    p = cluster.fork({WTYPE: "matcher", GAMENAME: "connect4"});
+    p.on("message", onWorkerMessage);
+    p = cluster.fork({WTYPE: "matcher", GAMENAME: "tictactoe"});
     p.on("message", onWorkerMessage);
   });
 } else {
@@ -60,8 +64,8 @@ if (cluster.isMaster) {
     shlog.info("starting mailer");
     mailer.start();
   } else if (process.env.WTYPE === "matcher") {
-    shlog.info("starting matcher");
-    matcher.start();
+    shlog.info("starting matcher:", process.env.GAMENAME);
+    matcher.start(process.env.GAMENAME);
   } else {
     shelly.start();
   }

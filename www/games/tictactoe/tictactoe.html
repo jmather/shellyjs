@@ -121,7 +121,7 @@ function setState(game) {
     }
 
     if (game.status == "over") {
-        showError("game over");
+        showInfo("game over");
         $("#gameWinner").text(game.players[game.state.winner].name);
     } else {
         $("#gameWinner").text("");

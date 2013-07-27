@@ -99,7 +99,7 @@ shmatcher.queueList = function (gameName, cb) {
   global.db.smembers(matchKey(gameName), cb);
 };
 
-shmatcher.start = function () {
+shmatcher.start = function (gameName) {
   process.on("uncaughtException", function (error) {
     shlog.error("uncaughtException", error.stack);
     // restart the loop
@@ -113,6 +113,6 @@ shmatcher.start = function () {
       return;
     }
     shlog.info("starting macher");
-    matchLoop("connect4");
+    matchLoop(gameName);
   });
 };

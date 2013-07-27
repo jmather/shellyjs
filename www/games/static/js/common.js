@@ -5,8 +5,12 @@ function clone(obj) {
   return $.extend({}, obj);
 }
 
-function getURLParameter(name) {
-  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+function getURLParameter(name, dflt) {
+  var p = decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+  if (p === null && typeof(dflt) !== "undefined") {
+    p = dflt;
+  }
+  return p;
 }
 
 function setSession() {
@@ -58,6 +62,15 @@ function showError(msg) {
 
 function hideError() {
   $("#errorMessage").css("display", "none");
+}
+
+function showInfo(msg) {
+  $("#infoMessage").css("display", "block");
+  $("#infoText").text("Info: " + msg);
+}
+
+function hideInfo() {
+  $("#infoMessage").css("display", "none");
 }
 
 function gameInit(gameName, gameId) {
