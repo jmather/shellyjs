@@ -84,9 +84,6 @@ process.on("message", function (msg) {
     socket.sendDirect(msg.toWsid, msg.data);
     return;
   }
-  if (msg.cmd === "shelly.stop") {
-    return;
-  }
   shlog.error("bad_message", "unknown command", msg);
 });
 

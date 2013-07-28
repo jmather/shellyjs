@@ -28,16 +28,14 @@ if (_.isUndefined(global.dnodes)) {
 ShCluster.init = function (cb) {
   var self = this;
   gDb.init(function (err) {
+    // just init the db if we are just worker
+    if (cluster.isWorker) {
+      return cb(0);
+    }
     gLoader.get("kServer", global.server.serverId, function (err, server) {
       server.set("clusterUrl", global.C.CLUSTER_URL);
       server.set("socketUrl", global.C.SOCKET_URL);
       shlog.info("set server info", server.getData());
-
-      // only start add the server record and start dnode server if we are master
-      if (cluster.isWorker) {
-        return cb(0);
-      }
-
       gDriver.sadd("serverList", global.server.serverId, function (err) {
         gLoader.dump();
         if (err) {
@@ -189,7 +187,7 @@ ShCluster.setLocate = function (user, socketId, cb) {
     locate.set("serverId", global.server.serverId);
     locate.set("workerId", shlog.workerId);
     locate.set("socketId", socketId);
-    shlog.info("locate set", locate.getData());
+    shlog.debug("locate set", locate.getData());
     locate.save(cb);
   });
 };
@@ -299,7 +297,7 @@ ShCluster.home = function (oid, cb) {
         shlog.error("bad_serverId", "cannot find cluster id", serverId);
         return cb(1, "bad_serverId");
       }
-      shlog.info("get home server oid: %s, idx: %s", oid, idx);
+      shlog.debug("get home server oid: %s, idx: %s", oid, idx);
       shlog.debug("get home server data: %j", server.getData());
       return cb(0, server.getData());
     }, {checkCache: false});
