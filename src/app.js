@@ -1,14 +1,67 @@
+var os = require("os");
+var fs = require("fs");
+var path = require("path");
 var cluster = require("cluster");
 var _ = require("lodash");
 
-// need shelly before log - this inits all config and other globals
-var shelly = require(__dirname + "/shelly.js");
-var shlog = require(global.gBaseDir + "/src/shlog.js");
+global.gBaseDir = path.dirname(__dirname);
 
-var socket = require(global.gBaseDir + "/src/socket.js");
+global.configBase = global.gBaseDir + "/config";
+// first param alters config dir
+if (_.isString(process.argv[2])) {
+  global.configBase = process.argv[2];
+}
+
+global.C = {};
+global.CDEF = function (name, value) {
+  if (_.isUndefined(global.C[name])) {
+    global.C[name] = value;
+  }
+};
+// load configs with private key and per machine overrides
+/*jslint stupid: true */
+var keyConfigFn = global.configBase + "/keys.js";
+if (fs.existsSync(keyConfigFn)) {
+  require(keyConfigFn);
+}
+// load configs with per machine overrides
+var machineConfigFn = global.configBase + "/" + os.hostname() + ".js";
+/*jslint stupid: true */
+if (fs.existsSync(machineConfigFn)) {
+  require(machineConfigFn);
+}
+require(global.configBase + "/main.js");
+global.PACKAGE = require(global.gBaseDir + "/package.json");
+
+var shutil = require(global.gBaseDir + "/src/shutil.js");
+/*jslint stupid: true */
+// OK as this is only called once during startup
+function serverInfo() {
+  var serverInfoFn = global.configBase + "/server.json";
+  var serverData = {};
+  if (!fs.existsSync(serverInfoFn)) {
+    serverData.serverId = shutil.uuid();
+    fs.writeFileSync(serverInfoFn, JSON.stringify(serverData));
+  } else {
+    serverData = require(serverInfoFn);
+  }
+  return serverData;
+}
+global.server = serverInfo();
+
+var shlog = require(global.gBaseDir + "/src/shlog.js");
+if (cluster.isMaster) {
+  shlog.info("loaded:", new Date());
+  shlog.info("server:", global.server);
+  shlog.info("configBase:", global.configBase);
+  shlog.info("config:", global.C);
+}
+
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
+var shelly = require(global.gBaseDir + "/src/shelly.js");
 var mailer = require(global.gBaseDir + "/src/shmailer.js");
 var matcher = require(global.gBaseDir + "/src/shmatcher.js");
+var socket = require(global.gBaseDir + "/src/socket.js");
 
 var gStats = {};
 
