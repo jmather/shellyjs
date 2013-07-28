@@ -21,6 +21,10 @@ var gLoader = new ShLoader(gDb);
 var gDriver = gDb.driver;
 var gServer = null;
 
+if (_.isUndefined(global.dnodes)) {
+  global.dnodes = {};
+}
+
 ShCluster.init = function (cb) {
   var self = this;
   gDb.init(function (err) {
@@ -82,23 +86,45 @@ ShCluster.init = function (cb) {
   });
 };
 
+ShCluster.shutdown = function () {
+  shlog.info("shutdown: cluster clients");
+  _.each(global.dnodes, function (obj) {
+    shlog.info("shutdown: closing client:", obj.d.serverId);
+    obj.d.end();
+    delete global.dnodes[obj.d.serverId];
+  });
+
+  async.series([
+    function (cb) {
+      shlog.info("shutdown: dumping loader");
+      gLoader.dump(cb);
+    },
+    function (cb) {
+      shlog.info("shutdown: db");
+      gDb.close(cb);
+    }
+  ],
+    function (err, results) {
+      process.exit();
+    });
+};
+
 var loopUntilNoWorkers = function () {
   if (Object.keys(cluster.workers).length > 0) {
     shlog.info("there are still " + Object.keys(cluster.workers).length + " workers...");
     setTimeout(loopUntilNoWorkers, 1000);
   } else {
-    shlog.info("all workers gone, shutdown complete");
-    process.exit();
+    shlog.info("all workers gone, shutdown master");
+    ShCluster.shutdown();
   }
 };
 
-ShCluster.shutdown = function () {
+ShCluster.masterShutdown = function () {
+  // take server offline right away
+  shlog.info("shutdown: cluster socket server");
+  gServer.end();
+
   async.series([
-    function (cb) {
-      shlog.info("shutdown: cluster socket server");
-      gServer.end();
-      cb(0);
-    },
     function (cb) {
       shlog.info("shutdown: delete server from serverList");
       gDriver.srem("serverList", global.server.serverId, cb);
@@ -106,17 +132,10 @@ ShCluster.shutdown = function () {
     function (cb) {
       shlog.info("shutdown: delete kServer object");
       gLoader.delete("kServer", global.server.serverId, cb);
-    },
-    function (cb) {
-      shlog.info("shutdown: dumping loader");
-      gLoader.dump(cb);
     }
   ],
     function (err, results) {
       shlog.info("cluster length " + Object.keys(cluster.workers).length);
-      Object.keys(cluster.workers).forEach(function (id) {
-        cluster.workers[id].send({cmd: "shelly.stop"});
-      });
       setTimeout(loopUntilNoWorkers, 1000);
     });
 };
@@ -188,15 +207,37 @@ ShCluster.sendServer = function (serverId, data, cb) {
       return cb(1, "bad_serverId");
     }
     var urlParts = url.parse(server.get("clusterUrl"));
-    shlog.debug("send:", serverId, urlParts.hostname, urlParts.port, data);
-    var d = dnode.connect(urlParts.port, urlParts.hostname);
-    d.on('remote', function (remote) {
-      remote.event(data, function (data) {
+    if (_.isUndefined(global.dnodes[serverId])) {
+      shlog.info("creating client for:", serverId);
+      var d = dnode.connect(urlParts.port, urlParts.hostname);
+      d.serverId = serverId;
+      d.on("error", function (err, data) {
+        shlog.info("socket error - removing:", serverId);
+        delete global.dnodes[serverId];
+      });
+      d.on("fail", function (err, data) {
+        shlog.info("socket fail - removing:", serverId);
+        delete global.dnodes[serverId];
+      });
+      d.on("end", function (err, data) {
+        shlog.info("socket end - removing:", serverId);
+        delete global.dnodes[serverId];
+      });
+      d.on('remote', function (remote, conn) {
+        shlog.debug("send(connect):", conn.serverId, urlParts.hostname, urlParts.port, data);
+        global.dnodes[conn.serverId] = {d: conn, remote: remote};
+        remote.event(data, function (data) {
+          shlog.debug("response: %j", data);
+          cb(0, data);
+        });
+      });
+    } else {
+      shlog.debug("send(cached):", serverId, urlParts.hostname, urlParts.port, data);
+      global.dnodes[serverId].remote.event(data, function (data) {
         shlog.debug("response: %j", data);
-        d.end();
         cb(0, data);
       });
-    });
+    }
   }, {checkCache: false});
 };
 
@@ -206,7 +247,7 @@ ShCluster.sendServers = function (data, cb) {
   var serverList = [];
   gDriver.smembers("serverList", function (err, servers) {
     if (err) {
-      return cb(err, servers)
+      return cb(err, servers);
     }
     async.each(servers, function (serverId, lcb) {
       self.sendServer(serverId, data, function (err, data) {

@@ -66,3 +66,8 @@ shmailer.start = function () {
   shlog.info("starting mailer");
   sendLoop();
 };
+
+shmailer.shutdown = function (cb) {
+  shlog.info("shutdown mailer");
+  cb(0);
+};

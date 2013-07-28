@@ -62,8 +62,6 @@ if (cluster.isMaster) {
 global.db = require(global.gBaseDir + "/src/shdb.js");
 global.socket = null;
 
-var socket = require(global.gBaseDir + "/src/socket.js");
-
 var shelly = exports;
 
 var admin = null;
@@ -71,19 +69,6 @@ var rest = null;
 var games = null;
 
 shelly.start = function () {
-  // handle all the exit cases
-  process.on("uncaughtException", function (error) {
-    shlog.error("uncaughtException", error.stack);
-  });
-
-  process.on("SIGINT", function () {
-    // ignore as master process sends shutdown message and waits
-  });
-
-  process.on("SIGQUIT", function () {
-    // ignore as master process sends shutdown message and waits
-  });
-
   shlog.info("starting db");
   global.db.init(function (err) {
     if (!err) {
@@ -102,7 +87,7 @@ shelly.start = function () {
   });
 };
 
-shelly.shutdown = function () {
+shelly.shutdown = function (cb) {
   async.series([
     function (cb) {
       if (admin) {
@@ -137,19 +122,6 @@ shelly.shutdown = function () {
   ],
     function (err, results) {
       shlog.info("done.");
-      process.exit(0);
+      cb(0);
     });
-};
-
-shelly.onMessage = function (msg) {
-  shlog.debug("onMessage: %j", msg);
-  if (msg.cmd === "user.direct") {
-    socket.sendDirect(msg.toWsid, msg.data);
-    return;
-  }
-  if (msg.cmd === "shelly.stop") {
-    this.shutdown();
-    return;
-  }
-  shlog.error("bad_message", "unknown command", msg);
 };

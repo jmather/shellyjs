@@ -107,12 +107,11 @@ shmatcher.start = function (gameName) {
   });
 
   gLoader = new ShLoader();
-  shcluster.init(function (err, data) {
-    if (err) {
-      shlog.error("unable to start shcluster module");
-      return;
-    }
-    shlog.info("starting macher");
-    matchLoop(gameName);
-  });
+  shlog.info("starting matcher");
+  matchLoop(gameName);
+};
+
+shmatcher.shutdown = function (cb) {
+  shlog.info("shutdown matcher");
+  cb(0);
 };
