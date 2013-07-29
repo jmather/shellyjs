@@ -63,8 +63,6 @@ var mailer = require(global.gBaseDir + "/src/shmailer.js");
 var matcher = require(global.gBaseDir + "/src/shmatcher.js");
 var socket = require(global.gBaseDir + "/src/socket.js");
 
-var gStats = {};
-
 // SWD: this need to moved to a config file
 global.games = {};
 global.games.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
@@ -105,7 +103,7 @@ shCluster.init(function (err, data) {
       p.on("message", onWorkerMessage);
     }
     // fork a mail processor
-    if (global.C.EMAIL_QUEUE) {
+    if (global.C.EMAIL_CONSUMER) {
       p = cluster.fork({WTYPE: "mailer"});
       p.on("message", onWorkerMessage);
     }

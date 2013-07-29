@@ -131,7 +131,7 @@ shdb.kset = function (keyType, params, value, cb) {
     shlog.info("kset: " + gKeyTypes[keyType].tpl + "->" + key);
     client.set(key, value, function (err, value) {
       if (err) {
-        shlog.error("error on set", err, value);
+        shlog.error("error on kset", err, key, value);
       }
       if (_.isFunction(cb)) {
         cb(err);
@@ -150,7 +150,7 @@ shdb.kdelete = function (keyType, params, cb) {
     shlog.info("kdelete: " + gKeyTypes[keyType].tpl + "->" + key);
     client.del(key, function (err) {
       if (err) {
-        shlog.error("error on remove", err);
+        shlog.error("error on kdelete", err);
       }
       if (_.isFunction(cb)) {
         cb(0);
