@@ -125,15 +125,19 @@ Challenge.accept = function (req, res, cb) {
         return cb(error);
       }
       challenges.removeRecieved(req.body.chId);
+      // wait for game to save to avoid race condition
+      req.loader.dump(function (err) {
+        var startInfo = {};
+        startInfo.gameName = req.env.game.get("name");
+        startInfo.gameId = req.env.game.get("oid");
+        var event = sh.event("challenge.start", startInfo);
+        res.add(event);
+        dispatch.sendUsers(req.body.players, event, req.session.uid);
 
-      var startInfo = {};
-      startInfo.gameName = req.env.game.get("name");
-      startInfo.gameId = req.env.game.get("oid");
-      dispatch.sendUsers(req.body.players, sh.event("challenge.start", startInfo));
-
-      res.add(sh.event("challenge.accept", {chId: req.body.chId}));
-      req.body.toUid = challenge.fromUid;  // send the notif back to creating user
-      sendAccept(req, res, cb);
+        res.add(sh.event("challenge.accept", {chId: req.body.chId}));
+        req.body.toUid = challenge.fromUid;  // send the notif back to creating user
+        sendAccept(req, res, cb);
+      });
     });
   });
 };
