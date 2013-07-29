@@ -1,15 +1,18 @@
+var _ = require("lodash");
+
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var mailer = require(global.gBaseDir + "/src/shmail.js");
 
 var shmailer = exports;
 
 shmailer.sendEmail = function (emailInfo, cb) {
-  var locals = {
-    email: emailInfo.email,
-    subject: "Shelly Game Challenge",
-    name: "pitty the fool",
-    resetUrl: "http;//localhost:3000/password_rest/000000000001|afdaevdae353"
+
+  var baseInfo = {
+    timeQueued: 0,
+    timeSent: new Date().getTime(),
+    retries: 0
   };
+  _.merge(emailInfo, baseInfo);
   mailer.send(emailInfo.template, emailInfo, function (err, responseStatus, html, text) {
     if (err) {
       var errorInfo = {code: err.name, message: err.message, emailInfo: emailInfo};
@@ -31,7 +34,6 @@ function sendLoop() {
 
     var emailInfo = JSON.parse(data);
     shlog.info("sending:", emailInfo.email, emailInfo.template);
-    emailInfo.timeSent = new Date().getTime();
     shmailer.sendEmail(emailInfo, function (err, data) {
       if (err) {
         // add back to set

@@ -52,8 +52,10 @@ shmail.send = function (templateName, locals, fn) {
         text: text
       }, function (err, responseStatus) {
         if (err) {
+          shlog.error("sending:", locals.email, err);
           return fn(err);
         }
+        shlog.info("sending:", locals.email, responseStatus.message);
         return fn(null, responseStatus.message, html, text);
       });
     });
