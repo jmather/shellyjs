@@ -4,7 +4,7 @@ var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
-var stats = require(global.gBaseDir + "/src/stats.js");
+var stats = require(global.gBaseDir + "/src/shstats.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var shcluster = require(global.gBaseDir + "/src/shcluster.js");
