@@ -85,16 +85,17 @@ dispatch.sendUsers = function (uids, data, excludeIds, cb) {
 
   var locateList = {};
   async.each(uids, function (uid, lcb) {
-    if (!_.contains(excludeIds, uid)) {
-      dispatch.sendUser(uid, data, function (err, locateInfo) {
-        if (err) {
-          shlog.info("bad user send", err, locateInfo);
-          return lcb();
-        }
-        locateList[uid] = locateInfo.getData();
-        return lcb();
-      });
+    if (_.contains(excludeIds, uid)) {
+      return lcb();
     }
+    dispatch.sendUser(uid, data, function (err, locateInfo) {
+      if (err) {
+        shlog.info("bad user send", err, locateInfo);
+        return lcb();
+      }
+      locateList[uid] = locateInfo.getData();
+      return lcb();
+    });
   }, function (error) {
     if (_.isFunction(cb)) {
       if (error) {

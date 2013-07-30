@@ -282,7 +282,8 @@ Game.turn = function (req, res, cb) {
       return cb(error);
     }
     if (gameData.status === "over") {
-      channel.sendInt("game:" + gameId, sh.event("game.over", gameData));
+      // just users in game
+      channel.sendInt("game:" + gameId, sh.event("game.over", gameData), cb);
     } else {
       // turn.next sent to all users online
       var event = sh.event("game.turn.next", {gameId: gameId,
@@ -291,9 +292,8 @@ Game.turn = function (req, res, cb) {
         name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
         pic: ""});
       res.add(event); // send to me
-      dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // send to all other players
+      dispatch.sendUsers(gameData.playerOrder, event, req.session.uid, cb); // send to all other players
     }
-    return cb(error);
   });
 };
 
