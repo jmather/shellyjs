@@ -1,30 +1,86 @@
+var async = require("async");
+var _ = require("lodash");
 var gStats = require(global.gBaseDir + global.C.STATS_WRAPPER);
 
 var shstats = exports;
 
+var gStatTracker = {};
+
+function regStat(domain, key) {
+  if (_.isUndefined(gStatTracker[domain + ":" + key])) {
+    gStatTracker[domain + ":" + key] = {domain: domain, key: key};
+    gStats.reg(domain, key);
+  }
+}
+
 shstats.incr = function (domain, key, amount) {
+  regStat(domain, key);
   return gStats.incr(domain, key, amount);
 };
 
 shstats.decr = function (domain, key, amount) {
+  regStat(domain, key);
   return gStats.decr(domain, key, amount);
 };
 
 shstats.stamp = function (domain, key, ts) {
+  regStat(domain, key);
   return gStats.stamp(domain, key, ts);
 };
 
 shstats.get = function (domain, key, cb) {
-  gStats.incr("stats", "numGets");
+  gStats.get(domain, key, function (err, data) {
+    if (err) {
+      return cb(err, data);
+    }
+    cb(0, data);
+  });
+};
 
-  try {
-    gStats.get(domain, key, function (err, data) {
-      var stats = {};
-      stats[domain] = {};
-      stats[domain][key] = data;
-      cb(err, stats);
+shstats.reset = function (domain, key, cb) {
+  gStats.set(domain, key, 0);
+  cb(0, 0);
+};
+
+shstats.getAll = function (cb) {
+  gStats.list(function (err, statsKeys) {
+    if (err) {
+      return cb(err, statsKeys);
+    }
+    var stats = {};
+    async.each(statsKeys, function (key, lcb) {
+      var parts = key.split(":");
+      gStats.get(parts[0], parts[1], function (err, data) {
+        if (!err) {
+          if (_.isUndefined(stats[parts[0]])) {
+            stats[parts[0]] = {};
+          }
+          stats[parts[0]][parts[1]] = data;
+        }
+        lcb(0);
+      });
+    }, function (err) {
+      cb(0, stats);
     });
-  } catch (e) {
-    cb(1);
-  }
+  });
+};
+
+shstats.resetAll = function (cb) {
+  gStats.list(function (err, statsKeys) {
+    if (err) {
+      return cb(err, statsKeys);
+    }
+    var stats = {};
+    async.each(statsKeys, function (key, lcb) {
+      var parts = key.split(":");
+      gStats.set(parts[0], parts[1], 0);
+      if (_.isUndefined(stats[parts[0]])) {
+        stats[parts[0]] = {};
+      }
+      stats[parts[0]][parts[1]] = 0;
+      lcb(0);
+    }, function (err) {
+      cb(0, stats);
+    });
+  });
 };

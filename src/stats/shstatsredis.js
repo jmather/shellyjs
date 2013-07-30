@@ -6,6 +6,25 @@ function makeKey(domain, key) {
   return domain + ":" + key;
 }
 
+shstatsredis.reg = function (domain, key) {
+  global.db.sadd("stats", makeKey(domain, key), function (err, data) {
+    // ignore;
+  });
+}
+
+shstatsredis.list = function (cb) {
+  global.db.smembers("stats", cb);
+}
+
+shstatsredis.set = function (domain, key, amount) {
+  if (_.isUndefined(amount)) {
+    amount = 1;
+  }
+  global.db.set(makeKey(domain, key), amount, function (err, data) {
+//    console.log(err, data);
+  });
+};
+
 shstatsredis.incr = function (domain, key, amount) {
   if (_.isUndefined(amount)) {
     amount = 1;

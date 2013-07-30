@@ -7,6 +7,7 @@ var async = require("async");
 var uuid = require("node-uuid");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var stats = require(global.gBaseDir + "/src/shstats.js");
 var session = require(global.gBaseDir + "/src/session.js");  // used by fill session
 
 var shutil = exports;
@@ -80,6 +81,7 @@ shutil.call = function (req, res, cb) {
     res.add(shutil.error("module_call", "invalid command", {cmd: req.body.cmd}));
     return cb(1);
   }
+  stats.incr("cmds", req.body.cmd);
 
   shlog.info("cmd = " + req.body.cmd);
   var cmdParts = req.body.cmd.split(".");
