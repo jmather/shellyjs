@@ -149,6 +149,7 @@ function onError(err) {
 
 function handleConnect(ws) {
   if (global.shutdown) {
+    // just in case someone sneaks in
     shlog.error("connect after shutdown");
     ws.close();
     return;
@@ -195,11 +196,13 @@ Socket.start = function () {
 
 Socket.close = function (cb) {
   try {
+    // close first so we don't allow any new connections
+    wss.close();
+
     _.each(global.sockets, function (ws, socketId) {
       shlog.info("shutdown socketId:", socketId);
       ws.close(1001, "server going down");
     });
-    wss.close();
     // wait 3 sec for socket close events
     // SWD set this as config param
     setTimeout(function () {
