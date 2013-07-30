@@ -3,6 +3,7 @@ var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var stats = require(global.gBaseDir + "/src/shstats.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
@@ -25,6 +26,7 @@ function sendAll() {
   this.send(this.msgs);
   _.each(this.msgs, function (data) {
     if (data.event === "error") {
+      stats.incr("errors", "rest");
       shlog.error("send %j", data);  // log all errors
     }
   });

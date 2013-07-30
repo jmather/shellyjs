@@ -4,6 +4,7 @@ var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var stats = require(global.gBaseDir + "/src/stats.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var shcluster = require(global.gBaseDir + "/src/shcluster.js");
@@ -49,6 +50,7 @@ function sendAll() {
   var self = this;
   _.each(this.msgs, function (data) {
     if (data.event === "error") {
+      stats.incr("errors", "socket");
       shlog.error("send %j", data);  // log all errors
     }
     sh.sendWs(self.ws, 0, data);
