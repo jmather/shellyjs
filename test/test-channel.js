@@ -21,7 +21,7 @@ describe("module channel", function () {
     it("list users online", function (done) {
       st.userCall({cmd: "channel.list", channel: gChannel},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "channel.list");
           done();
         });
     });
@@ -31,7 +31,7 @@ describe("module channel", function () {
     it("send a messge to a channel", function (done) {
       st.userCall({cmd: "channel.send", channel: gChannel, message: "here me foo"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "channel.send");
           done();
         });
     });
@@ -41,6 +41,7 @@ describe("module channel", function () {
     it("listen for events on this channel", function (done) {
       st.userCall({cmd: "channel.add", channel: gChannel},
         function (err, res) {
+          // not a valid rest command
           res.body.should.have.property("event", "error");
           done();
         });
@@ -51,6 +52,7 @@ describe("module channel", function () {
     it("stop listening for events on this channel", function (done) {
       st.userCall({cmd: "channel.remove", channel: gChannel},
         function (err, res) {
+          // not a valid rest command
           res.body.should.have.property("event", "error");
           done();
         });

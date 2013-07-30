@@ -32,7 +32,7 @@ user.set = function (req, res, cb) {
   }
 
   req.session.user.setData(userData);
-  res.add(sh.event("user.get", req.session.user.getData()));
+  res.add(sh.event("user.set", req.session.user.getData()));
   return cb(0);
 };
 

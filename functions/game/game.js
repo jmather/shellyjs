@@ -300,7 +300,7 @@ Game.turn = function (req, res, cb) {
 Game.get = function (req, res, cb) {
   var game = req.env.game;
 
-  res.add(sh.event("game.info", game.getData()));
+  res.add(sh.event("game.get", game.getData()));
   return cb(0);
 };
 
@@ -310,7 +310,7 @@ Game.set = function (req, res, cb) {
 
   game.setData(newGameData);
 
-  res.add(sh.event("game.info", game.getData()));
+  res.add(sh.event("game.set", game.getData()));
   return cb(0);
 };
 
@@ -328,17 +328,19 @@ Game.reset = function (req, res, cb) {
   }
 
   req.env.gameModule.reset(req, res, function (error) {
-    if (!error) {
-      channel.sendInt("game:" + gameData.oid, sh.event("game.reset", gameData));
+    // ignore error as we need to send anyway
 
-      // notify all players
-      dispatch.sendUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
-          gameName: gameData.name,
-          whoTurn: gameData.whoTurn,
-          name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
-          pic: ""
-        }));
-    }
+    // send to players in game and back to self
+    var event = sh.event("game.reset", gameData);
+    channel.sendInt("game:" + gameData.oid, event, req.session.uid);
+    res.add(event);
+
+    // notify any players online
+    dispatch.sendUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
+      gameName: gameData.name,
+      whoTurn: gameData.whoTurn,
+      name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
+      pic: ""}));
     return cb(error);
   });
 };

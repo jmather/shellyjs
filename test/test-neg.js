@@ -21,7 +21,6 @@ describe("general negative tests", function () {
     it("missing command", function (done) {
       st.userCall({},
         function (err, res) {
-          console.log(res.body);
           res.body.should.have.property("event", "error");
           done();
         });

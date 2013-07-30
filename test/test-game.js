@@ -21,6 +21,7 @@ describe("module game", function () {
     it("respond with valid game", function (done) {
       st.userCall({cmd: "game.create", name: "tictactoe"},
         function (err, res) {
+          res.body.should.have.property("event", "game.create");
           res.body.data.should.have.property("name", "tictactoe");
           res.body.data.should.have.property("oid");
           res.body.data.should.have.property("state");
@@ -33,6 +34,7 @@ describe("module game", function () {
     it("respond with valid game", function (done) {
       st.userCall({cmd: "game.get", gameId: gCurrentGame},
         function (err, res) {
+          res.body.should.have.property("event", "game.get");
           res.body.data.should.have.property("name", "tictactoe");
           res.body.data.should.have.property("oid");
           res.body.data.should.have.property("state");
@@ -45,6 +47,7 @@ describe("module game", function () {
     it("respond with valid game", function (done) {
       st.userCall({cmd: "game.reset", gameId: gCurrentGame},
         function (err, res) {
+          res.body.should.have.property("event", "game.reset");
           res.body.data.should.have.property("name", "tictactoe");
           res.body.data.should.have.property("oid");
           res.body.data.should.have.property("state");
@@ -57,7 +60,7 @@ describe("module game", function () {
     it("list games user is playing", function (done) {
       st.userCall({cmd: "game.playing"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "game.playing");
           done();
         });
     });

@@ -21,32 +21,32 @@ function playGame() {
   it("turn 1", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 0}},
       function (err, res) {
-        res[0].should.not.have.property("event", "error");
-        gWhoTurn = res[0].data.whoTurn;
+        res[1].should.have.property("event", "game.turn.next");
+        gWhoTurn = res[1].data.whoTurn;
         done();
       });
   });
   it("turn 2", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 1}},
       function (err, res) {
-        res[0].should.not.have.property("event", "error");
-        gWhoTurn = res[0].data.whoTurn;
+        res[1].should.have.property("event", "game.turn.next");
+        gWhoTurn = res[1].data.whoTurn;
         done();
       });
   });
   it("turn 3", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 0}},
       function (err, res) {
-        res[0].should.not.have.property("event", "error");
-        gWhoTurn = res[0].data.whoTurn;
+        res[1].should.have.property("event", "game.turn.next");
+        gWhoTurn = res[1].data.whoTurn;
         done();
       });
   });
   it("turn 4", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 1}},
       function (err, res) {
-        res[0].should.not.have.property("event", "error");
-        gWhoTurn = res[0].data.whoTurn;
+        res[1].should.have.property("event", "game.turn.next");
+        gWhoTurn = res[1].data.whoTurn;
         done();
       });
   });
@@ -67,12 +67,12 @@ describe("basic user create and game play", function () {
     gConn2 = new ShConnect("localhost");
     gConnAdmin = new ShConnect("localhost");
     gConnAdmin.login("shelly", "", function (err, res) {
-      res[0].should.not.have.property("event", "error");
+      res[0].should.have.property("event", "reg.login");
       // pre-mop up these users
       gConnAdmin.call("reg.remove", {email: gEmail1}, function (err, res) {
-        res[0].should.not.have.property("event", "error");
+        res[0].should.have.property("event", "reg.remove");
         gConnAdmin.call("reg.remove", {email: gEmail2}, function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "reg.remove");
           done();
         });
       });
@@ -83,7 +83,7 @@ describe("basic user create and game play", function () {
     it("clear queue", function (done) {
       gConnAdmin.call("match.clear", {name: "tictactoe"},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "match.clear");
           done();
         });
     });
@@ -93,7 +93,7 @@ describe("basic user create and game play", function () {
     it("register user1", function (done) {
       gConn1.call("reg.create", {email: gEmail1, password: gPassword},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "reg.create");
           gConn1.setSession(res[0].data.session);
           gConns[gConn1.uid()] = gConn1;
           done();
@@ -102,7 +102,7 @@ describe("basic user create and game play", function () {
     it("dequeue user1", function (done) {
       gConn1.call("match.remove", {name: "tictactoe"},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "match.remove");
           done();
         });
     });
@@ -112,7 +112,7 @@ describe("basic user create and game play", function () {
     it("register user2", function (done) {
       gConn2.call("reg.create", {email: gEmail2, password: gPassword},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "reg.create");
           gConn2.setSession(res[0].data.session);
           gConns[gConn2.uid()] = gConn2;
           done();
@@ -121,7 +121,7 @@ describe("basic user create and game play", function () {
     it("dequeue user2", function (done) {
       gConn2.call("match.remove", {name: "tictactoe"},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "match.remove");
           done();
         });
     });
@@ -165,14 +165,14 @@ describe("basic user create and game play", function () {
     it("user1 join", function (done) {
       gConn1.call("game.join", {gameId: gGameId},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "game.join");
           done();
         });
     });
     it("user2 join", function (done) {
       gConn2.call("game.join", {gameId: gGameId},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "game.join");
           gWhoTurn = res[0].data.whoTurn;
           done();
         });
@@ -187,7 +187,7 @@ describe("basic user create and game play", function () {
     it("reset", function (done) {
       gConn1.call("game.reset", {gameId: gGameId},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "game.reset");
           gWhoTurn = res[0].data.whoTurn;
           done();
         });
@@ -202,14 +202,14 @@ describe("basic user create and game play", function () {
     it("user1 leave", function (done) {
       gConn1.call("game.leave", {gameId: gGameId},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "game.leave");
           done();
         });
     });
     it("user2 leave", function (done) {
       gConn2.call("game.leave", {gameId: gGameId},
         function (err, res) {
-          res[0].should.not.have.property("event", "error");
+          res[0].should.have.property("event", "game.leave");
           done();
         });
     });

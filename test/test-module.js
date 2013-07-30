@@ -20,7 +20,7 @@ describe("module module", function () {
     it("list info for all core modules", function (done) {
       st.adminCall({cmd: "module.list"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "module.list");
           done();
         });
     });
@@ -30,7 +30,7 @@ describe("module module", function () {
     it("info the named core modules", function (done) {
       st.adminCall({cmd: "module.info", name: "module"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "module.info");
           done();
         });
     });

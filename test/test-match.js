@@ -16,7 +16,7 @@ describe("module match", function () {
       // clear the game queue
       st.userCall({cmd: "match.remove", name: gGameName},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "match.remove");
           done();
         });
     });
@@ -26,7 +26,7 @@ describe("module match", function () {
     it("list game queue", function (done) {
       st.userCall({cmd: "match.list", name: gGameName},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "match.list");
           done();
         });
     });
@@ -66,7 +66,7 @@ describe("module match", function () {
     it("remove a user from a game queue", function (done) {
       st.userCall({cmd: "match.remove", name: "tictactoe"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "match.remove");
           done();
         });
     });
@@ -74,7 +74,7 @@ describe("module match", function () {
     it("verify user is not in game queue", function (done) {
       st.userCall({cmd: "match.list", name: "tictactoe"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "match.list");
           _.each(res.body.data, function (user) {
             user.should.not.have.property("uid", st.uid("user"));
           });
@@ -95,7 +95,7 @@ describe("module match", function () {
     it("get stats for a game queue", function (done) {
       st.userCall({cmd: "match.remove", name: "tictactoe"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "match.remove");
           done();
         });
     });

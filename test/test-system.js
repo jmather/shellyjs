@@ -20,7 +20,7 @@ describe("module system", function () {
     it("get server config data", function (done) {
       st.adminCall({cmd: "system.config"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "system.config");
           done();
         });
     });
@@ -30,7 +30,7 @@ describe("module system", function () {
     it("get server statistics data", function (done) {
       st.adminCall({cmd: "system.stats"},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "system.stats");
           done();
         });
     });

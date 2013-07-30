@@ -20,7 +20,7 @@ object.create = function (req, res, cb) {
   var obj = req.loader.create("kObject", sh.uuid());
   obj.set(req.body.object);
 
-  res.add(sh.event("object.get", obj.getData()));
+  res.add(sh.event("object.create", obj.getData()));
   return cb(0);
 };
 

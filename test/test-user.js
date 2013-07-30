@@ -25,7 +25,7 @@ describe("module user", function () {
   describe("CMD user.get", function () {
     it("respond with valid user", function (done) {
       st.userCall({cmd: "user.get"}, function (err, res) {
-        res.body.should.not.have.property("event", "error");
+        res.body.should.have.property("event", "user.get");
         res.body.data.should.have.property("name");
         done();
       });
@@ -36,7 +36,7 @@ describe("module user", function () {
     it("change user name with set", function (done) {
       var newName = "test-" + new Date().getTime();
       st.userCall({cmd: "user.set", user: {name: newName}}, function (err, res) {
-        res.body.should.not.have.property("event", "error");
+        res.body.should.have.property("event", "user.set");
         res.body.data.should.have.property("name", newName);
         done();
       });
@@ -46,7 +46,7 @@ describe("module user", function () {
   describe("CMD user.find", function () {
     it("find user = " + gEmail, function (done) {
       st.adminCall({cmd: "user.find", by: "email", value: gEmail}, function (err, res) {
-        res.body.should.not.have.property("event", "error");
+        res.body.should.have.property("event", "user.find");
         res.body.data.should.have.property("email", gEmail);
         done();
       });

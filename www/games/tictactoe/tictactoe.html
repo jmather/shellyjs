@@ -224,7 +224,7 @@ function processEvent(res, from) {
             updateMyTurns(res.data.gameId, res.data.gameName, res.data.whoTurn);
         }
     }
-    if (res.event == "game.info"
+    if (res.event == "game.update"
             || res.event == "game.over"
             || res.event == "game.reset") {
         setState(res.data);

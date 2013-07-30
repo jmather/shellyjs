@@ -23,7 +23,7 @@ describe("module reg", function () {
     it("respond with no error", function (done) {
       st.adminCall({cmd: "reg.remove", email: gEmail},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "reg.remove");
           done();
         });
     });

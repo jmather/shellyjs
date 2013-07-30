@@ -50,7 +50,6 @@ connect4.reset = function (req, res, cb) {
   state.winner = "";
   state.winnerSet = null;
 
-  res.add(sh.event("game.reset", req.env.game.getData()));
   return cb(0);
 };
 

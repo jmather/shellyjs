@@ -21,7 +21,7 @@ describe("module object", function () {
     it("create a new object", function (done) {
       st.userCall({cmd: "object.create", object: {}},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "object.create");
           res.body.data.should.have.property("oid");
           gOid = res.body.data.oid;
           done();
@@ -33,7 +33,7 @@ describe("module object", function () {
     it("set a value in an existing object", function (done) {
       st.userCall({cmd: "object.set", oid: gOid, object: {test: "foo"}},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "object.set");
           res.body.data.should.have.property("test", "foo");
           done();
         });
@@ -44,7 +44,7 @@ describe("module object", function () {
     it("get an existing object", function (done) {
       st.userCall({cmd: "object.get", oid: gOid, object: {test: "foo"}},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "object.get");
           res.body.data.should.have.property("test", "foo");
           done();
         });
@@ -55,7 +55,7 @@ describe("module object", function () {
     it("delete an existing object", function (done) {
       st.userCall({cmd: "object.delete", oid: gOid},
         function (err, res) {
-          res.body.should.not.have.property("event", "error");
+          res.body.should.have.property("event", "object.delete");
           res.body.data.should.have.property("status", "ok");
           done();
         });
