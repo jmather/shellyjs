@@ -15,6 +15,7 @@ var gConnAdmin = null;
 var gGameId = "";
 var gWhoTurn = "";
 var gConns = [];
+var gMatchWait = 7000;
 
 function playGame() {
   it("turn 1", function (done) {
@@ -78,6 +79,16 @@ describe("basic user create and game play", function () {
     });
   });
 
+  describe("setup match queue", function () {
+    it("clear queue", function (done) {
+      gConnAdmin.call("match.clear", {name: "tictactoe"},
+        function (err, res) {
+          res[0].should.not.have.property("event", "error");
+          done();
+        });
+    });
+  });
+
   describe("setup user1", function () {
     it("register user1", function (done) {
       gConn1.call("reg.create", {email: gEmail1, password: gPassword},
@@ -128,13 +139,24 @@ describe("basic user create and game play", function () {
     it("user2 match", function (done) {
       gConn2.call("match.add", {name: "tictactoe"},
         function (err, res) {
-          // res[0] is create message
-          should.exist(res[1]);
-          res[1].should.have.property("event", "match.made");
-          res[1].data.should.have.property("gameId");
-          gGameId = res[1].data.gameId;
+          res[0].should.have.property("event", "match.add");
+          res[0].data.should.have.property("uid", gConn2.uid());
           done();
         });
+    });
+    it("user1 gameId", function (done) {
+      this.timeout(gMatchWait);
+      console.log("waiting for matcher (" + gMatchWait + "ms)");
+      setTimeout(function () {
+        gConn1.call("game.playing", {},
+          function (err, res) {
+            res[0].should.have.property("event", "game.playing");
+            var gameIds = Object.keys(res[0].data);
+            gameIds.should.have.length(1);
+            gGameId = gameIds[0];
+            done();
+          });
+      }, 6000);
     });
   });
 

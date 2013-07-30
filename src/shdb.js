@@ -60,7 +60,7 @@ shdb.init = function (cb) {
 
 shdb.get = function (key, cb) {
   try {
-    shlog.info("get", key);
+    shlog.info("get: ", key);
     client.get(key, cb);
   } catch (e) {
     cb(1, {message: e.message, stack: e.stack});
@@ -112,7 +112,7 @@ shdb.set = function (key, value, cb) {
   try {
     client.set(key, value, function (err, value) {
       if (err) {
-        shlog.error("error on set", err, value);
+        shlog.error("error on set:", err, value);
       }
       if (_.isFunction(cb)) {
         cb(err);
@@ -131,10 +131,27 @@ shdb.kset = function (keyType, params, value, cb) {
     shlog.info("kset: " + gKeyTypes[keyType].tpl + "->" + key);
     client.set(key, value, function (err, value) {
       if (err) {
-        shlog.error("error on kset", err, key, value);
+        shlog.error("error on kset:", err, key, value);
       }
       if (_.isFunction(cb)) {
         cb(err);
+      }
+    });
+  } catch (e) {
+    cb(1, {message: e.message, stack: e.stack});
+    return;
+  }
+};
+
+shdb.delete = function (key, cb) {
+  try {
+    shlog.info("kdelete: " + key);
+    client.del(key, function (err) {
+      if (err) {
+        shlog.error("error on delete:", err);
+      }
+      if (_.isFunction(cb)) {
+        cb(0);
       }
     });
   } catch (e) {

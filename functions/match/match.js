@@ -13,6 +13,7 @@ match.functions = {
   add: {desc: "add caller to the game matcher", params: {name: {dtype: "string"}}, security: []},
   remove: {desc: "remove caller from the game matcher", params: {name: {dtype: "string"}}, security: []},
   list: {desc: "list the match players for a game", params: {name: {dtype: "string"}}, security: []},
+  clear: {desc: "clear the match queue (for testing)", params: {name: {dtype: "string"}}, security: ["admin"]},
   count: {desc: "count the users waiting for a game", params: {name: {dtype: "string"}}, security: []},
   info: {desc: "list the games avaliable", params: {}, security: []},
   stats: {desc: "list the match stats for all games", params: {}, security: []}
@@ -62,6 +63,22 @@ match.list = function (req, res, cb) {
       return cb(1);
     }
     res.add(sh.event("match.list", data));
+    return cb(0);
+  });
+};
+
+match.clear = function (req, res, cb) {
+  if (_.isUndefined(global.games[req.body.name])) {
+    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    return cb(1);
+  }
+
+  global.db.delete("match:any:" + req.body.name, function (err, data) {
+    if (err) {
+      res.add(sh.error("no_clear", "unable to clear match list", {name: req.body.name}));
+      return cb(1);
+    }
+    res.add(sh.event("match.clear", data));
     return cb(0);
   });
 };
