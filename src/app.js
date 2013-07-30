@@ -48,6 +48,7 @@ function serverInfo() {
   return serverData;
 }
 global.server = serverInfo();
+global.shutdown = false;
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 if (cluster.isMaster) {
@@ -156,6 +157,8 @@ process.on("uncaughtException", function (error) {
 });
 
 function shutdown() {
+  global.shutdown = true;
+
   if (cluster.isMaster) {
     shlog.info("master SIGINT - graceful shutdown");
     // waits for all client processes to end

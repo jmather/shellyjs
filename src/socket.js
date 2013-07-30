@@ -148,6 +148,12 @@ function onError(err) {
 }
 
 function handleConnect(ws) {
+  if (global.shutdown) {
+    shlog.error("connect after shutdown");
+    ws.close();
+    return;
+  }
+
   shlog.info("(" + ws.id + ") socket: connect");
   ws.uid = 0;
   ws.games = [];
