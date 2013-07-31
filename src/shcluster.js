@@ -120,7 +120,9 @@ var loopUntilNoWorkers = function () {
 ShCluster.masterShutdown = function () {
   // take server offline right away
   shlog.info("shutdown: cluster socket server");
-  gServer.end();
+  if (gServer) {
+    gServer.end();
+  }
 
   async.series([
     function (cb) {

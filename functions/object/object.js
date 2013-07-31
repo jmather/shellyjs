@@ -29,7 +29,7 @@ object.delete = function (req, res, cb) {
 
   req.loader.delete("kObject", req.body.oid, function (err, data) {
     if (err) {
-      res.add(sh.error("object_delete", "unable to delete object", {oid: req.body.oid, info: data}));
+      res.add(sh.error("delete-failed", "unable to delete object", data));
       return cb(1);
     }
 
@@ -41,7 +41,7 @@ object.delete = function (req, res, cb) {
 object.get = function (req, res, cb) {
   req.loader.exists("kObject", req.body.oid, function (err, obj) {
     if (err) {
-      res.add(sh.error("object_get", "unable to load object", obj));
+      res.add(sh.error("get-failed", "unable to get object", obj));
       return cb(1);
     }
     res.add(sh.event("object.get", obj.getData()));
@@ -52,7 +52,7 @@ object.get = function (req, res, cb) {
 object.set = function (req, res, cb) {
   req.loader.get("kObject", req.body.oid, function (err, obj) {
     if (err) {
-      res.add(sh.error("object_set", "unable to load object to set", obj));
+      res.add(sh.error("set-failed", "unable to load object to set", obj));
       return cb(1);
     }
     obj.setData(req.body.object);

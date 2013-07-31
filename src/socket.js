@@ -50,6 +50,7 @@ function sendAll() {
   var self = this;
   _.each(this.msgs, function (data) {
     if (data.event === "error") {
+      data.inputs = self.req.body;
       stats.incr("errors", "socket");
       shlog.error("send %j", data);  // log all errors
     }

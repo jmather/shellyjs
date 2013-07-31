@@ -5,6 +5,7 @@ var domain = require("domain");
 var _ = require("lodash");
 var async = require("async");
 var uuid = require("node-uuid");
+var stackTrace = require("stack-trace");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var stats = require(global.gBaseDir + "/src/shstats.js");
@@ -47,8 +48,27 @@ shutil.error = function (code, message, data) {
   var res = this.event("error", data);
   res.code = code;
   res.message = message;
+
+  var trace = stackTrace.get();
+  var callerFn = trace[1].getFileName();
+  res.file = path.basename(callerFn);
+  res.line = trace[1].getLineNumber();
+
   return res;
 };
+
+shutil.intMsg = function (code, data) {
+  var res = {};
+  res.code = code;
+  res.data = data;
+
+  var trace = stackTrace.get();
+  var fn = trace[1].getFileName();
+  var file = path.basename(fn);
+  var line = trace[1].getLineNumber();
+
+  return res;
+}
 
 shutil.fillSession = function (sess, req, res, cb) {
   req.session = {valid: false,

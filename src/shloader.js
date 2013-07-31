@@ -148,7 +148,7 @@ ShLoader.prototype.dump = function (cb) {
   async.each(Object.keys(this._objects), function (key, lcb) {
     shlog.info("dumping: %s", key);
     self._objects[key].save(function (err, data) {
-      if (data.code === "object_saved") {
+      if (data.code === "object-saved") {
         self._saves += 1;
       }
       lcb(err);

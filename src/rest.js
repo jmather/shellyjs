@@ -23,13 +23,15 @@ function add(data) {
 
 // res.send - sends all events or errors
 function sendAll() {
-  this.send(this.msgs);
+  var self = this;
   _.each(this.msgs, function (data) {
     if (data.event === "error") {
+      data.inputs = self.req.body;
       stats.incr("errors", "rest");
       shlog.error("send %j", data);  // log all errors
     }
   });
+  this.send(this.msgs);
   this.msgs = [];
 }
 
