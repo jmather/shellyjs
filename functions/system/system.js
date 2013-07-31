@@ -41,7 +41,7 @@ system.stat = function (req, res, cb) {
 
   stats.get(req.body.domain, req.body.key, function (err, data) {
     if (err) {
-      res.add(sh.error("stat_get", "unable to get stat", data));
+      res.add(sh.error("stat-bad", "unable to get stat", data));
       return cb(0);
     }
     res.add(sh.event("system.stat", {domain: req.body.domain, key: req.body.key, value: data}));
@@ -63,7 +63,7 @@ system.stats = function (req, res, cb) {
 
   stats.getAll(function (err, stats) {
     if (err) {
-      res.add(sh.error("object_get", "unable to get object", stats));
+      res.add(sh.error("stats-bad", "unable to get object", stats));
       return cb(0);
     }
     res.add(sh.event("system.stats", stats));
@@ -76,7 +76,7 @@ system.statsReset = function (req, res, cb) {
 
   stats.resetAll(function (err, stats) {
     if (err) {
-      res.add(sh.error("statsReset", "unable to reset stats", stats));
+      res.add(sh.error("stats-reset", "unable to reset stats", stats));
       return cb(0);
     }
     res.add(sh.event("system.statsReset", stats));
@@ -96,7 +96,7 @@ system.rawGet = function (req, res, cb) {
 
   global.db.get(req.body.key, function (err, data) {
     if (err) {
-      res.add(sh.error("object_get", "unable to get object", data));
+      res.add(sh.error("object-get", "unable to get object", data));
       return cb(1);
     }
     res.add(sh.event("system.rawGet", {key: req.body.key, value: JSON.parse(data)}));
@@ -109,7 +109,7 @@ system.rawSet = function (req, res, cb) {
 
   global.db.set(req.body.key, JSON.stringify(req.body.data), function (err, data) {
     if (err) {
-      res.add(sh.error("object_set", "unable to set object", data));
+      res.add(sh.error("object-set", "unable to set object", data));
       return cb(1);
     }
     res.add(sh.event("system.rawSet", {key: req.body.key, value: req.body.data}));

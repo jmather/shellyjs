@@ -74,7 +74,7 @@ function makeCalls(msgs, req, res) {
       res.sendAll();
     });
   } catch (err1) {
-    res.add(sh.error("socket", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
+    res.add(sh.error("socket-calls", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
   }
 }
 
@@ -85,7 +85,7 @@ function onMessage(data) {
   try {
     packet = JSON.parse(data);
   } catch (err) {
-    sh.sendWs(this, 1, sh.error("socket", "unable to parse json message", { message: err.message, stack: err.stack }));
+    sh.sendWs(this, 1, sh.error("socket-parse", "unable to parse json message", { message: err.message, stack: err.stack }));
     return;
   }
 
@@ -187,7 +187,7 @@ Socket.start = function () {
     try {
       handleConnect(ws);
     } catch (err) {
-      sh.sendWs(ws, 1, sh.error("socket", "connection - " + err.message, { message: err.message, stack: err.stack }));
+      sh.sendWs(ws, 1, sh.error("socket-connect", "connection - " + err.message, { message: err.message, stack: err.stack }));
     }
   }); // end wss.on-connection
 

@@ -19,29 +19,29 @@ Challenge.functions = {
   list: {desc: "list all challenges for the current user", params: {}, security: []},
   alist: {desc: "list all challenges for the given user", params: {uid: {dtype: "string"}}, security: ["admin"]},
   email: {desc: "email a challenge", params: {email: {dtype: "string"}, game: {dtype: "string"}}, security: []},
-  jobs: {desc: "list the current job queue", params: {}, security: ["admin"]}
+  emailList: {desc: "list the current email queue", params: {}, security: ["admin"]}
 };
 
 Challenge.make = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.game])) {
-    res.add(sh.error("bad_game", "unknown game", {game: req.body.game}));
+    res.add(sh.error("game-bad", "unknown game", {game: req.body.game}));
     return cb(1);
   }
   if (req.body.toUid === req.session.uid) {
-    res.add(sh.error("bad_user", "you cannot challenge yourself"));
+    res.add(sh.error("user-bad", "you cannot challenge yourself"));
     return cb(1);
   }
 
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenge_get", "unable to load challenge list", {uid: req.session.uid}));
+      res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
       return cb(err);
     }
     var chId = challenges.addSend(req.body.toUid, req.body.game);
     res.add(sh.event("challenge.make", {chId: chId, sent: challenges.get("sent")[chId]}));
     req.loader.get("kChallenges", req.body.toUid, function (err, challenges) {
       if (err) {
-        res.add(sh.error("challenge_get", "unable to load challenge list", {uid: req.session.uid}));
+        res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
         return cb(err);
       }
       var chId = challenges.addRecieved(req.session.uid, req.body.game, {
@@ -66,7 +66,7 @@ function sendEmail(emailInfo, req, res, cb) {
     // queue the email for the consumer worker to process it
     mailer.queueEmail(emailInfo, function (err, data) {
       if (err) {
-        res.add(sh.error(req.body.cmd, "error queueing email", data));
+        res.add(sh.error("email-queue", "error queueing email", data));
         return cb(err);
       }
       res.add(sh.event(req.body.cmd, {status: "queued"}));
@@ -76,7 +76,7 @@ function sendEmail(emailInfo, req, res, cb) {
     // send the email directly
     mailer.sendEmail(emailInfo, function (err, data) {
       if (err) {
-        res.add(sh.error(req.body.cmd, "error sending challenge email", data));
+        res.add(sh.error("email-send", "error sending challenge email", data));
         return cb(err);
       }
       res.add(sh.event(req.body.cmd, {status: "sent", info: data}));
@@ -88,7 +88,7 @@ function sendEmail(emailInfo, req, res, cb) {
 function sendAccept(req, res, cb) {
   req.loader.exists("kUser", req.body.toUid, function (err, challengeUser) {
     if (err) {
-      res.add(sh.error("challenge.accept", "unable to load challenge user", challengeUser));
+      res.add(sh.error("user-bad", "unable to load challenge user", challengeUser));
       return cb(1);
     }
     var emailInfo = {email: challengeUser.get("email"), fromProfile: req.session.user.profile(),
@@ -111,7 +111,7 @@ function sendAccept(req, res, cb) {
 Challenge.accept = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
       return cb(err);
     }
 
@@ -145,7 +145,7 @@ Challenge.accept = function (req, res, cb) {
 Challenge.decline = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
       return cb(err);
     }
     challenges.removeRecieved(req.body.chId);
@@ -162,7 +162,7 @@ Challenge.withdraw = function (req, res, cb) {
 Challenge.list = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
       return cb(err);
     }
     res.add(sh.event("challenge.list", challenges.getData()));
@@ -173,7 +173,7 @@ Challenge.list = function (req, res, cb) {
 Challenge.alist = function (req, res, cb) {
   req.loader.get("kChallenges", req.body.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
       return cb(err);
     }
     res.add(sh.event("challenge.list", challenges.getData()));
@@ -184,7 +184,7 @@ Challenge.alist = function (req, res, cb) {
 function sendChallenge(req, res, cb) {
   req.loader.exists("kUser", req.body.toUid, function (err, challengeUser) {
     if (err) {
-      res.add(sh.error("challenge.email", "unable to load challenge user", challengeUser));
+      res.add(sh.error("user-bad", "unable to load challenge user", challengeUser));
       return cb(1);
     }
     var emailInfo = {email: req.body.email, fromProfile: req.session.user.profile(),
@@ -233,13 +233,14 @@ Challenge.email = function (req, res, cb) {
   });
 };
 
-Challenge.jobs = function (req, res, cb) {
+// SWD this should probably be moved to the system or a new email module
+Challenge.emailList = function (req, res, cb) {
   mailer.queueList(function (err, data) {
     if (err) {
-      res.add(sh.error("challenge.jobs", "error getting job queue", data));
+      res.add(sh.error("emaillist-get", "error getting job queue", data));
       return cb(err);
     }
-    res.add(sh.event("challenge.jobs", data));
+    res.add(sh.event("challenge.emailList", data));
     return cb(0);
   });
 };

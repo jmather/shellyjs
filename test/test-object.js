@@ -64,7 +64,7 @@ describe("module object", function () {
       st.userCall({cmd: "object.get", oid: gOid},
         function (err, res) {
           res.body.should.have.property("event", "error");
-          res.body.should.have.property("code", "get-failed");
+          res.body.should.have.property("code", "object-get");
           done();
         });
     });

@@ -27,7 +27,7 @@ user.set = function (req, res, cb) {
 
   // only admin can change roles
   if (!_.isUndefined(userData.roles)  && !req.session.user.hasRole("admin")) {
-    res.add(sh.error("no_permision", "user does not have rights to alter roles"));
+    res.add(sh.error("user-roles", "user does not have rights to alter roles"));
     return cb(1);
   }
 
@@ -41,7 +41,7 @@ user.aget = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, function (error, user) {
     if (error) {
-      res.add(sh.error("user_aget", "user does not exist", user));
+      res.add(sh.error("user-aget", "user does not exist", user));
       return;
     }
     res.add(sh.event("user.get", user.getData()));
@@ -55,7 +55,7 @@ user.aset = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, function (error, user) {
     if (error) {
-      res.add(sh.error("user_aset", "user does not exist", user));
+      res.add(sh.error("user-aset", "user does not exist", user));
       return;
     }
     user.setData(newUser);
@@ -69,7 +69,7 @@ user.profiles = function (req, res, cb) {
   var userIds = req.body.users;
   sh.fillProfiles(req.loader, userIds, function (error, data) {
     if (error) {
-      res.add(sh.error("profile_fill", "unable to fill in profile data", data));
+      res.add(sh.error("profile-fill", "unable to fill in profile data", data));
       return cb(1);
     }
     res.add(sh.event("user.profiles", data));
@@ -81,7 +81,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "email") {
     reg.findUserByEmail(req.loader, req.body.value, function (err, data) {
       if (err) {
-        res.add(sh.error("no-user", "unable to file user with this email", data));
+        res.add(sh.error("user-find-email", "unable to file user with this email", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -92,7 +92,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "uid") {
     req.loader.exists("kUser", req.body.value, function (err, data) {
       if (err) {
-        res.add(sh.error("no_user", "unable to find user with uid", data));
+        res.add(sh.error("user-find-uid", "unable to find user with uid", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -103,7 +103,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "token") {
     reg.findUserByToken(req.loader, req.body.value, function (err, data) {
       if (err) {
-        res.add(data);
+        res.add(sh.error("user-find-token", "unable to find user with uid", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -112,6 +112,6 @@ user.find = function (req, res, cb) {
     return;
   }
 
-  res.add(sh.error("find-by-unknown", "no way to find a user by this data type", {by: req.body.by}));
+  res.add(sh.error("user-find-unknown", "no way to find a user by this data type", {by: req.body.by}));
   return cb(1);
 };

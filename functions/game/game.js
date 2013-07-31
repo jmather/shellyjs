@@ -54,7 +54,7 @@ Game.pre = function (req, res, cb) {
       req.env.gameModule = loadGameModule(name);
       return cb(0);
     } catch (e) {
-      res.add(sh.error("game_require", "unable to load game module", {name: name, info: e.message}));
+      res.add(sh.error("game-require", "unable to load game module", {name: name, info: e.message}));
       return cb(1);
     }
   }
@@ -76,7 +76,7 @@ Game.pre = function (req, res, cb) {
     } catch (e) {
       // special case this so we can always remove a bad game
       if (req.body.cmd !== "game.leave") {
-        res.add(sh.error("game_require", "unable to load game module", {name: gameName, message: e.message}));
+        res.add(sh.error("game-require", "unable to load game module", {name: gameName, message: e.message}));
         return cb(1);
       }
     }
@@ -134,7 +134,7 @@ Game.create = function (req, res, cb) {
       game.setPlayer(uid, "ready");
       sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
         if (error) {
-          res.add(sh.error("user_info", "unable to load users for this game", data));
+          res.add(sh.error("user-profiles", "unable to load users for this game", data));
           return cb(1);
         }
         // SWD check if create exists
@@ -152,7 +152,7 @@ Game.create = function (req, res, cb) {
       }
       sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
         if (error) {
-          res.add(sh.error("user_info", "unable to load users for this game", data));
+          res.add(sh.error("user-profiles", "unable to load users for this game", data));
           return cb(1);
         }
 
@@ -203,7 +203,7 @@ Game.join = function (req, res, cb) {
 
     sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
       if (error) {
-        res.add(sh.error("user-load", "unable to load users for this game", data));
+        res.add(sh.error("user-profiles", "unable to load users for this game", data));
         return cb(1);
       }
       res.add(sh.event("game.join", game.getData()));
@@ -220,7 +220,7 @@ Game.leave = function (req, res, cb) {
 
   req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {
-      res.add(sh.error("playing_load", "unable to load playing list", {uid: uid}));
+      res.add(sh.error("playing-load", "unable to load playing list", {uid: uid}));
       return cb(1);
     }
     playing.removeGame(req.body.gameId);
@@ -250,7 +250,7 @@ Game.turn = function (req, res, cb) {
   var gameData = req.env.game.getData();
 
   if (Object.keys(gameData.players).length < gameData.minPlayers) {
-    res.add(sh.error("players_missing", "not enough players in game", {required: gameData.minPlayers, playerCount: Object.keys(gameData.players).length}));
+    res.add(sh.error("players-missing", "not enough players in game", {required: gameData.minPlayers, playerCount: Object.keys(gameData.players).length}));
     return cb(1);
   }
   if (gameData.status === "over") {
@@ -258,7 +258,7 @@ Game.turn = function (req, res, cb) {
     return cb(0);
   }
   if (gameData.whoTurn !== uid) {
-    res.add(sh.error("game_noturn", "not your turn", {whoTurn: gameData.whoTurn}));
+    res.add(sh.error("game-noturn", "not your turn", {whoTurn: gameData.whoTurn}));
     return cb(1);
   }
 
@@ -317,7 +317,7 @@ Game.reset = function (req, res, cb) {
   gameData.status = "playing";
 
   if (_.isUndefined(req.env.gameModule)) {
-    res.add(sh.error("game_reset", "this game has no reset"));
+    res.add(sh.error("game-reset-undefined", "this game has no reset"));
     return cb(1);
   }
 
@@ -403,7 +403,7 @@ Game.call = function (req, res, cb) {
   var module = req.env.gameModule;
 
   if (_.isUndefined(module[req.body.func])) {
-    res.add(sh.error("game_call", "function does not exist", {func: req.body.func}));
+    res.add(sh.error("game-call-undefined", "function does not exist", {func: req.body.func}));
     return cb(1);
   }
 
@@ -443,7 +443,7 @@ Game.playing = function (req, res, cb) {
 
   req.loader.get("kPlaying", uid, function (error, playing) {
     if (error) {
-      res.add(sh.error("playing_load", "unable to load playing list", {uid: uid}));
+      res.add(sh.error("playing-load", "unable to load playing list", {uid: uid}));
       return cb(1);
     }
     fillGames(req.loader, playing.getData().currentGames, function (error, data) {
@@ -451,7 +451,7 @@ Game.playing = function (req, res, cb) {
         res.add(sh.event("game.playing", data));
         return cb(0);
       }
-      res.add(sh.error("playing_fill", "unable to fill games in playing list", data));
+      res.add(sh.error("playing-fillgames", "unable to fill games in playing list", data));
       return cb(1);
     });
   });

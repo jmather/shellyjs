@@ -100,7 +100,7 @@ tictactoe.turn = function (req, res, cb) {
   var gameBoard = state.gameBoard;
 
   if (gameBoard[move.x][move.y] !== "") {
-    res.add(sh.error("move_bad", "this square has been taken"));
+    res.add(sh.error("move-bad", "this square has been taken"));
     return cb(1);
   }
 

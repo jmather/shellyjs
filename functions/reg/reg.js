@@ -89,12 +89,12 @@ exports.findUserByEmail = function (loader, email, cb) {
 exports.findUserByToken = function (loader, token, cb) {
   loader.exists("kTokenMap", token, function (error, tm) {
     if (error) {
-      cb(1, sh.error("no_user_token", "unable to find user with token = " + token, {token: token}));
+      cb(1, sh.error("token-bad", "unable to find user with token = " + token, {token: token}));
       return;
     }
     loader.exists("kUser", tm.get("uid"), function (error, user) {
       if (error) {
-        cb(1, sh.error("no_user_uid", "unable to load user for id", {token: token, uid: tm.get("uid")}));
+        cb(1, sh.error("user-bad", "unable to load user for id", {token: token, uid: tm.get("uid")}));
         return;
       }
       cb(0, user);
@@ -113,30 +113,30 @@ exports.login = function (req, res, cb) {
       check(email, 102).isEmail();
     }
   } catch (e) {
-    res.add(sh.error("bad_email", "email is not correct format"));
+    res.add(sh.error("email-bad", "email is not correct format"));
     return cb(1);
   }
   var role = sanitize(req.body.role).trim();
 
   req.loader.exists("kEmailMap", email, function (error, em) {
     if (error) {
-      res.add(sh.error("email_notfound", "email is not registered", {email: email}));
+      res.add(sh.error("email-bad", "email is not registered", {email: email}));
       return cb(1);
     }
 
     // check password
     if (!checkPassword(em.get("uid"), password, em.get("password"))) {
-      res.add(sh.error("password_bad", "incorrect password", {email: email}));
+      res.add(sh.error("password-bad", "incorrect password", {email: email}));
       return cb(1);
     }
 
     req.loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
-        res.add(sh.error("user_get", "unable to get user", user));
+        res.add(sh.error("user-bad", "unable to get user", user));
         return cb(1);
       }
       if (role.length && !_.contains(user.get("roles"), role)) {
-        res.add(sh.error("no_role", "user does not have this role: " + role, {role: role, roles: user.get("roles")}));
+        res.add(sh.error("user-role", "user does not have this role: " + role, {role: role, roles: user.get("roles")}));
         return cb(1);
       }
 
@@ -163,7 +163,7 @@ exports.anonymous = function (req, res, cb) {
   try {
     check(token, "token not long enough").len(6);
   } catch (e) {
-    res.add(sh.error("params_bad", "token not valid", {info: e.message}));
+    res.add(sh.error("params-bad", "token not valid", {info: e.message}));
     return cb(1);
   }
 
@@ -172,7 +172,7 @@ exports.anonymous = function (req, res, cb) {
       // check if uid has upgraded account
       req.loader.exists("kUser", tm.get("uid"), function (error, user) {
         if (!error && user.get("email").length) {
-          res.add(sh.error("user_upgraded", "user has already upgraded the anonymous account"));
+          res.add(sh.error("user-upgraded", "user has already upgraded the anonymous account"));
           return cb(1);
         }
         var out = {};
@@ -204,13 +204,13 @@ exports.upgrade = function (req, res, cb) {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
   } catch (e) {
-    res.add(sh.error("params_bad", e.message, {info: e.message}));
+    res.add(sh.error("params-bad", e.message, {info: e.message}));
     return cb(1);
   }
 
   // make sure the email is not already set
   if (req.session.user.get("email").length > 0) {
-    res.add(sh.error("email_set", "email is already set for this user", req.session.user.getData()));
+    res.add(sh.error("email-set", "email is already set for this user", req.session.user.getData()));
     return cb(1);
   }
 
@@ -223,7 +223,7 @@ exports.upgrade = function (req, res, cb) {
         res.add(sh.event("reg.upgrade", req.session.user.getData()));
         return cb(0);
       }
-      res.add(sh.error("email_in_use", "email is already used by another user"));
+      res.add(sh.error("email-inuse", "email is already used by another user"));
       return cb(1);
     }
     // set the email for the user
@@ -244,7 +244,7 @@ exports.downgrade = function (req, res, cb) {
     if (!err) {
       req.loader.delete("kEmailMap", user.get("email"), function (err, data) {
         if (err) {
-          res.add(sh.error("delete_error", "unable to delete email map", data));
+          res.add(sh.error("email-delete", "unable to delete email map", data));
           return cb(1);
         }
         user.set("email", "");
@@ -252,7 +252,7 @@ exports.downgrade = function (req, res, cb) {
         return cb(0);
       });
     } else {
-      res.add(sh.error("no_user", "unable to load user", {userId: uid}));
+      res.add(sh.error("user-bad", "unable to load user", {userId: uid}));
       return cb(1);
     }
   });
@@ -265,20 +265,20 @@ exports.create = function (req, res, cb) {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
   } catch (e) {
-    res.add(sh.error("params_bad", e.message, {info: e.message}));
+    res.add(sh.error("params-bad", e.message, {info: e.message}));
     return cb(1);
   }
 
   req.loader.exists("kEmailMap", email, function (error, em) {
     if (!error) {
-      res.add(sh.error("email_used", "this email is already registered", {email: email}));
+      res.add(sh.error("email-used", "this email is already registered", {email: email}));
       return cb(2, em);
     }
     // create the user
     em = createEmailReg(req.loader, sh.uuid(), email, password);
     req.loader.get("kUser", em.get("uid"), function (error, user) {
       if (error) {
-        res.add(sh.error("user_get", "unable to load user", user));
+        res.add(sh.error("user-bad", "unable to load user", user));
         return cb(3);
       }
       user.set("email", email);
@@ -302,12 +302,12 @@ exports.remove = function (req, res, cb) {
 
     req.loader.delete("kEmailMap", req.body.email, function (err, data) {
       if (err) {
-        res.add(sh.error("delete_error", "unable to delete email map", em));
+        res.add(sh.error("email-delete", "unable to delete email map", em));
         return cb(1);
       }
       req.loader.delete("kUser", em.get("uid"), function (err, data) {
         if (err) {
-          res.add(sh.error("delete_error", "unable to delete user", em.get("uid")));
+          res.add(sh.error("user-delete", "unable to delete user", em.get("uid")));
           return cb(1);
         }
         res.add(sh.event("reg.remove", {status: "ok", message: "user and email map removed"}));

@@ -19,7 +19,7 @@ cluster.servers = function (req, res, cb) {
 
   shcluster.servers(function (err, serverList) {
     if (err) {
-      res.add(sh.error("cluster_servers", "unable to get server list", serverList));
+      res.add(sh.error("servers-get", "unable to get server list", serverList));
       return cb(1);
     }
     res.add(sh.event("cluster.servers", serverList));
@@ -32,7 +32,7 @@ cluster.locate = function (req, res, cb) {
 
   shcluster.locate(req.body.uid, function (err, locate) {
     if (err) {
-      res.add(sh.error("cluster_locate", "unable to get user location", {uid: req.body.uid, error: err, info: locate}));
+      res.add(sh.error("cluster-locate", "unable to get user location", {uid: req.body.uid, error: err, info: locate}));
       return cb(1);
     }
     res.add(sh.event("cluster.location", locate.getData()));
@@ -45,7 +45,7 @@ cluster.sendUser = function (req, res, cb) {
 
   shcluster.sendUser(req.body.uid, req.body.data, function (err, data) {
     if (err) {
-      res.add(sh.error("cluster_send", "unable to send data", data));
+      res.add(sh.error("cluster-senduser", "unable to send data to user", data));
       return cb(err);
     }
     res.add(sh.event("cluster.send", data));
@@ -58,7 +58,7 @@ cluster.home = function (req, res, cb) {
 
   shcluster.home(req.body.oid, function (err, data) {
     if (err) {
-      res.add(sh.error("cluster_home", "unable to locate a server for this oid", data));
+      res.add(sh.error("cluster-home", "unable to locate a server for this oid", data));
       return cb(err);
     }
     res.add(sh.event("cluster.home", data));

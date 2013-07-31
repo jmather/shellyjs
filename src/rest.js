@@ -93,7 +93,7 @@ rest.use(function (err, req, res, next) {
 
   res.status(500);
   shlog.error("rest error %s %j", err, err.stack);
-  res.send(sh.error("rest_api", err.message, { message: err.message, stack: err.stack }));
+  res.send(sh.error("rest-error", err.message, { message: err.message, stack: err.stack }));
 });
 
 

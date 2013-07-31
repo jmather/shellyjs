@@ -22,13 +22,13 @@ match.functions = {
 
 match.add = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.name])) {
-    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    res.add(sh.error("game-bad", "unknown game", {name: req.body.name}));
     return cb(1);
   }
 
   global.db.sadd("match:any:" + req.body.name, req.session.uid, function (err, data) {
     if (err) {
-      res.add(sh.error("match.add", "unable to add player for matching", data));
+      res.add(sh.error("match-add", "unable to add player for matching", data));
       return cb(err);
     }
     res.add(sh.event("match.add", req.session.user.profile()));
@@ -38,13 +38,13 @@ match.add = function (req, res, cb) {
 
 match.remove = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.name])) {
-    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    res.add(sh.error("game-bad", "unknown game", {name: req.body.name}));
     return cb(1);
   }
 
   global.db.srem("match:any:" + req.body.name, req.session.uid, function (err, data) {
     if (err) {
-      res.add(sh.error("match.remove", "unable to add player for matching", data));
+      res.add(sh.error("match-remove", "unable to add player for matching", data));
       return cb(err);
     }
     res.add(sh.event("match.remove", req.session.user.profile()));
@@ -54,13 +54,13 @@ match.remove = function (req, res, cb) {
 
 match.check = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.name])) {
-    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    res.add(sh.error("game-bad", "unknown game", {name: req.body.name}));
     return cb(1);
   }
 
   global.db.sismember("match:any:" + req.body.name, req.session.uid, function (err, data) {
     if (err) {
-      res.add(sh.error("match.check", "unable to check if user is being matched", data));
+      res.add(sh.error("match-check", "unable to check if user is being matched", data));
       return cb(err);
     }
     res.add(sh.event("match.check", {isWaiting: data}));
@@ -70,13 +70,13 @@ match.check = function (req, res, cb) {
 
 match.list = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.name])) {
-    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    res.add(sh.error("game-bad", "unknown game", {name: req.body.name}));
     return cb(1);
   }
 
   global.db.smembers("match:any:" + req.body.name, function (err, data) {
     if (err) {
-      res.add(sh.error("no_list", "unable to get match list", {name: req.body.name}));
+      res.add(sh.error("matchlist-load", "unable to get match list", {name: req.body.name}));
       return cb(1);
     }
     res.add(sh.event("match.list", data));
@@ -86,13 +86,13 @@ match.list = function (req, res, cb) {
 
 match.clear = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.name])) {
-    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    res.add(sh.error("game-bad", "unknown game", {name: req.body.name}));
     return cb(1);
   }
 
   global.db.delete("match:any:" + req.body.name, function (err, data) {
     if (err) {
-      res.add(sh.error("no_clear", "unable to clear match list", {name: req.body.name}));
+      res.add(sh.error("matchlist-delete", "unable to clear match list", {name: req.body.name}));
       return cb(1);
     }
     res.add(sh.event("match.clear", data));
@@ -102,13 +102,13 @@ match.clear = function (req, res, cb) {
 
 match.count = function (req, res, cb) {
   if (_.isUndefined(global.games[req.body.name])) {
-    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    res.add(sh.error("game-bad", "unknown game", {name: req.body.name}));
     return cb(1);
   }
 
   global.db.scard("match:any:" + req.body.name, function (err, data) {
     if (err) {
-      res.add(sh.error("no_list", "unable to get match list", {name: req.body.name}));
+      res.add(sh.error("matchslist-count", "unable to get match list", {name: req.body.name}));
       return cb(1);
     }
     res.add(sh.event("match.count", {name: req.body.name, waiting: data}));

@@ -24,7 +24,7 @@ var channelDef = {
 Channel.list = function (req, res, cb) {
   global.db.smembers(req.body.channel, function (err, data) {
     if (err) {
-      res.add(sh.error("error_getting_channel", err, data));
+      res.add(sh.error("channel-list", err, data));
       return cb(1);
     }
     res.add(sh.event("channel.list", data));
@@ -36,13 +36,13 @@ Channel.add = function (req, res, cb) {
   shlog.info("channel.add: ", req.body.channel, req.session.uid);
 
   if (_.isUndefined(res.ws)) {
-    res.add(sh.error("socket_only_call", "this call can only be made from the socket interafce"));
+    res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
     return cb(1);
   }
 
   global.db.sadd(req.body.channel, req.session.uid, function (err, data) {
     if (err) {
-      res.add(sh.error("error_adding_channel", data));
+      res.add(sh.error("channel-add", data));
       return cb(1);
     }
     res.add(sh.event("channel.add", data));
@@ -97,13 +97,13 @@ Channel.remove = function (req, res, cb) {
   shlog.info("channel.remove: ", req.body.channel, req.session.uid);
 
   if (_.isUndefined(res.ws)) {
-    res.add(sh.error("socket_only_call", "this call can only be made from the socket interafce"));
+    res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
     return cb(1);
   }
 
   Channel.removeInt(req.body.channel, req.session.uid, function (err, event) {
     if (err) {
-      res.add(sh.error("bad_remove", "unable to remove user from channel"));
+      res.add(sh.error("channel-remove", "unable to remove user from channel"));
       return cb(1);
     }
     res.add(event);

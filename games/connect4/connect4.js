@@ -199,7 +199,7 @@ connect4.turn = function (req, res, cb) {
   var board = state.board;
 
   if (board[move.x][move.y] !== EMPTY) {
-    res.add(sh.error("move_bad", "this square has been taken"));
+    res.add(sh.error("move-bad", "this square has been taken"));
     return cb(1);
   }
 
