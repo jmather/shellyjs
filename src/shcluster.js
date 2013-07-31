@@ -16,9 +16,9 @@ if (_.isUndefined(global.gServerStats)) {
 
 var ShCluster = exports;
 
-var gDb = require(global.gBaseDir + "/src/shdb.js");
-var gLoader = new ShLoader(gDb);
-var gDriver = gDb.driver;
+global.db = require(global.gBaseDir + "/src/shdb.js");
+var gLoader = new ShLoader(global.db);
+var gDriver = global.db.driver;
 var gServer = null;
 
 if (_.isUndefined(global.dnodes)) {
@@ -27,7 +27,7 @@ if (_.isUndefined(global.dnodes)) {
 
 ShCluster.init = function (cb) {
   var self = this;
-  gDb.init(function (err) {
+  global.db.init(function (err) {
     // just init the db if we are just worker
     if (cluster.isWorker) {
       return cb(0);
@@ -99,7 +99,7 @@ ShCluster.shutdown = function () {
     },
     function (cb) {
       shlog.info("shutdown: db");
-      gDb.close(cb);
+      global.db.close(cb);
     }
   ],
     function (err, results) {
@@ -192,6 +192,10 @@ ShCluster.setLocate = function (user, socketId, cb) {
     shlog.debug("locate set", locate.getData());
     locate.save(cb);
   });
+};
+
+ShCluster.removeLocate = function (uid, cb) {
+  gLoader.delete("kLocate", uid, cb);
 };
 
 ShCluster.locate = function (uid, cb) {

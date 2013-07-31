@@ -3,7 +3,6 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 
-global.db = require(global.gBaseDir + "/src/shdb.js");
 global.socket = null;
 
 var shelly = exports;
@@ -13,22 +12,14 @@ var rest = null;
 var games = null;
 
 shelly.start = function () {
-  shlog.info("starting db");
-  global.db.init(function (err) {
-    if (!err) {
-      shlog.info("starting web and socket");
+  shlog.info("starting web and socket");
 
-      admin = require(global.gBaseDir + "/src/admin.js");
-      rest = require(global.gBaseDir + "/src/rest.js");
-      games = require(global.gBaseDir + "/src/games.js");
+  admin = require(global.gBaseDir + "/src/admin.js");
+  rest = require(global.gBaseDir + "/src/rest.js");
+  games = require(global.gBaseDir + "/src/games.js");
 
-      global.socket = require(global.gBaseDir + "/src/socket.js");
-      global.socket.start();
-    } else {
-      shlog.error("unable to start db", err);
-      process.exit(1);
-    }
-  });
+  global.socket = require(global.gBaseDir + "/src/socket.js");
+  global.socket.start();
 };
 
 shelly.shutdown = function (cb) {
@@ -58,15 +49,6 @@ shelly.shutdown = function (cb) {
         games = null;
       }
       cb(0);
-    },
-    function (cb) {
-      if (global.db) {
-        shlog.info("shutting down db");
-        global.db.close(function () {
-          global.db = null;
-          cb(0);
-        });
-      } else { cb(0); }
     }
   ],
     function (err, results) {

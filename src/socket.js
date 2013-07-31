@@ -131,8 +131,9 @@ function onClose() {
 
   // clean up the global locator if there
   if (_.isString(this.uid)) {
-    global.db.kdelete("kLocate", this.uid);
-    // don't for response
+    shcluster.removeLocate(this.uid, function (err, data) {
+      // ignore and don't wait
+    });
   }
 
   // clean up any channels
