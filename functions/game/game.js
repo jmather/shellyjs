@@ -66,7 +66,7 @@ Game.pre = function (req, res, cb) {
       if (req.body.cmd === "game.leave") {  // always alow user to remove a bad game
         return cb(0);
       }
-      res.add(sh.error("game_load", "unable to load game data in game.pre", {gameId: req.body.gameId}));
+      res.add(sh.error("game-load", "unable to load game data"));
       return cb(1);
     }
     var gameName = game.get("name");
@@ -188,7 +188,7 @@ Game.join = function (req, res, cb) {
 
   var players = game.get("players");
   if (_.isUndefined(players[uid]) && Object.keys(players).length === game.get("maxPlayers")) {
-    res.add(sh.error("game_full", "game has maximum amount of players", {maxPlayers: game.get("maxPlayers")}));
+    res.add(sh.error("game-full", "game has maximum amount of players", {maxPlayers: game.get("maxPlayers")}));
     return cb(1);
   }
 
@@ -203,7 +203,7 @@ Game.join = function (req, res, cb) {
 
     sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
       if (error) {
-        res.add(sh.error("user_info", "unable to load users for this game", data));
+        res.add(sh.error("user-load", "unable to load users for this game", data));
         return cb(1);
       }
       res.add(sh.event("game.join", game.getData()));

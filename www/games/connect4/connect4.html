@@ -181,12 +181,17 @@
         }
 
         function processEvent(msg) {
+            if (msg.event === "error") {
+                showError(msg.message);
+                return;
+            }
             if (msg.event === "game.update") {
                 var move = msg.data.move;
                 if (Env.user.oid !== msg.data.uid) { // ignore our own moves
                     gBoard[move.x][move.y] = msg.data.color;
                     addPiece((msg.data.color===0 ? "yellow" : "red"), move.x);
                 }
+                return;
             }
             if (msg.event === "game.turn.next") {
                 if(msg.data.gameId === Env.gameId) {
@@ -194,6 +199,7 @@
                 } else if (msg.data.whoTurn === Env.user.oid) {
                     updateMyTurns(msg.data.gameId, msg.data.gameName, msg.data.whoTurn);
                 }
+                return;
             }
             if (msg.event == "game.playing") {
                 setMyTurns(msg.data);
@@ -201,17 +207,21 @@
             }
             if (msg.event === "game.join") {
                 resetBoard(msg);
+                return;
             }
             if (msg.event === "game.over") {
                 setTimeout(function () { // simple delay for fall
                     checkOver(msg.data);
                 }, 2000);
+                return;
             }
             if (msg.event === "game.reset") {
                 resetBoard(msg);
+                return;
             }
             if (msg.event === "channel.user") {
                 $(".uid"+msg.data.uid).find("#playerStatus").text(msg.data.status);
+                return;
             }
             if (msg.event == "channel.message") {
                 for (var i=0; i<msg.data.bank.length; i++) {

@@ -92,7 +92,7 @@ function onMessage(data) {
   // setup req/res
   var loader = new ShLoader();
   var req = {session: {valid: false}, body: {}, loader: loader};
-  var res = {ws: this, add: add, sendAll: sendAll, clear: clear};
+  var res = {req: req, ws: this, add: add, sendAll: sendAll, clear: clear};
 
   // handle batch
   var msgs = null;
