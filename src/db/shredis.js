@@ -67,6 +67,11 @@ shRedis.spop = function (key, cb) {
   client.spop(key, cb);
 };
 
+shRedis.sismember = function (key, value, cb) {
+  shlog.info("sismembers", key, value);
+  client.sismember(key, value, cb);
+};
+
 shRedis.smembers = function (key, cb) {
   shlog.info("smembers", key);
   client.smembers(key, cb);

@@ -152,8 +152,18 @@ function processEvent(res, from) {
         }
         return;
     }
+    if (res.event == "match.check") {
+        if (res.data.isWaiting) {
+            $("#matchSubmit").css("display", "none");
+            $("#matchLooking").css("display", "block");
+        } else {
+            $("#matchSubmit").css("display", "block");
+            $("#matchLooking").css("display", "none");
+        }
+        return;
+    }
     if (res.event == "match.add") {
-        $("#matchAdd").css("display", "none");
+        $("#matchSubmit").css("display", "none");
         $("#matchLooking").css("display", "block");
         return;
     }
@@ -184,6 +194,7 @@ function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
             {cmd: "challenge.list"},
+            {cmd: "match.check", name: Env.gameName},
             {cmd: "suggest.add"},
             {cmd: "suggest.list", limit: 10},
             {cmd: "channel.add", channel: "lobby:0"}
@@ -241,10 +252,14 @@ function init() {
 <div class="matchAddDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Find me a game with:</div>
     <div class="gameBoxInnerDiv" readonly style="text-align: center;">
-        <button id="matchAdd" >Next Available Opponent</button>
-        <div id="matchLooking" style="display: none;">
-            <div>Currently looking for an opponent for you.</div>
-            <div>Challenge some friends below while you wait.</div>
+        <div style="height: 35px">
+            <div id="matchSubmit" style="display: none; padding-top: 7px;">
+                <button id="matchAdd" >Next Available Opponent</button>
+            </div>
+            <div id="matchLooking" style="display: none;">
+                <div>Currently looking for an opponent for you.</div>
+                <div>Challenge some friends below while you wait.</div>
+            </div>
         </div>
     </div>
 </div>

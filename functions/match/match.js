@@ -12,6 +12,7 @@ match.desc = "match players to the desired game and start them in it";
 match.functions = {
   add: {desc: "add caller to the game matcher", params: {name: {dtype: "string"}}, security: []},
   remove: {desc: "remove caller from the game matcher", params: {name: {dtype: "string"}}, security: []},
+  check: {desc: "check if caller is currently being matched", params: {name: {dtype: "string"}}, security: []},
   list: {desc: "list the match players for a game", params: {name: {dtype: "string"}}, security: []},
   clear: {desc: "clear the match queue (for testing)", params: {name: {dtype: "string"}}, security: ["admin"]},
   count: {desc: "count the users waiting for a game", params: {name: {dtype: "string"}}, security: []},
@@ -47,6 +48,22 @@ match.remove = function (req, res, cb) {
       return cb(err);
     }
     res.add(sh.event("match.remove", req.session.user.profile()));
+    return cb(0);
+  });
+};
+
+match.check = function (req, res, cb) {
+  if (_.isUndefined(global.games[req.body.name])) {
+    res.add(sh.error("bad_game", "unknown game", {name: req.body.name}));
+    return cb(1);
+  }
+
+  global.db.sismember("match:any:" + req.body.name, req.session.uid, function (err, data) {
+    if (err) {
+      res.add(sh.error("match.check", "unable to check if user is being matched", data));
+      return cb(err);
+    }
+    res.add(sh.event("match.check", {isWaiting: data}));
     return cb(0);
   });
 };

@@ -228,6 +228,15 @@ shdb.spop = function (key, cb) {
   }
 };
 
+shdb.sismember = function (key, value, cb) {
+  shlog.info("sismember", key, value);
+  try {
+    client.sismember(key, value, cb);
+  } catch (e) {
+    return cb(1, sh.intMsg("sismember-failed", e.message));
+  }
+};
+
 shdb.smembers = function (key, cb) {
   shlog.info("smembers", key);
   try {
