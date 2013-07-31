@@ -81,7 +81,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "email") {
     reg.findUserByEmail(req.loader, req.body.value, function (err, data) {
       if (err) {
-        res.add(data);  // helper function fills in correct error - SWD - should change this
+        res.add(sh.error("no-user", "unable to file user with this email", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -92,7 +92,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "uid") {
     req.loader.exists("kUser", req.body.value, function (err, data) {
       if (err) {
-        res.add(sh.error("no_user", "unable to find user with uid = " + req.body.value));
+        res.add(sh.error("no_user", "unable to find user with uid", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -112,6 +112,6 @@ user.find = function (req, res, cb) {
     return;
   }
 
-  res.add(sh.error("unknown_find_by", "no way to find a user by this data type = "  + req.body.by, {by: req.body.by}));
+  res.add(sh.error("find-by-unknown", "no way to find a user by this data type", {by: req.body.by}));
   return cb(1);
 };

@@ -1,6 +1,7 @@
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 var mailer = require(global.gBaseDir + "/src/shmail.js");
 
 var shmailer = exports;
@@ -15,9 +16,9 @@ shmailer.sendEmail = function (emailInfo, cb) {
   _.merge(emailInfo, baseInfo);
   mailer.send(emailInfo.template, emailInfo, function (err, responseStatus, html, text) {
     if (err) {
-      var errorInfo = {code: err.name, message: err.message, emailInfo: emailInfo};
-      shlog.error(errorInfo);
-      return cb(1, errorInfo);
+      var errorMsg = sh.intMsg(err.name, err.message);
+      shlog.error(errorMsg);
+      return cb(1, errorMsg);
     }
     return cb(0, {error: err, status: responseStatus});
   });

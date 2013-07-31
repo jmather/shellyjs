@@ -93,25 +93,19 @@ Game.post = function (req, rs, cb) {
 
 function addGamePlaying(loader, uid, game, cb) {
   loader.get("kPlaying", uid, function (error, playing) {
-    playing.addGame(game);
-    cb();
-  });
-}
-
-function removeGamePlaying(loader, uid, game, cb) {
-  loader.get(uid, function (error, playing) {
-    // SWD check error
     if (!error) {
-      playing.removeGame(game);
+      playing.addGame(game);
     }
-    cb();
+    cb(error, playing);
   });
 }
 
 function addGamePlayingMulti(loader, players, game, cb) {
   async.each(players, function (playerId, cb) {
-    addGamePlaying(loader, playerId, game, cb);
-    // ignore any errors
+    addGamePlaying(loader, playerId, game, function (err, data) {
+      // ignore any errors
+      cb(0);
+    });
   }, function (error) {
     if (error) {
       cb(1, error);

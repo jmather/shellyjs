@@ -34,14 +34,14 @@ Challenge.make = function (req, res, cb) {
 
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenge_get", "unable to load challenge list", {uid: req.session.uid}));
       return cb(err);
     }
     var chId = challenges.addSend(req.body.toUid, req.body.game);
     res.add(sh.event("challenge.make", {chId: chId, sent: challenges.get("sent")[chId]}));
     req.loader.get("kChallenges", req.body.toUid, function (err, challenges) {
       if (err) {
-        res.add(sh.error("challenge_get", "unable to load challenge list"), {uid: req.session.uid});
+        res.add(sh.error("challenge_get", "unable to load challenge list", {uid: req.session.uid}));
         return cb(err);
       }
       var chId = challenges.addRecieved(req.session.uid, req.body.game, {

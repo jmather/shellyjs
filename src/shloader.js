@@ -2,6 +2,7 @@ var _ = require("lodash");
 var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 function ShLoader(db) {
   if (_.isObject(db)) {
@@ -43,8 +44,7 @@ ShLoader.prototype.create = function (keyType, params) {
 
 ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
-    cb(1, {message: "bad object key type", data: keyType});
-    return;
+    return cb(1, sh.intMsg("keytype-bad", keyType));
   }
   var opts = {checkCache: true};
   if (_.isObject(opts)) {
@@ -57,8 +57,7 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
     if (_.isObject(this._objects[key])) {
       shlog.info("cache hit: %s", key);
       this._cacheHit += 1;
-      cb(0, this._objects[key]);
-      return;
+      return cb(0, this._objects[key]);
     }
     this._cacheMiss += 1;
   }
@@ -67,8 +66,7 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   try {
     ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
-    cb(1, {message: "unable to load object module", data: keyType});
-    return;
+    return cb(1, sh.intMsg("module-load-failed", this._db.moduleFile(keyType)));
   }
 
   shlog.info("exists-load: %s - %s", keyType, params);
@@ -77,8 +75,7 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   obj.load(params, function (err, data) {
     if (!err) {
       self._objects[obj._key] = obj;
-      cb(0, obj);
-      return;
+      return cb(0, obj);
     }
     cb(err, data);
   });
@@ -86,8 +83,7 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
 
 ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
-    cb(1, {message: "bad object key type", data: keyType});
-    return;
+    return cb(1, sh.intMsg("keytype-bad", keyType));
   }
   var opts = {checkCache: true};
   if (_.isObject(opts)) {
@@ -101,8 +97,7 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
     if (_.isObject(this._objects[key])) {
       this._cacheHit += 1;
       shlog.info("cache hit: %s", key);
-      cb(0, this._objects[key]);
-      return;
+      return cb(0, this._objects[key]);
     }
     this._cacheMiss += 1;
   }
@@ -111,8 +106,7 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
   try {
     ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
-    cb(1, {message: "unable to lod module", data: keyType});
-    return;
+    return cb(1, sh.intMsg("module-load-failed", this._db.moduleFile(keyType)));
   }
 
   shlog.info("get-loadOrCreate: %s - %s", keyType, params);
@@ -122,8 +116,7 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
     if (!err) {
       shlog.info("cache store: %s", obj._key);
       self._objects[obj._key] = obj;
-      cb(0, obj);
-      return;
+      return cb(0, obj);
     }
     cb(err, data);
   });
@@ -131,8 +124,7 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
 
 ShLoader.prototype.delete = function (keyType, params, cb) {
   if (!this._db.validKey(keyType)) {
-    cb(1, {message: "bad object key type", data: keyType});
-    return;
+    return cb(1, sh.intMsg("keytype-bad", keyType));
   }
 
   var key = this._db.key(keyType, params);

@@ -73,12 +73,12 @@ exports.verifyUser = function (loader, email, password, cb) {
 exports.findUserByEmail = function (loader, email, cb) {
   loader.exists("kEmailMap", email, function (error, em) {
     if (error) {
-      cb(1, sh.error("no_user_email", "unable to find user with email = " + email, {email: email}));
+      cb(1, sh.intMsg("find-failed", email));
       return;
     }
     loader.exists("kUser", em.get("uid"), function (error, user) {
       if (error) {
-        cb(1, sh.error("no_user_uid", "unable to load user for id", {email: email, uid: em.get("uid")}));
+        cb(1, sh.intMsg("user-get-failed", {email: email, uid: em.get("uid")}));
         return;
       }
       cb(0, user);

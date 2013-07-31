@@ -6,7 +6,7 @@ var async = require("async");
 var uuid = require("node-uuid");
 var dnode = require("dnode");
 
-var shutil = require(__dirname + "/shutil.js");
+var sh = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 
@@ -203,8 +203,8 @@ ShCluster.locate = function (uid, cb) {
 ShCluster.sendServer = function (serverId, data, cb) {
   gLoader.exists("kServer", serverId, function (err, server) {
     if (err) {
-      shlog.error("bad_serverId", "cannot find cluster id", serverId);
-      return cb(1, "bad_serverId");
+      shlog.error("serverId-bad", "cannot find cluster id", serverId);
+      return cb(1, sh.intMsg("serverId-bad", serverId));
     }
     var urlParts = url.parse(server.get("clusterUrl"));
     if (_.isUndefined(global.dnodes[serverId])) {
@@ -268,7 +268,7 @@ ShCluster.sendUser = function (uid, data, cb) {
   gLoader.exists("kLocate", uid, function (err, locateInfo) {
     if (err) {
       shlog.error("user_offline", "user is offline", uid);
-      return cb(1, "user_offline");
+      return cb(1, sh.intMsg("user-offline", uid));
     }
     self.sendUserWithLocate(locateInfo, cb);
   }, {checkCache: false});
@@ -292,12 +292,12 @@ ShCluster.home = function (oid, cb) {
     if (err) {
       return cb(err, servers);
     }
-    var idx = shutil.modString(oid, servers.length);
+    var idx = sh.modString(oid, servers.length);
     var serverId = servers[idx];
     gLoader.get("kServer", serverId, function (err, server) {
       if (err) {
-        shlog.error("bad_serverId", "cannot find cluster id", serverId);
-        return cb(1, "bad_serverId");
+        shlog.error("serverId-bad", "cannot find cluster id", serverId);
+        return cb(1, sh.intMsg("serverId-bad", serverId));
       }
       shlog.debug("get home server oid: %s, idx: %s", oid, idx);
       shlog.debug("get home server data: %j", server.getData());

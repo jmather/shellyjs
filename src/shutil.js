@@ -64,11 +64,11 @@ shutil.intMsg = function (code, data) {
 
   var trace = stackTrace.get();
   var fn = trace[1].getFileName();
-  var file = path.basename(fn);
-  var line = trace[1].getLineNumber();
+  res.file = path.basename(fn);
+  res.line = trace[1].getLineNumber();
 
   return res;
-}
+};
 
 shutil.fillSession = function (sess, req, res, cb) {
   req.session = {valid: false,

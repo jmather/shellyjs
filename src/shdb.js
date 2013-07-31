@@ -3,6 +3,7 @@ var util = require("util");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var gDbScope = "dev:";
 
@@ -53,7 +54,7 @@ shdb.init = function (cb) {
         cb(0);
       });
     } catch (e) {
-      return cb(1, {message: e.message, stack: e.stack});
+      return cb(1, sh.intMsg("init-failed", e.message));
     }
   });
 };
@@ -63,8 +64,7 @@ shdb.get = function (key, cb) {
     shlog.info("get: ", key);
     client.get(key, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("get-failed", e.message));
   }
 };
 
@@ -103,8 +103,7 @@ shdb.kget = function (keyType, params, cb) {
       cb(err, value);
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("kget-failed", e.message));
   }
 };
 
@@ -119,8 +118,7 @@ shdb.set = function (key, value, cb) {
       }
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("set-failed", e.message));
   }
 };
 
@@ -138,8 +136,7 @@ shdb.kset = function (keyType, params, value, cb) {
       }
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("kset-failed", e.message));
   }
 };
 
@@ -155,8 +152,7 @@ shdb.delete = function (key, cb) {
       }
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("delete-failed", e.message));
   }
 };
 
@@ -174,8 +170,7 @@ shdb.kdelete = function (keyType, params, cb) {
       }
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("kdelete-failed", e.message));
   }
 };
 
@@ -184,7 +179,7 @@ shdb.incr = function (key, amount, cb) {
   try {
     client.incr(key, amount, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("incr-failed", e.message));
   }
 };
 
@@ -193,7 +188,7 @@ shdb.decr = function (key, amount, cb) {
   try {
     client.decr(key, amount, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("decr-failed", e.message));
   }
 };
 
@@ -202,7 +197,7 @@ shdb.sadd = function (key, value, cb) {
   try {
     client.sadd(key, value, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("sadd-failed", e.message));
   }
 };
 
@@ -211,7 +206,7 @@ shdb.srem = function (key, value, cb) {
   try {
     client.srem(key, value, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("srem-failed", e.message));
   }
 };
 
@@ -220,7 +215,7 @@ shdb.scard = function (key, cb) {
   try {
     client.scard(key, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("scard-failed", e.message));
   }
 };
 
@@ -229,7 +224,7 @@ shdb.spop = function (key, cb) {
   try {
     client.spop(key, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("spop-failed", e.message));
   }
 };
 
@@ -238,7 +233,7 @@ shdb.smembers = function (key, cb) {
   try {
     client.smembers(key, cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("smembers-failed", e.message));
   }
 };
 
@@ -246,10 +241,10 @@ shdb.smembers = function (key, cb) {
 shdb.dequeue = function (queueName, uid, cb) {
   shlog.info("dequeue:", queueName, uid);
   try {
-    client.dequeue(queueName, uid, function(err, rdata) {
+    client.dequeue(queueName, uid, function (err, rdata) {
       if (err === 3) { // retry 1
         shlog.error("dequeue: txn failed, retry 1", queueName);
-        client.dequeue(queueName, uid, function(err, rdata) {
+        client.dequeue(queueName, uid, function (err, rdata) {
           if (err === 3) { // retry 2
             shlog.error("dequeue: txn failed, retry 2", queueName);
             client.dequeue(queueName, uid, cb);
@@ -262,7 +257,7 @@ shdb.dequeue = function (queueName, uid, cb) {
       return cb(err, rdata);
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("dequeue-failed", e.message));
   }
 };
 
@@ -285,7 +280,7 @@ shdb.popOrPush = function (queueName, minMatches, data, cb) {
       return cb(err, rdata);
     });
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
+    return cb(1, sh.intMsg("popOrPush-failed", e.message));
   }
 };
 
@@ -293,7 +288,6 @@ shdb.close = function (cb) {
   try {
     client.close(cb);
   } catch (e) {
-    cb(1, {message: e.message, stack: e.stack});
-    return;
+    return cb(1, sh.intMsg("close-failed", e.message));
   }
 };

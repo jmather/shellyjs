@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 
 var shstatsredis = exports;
 
@@ -10,11 +11,11 @@ shstatsredis.reg = function (domain, key) {
   global.db.sadd("stats", makeKey(domain, key), function (err, data) {
     // ignore;
   });
-}
+};
 
 shstatsredis.list = function (cb) {
   global.db.smembers("stats", cb);
-}
+};
 
 shstatsredis.set = function (domain, key, amount) {
   if (_.isUndefined(amount)) {
@@ -54,7 +55,7 @@ shstatsredis.stamp = function (domain, key, ts) {
 
 shstatsredis.get = function (domain, key, cb) {
   if (!_.isString(domain) || !_.isString(key)) {
-    return cb(1, {code: "bad_params", message: "domain or key need to be strings"});
+    return cb(1, sh.intMsg("params-bad", "domain or key need to be strings"));
   }
   global.db.get(makeKey(domain, key), cb);
 };
