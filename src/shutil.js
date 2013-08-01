@@ -167,7 +167,7 @@ shutil.call = function (req, res, cb) {
     }
     if (_.isUndefined(req.body[key])) {
       this.paramsOk = false;
-      res.add(shutil.error("param_required", "missing required parameter", {cmd: req.body.cmd, key: key}));
+      res.add(shutil.error("param-required", "missing required parameter", {cmd: req.body.cmd, key: key}));
       return cb(1);
     }
     var ptype = typeof req.body[key];
@@ -176,7 +176,7 @@ shutil.call = function (req, res, cb) {
     }
     if (ptype !== value.dtype) {
       this.paramsOk = false;
-      res.add(shutil.error("param_type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
+      res.add(shutil.error("param-type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
       return cb(1);
     }
   }, this);

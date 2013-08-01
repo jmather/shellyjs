@@ -163,7 +163,7 @@ exports.anonymous = function (req, res, cb) {
   try {
     check(token, "token not long enough").len(6);
   } catch (e) {
-    res.add(sh.error("params-bad", "token not valid", {info: e.message}));
+    res.add(sh.error("param-bad", "token not valid", {info: e.message}));
     return cb(1);
   }
 
@@ -204,7 +204,7 @@ exports.upgrade = function (req, res, cb) {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
   } catch (e) {
-    res.add(sh.error("params-bad", e.message, {info: e.message}));
+    res.add(sh.error("param-bad", e.message, {info: e.message}));
     return cb(1);
   }
 
@@ -265,7 +265,7 @@ exports.create = function (req, res, cb) {
     check(email, "invalid email address").isEmail();
     check(password, "password too short").len(6);
   } catch (e) {
-    res.add(sh.error("params-bad", e.message, {info: e.message}));
+    res.add(sh.error("param-bad", e.message, {info: e.message}));
     return cb(1);
   }
 

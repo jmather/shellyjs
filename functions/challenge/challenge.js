@@ -111,32 +111,45 @@ function sendAccept(req, res, cb) {
 Challenge.accept = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load recievers challenge list"), {uid: req.session.uid});
       return cb(err);
     }
 
     var challenge = challenges.get("recieved")[req.body.chId];
-
-    req.body.cmd = "game.create";     // change the command so we can forward
-    req.body.name = challenge.game;
-    req.body.players = [req.session.uid, challenge.fromUid];
-    sh.call(req, res, function (error) {
-      if (error) {
-        return cb(error);
+    if (_.isUndefined(challenge)) {
+      res.add(sh.error("challenge-bad", "unable to find the challenge id"), {uid: req.session.uid});
+      return cb(err);
+    }
+    req.loader.get("kChallenges", challenge.fromUid, function (err, senderChallenges) {
+      if (err) {
+        res.add(sh.error("challenges-get", "unable to load senders challenge list"), {uid: req.session.uid});
+        return cb(err);
       }
-      challenges.removeRecieved(req.body.chId);
-      // wait for game to save to avoid race condition
-      req.loader.dump(function (err) {
-        var startInfo = {};
-        startInfo.gameName = req.env.game.get("name");
-        startInfo.gameId = req.env.game.get("oid");
-        var event = sh.event("challenge.start", startInfo);
-        res.add(event);
-        dispatch.sendUsers(req.body.players, event, req.session.uid);
 
+      req.body.cmd = "game.create";     // change the command so we can forward
+      req.body.name = challenge.game;
+      req.body.players = [req.session.uid, challenge.fromUid];
+      sh.call(req, res, function (error) {
+        if (error) {
+          return cb(error);
+        }
+        res.msgs = []; // clear the game create - SWD - should add res.clear();
+        challenges.removeRecieved(req.body.chId);
+        senderChallenges.removeSend(req.session.uid + ":" + challenge.game);
         res.add(sh.event("challenge.accept", {chId: req.body.chId}));
-        req.body.toUid = challenge.fromUid;  // send the notif back to creating user
-        sendAccept(req, res, cb);
+
+        // wait for game to save to avoid race condition
+        req.loader.dump(function (err) {
+          var startInfo = {};
+          startInfo.gameName = req.env.game.get("name");
+          startInfo.gameId = req.env.game.get("oid");
+          var event = sh.event("challenge.start", startInfo);
+          res.add(event);
+          dispatch.sendUsers(req.body.players, event, req.session.uid);
+
+          req.body.toUid = challenge.fromUid;  // send the notif back to creating user
+          sendAccept(req, res, cb);
+        });
       });
     });
   });
@@ -148,15 +161,46 @@ Challenge.decline = function (req, res, cb) {
       res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
       return cb(err);
     }
-    challenges.removeRecieved(req.body.chId);
-    res.add(sh.event("challenge.decline", {chId: req.body.chId}));
-    return cb(0);
+    var challenge = challenges.get("recieved")[req.body.chId];
+    if (_.isUndefined(challenge)) {
+      res.add(sh.error("challenge-bad", "unable to find the challenge id"), {uid: req.session.uid});
+      return cb(err);
+    }
+    req.loader.get("kChallenges", challenge.fromUid, function (err, senderChallenges) {
+      if (err) {
+        res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+        return cb(err);
+      }
+      challenges.removeRecieved(req.body.chId);
+      senderChallenges.removeSend(req.session.uid + ":" + challenge.game);
+      res.add(sh.event("challenge.decline", {chId: req.body.chId}));
+      return cb(0);
+    });
   });
 };
 
 Challenge.withdraw = function (req, res, cb) {
-  res.add(sh.event("challenge.withdraw"));
-  return cb(0);
+  req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
+    if (err) {
+      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+      return cb(err);
+    }
+    var challenge = challenges.get("sent")[req.body.chId];
+    if (_.isUndefined(challenge)) {
+      res.add(sh.error("challenge-bad", "unable to find the challenge id"), {uid: req.session.uid});
+      return cb(err);
+    }
+    req.loader.get("kChallenges", challenge.toUid, function (err, recieverChallenges) {
+      if (err) {
+        res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+        return cb(err);
+      }
+      challenges.removeSend(req.body.chId);
+      recieverChallenges.removeRecieved(req.session.uid + ":" + challenge.game);
+      res.add(sh.event("challenge.withdraw", {chId: req.body.chId}));
+      return cb(0);
+    });
+  });
 };
 
 Challenge.list = function (req, res, cb) {
@@ -210,6 +254,7 @@ Challenge.email = function (req, res, cb) {
   req.body.password = "XXXXXX";
   req.body.toUid = null;
   sh.call(req, res, function (error, data) {
+    res.msgs = []; // SWD clear the reg.create event - dont' want it  - should also switch this to res.clear
     if (error && error !== 2) {
       return cb(error);
     }
