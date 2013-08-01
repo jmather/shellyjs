@@ -13,8 +13,8 @@ shmailer.sendEmail = function (emailInfo, cb) {
     timeSent: new Date().getTime(),
     retries: 0
   };
-  _.merge(emailInfo, baseInfo);
-  mailer.send(emailInfo.template, emailInfo, function (err, responseStatus, html, text) {
+  _.merge(baseInfo, emailInfo);
+  mailer.send(baseInfo.template, baseInfo, function (err, responseStatus, html, text) {
     if (err) {
       var errorMsg = sh.intMsg(err.name, err.message);
       shlog.error(errorMsg);
