@@ -262,11 +262,9 @@ function sendRestCmd(cmd, data, cb) {
  * Message bank functions
 ***********************/
 var gMessageCount = 0;
-var gMessageChannel = "lobby:0";
 
-function messageInit(channel)
+function messageInit()
 {
-  gMessageChannel = channel;
   $("#chatInput").bind('keypress', function(e){
     if ( e.keyCode == 13 ) {
       if($(this).val() !== "")
@@ -291,7 +289,7 @@ function messageReset() {
 }
 
 function addMessage(channel, data) {
-  if(channel !== gMessageChannel) {
+  if(channel !== Env.channel) {
     // drop it for now
     return;
   }
@@ -324,7 +322,7 @@ function addMessage(channel, data) {
 }
 
 function sendMessage(msg) {
-  sendCmd("channel.send", {channel: gMessageChannel, message: msg});
+  sendCmd("channel.send", {channel: Env.channel, message: msg});
 }
 
 

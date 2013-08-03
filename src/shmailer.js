@@ -16,7 +16,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
   _.merge(baseInfo, emailInfo);
   mailer.send(baseInfo.template, baseInfo, function (err, responseStatus, html, text) {
     if (err) {
-      var errorMsg = sh.intMsg(err.name, err.message);
+      var errorMsg = sh.intMsg(err.code, err.message);
       shlog.error(errorMsg);
       return cb(1, errorMsg);
     }
