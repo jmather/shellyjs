@@ -45,6 +45,7 @@
         if (pgameId !== null) {
             Env.gameId = pgameId.toString();
         }
+        Env.channel = "game:" + Env.gameId;
 
         function shellyInit() {
             messageReset();
@@ -54,7 +55,7 @@
                     {cmd: "user.get"},
                     {cmd: "game.join", gameId: Env.gameId},
                     {cmd: "game.playing"},
-                    {cmd: "channel.add", channel: "game:" + Env.gameId}
+                    {cmd: "channel.add", channel: Env.channel}
                 ]});
         }
 
