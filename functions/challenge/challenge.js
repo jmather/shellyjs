@@ -111,18 +111,18 @@ function sendAccept(req, res, cb) {
 Challenge.accept = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenges-get", "unable to load recievers challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load recievers challenge list", {uid: req.session.uid}));
       return cb(err);
     }
 
     var challenge = challenges.get("recieved")[req.body.chId];
     if (_.isUndefined(challenge)) {
-      res.add(sh.error("challenge-bad", "unable to find the challenge id"), {uid: req.session.uid});
+      res.add(sh.error("challenge-bad", "unable to find the challenge id", {uid: req.session.uid}));
       return cb(err);
     }
     req.loader.get("kChallenges", challenge.fromUid, function (err, senderChallenges) {
       if (err) {
-        res.add(sh.error("challenges-get", "unable to load senders challenge list"), {uid: req.session.uid});
+        res.add(sh.error("challenges-get", "unable to load senders challenge list", {uid: req.session.uid}));
         return cb(err);
       }
 
@@ -158,17 +158,17 @@ Challenge.accept = function (req, res, cb) {
 Challenge.decline = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
       return cb(err);
     }
     var challenge = challenges.get("recieved")[req.body.chId];
     if (_.isUndefined(challenge)) {
-      res.add(sh.error("challenge-bad", "unable to find the challenge id"), {uid: req.session.uid});
+      res.add(sh.error("challenge-bad", "unable to find the challenge id", {uid: req.session.uid}));
       return cb(err);
     }
     req.loader.get("kChallenges", challenge.fromUid, function (err, senderChallenges) {
       if (err) {
-        res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+        res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
         return cb(err);
       }
       challenges.removeRecieved(req.body.chId);
@@ -182,17 +182,17 @@ Challenge.decline = function (req, res, cb) {
 Challenge.withdraw = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
       return cb(err);
     }
     var challenge = challenges.get("sent")[req.body.chId];
     if (_.isUndefined(challenge)) {
-      res.add(sh.error("challenge-bad", "unable to find the challenge id"), {uid: req.session.uid});
+      res.add(sh.error("challenge-bad", "unable to find the challenge id", {uid: req.session.uid}));
       return cb(err);
     }
     req.loader.get("kChallenges", challenge.toUid, function (err, recieverChallenges) {
       if (err) {
-        res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+        res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
         return cb(err);
       }
       challenges.removeSend(req.body.chId);
@@ -206,7 +206,7 @@ Challenge.withdraw = function (req, res, cb) {
 Challenge.list = function (req, res, cb) {
   req.loader.get("kChallenges", req.session.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
       return cb(err);
     }
     res.add(sh.event("challenge.list", challenges.getData()));
@@ -217,7 +217,7 @@ Challenge.list = function (req, res, cb) {
 Challenge.alist = function (req, res, cb) {
   req.loader.get("kChallenges", req.body.uid, function (err, challenges) {
     if (err) {
-      res.add(sh.error("challenges-get", "unable to load challenge list"), {uid: req.session.uid});
+      res.add(sh.error("challenges-get", "unable to load challenge list", {uid: req.session.uid}));
       return cb(err);
     }
     res.add(sh.event("challenge.list", challenges.getData()));
