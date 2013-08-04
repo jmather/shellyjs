@@ -5,7 +5,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var gDbScope = "dev:";
+var gDbScope = global.C.DB_SCOPE;
 
 var shdb = exports;
 
@@ -246,6 +246,24 @@ shdb.smembers = function (key, cb) {
   }
 };
 
+
+shdb.hset = function (key, field, value, cb) {
+  shlog.info("hset", key);
+  try {
+    client.hset(key, field, value, cb);
+  } catch (e) {
+    return cb(1, sh.intMsg("hset-failed", e.message));
+  }
+};
+
+shdb.hgetall = function (key, cb) {
+  shlog.info("hgetall", key);
+  try {
+    client.hgetall(key, cb);
+  } catch (e) {
+    return cb(1, sh.intMsg("hgetall-failed", e.message));
+  }
+};
 
 shdb.dequeue = function (queueName, uid, cb) {
   shlog.info("dequeue:", queueName, uid);

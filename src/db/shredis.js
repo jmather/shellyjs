@@ -77,6 +77,16 @@ shRedis.smembers = function (key, cb) {
   client.smembers(key, cb);
 };
 
+shRedis.hset = function (key, field, value, cb) {
+  shlog.info("hset", key, field, value);
+  client.hset(key, field, value, cb);
+};
+
+shRedis.hgetall = function (key, cb) {
+  shlog.info("hgetall", key);
+  client.hgetall(key, cb);
+};
+
 shRedis.dequeue = function (queueName, uid, cb) {
   client.watch(queueName);
   client.get(queueName, function (err, row) {

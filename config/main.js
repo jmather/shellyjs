@@ -21,6 +21,7 @@ global.CDEF("CLUSTER_URL", "tcp://localhost:5151");
 global.CDEF("NUM_WORKERS", 2);
 
 // db
+global.CDEF("DB_SCOPE", "dev:");
 global.CDEF("DB_WRAPPER", "/src/db/shredis.js");
 global.CDEF("DB_OPTIONS", {});
 //global.C.db.wrapper = "/src/db/shsqlite.js";
