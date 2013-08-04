@@ -421,6 +421,8 @@ function fillGames(loader, gameList, cb) {
       }
       gameList[gameId].whoTurn = game.get("whoTurn");
       gameList[gameId].players = game.get("players");
+      lcb();
+/* SWD expensive call with cache turned off
       shcluster.home(gameId, function (err, server) {
         if (err) {
           return lcb(err);
@@ -428,6 +430,7 @@ function fillGames(loader, gameList, cb) {
         gameList[gameId].SOCKET_URL = server.SOCKET_URL;
         lcb();
       });
+ */
     });
   }, function (error) {
     if (error) {
