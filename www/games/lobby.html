@@ -62,46 +62,6 @@ var Env = {{{EnvJson}}};
 Env.gameName = getURLParameter("gn", "connect4");
 Env.channel = "lobby:" + Env.gameName + ":0";
 
-function addChallenge(chId, challenge) {
-    if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
-        return;
-    }
-    var $newChallenge = $("#challengeTemplate").clone();
-    $newChallenge.find("#challengerName").text(challenge.data.name);
-    $newChallenge.find("#challengerAge").text(challenge.data.age);
-    $newChallenge.find("#challengerGender").text(challenge.data.gender);
-    $newChallenge.find("#challengeGame").text(challenge.game);
-    $newChallenge.find("#challengerPict").attr("src", challenge.data.pict);
-    $newChallenge.addClass("activeChallenge");
-    $newChallenge.attr("id", chId);
-    $newChallenge.css("display", "block");
-
-    $newChallenge.find("#challengeAccept").attr("chId", chId);
-    $newChallenge.find("#challengeDecline").attr("chId", chId);
-
-    $newChallenge.find("#challengeAccept").click(function () {
-        var chId =$(this).attr("chId");
-        console.log("accept", chId);
-        sendCmd("challenge.accept", {chId: chId});
-        $("#" + chId.replace(":", "\\:")).remove();
-    });
-    $newChallenge.find("#challengeDecline").click(function () {
-        var chId =$(this).attr("chId");
-        console.log("decline", chId);
-        sendCmd("challenge.decline", {chId: chId});
-        $("#" + chId.replace(":", "\\:")).remove();
-    });
-
-    $("#challengeList").append($newChallenge);
-}
-
-function setChallengeInfo(challengeList) {
-    $(".activeChallenge").remove();
-    for (chId in challengeList.recieved) {
-        addChallenge(chId, challengeList.recieved[chId]);
-    }
-}
-
 function removeUser(listName, uid) {
     $(".userId" + listName + uid).remove();
 }
@@ -194,14 +154,6 @@ function processEvent(res, from) {
         setUserInfo("suggestedUserList", res.data);
         return;
     }
-    if (res.event == "challenge.list") {
-        setChallengeInfo(res.data);
-        return;
-    }
-    if (res.event == "challenge.send") {
-        addChallenge(res.data.chId, res.data.challenge);
-        return;
-    }
     if (res.event == "challenge.start") {
         gameInit(res.data.gameName, res.data.gameId);
         return;
@@ -216,7 +168,6 @@ function processEvent(res, from) {
 function shellyInit() {
     sendRaw({session: Env.session,
         batch: [{cmd: "system.connInfo"},
-            {cmd: "challenge.list"},
             {cmd: "match.check", name: Env.gameName},
             {cmd: "suggest.add"},
             {cmd: "suggest.list", limit: 10},

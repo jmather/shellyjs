@@ -70,15 +70,17 @@ function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
         return;
     }
+    console.log("here", chId, challenge);
     var $newChallenge = $("#challengeTemplate").clone();
-    $newChallenge.find("#challengerName").text(challenge.data.name);
-    $newChallenge.find("#challengerAge").text(challenge.data.age);
-    $newChallenge.find("#challengerGender").text(challenge.data.gender);
+    $newChallenge.find("#challengerName").text(challenge.name);
+    $newChallenge.find("#challengerAge").text(challenge.age);
+    $newChallenge.find("#challengerGender").text(challenge.gender);
     $newChallenge.find("#challengeGame").text(challenge.game);
-    $newChallenge.find("#challengerPict").attr("src", challenge.data.pict);
+    $newChallenge.find("#challengerPict").attr("src", challenge.pict);
     $newChallenge.addClass("activeChallenge");
     $newChallenge.attr("id", chId);
     $newChallenge.css("display", "block");
+    console.log("here");
 
     $newChallenge.find("#challengeAccept").attr("chId", chId);
     $newChallenge.find("#challengeDecline").attr("chId", chId);
@@ -101,8 +103,8 @@ function addChallenge(chId, challenge) {
 
 function setChallengeInfo(challengeList) {
     $(".activeChallenge").remove();
-    for (chId in challengeList.recieved) {
-        addChallenge(chId, challengeList.recieved[chId]);
+    for (chId in challengeList) {
+        addChallenge(chId, challengeList[chId]);
     }
 }
 

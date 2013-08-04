@@ -79,13 +79,12 @@ describe("challenge module", function () {
         });
     });
     it("user1 verify sent", function (done) {
-      gConn1.call("challenge.list", {},
+      gConn1.call("challenge.listSent", {},
         function (err, res) {
-          res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.have.property(gSChId);
-          res[0].data.sent[gSChId].should.have.property("toUid", gConn2.uid());
-          res[0].data.sent[gSChId].should.have.property("game", gGameName);
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
+          res[0].data[gSChId].should.have.property("game", gGameName);
           done();
         });
     });
@@ -93,11 +92,10 @@ describe("challenge module", function () {
       gConn2.call("challenge.list", {},
         function (err, res) {
           res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("recieved");
           gRChId = gConn1.uid() + ":" + gGameName;
-          res[0].data.recieved.should.have.property(gRChId);
-          res[0].data.recieved[gRChId].should.have.property("fromUid", gConn1.uid());
-          res[0].data.recieved[gRChId].should.have.property("game", gGameName);
+          res[0].data.should.have.property(gRChId);
+          res[0].data[gRChId].should.have.property("fromUid", gConn1.uid());
+          res[0].data[gRChId].should.have.property("game", gGameName);
           done();
         });
     });
@@ -114,21 +112,19 @@ describe("challenge module", function () {
           done();
         });
     });
-    it("user1 verify removed", function (done) {
-      gConn1.call("challenge.list", {},
+    it("user1 verify sent removed", function (done) {
+      gConn1.call("challenge.listSent", {},
         function (err, res) {
-          res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.not.have.property(gSChId);
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.not.have.property(gSChId);
           done();
         });
     });
-    it("user2 verify removed", function (done) {
+    it("user2 verify recv removed", function (done) {
       gConn2.call("challenge.list", {},
         function (err, res) {
           res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("recieved");
-          res[0].data.recieved.should.not.have.property(gRChId);
+          res[0].data.should.not.have.property(gRChId);
           done();
         });
     });
@@ -159,6 +155,27 @@ describe("challenge module", function () {
           done();
         });
     });
+    it("user1 verify sent", function (done) {
+      gConn1.call("challenge.listSent", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
+          res[0].data[gSChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
+    it("user2 verify recieved", function (done) {
+      gConn2.call("challenge.list", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.list");
+          gRChId = gConn1.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gRChId);
+          res[0].data[gRChId].should.have.property("fromUid", gConn1.uid());
+          res[0].data[gRChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
     it("user2 decline", function (done) {
       gConn2.call("challenge.decline", {chId: gRChId},
         function (err, res) {
@@ -167,21 +184,19 @@ describe("challenge module", function () {
           done();
         });
     });
-    it("user1 verify removed", function (done) {
-      gConn1.call("challenge.list", {},
+    it("user1 verify send removed", function (done) {
+      gConn1.call("challenge.listSent", {},
         function (err, res) {
-          res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.not.have.property(gSChId);
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.not.have.property(gSChId);
           done();
         });
     });
-    it("user2 verify removed", function (done) {
+    it("user2 verify recv removed", function (done) {
       gConn2.call("challenge.list", {},
         function (err, res) {
           res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("recieved");
-          res[0].data.recieved.should.not.have.property(gRChId);
+          res[0].data.should.not.have.property(gRChId);
           done();
         });
     });
@@ -199,6 +214,27 @@ describe("challenge module", function () {
           done();
         });
     });
+    it("user1 verify sent", function (done) {
+      gConn1.call("challenge.listSent", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
+          res[0].data[gSChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
+    it("user2 verify recieved", function (done) {
+      gConn2.call("challenge.list", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.list");
+          gRChId = gConn1.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gRChId);
+          res[0].data[gRChId].should.have.property("fromUid", gConn1.uid());
+          res[0].data[gRChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
     it("user1 withdraw", function (done) {
       gConn1.call("challenge.withdraw", {chId: gSChId},
         function (err, res) {
@@ -208,11 +244,10 @@ describe("challenge module", function () {
         });
     });
     it("user1 verify removed", function (done) {
-      gConn1.call("challenge.list", {},
+      gConn1.call("challenge.listSent", {},
         function (err, res) {
-          res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.not.have.property(gSChId);
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.not.have.property(gSChId);
           done();
         });
     });
@@ -220,8 +255,7 @@ describe("challenge module", function () {
       gConn2.call("challenge.list", {},
         function (err, res) {
           res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("recieved");
-          res[0].data.recieved.should.not.have.property(gRChId);
+          res[0].data.should.not.have.property(gRChId);
           done();
         });
     });
@@ -239,6 +273,27 @@ describe("challenge module", function () {
           done();
         });
     });
+    it("user1 verify sent", function (done) {
+      gConn1.call("challenge.listSent", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
+          res[0].data[gSChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
+    it("user2 verify recieved", function (done) {
+      gConn2.call("challenge.list", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.list");
+          gRChId = gConn1.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gRChId);
+          res[0].data[gRChId].should.have.property("fromUid", gConn1.uid());
+          res[0].data[gRChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
     it("user2 accept", function (done) {
       gRChId = gConn1.uid() + ":" + gGameName;
       gConn2.call("challenge.accept", {chId: gRChId},
@@ -250,21 +305,19 @@ describe("challenge module", function () {
           done();
         });
     });
-    it("user1 verify removed", function (done) {
-      gConn1.call("challenge.list", {},
+    it("user1 verify sent removed", function (done) {
+      gConn1.call("challenge.listSent", {},
         function (err, res) {
-          res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.not.have.property(gSChId);
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.not.have.property(gSChId);
           done();
         });
     });
-    it("user2 verify removed", function (done) {
+    it("user2 verify recv removed", function (done) {
       gConn2.call("challenge.list", {},
         function (err, res) {
           res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("recieved");
-          res[0].data.recieved.should.not.have.property(gRChId);
+          res[0].data.should.not.have.property(gRChId);
           done();
         });
     });
@@ -295,7 +348,6 @@ describe("challenge module", function () {
           done();
         });
     });
-
     it("login user3", function (done) {
       gConn3 = new ShConnect("localhost");
       gConn3.call("reg.login", {email: gEmail3, password: "XXXXXX"},
@@ -303,6 +355,27 @@ describe("challenge module", function () {
           res[0].should.have.property("event", "reg.login");
           gConn3.setSession(res[0].data.session);
           gConns[gConn3.uid()] = gConn3;
+          done();
+        });
+    });
+    it("user1 verify sent", function (done) {
+      gConn1.call("challenge.listSent", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn3.uid());
+          res[0].data[gSChId].should.have.property("game", gGameName);
+          done();
+        });
+    });
+    it("user3 verify recieved", function (done) {
+      gConn3.call("challenge.list", {},
+        function (err, res) {
+          res[0].should.have.property("event", "challenge.list");
+          gRChId = gConn1.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gRChId);
+          res[0].data[gRChId].should.have.property("fromUid", gConn1.uid());
+          res[0].data[gRChId].should.have.property("game", gGameName);
           done();
         });
     });
@@ -317,21 +390,19 @@ describe("challenge module", function () {
           done();
         });
     });
-    it("user1 verify removed", function (done) {
-      gConn1.call("challenge.list", {},
+    it("user1 verify sent removed", function (done) {
+      gConn1.call("challenge.listSent", {},
         function (err, res) {
-          res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.not.have.property(gSChId);
+          res[0].should.have.property("event", "challenge.listSent");
+          res[0].data.should.not.have.property(gSChId);
           done();
         });
     });
-    it("user3 verify removed", function (done) {
+    it("user3 verify recv removed", function (done) {
       gConn3.call("challenge.list", {},
         function (err, res) {
           res[0].should.have.property("event", "challenge.list");
-          res[0].data.should.have.property("recieved");
-          res[0].data.recieved.should.not.have.property(gRChId);
+          res[0].data.should.not.have.property(gRChId);
           done();
         });
     });

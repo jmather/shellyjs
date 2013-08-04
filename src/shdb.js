@@ -246,13 +246,21 @@ shdb.smembers = function (key, cb) {
   }
 };
 
-
 shdb.hset = function (key, field, value, cb) {
   shlog.info("hset", key);
   try {
     client.hset(key, field, value, cb);
   } catch (e) {
     return cb(1, sh.intMsg("hset-failed", e.message));
+  }
+};
+
+shdb.hdel = function (key, field, cb) {
+  shlog.info("hdel", key);
+  try {
+    client.hdel(key, field, cb);
+  } catch (e) {
+    return cb(1, sh.intMsg("hdel-failed", e.message));
   }
 };
 

@@ -82,6 +82,11 @@ shRedis.hset = function (key, field, value, cb) {
   client.hset(key, field, value, cb);
 };
 
+shRedis.hdel = function (key, field, cb) {
+  shlog.info("hdel", key, field);
+  client.hdel(key, field, cb);
+};
+
 shRedis.hgetall = function (key, cb) {
   shlog.info("hgetall", key);
   client.hgetall(key, cb);
