@@ -12,6 +12,7 @@ function MessageBank() {
     bank: []
   };
   this._max = 10;
+  this.alwaysLock = true;
 }
 
 util.inherits(MessageBank, ShObject);
