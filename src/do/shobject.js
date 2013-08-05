@@ -24,7 +24,7 @@ ShObject.prototype.key = function () {
   return this._key;
 };
 
-ShObject.prototype.create = function (oid) {
+ShObject.prototype.create = function (oid, cb) {
   this._oid = oid;
   this._key = db.key(this._keyType, this._oid);
   this._data.oid = oid;
@@ -33,6 +33,9 @@ ShObject.prototype.create = function (oid) {
   this._data.modified = ts;
   this.alwaysLock = false;
   // leave hash empty as it must be saved
+  if (_.isFunction(cb)) {
+    return cb(0, this);
+  }
 };
 
 ShObject.prototype.load = function (oid, cb) {
@@ -67,7 +70,7 @@ ShObject.prototype.loadOrCreate = function (oid, cb) {
     if (error) {
       self.create(oid);
     }
-    cb(0);  // object must be valid
+    cb(0, self);  // object must be valid
   });
 };
 
