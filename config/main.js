@@ -33,7 +33,7 @@ global.CDEF("STATS_WRAPPER", "/src/stats/shstatsredis.js");
 
 // default admin
 global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
-global.CDEF("DEFALUT_ADMIN_PASSWORD", "");
+global.CDEF("DEFAULT_ADMIN_PASSWORD", "");
 
 // email settings
 global.CDEF("EMAIL_QUEUE", true);

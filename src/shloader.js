@@ -3,6 +3,7 @@ var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var shlock = require(global.gBaseDir + "/src/shlock.js");
 
 function ShLoader(db) {
   if (_.isObject(db)) {
@@ -75,9 +76,15 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   obj.load(params, function (err, data) {
     if (!err) {
       self._objects[obj._key] = obj;
-      return cb(0, obj);
+      shlock.acquire(obj._key, function (err, data) {
+        if (err) {
+          return cb(err, data);
+        }
+        return cb(0, obj);
+      });
+    } else {
+      return cb(err, data);
     }
-    cb(err, data);
   });
 };
 
@@ -91,8 +98,8 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
   }
 
   // check cache
+  var key = this._db.key(keyType, params);
   if (opts.checkCache) {
-    var key = this._db.key(keyType, params);
     shlog.info("get: %s", key);
     if (_.isObject(this._objects[key])) {
       this._cacheHit += 1;
@@ -116,9 +123,15 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
     if (!err) {
       shlog.info("cache store: %s", obj._key);
       self._objects[obj._key] = obj;
-      return cb(0, obj);
+      shlock.acquire(obj._key, function (err, data) {
+        if (err) {
+          return cb(err, data);
+        }
+        return cb(0, obj);
+      });
+    } else {
+      return cb(err, data);
     }
-    cb(err, data);
   });
 };
 
@@ -131,7 +144,9 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
   shlog.info("delete object", key);
   delete this._objects[key];
 
-  this._db.kdelete(keyType, params, cb);
+  this._db.kdelete(keyType, params, function (err, data) {
+    shlock.release(key, cb);
+  });
 };
 
 ShLoader.prototype.dump = function (cb) {
@@ -143,7 +158,10 @@ ShLoader.prototype.dump = function (cb) {
       if (data.code === "object-saved") {
         self._saves += 1;
       }
-      lcb(err);
+      shlock.release(key, function (err, data) {
+        // ignore any errors, as we need to keep going
+        lcb(err);
+      });
     });
   }, function (err) {
     shlog.info("dump complete:", self._cacheHit, "misses:", self._cacheMiss, "saves:", self._saves);
