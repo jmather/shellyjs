@@ -119,48 +119,53 @@ Game.create = function (req, res, cb) {
   shlog.info("game.create");
   var uid = req.session.uid;
 
-  var game = req.loader.create("kGame", sh.uuid());
+  req.loader.create("kGame", sh.uuid(), function (err, game) {
+    if (err) {
+      res.add(sh.error("game-create", "unable to create a game", game));
+      return cb(1);
+    }
 
-  game.set("name", req.body.name);
-  game.set("ownerId", uid);
-  game.set("whoTurn", uid);
+    game.set("name", req.body.name);
+    game.set("ownerId", uid);
+    game.set("whoTurn", uid);
 
-  // add to request environment
-  req.env.game = game;
+    // add to request environment
+    req.env.game = game;
 
-  // SWD - clean this up
-  if (_.isUndefined(req.body.players)) {
-    addGamePlaying(req.loader, uid, game, function (error, data) {
-      game.setPlayer(uid, "ready");
-      sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
-        if (error) {
-          res.add(sh.error("user-profiles", "unable to load users for this game", data));
-          return cb(1);
-        }
-        // SWD check if create exists
-        req.env.gameModule.create(req, res, cb);
+    // SWD - clean this up
+    if (_.isUndefined(req.body.players)) {
+      addGamePlaying(req.loader, uid, game, function (error, data) {
+        game.setPlayer(uid, "ready");
+        sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
+          if (error) {
+            res.add(sh.error("user-profiles", "unable to load users for this game", data));
+            return cb(1);
+          }
+          // SWD check if create exists
+          req.env.gameModule.create(req, res, cb);
+        });
       });
-    });
-  } else {
-    _.each(req.body.players, function (playerId) {
-      game.setPlayer(playerId, "ready");
-    });
-    addGamePlayingMulti(req.loader, req.body.players, game, function (error, data) {
-      // SWD ignore any errors for now
-      if (error) {
-        shlog.error("add_players", "unable to add a player", data);
-      }
-      sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
-        if (error) {
-          res.add(sh.error("user-profiles", "unable to load users for this game", data));
-          return cb(1);
-        }
-
-        // SWD check if create exists
-        req.env.gameModule.create(req, res, cb);
+    } else {
+      _.each(req.body.players, function (playerId) {
+        game.setPlayer(playerId, "ready");
       });
-    });
-  }
+      addGamePlayingMulti(req.loader, req.body.players, game, function (error, data) {
+        // SWD ignore any errors for now
+        if (error) {
+          shlog.error("add_players", "unable to add a player", data);
+        }
+        sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
+          if (error) {
+            res.add(sh.error("user-profiles", "unable to load users for this game", data));
+            return cb(1);
+          }
+
+          // SWD check if create exists
+          req.env.gameModule.create(req, res, cb);
+        });
+      });
+    }
+  });
 };
 
 Game.start = function (req, res, cb) {

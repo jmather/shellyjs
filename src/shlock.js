@@ -10,7 +10,7 @@ shlock.acquire = function (key, cb) {
         if (count < 3) {
           shlog.info("lock retry:", lkey, err, data);
           count += 1;
-          setTimeout(function () { tryLock(lkey, count, cb); }, 500);
+          setTimeout(function () { tryLock(lkey, count, cb); }, 1000);
           return;
         }
         shlog.error("lock failed:", lkey, err, data);

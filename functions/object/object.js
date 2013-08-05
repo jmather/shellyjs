@@ -17,11 +17,15 @@ object.functions = {
 object.create = function (req, res, cb) {
   shlog.info("object.create");
 
-  var obj = req.loader.create("kObject", sh.uuid());
-  obj.set(req.body.object);
-
-  res.add(sh.event("object.create", obj.getData()));
-  return cb(0);
+  req.loader.create("kObject", sh.uuid(), function (err, obj) {
+    if (err) {
+      res.add(sh.error("object-create", "unable to create object", data));
+      return cb(1);
+    }
+    obj.set(req.body.object);
+    res.add(sh.event("object.create", obj.getData()));
+    return cb(0);
+  });
 };
 
 object.delete = function (req, res, cb) {

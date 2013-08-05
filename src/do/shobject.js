@@ -55,8 +55,7 @@ ShObject.prototype.load = function (oid, cb) {
       self._hash = crypto.createHash("md5").update(value).digest("hex");
       self._data = _.merge(self._data, savedData);
     } catch (e) {
-      cb(1, sh.intMsg("object-parse", {message: e.message, value: value}));
-      return;
+      return cb(1, sh.intMsg("object-parse", {message: e.message, value: value}));
     }
     cb(0, self); // object is valid
   });

@@ -40,33 +40,40 @@ function checkPassword(uid, password, hash) {
   return newHash === hash;
 }
 
-function createEmailReg(loader, uid, email, password) {
-  var em = loader.create("kEmailMap", email);
-  em.set("email", email);
-  em.set("uid", uid);
-  em.set("password", hashPassword(uid, password));
-  return em;
+function createEmailReg(loader, uid, email, password, cb) {
+  loader.create("kEmailMap", email, function (err, em) {
+    // SWD handle error
+    em.set("email", email);
+    em.set("uid", uid);
+    em.set("password", hashPassword(uid, password));
+    return cb(0, em);
+  });
 }
 
 // used to create the default admin user
 exports.verifyUser = function (loader, email, password, cb) {
   loader.exists("kEmailMap", email, function (error, em) {
     if (error) {
-      em = createEmailReg(loader, sh.uuid(), email, password);
+      createEmailReg(loader, sh.uuid(), email, password, function (error, em) {
+        if (error) {
+          return cb(1, sh.intMsg("emailmap-failed"));
+        }
+        loader.get("kUser", em.get("uid"), function (error, user) {
+          if (error) {
+            cb(error, user);
+            return;
+          }
+          if (user.get("email").length === 0) {
+            user.set("email", email);
+            user.set("name", email.split("@")[0]);
+            user.set("roles", ["admin"]);
+          }
+          return cb(0, user);
+        });
+      });
+    } else {
+      return cb(0, sh.intMsg("user-exists"));
     }
-    loader.get("kUser", em.get("uid"), function (error, user) {
-      if (error) {
-        cb(error, user);
-        return;
-      }
-      if (user.get("email").length === 0) {
-        user.set("email", email);
-        user.set("name", email.split("@")[0]);
-        user.set("roles", ["admin"]);
-      }
-      cb(0, user);
-      return;
-    });
   });
 };
 
@@ -185,15 +192,19 @@ exports.anonymous = function (req, res, cb) {
     }
 
     // not there, so create token map
-    tm = req.loader.create("kTokenMap", token);
-    tm.set("uid", sh.uuid());
-    // user will get created on first login if session is valid
-
-    var out = {};
-    out.uid = tm.get("uid");
-    out.session = session.create(tm.get("uid"));
-    res.add(sh.event("reg.anonymous", out));
-    return cb(0);
+    req.loader.create("kTokenMap", token, function (err, tm) {
+      if (err) {
+        res.add(sh.error("tokenmap-create", "unable to create a token to user map"));
+        return cb(1);
+      }
+      tm.set("uid", sh.uuid());
+      // user will get created on first login if session is valid
+      var out = {};
+      out.uid = tm.get("uid");
+      out.session = session.create(tm.get("uid"));
+      res.add(sh.event("reg.anonymous", out));
+      return cb(0);
+    });
   });
 };
 
@@ -231,9 +242,14 @@ exports.upgrade = function (req, res, cb) {
     req.session.user.set("name", email.split("@")[0]);
 
     // create the email map
-    createEmailReg(req.loader, req.session.uid, email, password);
-    res.add(sh.event("reg.upgrade", req.session.user.getData()));
-    return cb(0);
+    createEmailReg(req.loader, req.session.uid, email, password, function (error, em) {
+      if (error) {
+        res.add(sh.error("emailmap-create", "unable to create email map", em));
+        return cb(2);
+      }
+      res.add(sh.event("reg.upgrade", req.session.user.getData()));
+      return cb(0);
+    });
   });
 };
 
@@ -275,20 +291,25 @@ exports.create = function (req, res, cb) {
       return cb(2, em);
     }
     // create the user
-    em = createEmailReg(req.loader, sh.uuid(), email, password);
-    req.loader.get("kUser", em.get("uid"), function (error, user) {
+    createEmailReg(req.loader, sh.uuid(), email, password, function (error, em) {
       if (error) {
-        res.add(sh.error("user-bad", "unable to load user", user));
-        return cb(3);
+        res.add(sh.error("emailmap-create", "unable to create email map", em));
+        return cb(3, em);
       }
-      user.set("email", email);
-      user.set("name", email.split("@")[0]);
+      req.loader.get("kUser", em.get("uid"), function (error, user) {
+        if (error) {
+          res.add(sh.error("user-bad", "unable to load user", user));
+          return cb(3);
+        }
+        user.set("email", email);
+        user.set("name", email.split("@")[0]);
 
-      var out = {};
-      out.uid = em.get("uid");
-      out.session = session.create(em.get("uid"));
-      res.add(sh.event("reg.create", out));
-      return cb(0, user);
+        var out = {};
+        out.uid = em.get("uid");
+        out.session = session.create(em.get("uid"));
+        res.add(sh.event("reg.create", out));
+        return cb(0, user);
+      });
     });
   });
 };

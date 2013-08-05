@@ -21,10 +21,15 @@ function ShLoader(db) {
 
 module.exports = ShLoader;
 
-ShLoader.prototype.create = function (keyType, params) {
+ShLoader.prototype.create = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
     shlog.error("bad key passed to create:", keyType);
     return null;
+  }
+
+  var opts = {lock: false};
+  if (_.isObject(opts)) {
+    opts = _.merge(opts, pOpts);
   }
 
   var ShClass = null;
@@ -32,16 +37,24 @@ ShLoader.prototype.create = function (keyType, params) {
     ShClass = require(this._db.moduleFile(keyType));
   } catch (e) {
     shlog.error("unable to load object module", keyType);
-    return null;
+    return cb(1, sh.intMsg("module-load", "unable to load object module", keyType));
   }
 
+  var self = this;
   shlog.info("create-create: %s - %s", keyType, params);
   var obj = new ShClass();
-  obj.create(params);  // SWD assumes params is just oid for shobjects
-  this._objects[obj._key] = obj;
-  shlog.info("create-new: %s", obj._key);
+  var key = this._db.key(keyType, params);  // SWD should be better way to get this before obj.create
+  shlock.acquire(key, function (err, data) {
+    if (err) {
+      return cb(err, data);
+    }
 
-  return obj;
+    obj.create(params);  // SWD assumes params is just oid for shobjects
+    self._objects[obj._key] = obj;
+    self._locks[obj._key] = true;
+    shlog.info("create-new: %s", obj._key);
+    return cb(0, obj);
+  });
 };
 
 ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
@@ -79,7 +92,7 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
       if (err) {
         return cb(err, data);
       }
-      obj.loadOrCreate(params, function (err, data) {
+      obj.load(params, function (err, data) {
         if (!err) {
           shlog.info("cache store: %s", obj._key);
           self._objects[obj._key] = obj;
@@ -90,8 +103,7 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
       });
     });
   } else {
-    var obj = new ShClass();
-    obj.loadOrCreate(params, function (err, data) {
+    obj.load(params, function (err, data) {
       if (!err) {
         shlog.info("cache store: %s", obj._key);
         self._objects[obj._key] = obj;
@@ -149,7 +161,6 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
       });
     });
   } else {
-    var obj = new ShClass();
     obj.loadOrCreate(params, function (err, data) {
       if (!err) {
         shlog.info("cache store: %s", obj._key);

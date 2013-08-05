@@ -15,7 +15,7 @@ var gConnAdmin = null;
 var gGameId = "";
 var gWhoTurn = "";
 var gConns = [];
-var gMatchWait = 7000;
+var gMatchWait = 9000;
 
 function playGame() {
   it("turn 1", function (done) {

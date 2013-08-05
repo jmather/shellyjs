@@ -19,6 +19,7 @@ function User() {
     gender: "",
     roles: []
   };
+//  this.alwaysLock = true;
 }
 
 util.inherits(User, ShObject);

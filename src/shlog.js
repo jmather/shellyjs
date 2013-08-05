@@ -9,6 +9,7 @@ var shlog = exports;
 
 var gDebug = {
 //  "shloader": {},
+  "shlock": {},
 //  "shobject": {},
 //  "shdb": {},
 //  "shsqlite": {},
