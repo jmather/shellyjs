@@ -12,6 +12,7 @@ function ShLoader(db) {
     this._db = global.db;
   }
   this._objects = {};
+  this._locks = {};
 
   this._cacheHit = 0;
   this._cacheMiss = 0;
@@ -47,14 +48,14 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
     return cb(1, sh.intMsg("keytype-bad", keyType));
   }
-  var opts = {checkCache: true};
+  var opts = {checkCache: true, lock: false};
   if (_.isObject(opts)) {
     opts = _.merge(opts, pOpts);
   }
 
   // check cache
+  var key = this._db.key(keyType, params);
   if (opts.checkCache) {
-    var key = this._db.key(keyType, params);
     if (_.isObject(this._objects[key])) {
       shlog.info("cache hit: %s", key);
       this._cacheHit += 1;
@@ -73,26 +74,39 @@ ShLoader.prototype.exists = function (keyType, params, cb, pOpts) {
   shlog.info("exists-load: %s - %s", keyType, params);
   var self = this;
   var obj = new ShClass();
-  obj.load(params, function (err, data) {
-    if (!err) {
-      self._objects[obj._key] = obj;
-      shlock.acquire(obj._key, function (err, data) {
-        if (err) {
-          return cb(err, data);
+  if (obj.alwaysLock || opts.lock) {
+    shlock.acquire(key, function (err, data) {
+      if (err) {
+        return cb(err, data);
+      }
+      obj.loadOrCreate(params, function (err, data) {
+        if (!err) {
+          shlog.info("cache store: %s", obj._key);
+          self._objects[obj._key] = obj;
+          self._locks[obj._key] = true;
+          return cb(0, obj);
         }
-        return cb(0, obj);
+        return cb(err, data);
       });
-    } else {
+    });
+  } else {
+    var obj = new ShClass();
+    obj.loadOrCreate(params, function (err, data) {
+      if (!err) {
+        shlog.info("cache store: %s", obj._key);
+        self._objects[obj._key] = obj;
+        return cb(0, obj);
+      }
       return cb(err, data);
-    }
-  });
+    });
+  }
 };
 
 ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
   if (!this._db.validKey(keyType)) {
     return cb(1, sh.intMsg("keytype-bad", keyType));
   }
-  var opts = {checkCache: true};
+  var opts = {checkCache: true, lock: false};
   if (_.isObject(opts)) {
     opts = _.merge(opts, pOpts);
   }
@@ -119,20 +133,32 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
   shlog.info("get-loadOrCreate: %s - %s", keyType, params);
   var self = this;
   var obj = new ShClass();
-  obj.loadOrCreate(params, function (err, data) {
-    if (!err) {
-      shlog.info("cache store: %s", obj._key);
-      self._objects[obj._key] = obj;
-      shlock.acquire(obj._key, function (err, data) {
-        if (err) {
-          return cb(err, data);
+  if (obj.alwaysLock || opts.lock) {
+    shlock.acquire(key, function (err, data) {
+      if (err) {
+        return cb(err, data);
+      }
+      obj.loadOrCreate(params, function (err, data) {
+        if (!err) {
+          shlog.info("cache store: %s", obj._key);
+          self._objects[obj._key] = obj;
+          self._locks[obj._key] = true;
+          return cb(0, obj);
         }
-        return cb(0, obj);
+        return cb(err, data);
       });
-    } else {
+    });
+  } else {
+    var obj = new ShClass();
+    obj.loadOrCreate(params, function (err, data) {
+      if (!err) {
+        shlog.info("cache store: %s", obj._key);
+        self._objects[obj._key] = obj;
+        return cb(0, obj);
+      }
       return cb(err, data);
-    }
-  });
+    });
+  }
 };
 
 ShLoader.prototype.delete = function (keyType, params, cb) {
@@ -144,8 +170,14 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
   shlog.info("delete object", key);
   delete this._objects[key];
 
+  var self = this;
   this._db.kdelete(keyType, params, function (err, data) {
-    shlock.release(key, cb);
+    if (self._locks[key]) {
+      delete self._locks[key];
+      shlock.release(key, cb);
+    } else {
+      cb(0);
+    }
   });
 };
 
@@ -158,10 +190,15 @@ ShLoader.prototype.dump = function (cb) {
       if (data.code === "object-saved") {
         self._saves += 1;
       }
-      shlock.release(key, function (err, data) {
-        // ignore any errors, as we need to keep going
-        lcb(err);
-      });
+      if (self._locks[key]) {
+        delete self._locks[key];
+        shlock.release(key, function (err, data) {
+          // ignore any errors, as we need to keep going
+          lcb(0);
+        });
+      } else {
+        lcb(0);
+      }
     });
   }, function (err) {
     shlog.info("dump complete:", self._cacheHit, "misses:", self._cacheMiss, "saves:", self._saves);

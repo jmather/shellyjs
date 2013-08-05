@@ -12,6 +12,7 @@ function Playing() {
     name: "",
     currentGames: {}
   };
+  this.alwaysLock = true;
 }
 
 util.inherits(Playing, ShObject);

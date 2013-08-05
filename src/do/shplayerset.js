@@ -13,6 +13,7 @@ function PlayerSet() {
     set: {}
   };
   this._max = 10;
+  this.alwaysLock = true;
 }
 
 util.inherits(PlayerSet, ShObject);

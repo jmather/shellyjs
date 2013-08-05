@@ -26,6 +26,7 @@ function Game() {
     rounds: 0,
     turnsPlayed: 0
   };
+  this.alwaysLock = true;
 }
 
 util.inherits(Game, ShObject);
