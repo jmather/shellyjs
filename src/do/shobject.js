@@ -31,7 +31,6 @@ ShObject.prototype.create = function (oid, cb) {
   var ts = new Date().getTime();
   this._data.created = ts;
   this._data.modified = ts;
-  this.alwaysLock = false;
   // leave hash empty as it must be saved
   if (_.isFunction(cb)) {
     return cb(0, this);

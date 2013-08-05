@@ -51,7 +51,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
   shlog.info("%s: %s - %s", funcName, keyType, params);
   var self = this;
   var obj = new ShClass();
-  if (obj.alwaysLock || opts.lock) {
+  if (opts.lock) {
     shlock.acquire(key, function (err, data) {
       if (err) {
         return cb(err, data);
