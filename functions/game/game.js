@@ -59,6 +59,10 @@ Game.pre = function (req, res, cb) {
     }
   }
 
+  var opts = {lock: true};
+  if (req.body.cmd === "game.get") {  // no need to lock the gets
+    opts.lock = false;
+  }
   var gameId = req.body.gameId;
   shlog.info("game.pre: populating game info for " + gameId);
   req.loader.exists("kGame", gameId, function (error, game) {
@@ -83,7 +87,7 @@ Game.pre = function (req, res, cb) {
 
     req.env.game = game;
     return cb(0);
-  });
+  }, opts);
 };
 
 Game.post = function (req, rs, cb) {
@@ -97,7 +101,7 @@ function addGamePlaying(loader, uid, game, cb) {
       playing.addGame(game);
     }
     cb(error, playing);
-  });
+  }, {lock: true});
 }
 
 function addGamePlayingMulti(loader, players, game, cb) {
@@ -197,24 +201,27 @@ Game.join = function (req, res, cb) {
     return cb(1);
   }
 
-  var isNew = !_.isObject(players[uid]);
+  // if new to game add to playing list, fill in profile, and notify game channel
+  if (!_.isObject(players[uid])) {
+    addGamePlaying(req.loader, uid, game, function (error, data) {
+      game.setPlayer(uid, "ready");
 
-  addGamePlaying(req.loader, uid, game, function (error, data) {
-    game.setPlayer(uid, "ready");
-
-    if (isNew) {
       channel.sendInt("game:" + game.get("oid"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
-    }
 
-    sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
-      if (error) {
-        res.add(sh.error("user-profiles", "unable to load users for this game", data));
-        return cb(1);
-      }
-      res.add(sh.event("game.join", game.getData()));
-      return cb(0);
+      // just extend the profile added uid
+      sh.extendProfiles(req.loader, game.get("players"), function (error, data) {
+        if (error) {
+          res.add(sh.error("user-profiles", "unable to load users for this game", data));
+          return cb(1);
+        }
+        res.add(sh.event("game.join", game.getData()));
+        return cb(0);
+      });
     });
-  });
+  } else {
+    res.add(sh.event("game.join", game.getData()));
+    return cb(0);
+  }
 };
 
 Game.leave = function (req, res, cb) {
@@ -234,7 +241,7 @@ Game.leave = function (req, res, cb) {
     }
     res.add(sh.event("game.leave", req.body.gameId));
     return cb(0);
-  });
+  }, {lock: true});
 };
 
 Game.kick = function (req, res, cb) {

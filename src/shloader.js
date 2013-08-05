@@ -26,6 +26,9 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
     return cb(1, sh.intMsg("keytype-bad", keyType));
   }
   var opts = {checkCache: true, lock: false};
+  if (funcName === "create") {
+    opts.lock = true; // always lock the creates
+  }
   if (_.isObject(opts)) {
     opts = _.merge(opts, pOpts);
   }
