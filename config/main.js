@@ -36,6 +36,7 @@ global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
 global.CDEF("DEFAULT_ADMIN_PASSWORD", "");
 
 // email settings
+global.CDEF("EMAIL_NOSEND", true);
 global.CDEF("EMAIL_QUEUE", true);
 global.CDEF("EMAIL_CONSUMER", true);
 global.CDEF("EMAIL_DEFAULT_FROM", "Game Shelly <shelly@gameshelly.com>");
