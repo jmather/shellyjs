@@ -57,8 +57,8 @@ Challenge.make = function (req, res, cb) {
           // don't care
         });
       return cb(0);
-    });
-  });
+    }, {lock: true});
+  }, {lock: true});
 };
 
 function sendEmail(emailInfo, req, res, cb) {
@@ -151,8 +151,8 @@ Challenge.accept = function (req, res, cb) {
           sendAccept(req, res, cb);
         });
       });
-    });
-  });
+    }, {lock: true});
+  }, {lock: true});
 };
 
 Challenge.decline = function (req, res, cb) {
@@ -175,8 +175,8 @@ Challenge.decline = function (req, res, cb) {
       senderChallenges.removeSend(req.session.uid + ":" + challenge.game);
       res.add(sh.event("challenge.decline", {chId: req.body.chId}));
       return cb(0);
-    });
-  });
+    }, {lock: true});
+  }, {lock: true});
 };
 
 Challenge.withdraw = function (req, res, cb) {
@@ -199,8 +199,8 @@ Challenge.withdraw = function (req, res, cb) {
       recieverChallenges.removeRecieved(req.session.uid + ":" + challenge.game);
       res.add(sh.event("challenge.withdraw", {chId: req.body.chId}));
       return cb(0);
-    });
-  });
+    }, {lock: true});
+  }, {lock: true});
 };
 
 Challenge.list = function (req, res, cb) {

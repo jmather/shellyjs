@@ -37,9 +37,12 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
   var key = this._db.key(keyType, params);
   if (opts.checkCache) {
     if (_.isObject(this._objects[key])) {
-      shlog.info("cache hit: %s", key);
-      this._cacheHit += 1;
-      return cb(0, this._objects[key]);
+      // if asking for lock we must have it for cached version
+      if (!opts.lock || (opts.lock && this._locks[key])) {
+        shlog.info("cache hit: %s", key);
+        this._cacheHit += 1;
+        return cb(0, this._objects[key]);
+      }
     }
     this._cacheMiss += 1;
   }

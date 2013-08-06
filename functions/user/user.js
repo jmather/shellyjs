@@ -31,9 +31,15 @@ user.set = function (req, res, cb) {
     return cb(1);
   }
 
-  req.session.user.setData(userData);
-  res.add(sh.event("user.set", req.session.user.getData()));
-  return cb(0);
+  req.loader.exists("kUser", req.session.uid, function (err, user) {
+    if (err) {
+      res.add(sh.error("user-bad", "unable to load user", user));
+      return cb(1);
+    }
+    user.setData(userData);
+    res.add(sh.event("user.set", user.getData()));
+    return cb(0);
+  }, {lock: true});
 };
 
 user.aget = function (req, res, cb) {
@@ -61,7 +67,7 @@ user.aset = function (req, res, cb) {
     user.setData(newUser);
     res.add(sh.event("user.get", user.getData()));
     return cb(0);
-  });
+  }, {lock: true});
 
 };
 

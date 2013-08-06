@@ -63,6 +63,7 @@ exports.verifyUser = function (loader, email, password, cb) {
             cb(error, user);
             return;
           }
+          // this is a fixup incase something went wrong - no need to lock
           if (user.get("email").length === 0) {
             user.set("email", email);
             user.set("name", email.split("@")[0]);
@@ -237,7 +238,7 @@ exports.upgrade = function (req, res, cb) {
       res.add(sh.error("email-inuse", "email is already used by another user"));
       return cb(1);
     }
-    // set the email for the user
+    // set the email for the user, don't worry about the lock here
     req.session.user.set("email", email);
     req.session.user.set("name", email.split("@")[0]);
 
@@ -271,7 +272,7 @@ exports.downgrade = function (req, res, cb) {
       res.add(sh.error("user-bad", "unable to load user", {userId: uid}));
       return cb(1);
     }
-  });
+  }, {lock: true});
 };
 
 exports.create = function (req, res, cb) {
@@ -310,7 +311,7 @@ exports.create = function (req, res, cb) {
         res.add(sh.event("reg.create", out));
         return cb(0, user);
       });
-    });
+    }, {lock: true});
   });
 };
 

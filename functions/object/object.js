@@ -62,5 +62,5 @@ object.set = function (req, res, cb) {
     obj.setData(req.body.object);
     res.add(sh.event("object.set", obj.getData()));
     return cb(0);
-  });
+  }, {lock: true});
 };

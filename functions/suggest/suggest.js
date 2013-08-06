@@ -41,5 +41,5 @@ Suggest.add = function (req, res, cb) {
 
     res.add(sh.event("suggest.add", {status: "ok"}));
     return cb(0);
-  });
+  }, {lock: true});
 };

@@ -142,6 +142,6 @@ Channel.send = function (req, res, cb) {
     req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
       ml.add(msgBlock);
       return cb(0, uidList);
-    });
+    }, {lock: true});
   });
 };
