@@ -1,8 +1,10 @@
+var fs = require("fs");
 var _ = require("lodash");
 var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var shkeys = require(global.gBaseDir + "/src/shkeys.js");
 var shlock = require(global.gBaseDir + "/src/shlock.js");
 
 function ShLoader(db) {
@@ -34,7 +36,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
   }
 
   // check cache
-  var key = this._db.key(keyType, params);
+  var key = shkeys.get(keyType, params);
   if (opts.checkCache) {
     if (_.isObject(this._objects[key])) {
       // if asking for lock we must have it for cached version
@@ -101,12 +103,12 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
     return cb(1, sh.intMsg("keytype-bad", keyType));
   }
 
-  var key = this._db.key(keyType, params);
+  var key = shkeys.get(keyType, params);
   shlog.info("delete object", key);
   delete this._objects[key];
 
   var self = this;
-  this._db.kdelete(keyType, params, function (err, data) {
+  this._db.delete(key, function (err, data) {
     if (self._locks[key]) {
       delete self._locks[key];
       shlock.release(key, cb);

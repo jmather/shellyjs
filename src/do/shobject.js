@@ -4,6 +4,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var shkeys = require(global.gBaseDir + "/src/shkeys.js");
 
 var db = global.db;
 
@@ -26,7 +27,7 @@ ShObject.prototype.key = function () {
 
 ShObject.prototype.create = function (oid, cb) {
   this._oid = oid;
-  this._key = db.key(this._keyType, this._oid);
+  this._key = shkeys.get(this._keyType, this._oid);
   this._data.oid = oid;
   var ts = new Date().getTime();
   this._data.created = ts;
@@ -44,12 +45,12 @@ ShObject.prototype.load = function (oid, cb) {
   }
 
   this._oid = oid;
-  this._key = db.key(this._keyType, this._oid);
+  this._key = shkeys.get(this._keyType, this._oid);
 
   var self = this;
-  db.kget(this._keyType, oid, function (err, value) {
+  db.get(this._key, function (err, value) {
     if (value === null) {
-      cb(1, sh.intMsg("kget-null", value));
+      cb(1, sh.intMsg("get-null", value));
       return;
     }
     try {
@@ -86,9 +87,9 @@ ShObject.prototype.save = function (cb) {
 
   var self = this;
   var dataStr = JSON.stringify(this._data);
-  db.kset(this._keyType, this._oid, dataStr, function (err, res) {
+  db.set(this._key, dataStr, function (err, res) {
     if (err !== null) {
-      cb(2, sh.intMsg("kset-failed", res));
+      cb(2, sh.intMsg("set-failed", res));
       return;
     }
     shlog.info("object saved: %s", self._key);

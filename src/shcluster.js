@@ -16,6 +16,7 @@ if (_.isUndefined(global.gServerStats)) {
 
 var ShCluster = exports;
 
+var shkeys = require(global.gBaseDir + "/src/shkeys.js");
 global.db = require(global.gBaseDir + "/src/shdb.js");
 var gLoader = new ShLoader(global.db);
 var gDriver = global.db.driver;
@@ -27,58 +28,60 @@ if (_.isUndefined(global.dnodes)) {
 
 ShCluster.init = function (cb) {
   var self = this;
-  global.db.init(function (err) {
-    // just init the db if we are just worker
-    if (cluster.isWorker) {
-      return cb(0);
-    }
-    gLoader.get("kServer", global.server.serverId, function (err, server) {
-      server.set("clusterUrl", global.C.CLUSTER_URL);
-      server.set("socketUrl", global.C.SOCKET_URL);
-      shlog.info("set server info", server.getData());
-      gDriver.sadd("serverList", global.server.serverId, function (err) {
-        gLoader.dump();
-        if (err) {
-          return cb(err, "unable to save to server list");
-        }
-
-        // start dnode
-        gServer = dnode({
-          event : function (msg, cb) {
-            shlog.debug("server event recv: %j", msg);
-
-            if (msg.cmd === "channel.count") {
-              var ret = {};
-              ret[msg.channel] = self.getStat(msg.channel);
-              cb(ret);
-              return;
-            }
-
-            // cmd = direct.user
-            // toWid = workerId
-            // toWsid = websocket id of user
-            // data = object to forward to user socket
-            if (_.isUndefined(msg.cmd)) {
-              shlog.error("server event: bad command %j", msg);
-              return;
-            }
-            if (_.isUndefined(msg.toWsid)) {
-              shlog.error("server event: socket id %j", msg);
-              return;
-            }
-            if (_.isUndefined(msg.toWid) || _.isUndefined(cluster.workers[msg.toWid])) {
-              shlog.error("server event: bad worker id %j", msg);
-              return;
-            }
-            cluster.workers[msg.toWid].send(msg);
-            cb("ok");
+  shkeys.init(function (err) {
+    global.db.init(function (err) {
+      // just init the db if we are just worker
+      if (cluster.isWorker) {
+        return cb(0);
+      }
+      gLoader.get("kServer", global.server.serverId, function (err, server) {
+        server.set("clusterUrl", global.C.CLUSTER_URL);
+        server.set("socketUrl", global.C.SOCKET_URL);
+        shlog.info("set server info", server.getData());
+        gDriver.sadd("serverList", global.server.serverId, function (err) {
+          gLoader.dump();
+          if (err) {
+            return cb(err, "unable to save to server list");
           }
-        });
-        var urlParts = url.parse(global.C.CLUSTER_URL);
-        shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
-        gServer.listen(urlParts.port, urlParts.hostName);
 
-        return cb(0, null);
+          // start dnode
+          gServer = dnode({
+            event : function (msg, cb) {
+              shlog.debug("server event recv: %j", msg);
+
+              if (msg.cmd === "channel.count") {
+                var ret = {};
+                ret[msg.channel] = self.getStat(msg.channel);
+                cb(ret);
+                return;
+              }
+
+              // cmd = direct.user
+              // toWid = workerId
+              // toWsid = websocket id of user
+              // data = object to forward to user socket
+              if (_.isUndefined(msg.cmd)) {
+                shlog.error("server event: bad command %j", msg);
+                return;
+              }
+              if (_.isUndefined(msg.toWsid)) {
+                shlog.error("server event: socket id %j", msg);
+                return;
+              }
+              if (_.isUndefined(msg.toWid) || _.isUndefined(cluster.workers[msg.toWid])) {
+                shlog.error("server event: bad worker id %j", msg);
+                return;
+              }
+              cluster.workers[msg.toWid].send(msg);
+              cb("ok");
+            }
+          });
+          var urlParts = url.parse(global.C.CLUSTER_URL);
+          shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
+          gServer.listen(urlParts.port, urlParts.hostName);
+
+          return cb(0, null);
+        });
       });
     });
   });
