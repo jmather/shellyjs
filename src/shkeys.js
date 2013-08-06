@@ -11,7 +11,6 @@ var gKeyTypes = {};
 shkeys.init = function (cb) {
   shlog.info("object init");
 
-  var modules = {};
   var funcDir = global.gBaseDir + "/src/do";
   fs.readdir(funcDir, function (err, files) {
     var error = 0;
@@ -29,6 +28,13 @@ shkeys.init = function (cb) {
     });
     return cb(0);
   });
+};
+
+shkeys.moduleFile = function (keyType) {
+  if (!_.isObject(gKeyTypes[keyType])) {
+    return null;
+  }
+  return gKeyTypes[keyType].file;
 };
 
 shkeys.validKey = function (keyType) {

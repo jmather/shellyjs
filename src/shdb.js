@@ -5,58 +5,25 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 
-var gDbScope = global.C.DB_SCOPE;
-
 var shdb = exports;
 
 var client = require(global.gBaseDir + global.C.DB_WRAPPER);
 shdb.driver = client.driver;
 
-var gKeyTypes = {};
-
-function initObjects(cb) {
-  shlog.info("object init");
-
-  var modules = {};
-  var funcDir = global.gBaseDir + "/src/do";
-  fs.readdir(funcDir, function (err, files) {
-    var error = 0;
-    var fileCount = files.length;
-    files.forEach(function (entry) {
-      var fn = funcDir + "/" + entry;
-      var ObjModule = require(fn);
-      var obj = new ObjModule();
-      if (!_.isUndefined(obj._keyType) && !_.isUndefined(obj._keyFormat)) {
-        gKeyTypes[obj._keyType] = {tpl: obj._keyFormat, file: fn};
-        shlog.info("object factory:", obj._keyType, fn);
-      } else {
-        shlog.info("bad data object missing keyType or keyFormat", fn);
-      }
-    });
-    cb();
-  });
-}
-
-shdb.getKeys = function () {
-  return gKeyTypes;
-};
-
 shdb.init = function (cb) {
-  initObjects(function () {
-    try {
-      shlog.info("db init");
-      client.init(global.C.DB_OPTIONS, function (err) {
-        if (err) {
-          shlog.error(err, global.C.db.settings);
-          cb(err);
-        }
-        shlog.info("db initilized");
-        cb(0);
-      });
-    } catch (e) {
-      return cb(1, sh.intMsg("init-failed", e.message));
-    }
-  });
+  try {
+    shlog.info("db init");
+    client.init(global.C.DB_OPTIONS, function (err) {
+      if (err) {
+        shlog.error(err, global.C.db.settings);
+        cb(err);
+      }
+      shlog.info("db initilized");
+      cb(0);
+    });
+  } catch (e) {
+    return cb(1, sh.intMsg("init-failed", e.message));
+  }
 };
 
 shdb.get = function (key, cb) {
@@ -65,45 +32,6 @@ shdb.get = function (key, cb) {
     client.get(key, cb);
   } catch (e) {
     return cb(1, sh.intMsg("get-failed", e.message));
-  }
-};
-
-function genKey(keyType, params) {
-  var key = null;
-  if (_.isObject(params)) {
-    var paramArray = [gKeyTypes[keyType].tpl].concat(params);
-    key = gDbScope + util.format.apply(util.format, paramArray);
-  } else {
-    key = gDbScope + util.format(gKeyTypes[keyType].tpl, params);
-  }
-  return key;
-}
-
-shdb.validKey = function (keyType) {
-  return _.isObject(gKeyTypes[keyType]);
-};
-
-shdb.key = function (keyType, params) {
-  return genKey(keyType, params);
-};
-
-shdb.moduleFile = function (keyType) {
-  if (!_.isObject(gKeyTypes[keyType])) {
-    return null;
-  }
-  return gKeyTypes[keyType].file;
-};
-
-shdb.kget = function (keyType, params, cb) {
-  // SWD check keyType undefined
-  try {
-    var key = genKey(keyType, params);
-    shlog.info("kget: " + gKeyTypes[keyType].tpl + "->" + key);
-    client.get(key, function (err, value) {
-      cb(err, value);
-    });
-  } catch (e) {
-    return cb(1, sh.intMsg("kget-failed", e.message));
   }
 };
 
@@ -122,24 +50,6 @@ shdb.set = function (key, value, cb) {
   }
 };
 
-shdb.kset = function (keyType, params, value, cb) {
-  // SWD check keyType undefined
-  try {
-    var key = genKey(keyType, params);
-    shlog.info("kset: " + gKeyTypes[keyType].tpl + "->" + key);
-    client.set(key, value, function (err, value) {
-      if (err) {
-        shlog.error("error on kset:", err, key, value);
-      }
-      if (_.isFunction(cb)) {
-        cb(err);
-      }
-    });
-  } catch (e) {
-    return cb(1, sh.intMsg("kset-failed", e.message));
-  }
-};
-
 shdb.delete = function (key, cb) {
   try {
     shlog.info("kdelete: " + key);
@@ -153,24 +63,6 @@ shdb.delete = function (key, cb) {
     });
   } catch (e) {
     return cb(1, sh.intMsg("delete-failed", e.message));
-  }
-};
-
-shdb.kdelete = function (keyType, params, cb) {
-  // SWD check keyType undefined
-  try {
-    var key = genKey(keyType, params);
-    shlog.info("kdelete: " + gKeyTypes[keyType].tpl + "->" + key);
-    client.del(key, function (err) {
-      if (err) {
-        shlog.error("error on kdelete", err);
-      }
-      if (_.isFunction(cb)) {
-        cb(0);
-      }
-    });
-  } catch (e) {
-    return cb(1, sh.intMsg("kdelete-failed", e.message));
   }
 };
 

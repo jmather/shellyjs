@@ -24,7 +24,7 @@ function ShLoader(db) {
 module.exports = ShLoader;
 
 ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) {
-  if (!this._db.validKey(keyType)) {
+  if (!shkeys.validKey(keyType)) {
     return cb(1, sh.intMsg("keytype-bad", keyType));
   }
   var opts = {checkCache: true, lock: false};
@@ -51,9 +51,9 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
 
   var ShClass = null;
   try {
-    ShClass = require(this._db.moduleFile(keyType));
+    ShClass = require(shkeys.moduleFile(keyType));
   } catch (e) {
-    return cb(1, sh.intMsg("module-load-failed", this._db.moduleFile(keyType)));
+    return cb(1, sh.intMsg("module-load-failed", shkeys.moduleFile(keyType)));
   }
 
   shlog.info("%s: %s - %s", funcName, keyType, params);
@@ -99,7 +99,7 @@ ShLoader.prototype.get = function (keyType, params, cb, pOpts) {
 };
 
 ShLoader.prototype.delete = function (keyType, params, cb) {
-  if (!this._db.validKey(keyType)) {
+  if (!shkeys.validKey(keyType)) {
     return cb(1, sh.intMsg("keytype-bad", keyType));
   }
 
