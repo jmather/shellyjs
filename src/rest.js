@@ -86,7 +86,7 @@ rest.post("/api", respond);
 //********** error handling
 
 rest.use(function (err, req, res, next) {
-  // try and save any data modified, if we got that far
+  // try and save any data modified and release locks, if we got that far
   if (_.isObject(req.loader)) {
     req.loader.dump();
   }

@@ -1,11 +1,13 @@
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
+var _x = require(global.gBaseDir + "/src/shcb.js").leanStacks(true)._x;
 
 var shlock = exports;
 
 shlock.acquire = function (key, cb) {
   var lkey = "lock:" + key;
   function tryLock(lkey, count, cb) {
-    global.db.driver.set([lkey, "foo", "NX", "EX", 5], function (err, data) {
+    global.db.set([lkey, "foo", "NX", "EX", 5], _x(cb, function (err, data) {
       if (err || data === null) {
         if (count < 3) {
           shlog.info("lock retry:", lkey, err, data);
@@ -14,11 +16,11 @@ shlock.acquire = function (key, cb) {
           return;
         }
         shlog.error("lock failed:", lkey, err, data);
-        return cb(err, data);
+        return cb(1, sh.intMsg("lock-failed", {error: err, data: data}));
       }
-      shlog.info("lock aquired:", lkey);
+      shlog.info("lock aquired:", lkey, err, data);
       return cb(0);
-    });
+    }));
   }
 
   tryLock(lkey, 0, cb);

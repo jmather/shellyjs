@@ -35,19 +35,13 @@ shdb.get = function (key, cb) {
   }
 };
 
+// SWD - maybe change to setA for array
 shdb.set = function (key, value, cb) {
-  try {
-    client.set(key, value, function (err, value) {
-      if (err) {
-        shlog.error("error on set:", err, value);
-      }
-      if (_.isFunction(cb)) {
-        cb(err);
-      }
-    });
-  } catch (e) {
-    return cb(1, sh.intMsg("set-failed", e.message));
+  if (_.isArray(key)) {
+    client.set(key, value);  // value must be cb;
+    return;
   }
+  client.set([key, value], cb);
 };
 
 shdb.delete = function (key, cb) {
