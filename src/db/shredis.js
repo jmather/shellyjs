@@ -1,7 +1,7 @@
 var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var _x = require(global.gBaseDir + "/src/shcb.js").leanStacks(true)._x;
+var _w = require(global.gBaseDir + "/src/shcb.js").leanStacks(true)._w;
 
 
 var shRedis = exports;
@@ -31,7 +31,7 @@ shRedis.get = function (key, cb) {
 
 shRedis.set = function (keyValue, cb) {
   shlog.info("set", keyValue);
-  client.set(keyValue, _x(cb, function (err, data) {
+  client.set(keyValue, _w(cb, function (err, data) {
     if (err) {
       return cb(1, sh.intMsg("redis-set", data));
     }
