@@ -64,12 +64,21 @@ function clear() {
   this.msgs = [];
 }
 
+function callError(err, data) {
+  sh.error("call-error", "call failed", data);
+}
+
 function makeCalls(msgs, req, res) {
   try {
     // process each message with same loader
     async.eachSeries(msgs, function (item, cb) {
       req.body = item;
-      sh.call(req, res, cb);
+      sh.call(req, res, _w(callError, function (err, data) {
+        if (err === 100) { // unknown exception
+          res.add(sh.error("call-error", "call failed", data));
+        }
+        cb(0);
+      }));
     }, function (err) {
       req.loader.dump();  // don't wait on dump cb
       res.sendAll();

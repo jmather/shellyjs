@@ -9,8 +9,7 @@ function shCallRaw(packet, cb) {
     dataType: "json",
     data: JSON.stringify(packet),
     success: function (data, status) {
-      // SWD just take first message for now
-      cb(0, data[0]);
+      cb(0, data);
     },
     error: function (xhr, status, err) {
       var data = JSON.parse(xhr.responseText);

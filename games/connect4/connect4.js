@@ -2,6 +2,7 @@ var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
@@ -212,7 +213,7 @@ connect4.turn = function (req, res, cb) {
   state.lastMove = {uid: uid, move: move, color: color};
   var event = sh.event("game.update", state.lastMove);
   res.add(event);
-  channel.sendInt("game:" + game.get("oid"), event, function (err, data) {
+  channel.sendInt("game:" + game.get("oid"), event, _w(cb, function (err, data) {
     var winSet = [];
     var win = checkWin(state.board, color, move.x, move.y, winSet);
     if (win) {
@@ -233,5 +234,5 @@ connect4.turn = function (req, res, cb) {
       return cb(0);
     }
     return cb(0);
-  });
+  }));
 };

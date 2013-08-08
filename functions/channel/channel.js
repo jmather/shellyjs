@@ -4,6 +4,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var Channel = exports;
 
@@ -22,14 +23,14 @@ var channelDef = {
 };
 
 Channel.list = function (req, res, cb) {
-  global.db.smembers(req.body.channel, function (err, data) {
+  global.db.smembers(req.body.channel, _w(cb, function (err, data) {
     if (err) {
       res.add(sh.error("channel-list", err, data));
       return cb(1);
     }
     res.add(sh.event("channel.list", data));
     return cb(0);
-  });
+  }));
 };
 
 Channel.add = function (req, res, cb) {
@@ -40,7 +41,7 @@ Channel.add = function (req, res, cb) {
     return cb(1);
   }
 
-  global.db.sadd(req.body.channel, req.session.uid, function (err, data) {
+  global.db.sadd(req.body.channel, req.session.uid, _w(cb, function (err, data) {
     if (err) {
       res.add(sh.error("channel-add", data));
       return cb(1);
@@ -55,7 +56,7 @@ Channel.add = function (req, res, cb) {
       gender: req.session.user.get("gender"),
       age: req.session.user.get("age"),
       status: "on"});
-    Channel.sendInt(req.body.channel, event, function (err, locateList) {
+    Channel.sendInt(req.body.channel, event, _w(cb, function (err, locateList) {
       // send me a list of current users
       _.each(locateList, function (locateInfo, uid) {
         var event = sh.event("channel.user", {channel: req.body.channel, uid: uid,
@@ -68,29 +69,29 @@ Channel.add = function (req, res, cb) {
       });
 
       // send back any messages on the channel
-      req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
+      req.loader.get("kMessageBank", req.body.channel, _w(cb, function (err, ml) {
         if (!err) {
           res.add(sh.event("channel.message", {channel: req.body.channel, bank: ml.get("bank")}));
         }
         return cb(0);
-      });
-    });
-  });
+      }));
+    }));
+  }));
 };
 
 Channel.removeInt = function (channel, uid, cb) {
   shlog.info("removeInt: ", channel, uid);
 
-  global.db.srem(channel, uid, function (err, data) {
+  global.db.srem(channel, uid, _w(cb, function (err, data) {
     // ignore the error and just send the off
-    global.db.smembers(channel, function (err, data) {
+    global.db.smembers(channel, _w(cb, function (err, data) {
       var event = sh.event("channel.user", {channel: channel, uid: uid, status: "off"});
       dispatch.sendUsers(data, event);
       if (_.isFunction(cb)) {
         return cb(0, event);
       }
-    });
-  });
+    }));
+  }));
 };
 
 Channel.remove = function (req, res, cb) {
@@ -101,28 +102,28 @@ Channel.remove = function (req, res, cb) {
     return cb(1);
   }
 
-  Channel.removeInt(req.body.channel, req.session.uid, function (err, event) {
+  Channel.removeInt(req.body.channel, req.session.uid, _w(cb, function (err, event) {
     if (err) {
       res.add(sh.error("channel-remove", "unable to remove user from channel"));
       return cb(1);
     }
     res.add(event);
     return cb(0);
-  });
+  }));
 };
 
 Channel.sendInt = function (channel, event, cb) {
-  global.db.smembers(channel, function (err, uidList) {
+  global.db.smembers(channel, _w(cb, function (err, uidList) {
     if (err) {
       return cb(1);
     }
 
-    dispatch.sendUsers(uidList, event, null, function (err, locateList) {
+    dispatch.sendUsers(uidList, event, null, _w(cb, function (err, locateList) {
       if (_.isFunction(cb)) {
         return cb(0, locateList);
       }
-    });
-  });
+    }));
+  }));
 };
 
 Channel.send = function (req, res, cb) {
@@ -136,12 +137,12 @@ Channel.send = function (req, res, cb) {
   };
   var event = sh.event("channel.message", {channel: req.body.channel, bank: [msgBlock]});
 
-  Channel.sendInt(req.body.channel, event, function (err, uidList) {
+  Channel.sendInt(req.body.channel, event, _w(cb, function (err, uidList) {
     // SWD don't really need to wait or care about send err
     res.add(sh.event("channel.send", {status: "sent", uids: uidList}));
-    req.loader.get("kMessageBank", req.body.channel, function (err, ml) {
+    req.loader.get("kMessageBank", req.body.channel, _w(cb, function (err, ml) {
       ml.add(msgBlock);
       return cb(0, uidList);
-    }, {lock: true});
-  });
+    }, {lock: true}));
+  }));
 };

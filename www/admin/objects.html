@@ -126,12 +126,12 @@
             $(".display-obj-btn").css("display", "none");
             console.log(res)
             if (err) {
-                showError(true, res.message);
+                showError(true, res[0].message);
             } else {
                 if(res.event == "error") {
-                    showError(true, res.message);
+                    showError(true, res[0].message);
                 } else {
-                    showObject(res.data);
+                    showObject(res[0].data);
                 }
             }
         }

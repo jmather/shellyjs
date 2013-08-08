@@ -128,7 +128,7 @@
                 alert(msg.message);
                 return;
             }
-            Env.modules = msg.data;
+            Env.modules = msg[0].data;
             for (mkey in Env.modules) {
                 createModule(mkey, Env.modules[mkey]);
             }

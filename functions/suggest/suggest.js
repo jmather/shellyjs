@@ -3,6 +3,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var dispatch = require(global.gBaseDir + "/src/dispatch.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var Suggest = exports;
 
@@ -15,7 +16,7 @@ Suggest.functions = {
 Suggest.list = function (req, res, cb) {
 
   var set = "any";
-  req.loader.get("kPlayerSet", "any", function (err, players) {
+  req.loader.get("kPlayerSet", "any", _w(cb, function (err, players) {
     if (err) {
       res.add(sh.error("suggest-bad", "unable to load the suggestion list", {set: set, error: err, data: players}));
       return cb(err);
@@ -26,13 +27,13 @@ Suggest.list = function (req, res, cb) {
     }
     res.add(sh.event("suggest.list", playerSet));
     return cb(0);
-  });
+  }));
 };
 
 Suggest.add = function (req, res, cb) {
 
   var set = "any";
-  req.loader.get("kPlayerSet", "any", function (err, players) {
+  req.loader.get("kPlayerSet", "any", _w(cb, function (err, players) {
     if (err) {
       res.add(sh.error("suggest-bad", "unable to load the suggestion list", {set: set, error: err, data: players}));
       return cb(err);
@@ -41,5 +42,5 @@ Suggest.add = function (req, res, cb) {
 
     res.add(sh.event("suggest.add", {status: "ok"}));
     return cb(0);
-  }, {lock: true});
+  }, {lock: true}));
 };

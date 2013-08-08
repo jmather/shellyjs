@@ -21,9 +21,9 @@
             $("#shSubTitle").text("System Info");
 
             shCall({cmd: "system.config"}, function (err, res) {
-                $("#baseDir").text(res.data.gBaseDir);
-                $("#config").text(JSON.stringify(res.data.CONFIG, undefined, 2))
-                $("#package").text(JSON.stringify(res.data.PACKAGE, undefined, 2))
+                $("#baseDir").text(res[0].data.gBaseDir);
+                $("#config").text(JSON.stringify(res[0].data.CONFIG, undefined, 2))
+                $("#package").text(JSON.stringify(res[0].data.PACKAGE, undefined, 2))
             })
         }
     </script>

@@ -76,7 +76,7 @@ function matchLoop() {
         var res = {};
         res.add = add;
         shlog.info("match made, create game", req.body.players);
-        sh.call(req, res, function (error) {
+        sh.call(req, res, _w(matchError, function (error) {
           if (error) {
             // problem - push the uids back
             shlog.error(error, res.msgs);
@@ -88,7 +88,7 @@ function matchLoop() {
             startInfo.gameId = req.env.game.get("oid");
             dispatch.sendUsers(req.body.players, sh.event("challenge.start", startInfo));
           });
-        });
+        }));
 
         dispatch.sendUsers(uidList, sh.event("game.matcher", "gameId and info here"));
         matchLoop();

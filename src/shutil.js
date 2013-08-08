@@ -205,12 +205,12 @@ shutil.call = function (req, res, cb) {
   }
 
   // call the pre, function, post sequence
-  module.pre(req, res, function (error, data) {
+  module.pre(req, res, _w(cb, function (error, data) {
     if (error) {
       shlog.info("pre error: ", error);
       return cb(error, data);
     }
-    module[funcName](req, res, function (error, data) {
+    module[funcName](req, res, _w(cb, function (error, data) {
       var retError = error;
       var retData = data;
       if (error) {
@@ -218,15 +218,15 @@ shutil.call = function (req, res, cb) {
         shlog.info("func error: ", error);
         return cb(error, data);
       }
-      module.post(req, res, function (error, data) {
+      module.post(req, res, _w(cb, function (error, data) {
         if (error) {
           return cb(error, data);
         }
         // return data from actual function call
         cb(retError, retData);
-      });
-    });
-  });
+      }));
+    }));
+  }));
 };
 
 // takes array of uids

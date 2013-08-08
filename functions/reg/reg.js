@@ -7,6 +7,7 @@ var sanitize = require("validator").sanitize;
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var session = require(global.gBaseDir + "/src/session.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
 var passwordVersion = 1;
@@ -52,13 +53,13 @@ function createEmailReg(loader, uid, email, password, cb) {
 
 // used to create the default admin user
 exports.verifyUser = function (loader, email, password, cb) {
-  loader.exists("kEmailMap", email, function (error, em) {
+  loader.exists("kEmailMap", email, _w(cb, function (error, em) {
     if (error) {
       createEmailReg(loader, sh.uuid(), email, password, function (error, em) {
         if (error) {
           return cb(1, sh.intMsg("emailmap-failed"));
         }
-        loader.get("kUser", em.get("uid"), function (error, user) {
+        loader.get("kUser", em.get("uid"), _w(cb, function (error, user) {
           if (error) {
             cb(error, user);
             return;
@@ -70,44 +71,44 @@ exports.verifyUser = function (loader, email, password, cb) {
             user.set("roles", ["admin"]);
           }
           return cb(0, user);
-        });
+        }));
       });
     } else {
       return cb(0, sh.intMsg("user-exists"));
     }
-  });
+  }));
 };
 
 exports.findUserByEmail = function (loader, email, cb) {
-  loader.exists("kEmailMap", email, function (error, em) {
+  loader.exists("kEmailMap", email, _w(cb, function (error, em) {
     if (error) {
       cb(1, sh.intMsg("find-failed", email));
       return;
     }
-    loader.exists("kUser", em.get("uid"), function (error, user) {
+    loader.exists("kUser", em.get("uid"), _w(cb, function (error, user) {
       if (error) {
         cb(1, sh.intMsg("user-get-failed", {email: email, uid: em.get("uid")}));
         return;
       }
       cb(0, user);
-    });
-  });
+    }));
+  }));
 };
 
 exports.findUserByToken = function (loader, token, cb) {
-  loader.exists("kTokenMap", token, function (error, tm) {
+  loader.exists("kTokenMap", token, _w(cb, function (error, tm) {
     if (error) {
       cb(1, sh.error("token-bad", "unable to find user with token = " + token, {token: token}));
       return;
     }
-    loader.exists("kUser", tm.get("uid"), function (error, user) {
+    loader.exists("kUser", tm.get("uid"), _w(cb, function (error, user) {
       if (error) {
         cb(1, sh.error("user-bad", "unable to load user for id", {token: token, uid: tm.get("uid")}));
         return;
       }
       cb(0, user);
-    });
-  });
+    }));
+  }));
 };
 
 exports.login = function (req, res, cb) {
@@ -126,7 +127,7 @@ exports.login = function (req, res, cb) {
   }
   var role = sanitize(req.body.role).trim();
 
-  req.loader.exists("kEmailMap", email, function (error, em) {
+  req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
     if (error) {
       res.add(sh.error("email-bad", "email is not registered", {email: email}));
       return cb(1);
@@ -138,7 +139,7 @@ exports.login = function (req, res, cb) {
       return cb(1);
     }
 
-    req.loader.get("kUser", em.get("uid"), function (error, user) {
+    req.loader.get("kUser", em.get("uid"), _w(cb, function (error, user) {
       if (error) {
         res.add(sh.error("user-bad", "unable to get user", user));
         return cb(1);
@@ -159,8 +160,8 @@ exports.login = function (req, res, cb) {
       out.session = session.create(em.get("uid"));
       res.add(sh.event("reg.login", out));
       return cb(0);
-    });
-  });
+    }));
+  }));
 };
 
 exports.anonymous = function (req, res, cb) {
@@ -175,10 +176,10 @@ exports.anonymous = function (req, res, cb) {
     return cb(1);
   }
 
-  req.loader.exists("kTokenMap", token, function (error, tm) {
+  req.loader.exists("kTokenMap", token, _w(cb, function (error, tm) {
     if (!error) {
       // check if uid has upgraded account
-      req.loader.exists("kUser", tm.get("uid"), function (error, user) {
+      req.loader.exists("kUser", tm.get("uid"), _w(cb, function (error, user) {
         if (!error && user.get("email").length) {
           res.add(sh.error("user-upgraded", "user has already upgraded the anonymous account"));
           return cb(1);
@@ -188,12 +189,12 @@ exports.anonymous = function (req, res, cb) {
         out.session = session.create(tm.get("uid"));
         res.add(sh.event("reg.anonymous", out));
         return cb(0);
-      });
+      }));
       return; // stop here
     }
 
     // not there, so create token map
-    req.loader.create("kTokenMap", token, function (err, tm) {
+    req.loader.create("kTokenMap", token, _w(cb, function (err, tm) {
       if (err) {
         res.add(sh.error("tokenmap-create", "unable to create a token to user map"));
         return cb(1);
@@ -205,8 +206,8 @@ exports.anonymous = function (req, res, cb) {
       out.session = session.create(tm.get("uid"));
       res.add(sh.event("reg.anonymous", out));
       return cb(0);
-    });
-  });
+    }));
+  }));
 };
 
 exports.upgrade = function (req, res, cb) {
@@ -227,7 +228,7 @@ exports.upgrade = function (req, res, cb) {
   }
 
   // make sure the email is not in use by someone else
-  req.loader.exists("kEmailMap", email, function (error, em) {
+  req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
     if (!error) {
       if (em.get("uid") === req.session.user.get("oid")) {
         // set it just in case something went wrong before
@@ -243,23 +244,23 @@ exports.upgrade = function (req, res, cb) {
     req.session.user.set("name", email.split("@")[0]);
 
     // create the email map
-    createEmailReg(req.loader, req.session.uid, email, password, function (error, em) {
+    createEmailReg(req.loader, req.session.uid, email, password, _w(cb, function (error, em) {
       if (error) {
         res.add(sh.error("emailmap-create", "unable to create email map", em));
         return cb(2);
       }
       res.add(sh.event("reg.upgrade", req.session.user.getData()));
       return cb(0);
-    });
-  });
+    }));
+  }));
 };
 
 // SWD for testing only
 exports.downgrade = function (req, res, cb) {
   var uid = req.body.uid;
-  req.loader.exists("kUser", uid, function (err, user) {
+  req.loader.exists("kUser", uid, _w(cb, function (err, user) {
     if (!err) {
-      req.loader.delete("kEmailMap", user.get("email"), function (err, data) {
+      req.loader.delete("kEmailMap", user.get("email"), _w(cb, function (err, data) {
         if (err) {
           res.add(sh.error("email-delete", "unable to delete email map", data));
           return cb(1);
@@ -267,12 +268,12 @@ exports.downgrade = function (req, res, cb) {
         user.set("email", "");
         res.add(sh.event("reg.downgrade", {status: "ok"}));
         return cb(0);
-      });
+      }));
     } else {
       res.add(sh.error("user-bad", "unable to load user", {userId: uid}));
       return cb(1);
     }
-  }, {lock: true});
+  }, {lock: true}));
 };
 
 exports.create = function (req, res, cb) {
@@ -286,18 +287,18 @@ exports.create = function (req, res, cb) {
     return cb(1);
   }
 
-  req.loader.exists("kEmailMap", email, function (error, em) {
+  req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
     if (!error) {
       res.add(sh.error("email-used", "this email is already registered", {email: email}));
       return cb(2, em);
     }
     // create the user
-    createEmailReg(req.loader, sh.uuid(), email, password, function (error, em) {
+    createEmailReg(req.loader, sh.uuid(), email, password, _w(cb, function (error, em) {
       if (error) {
         res.add(sh.error("emailmap-create", "unable to create email map", em));
         return cb(3, em);
       }
-      req.loader.get("kUser", em.get("uid"), function (error, user) {
+      req.loader.get("kUser", em.get("uid"), _w(cb, function (error, user) {
         if (error) {
           res.add(sh.error("user-bad", "unable to load user", user));
           return cb(3);
@@ -310,31 +311,31 @@ exports.create = function (req, res, cb) {
         out.session = session.create(em.get("uid"));
         res.add(sh.event("reg.create", out));
         return cb(0, user);
-      });
-    }, {lock: true});
-  });
+      }));
+    }, {lock: true}));
+  }));
 };
 
 exports.remove = function (req, res, cb) {
-  req.loader.exists("kEmailMap", req.body.email, function (err, em) {
+  req.loader.exists("kEmailMap", req.body.email, _w(cb, function (err, em) {
     if (err) {
       res.add(sh.event("reg.remove", {status: "ok", message: "no user exists"}));
       return cb(0);
     }
 
-    req.loader.delete("kEmailMap", req.body.email, function (err, data) {
+    req.loader.delete("kEmailMap", req.body.email, _w(cb, function (err, data) {
       if (err) {
         res.add(sh.error("email-delete", "unable to delete email map", em));
         return cb(1);
       }
-      req.loader.delete("kUser", em.get("uid"), function (err, data) {
+      req.loader.delete("kUser", em.get("uid"), _w(cb, function (err, data) {
         if (err) {
           res.add(sh.error("user-delete", "unable to delete user", em.get("uid")));
           return cb(1);
         }
         res.add(sh.event("reg.remove", {status: "ok", message: "user and email map removed"}));
         return cb(0);
-      });
-    });
-  });
+      }));
+    }));
+  }));
 };
