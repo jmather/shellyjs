@@ -30,7 +30,7 @@ shstatsredis.incr = function (domain, key, amount) {
   if (_.isUndefined(amount)) {
     amount = 1;
   }
-  global.db.incr(makeKey(domain, key), amount, function (err, data) {
+  global.db.incrby(makeKey(domain, key), amount, function (err, data) {
 //    console.log(err, data);
   });
 };
@@ -39,7 +39,7 @@ shstatsredis.decr = function (domain, key, amount) {
   if (_.isUndefined(amount)) {
     amount = 1;
   }
-  global.db.decr(makeKey(domain, key), amount, function (err, data) {
+  global.db.decrby(makeKey(domain, key), amount, function (err, data) {
 //    console.log(err, data);
   });
 };

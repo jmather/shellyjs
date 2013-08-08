@@ -29,8 +29,8 @@ shlock.acquire = function (key, cb) {
 shlock.release = function (key, cb) {
   var lkey = "lock:" + key;
   // SWD change this to lua script to check unique token to make sure we are releasing our own lock
-  global.db.driver.del(lkey, function (err, data) {
-    shlog.info("lock released:", lkey);
+  global.db.driver.del(lkey, _w(cb, function (err, data) {
+    shlog.info("lock released:", lkey, err, data);
     return cb(err, data);
-  });
+  }));
 };

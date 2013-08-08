@@ -27,7 +27,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
 function sendLoop() {
   global.db.spop("jobs:email", function (err, data) {
     shlog.debug("mailer check:", err, data);
-    if (err === null && data === null) {
+    if (!err && data === null) {
       // no emails, wait and loop
       setTimeout(sendLoop, 5000);
       return;
