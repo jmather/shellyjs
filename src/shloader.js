@@ -108,7 +108,7 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
   delete this._objects[key];
 
   var self = this;
-  this._db.delete(key, function (err, data) {
+  this._db.del(key, function (err, data) {
     if (self._locks[key]) {
       delete self._locks[key];
       shlock.release(key, cb);

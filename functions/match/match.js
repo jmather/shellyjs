@@ -90,7 +90,7 @@ match.clear = function (req, res, cb) {
     return cb(1);
   }
 
-  global.db.delete("match:any:" + req.body.name, function (err, data) {
+  global.db.del("match:any:" + req.body.name, function (err, data) {
     if (err) {
       res.add(sh.error("matchlist-delete", "unable to clear match list", {name: req.body.name}));
       return cb(1);

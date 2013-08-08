@@ -17,9 +17,9 @@ if (_.isUndefined(global.gServerStats)) {
 var ShCluster = exports;
 
 var shkeys = require(global.gBaseDir + "/src/shkeys.js");
-global.db = require(global.gBaseDir + "/src/shdb.js");
+//global.db = require(global.gBaseDir + "/src/shdb.js");
+global.db = require(global.gBaseDir + "/src/db/shredis.js");
 var gLoader = new ShLoader(global.db);
-var gDriver = global.db.driver;
 var gServer = null;
 
 if (_.isUndefined(global.dnodes)) {
@@ -29,7 +29,10 @@ if (_.isUndefined(global.dnodes)) {
 ShCluster.init = function (cb) {
   var self = this;
   shkeys.init(function (err) {
-    global.db.init(function (err) {
+    global.db.init(global.C.DB_OPTIONS, function (err, data) {
+      if (err) {
+        return cb(err, data);
+      }
       // just init the db if we are just worker
       if (cluster.isWorker) {
         return cb(0);
@@ -38,7 +41,7 @@ ShCluster.init = function (cb) {
         server.set("clusterUrl", global.C.CLUSTER_URL);
         server.set("socketUrl", global.C.SOCKET_URL);
         shlog.info("set server info", server.getData());
-        gDriver.sadd("serverList", global.server.serverId, function (err) {
+        global.db.sadd("serverList", global.server.serverId, function (err) {
           gLoader.dump();
           if (err) {
             return cb(err, "unable to save to server list");
@@ -130,7 +133,7 @@ ShCluster.masterShutdown = function () {
   async.series([
     function (cb) {
       shlog.info("shutdown: delete server from serverList");
-      gDriver.srem("serverList", global.server.serverId, cb);
+      global.db.srem("serverList", global.server.serverId, cb);
     },
     function (cb) {
       shlog.info("shutdown: delete kServer object");
@@ -161,7 +164,7 @@ ShCluster.getStat = function (key) {
 
 ShCluster.servers = function (cb) {
   var serverList = {};
-  gDriver.smembers("serverList", function (err, servers) {
+  global.db.smembers("serverList", function (err, servers) {
     shlog.info("smembers err:", err, "data:", servers);
     if (err) {
       return cb(err, servers);
@@ -252,7 +255,7 @@ ShCluster.sendServers = function (data, cb) {
   var ret = {};
   var self = this;
   var serverList = [];
-  gDriver.smembers("serverList", function (err, servers) {
+  global.db.smembers("serverList", function (err, servers) {
     if (err) {
       return cb(err, servers);
     }
@@ -294,7 +297,7 @@ ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
 
 ShCluster.home = function (oid, cb) {
   var self = this;
-  gDriver.smembers("serverList", function (err, servers) {
+  global.db.smembers("serverList", function (err, servers) {
     shlog.debug("smembers err: %s, data: %j", err, servers);
     if (err) {
       return cb(err, servers);

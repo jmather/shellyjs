@@ -5,8 +5,7 @@ exports._w = function (cb, func) {
     try {
       func.apply(null, arguments);
     } catch (e) {
-      var lcb = cb;
-      lcb(100, {message: e.toString(), stack: e.stack});
+      cb(100, {message: e.toString(), stack: e.stack});
     }
   };
   return ret;

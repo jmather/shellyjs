@@ -33,6 +33,9 @@ if (fs.existsSync(machineConfigFn)) {
 require(global.configBase + "/main.js");
 global.PACKAGE = require(global.gBaseDir + "/package.json");
 
+// number of times SIGINT or SIGQUIT called
+var gKillCount = 0;
+
 var shutil = require(global.gBaseDir + "/src/shutil.js");
 /*jslint stupid: true */
 // OK as this is only called once during startup
@@ -58,11 +61,14 @@ if (cluster.isMaster) {
   shlog.info("config:", global.C);
 }
 
+require(global.gBaseDir + "/src/shcb.js").leanStacks(true);
+
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
 var shelly = require(global.gBaseDir + "/src/shelly.js");
 var mailer = require(global.gBaseDir + "/src/shmailer.js");
 var matcher = require(global.gBaseDir + "/src/shmatcher.js");
 var socket = require(global.gBaseDir + "/src/socket.js");
+
 
 // SWD: this need to moved to a config file
 global.games = {};
@@ -184,9 +190,19 @@ function shutdown() {
 }
 
 process.on("SIGINT", function () {
-  shutdown();
+  if (gKillCount < 1) {
+    gKillCount += 1;
+    shutdown();
+  } else {
+    process.exit();
+  }
 });
 
 process.on("SIGQUIT", function () {
-  shutdown();
+  if (gKillCount < 1) {
+    gKillCount += 1;
+    shutdown();
+  } else {
+    process.exit();
+  }
 });

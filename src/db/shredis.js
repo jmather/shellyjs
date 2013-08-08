@@ -1,37 +1,44 @@
 var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var _w = require(global.gBaseDir + "/src/shcb.js").leanStacks(true)._w;
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 
 var shRedis = exports;
 
 var redis = require("redis");
-var client = redis.createClient();
-
-shRedis.driver = client;
+var gClient = null;
 
 // if you"d like to select database 3, instead of 0 (default), call
-// client.select(3, function() { /* ... */ });
+// gClient.select(3, function() { /* ... */ });
 
 shRedis.on = function (event, cb) {
-  client.on(event, cb);
+  gClient.on(event, cb);
 };
 
 shRedis.init = function (options, cb) {
   shlog.info("db init");
-  cb(0);
+  try {
+    gClient = redis.createClient();
+    shRedis.driver = gClient;
+    gClient.on("ready", function () {
+      shlog.info("db ready");
+      return cb(0);
+    });
+  } catch (e) {
+    return cb(1, sh.intMsg("init-failed", e.message));
+  }
 };
 
 shRedis.get = function (key, cb) {
   shlog.info("get", key);
-  client.get(key, cb);
+  gClient.get(key, cb);
 };
 
 
-shRedis.set = function (keyValue, cb) {
-  shlog.info("set", keyValue);
-  client.set(keyValue, _w(cb, function (err, data) {
+shRedis.set = function (key, value, cb) {
+  shlog.info("set", key, value);
+  gClient.set(key, value, _w(cb, function (err, data) {
     if (err) {
       return cb(1, sh.intMsg("redis-set", data));
     }
@@ -39,70 +46,79 @@ shRedis.set = function (keyValue, cb) {
   }));
 };
 
+shRedis.seta = function (args, cb) {
+  shlog.info("set", args);
+  gClient.set(args, _w(cb, function (err, data) {
+    if (err) {
+      return cb(1, sh.intMsg("redis-set", data));
+    }
+    return cb(0, data);
+  }));
+};
 
 shRedis.del = function (key, cb) {
   shlog.info("del", key);
-  client.del(key, cb);
+  gClient.del(key, cb);
 };
 
 shRedis.incr = function (key, amount, cb) {
   shlog.info("incr", key);
-  client.incrby(key, amount, cb);
+  gClient.incrby(key, amount, cb);
 };
 
 shRedis.decr = function (key, amount, cb) {
   shlog.info("decr", key);
-  client.incrby(key, amount, cb);
+  gClient.incrby(key, amount, cb);
 };
 
 shRedis.sadd = function (key, value, cb) {
   shlog.info("sadd", key);
-  client.sadd(key, value, cb);
+  gClient.sadd(key, value, cb);
 };
 
 shRedis.srem = function (key, value, cb) {
   shlog.info("srem", key, value);
-  client.srem(key, value, cb);
+  gClient.srem(key, value, cb);
 };
 
 shRedis.scard = function (key, cb) {
   shlog.info("scard", key);
-  client.scard(key, cb);
+  gClient.scard(key, cb);
 };
 
 shRedis.spop = function (key, cb) {
   shlog.info("spop", key);
-  client.spop(key, cb);
+  gClient.spop(key, cb);
 };
 
 shRedis.sismember = function (key, value, cb) {
   shlog.info("sismembers", key, value);
-  client.sismember(key, value, cb);
+  gClient.sismember(key, value, cb);
 };
 
 shRedis.smembers = function (key, cb) {
   shlog.info("smembers", key);
-  client.smembers(key, cb);
+  gClient.smembers(key, cb);
 };
 
 shRedis.hset = function (key, field, value, cb) {
   shlog.info("hset", key, field, value);
-  client.hset(key, field, value, cb);
+  gClient.hset(key, field, value, cb);
 };
 
 shRedis.hdel = function (key, field, cb) {
   shlog.info("hdel", key, field);
-  client.hdel(key, field, cb);
+  gClient.hdel(key, field, cb);
 };
 
 shRedis.hgetall = function (key, cb) {
   shlog.info("hgetall", key);
-  client.hgetall(key, cb);
+  gClient.hgetall(key, cb);
 };
 
 shRedis.dequeue = function (queueName, uid, cb) {
-  client.watch(queueName);
-  client.get(queueName, function (err, row) {
+  gClient.watch(queueName);
+  gClient.get(queueName, function (err, row) {
     if (row === null) {
       // nothing to dequeue
       return cb(0);
@@ -115,7 +131,7 @@ shRedis.dequeue = function (queueName, uid, cb) {
       // nothing to dequeue
       return cb(0);
     }
-    var multi = client.multi();
+    var multi = gClient.multi();
     multi.set(queueName, JSON.stringify(infoNew));
     multi.exec(function (err, replies) {
       shlog.info("dequeue - save", queueName, err, replies);
@@ -129,9 +145,9 @@ shRedis.dequeue = function (queueName, uid, cb) {
 };
 
 shRedis.popOrPush = function (queueName, minMatches, data, cb) {
-  client.watch(queueName);
-  client.get(queueName, function (err, row) {
-    var multi = client.multi();
+  gClient.watch(queueName);
+  gClient.get(queueName, function (err, row) {
+    var multi = gClient.multi();
     if (row === null) {
       // nothing in queue - set it
       multi.set(queueName, JSON.stringify([data]));
@@ -186,5 +202,5 @@ shRedis.popOrPush = function (queueName, minMatches, data, cb) {
 };
 
 shRedis.close = function (cb) {
-  client.quit(cb);
+  gClient.quit(cb);
 };

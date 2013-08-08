@@ -1,13 +1,13 @@
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
-var _w = require(global.gBaseDir + "/src/shcb.js").leanStacks(true)._w;
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var shlock = exports;
 
 shlock.acquire = function (key, cb) {
   var lkey = "lock:" + key;
   function tryLock(lkey, count, cb) {
-    global.db.set([lkey, "foo", "NX", "EX", 5], _w(cb, function (err, data) {
+    global.db.seta([lkey, "foo", "NX", "EX", 5], _w(cb, function (err, data) {
       if (err || data === null) {
         if (count < 3) {
           shlog.info("lock retry:", lkey, err, data);
