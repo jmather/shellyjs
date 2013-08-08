@@ -40,8 +40,7 @@ ShObject.prototype.create = function (oid, cb) {
 
 ShObject.prototype.load = function (oid, cb) {
   if (!_.isString(oid)) {
-    cb(1, sh.intMsg("oid-bad", oid));
-    return;
+    return cb(1, sh.intMsg("oid-bad", oid));
   }
 
   this._oid = oid;
@@ -50,8 +49,7 @@ ShObject.prototype.load = function (oid, cb) {
   var self = this;
   db.get(this._key, function (err, value) {
     if (value === null) {
-      cb(1, sh.intMsg("get-null", value));
-      return;
+      return cb(1, sh.intMsg("get-null", value));
     }
     try {
       var savedData = JSON.parse(value);
@@ -60,7 +58,7 @@ ShObject.prototype.load = function (oid, cb) {
     } catch (e) {
       return cb(1, sh.intMsg("object-parse", {message: e.message, value: value}));
     }
-    cb(0, self); // object is valid
+    return cb(0, self); // object is valid
   });
 };
 
@@ -70,7 +68,7 @@ ShObject.prototype.loadOrCreate = function (oid, cb) {
     if (error) {
       self.create(oid);
     }
-    cb(0, self);  // object must be valid
+    return cb(0, self);  // object must be valid
   });
 };
 
@@ -79,8 +77,7 @@ ShObject.prototype.save = function (cb) {
 
   if (currHash === this._hash) {
     shlog.info("ignoring save - object not modified: %s", this._key);
-    cb(0, sh.intMsg("object-same", "object has not changed"));
-    return;
+    return cb(0, sh.intMsg("object-same", "object has not changed"));
   }
   var now = new Date().getTime();
   this._data.modified = now;
@@ -88,13 +85,12 @@ ShObject.prototype.save = function (cb) {
   var self = this;
   var dataStr = JSON.stringify(this._data);
   db.set(this._key, dataStr, function (err, res) {
-    if (err !== null) {
-      cb(2, sh.intMsg("set-failed", res));
-      return;
+    if (err) {
+      return cb(2, sh.intMsg("set-failed", res));
     }
     shlog.info("object saved: %s", self._key);
     self._hash = currHash;
-    cb(0, sh.intMsg("object-saved", self._key));
+    return cb(0, sh.intMsg("object-saved", self._key));
   });
 };
 

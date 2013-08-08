@@ -9,6 +9,7 @@ var _ = require("lodash");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var commonStatic = global.gBaseDir + "/www/common";
 var adminBase = global.gBaseDir + "/www/admin";
@@ -55,7 +56,7 @@ app.use(function (req, res, next) {
   shlog.info("found cookie shSession: ", req.cookies.shSession);
 
   req.loader = new ShLoader();
-  sh.fillSession(req.cookies.shSession, req, res, function (error, data) {
+  sh.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
     if (error) {
       shlog.info("redirect - bad session");
       res.redirect("/login/index.html");
@@ -67,9 +68,8 @@ app.use(function (req, res, next) {
       res.redirect("/login/index.html");
       return 0;
     }
-    req.loader.dump();
-    return next();
-  });
+    req.loader.dump(next);
+  }));
 
   return 0;
 });
@@ -126,7 +126,8 @@ app.use(function (err, req, res, next) {
   res.status(500);
   res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
     partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
-//  res.send(sh.error("admin_page", { error: err.message, stack: err.stack, error1: err.message }));
+
+  return 0;
 });
 
 

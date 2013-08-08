@@ -6,6 +6,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var stats = require(global.gBaseDir + "/src/shstats.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var rest = express();
 
@@ -47,10 +48,10 @@ rest.use(function (req, res, next) {
   res.sendAll = sendAll;
   res.clear = clear;
 
-  sh.fillSession(req.body.session, req, res, function (error, data) {
+  sh.fillSession(req.body.session, req, res, _w(next, function (error, data) {
     // session.valid now used to control access to functions
     return next();
-  });
+  }));
 
   return 0;
 });

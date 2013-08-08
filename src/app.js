@@ -79,11 +79,6 @@ global.games.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 
 function onWorkerMessage(msg) {
   shlog.debug("master recv: %j", msg);
 
-  if (msg.cmd === "stat") {
-    shCluster.setStat(msg.key, msg.wid, msg.count);
-    return;
-  }
-
   if (msg.toWid === "all") {
     // forward to all workers, except sender
     _.each(cluster.workers, function (worker, wid) {

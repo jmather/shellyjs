@@ -10,6 +10,7 @@ var shcluster = require(__dirname + "/shcluster.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var socket = require(global.gBaseDir + "/src/socket.js");
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 // sync ok - only done on cluster startup
 
@@ -36,7 +37,7 @@ dispatch.shutdown = function (cb) {
 };
 
 dispatch.sendUser = function (uid, data, cb) {
-  shcluster.locate(uid, function (err, locateInfo) {
+  shcluster.locate(uid, _w(cb, function (err, locateInfo) {
     if (err) {
       return cb(err, "user is not online: " + uid);
     }
@@ -55,11 +56,11 @@ dispatch.sendUser = function (uid, data, cb) {
 
     // user is on different server
     shlog.info("sendUser - remote server:", l.serverId, "workerId:", l.workerId, "socketId:", l.socketId);
-    shcluster.sendUserWithLocate(locateInfo, data, function (err, data) {
+    shcluster.sendUserWithLocate(locateInfo, data, _w(cb, function (err, data) {
       // SWD ignore the error for now
       return cb(0, locateInfo);
-    });
-  });
+    }));
+  }));
 };
 
 dispatch.sendUsers = function (uids, data, excludeIds, cb) {
@@ -76,14 +77,14 @@ dispatch.sendUsers = function (uids, data, excludeIds, cb) {
     if (_.contains(excludeIds, uid)) {
       return lcb();
     }
-    dispatch.sendUser(uid, data, function (err, locateInfo) {
+    dispatch.sendUser(uid, data, _w(lcb, function (err, locateInfo) {
       if (err) {
         shlog.info("bad user send", err, locateInfo);
         return lcb();
       }
       locateList[uid] = locateInfo.getData();
       return lcb();
-    });
+    }));
   }, function (error) {
     if (_.isFunction(cb)) {
       if (error) {
@@ -92,10 +93,6 @@ dispatch.sendUsers = function (uids, data, excludeIds, cb) {
       return cb(0, locateList);
     }
   });
-};
-
-dispatch.sendChannel = function (channel, data, cb) {
-  return cb(0);
 };
 
 dispatch.sendServer = function (serverId, data, cb) {

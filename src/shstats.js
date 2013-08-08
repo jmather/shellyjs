@@ -1,6 +1,7 @@
 var async = require("async");
 var _ = require("lodash");
 var gStats = require(global.gBaseDir + global.C.STATS_WRAPPER);
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var shstats = exports;
 
@@ -29,17 +30,18 @@ shstats.stamp = function (domain, key, ts) {
 };
 
 shstats.get = function (domain, key, cb) {
-  gStats.get(domain, key, function (err, data) {
+  gStats.get(domain, key, _w(cb, function (err, data) {
     if (err) {
       return cb(err, data);
     }
     cb(0, data);
-  });
+  }));
 };
 
 shstats.reset = function (domain, key, cb) {
-  gStats.set(domain, key, 0);
-  cb(0, 0);
+  gStats.set(domain, key, 0, _w(cb, function (err, data) {
+    cb(0, 0);
+  }));
 };
 
 shstats.getAll = function (cb) {
@@ -50,7 +52,7 @@ shstats.getAll = function (cb) {
     var stats = {};
     async.each(statsKeys, function (key, lcb) {
       var parts = key.split(":");
-      gStats.get(parts[0], parts[1], function (err, data) {
+      gStats.get(parts[0], parts[1], _w(lcb, function (err, data) {
         if (!err) {
           if (_.isUndefined(stats[parts[0]])) {
             stats[parts[0]] = {};
@@ -58,7 +60,7 @@ shstats.getAll = function (cb) {
           stats[parts[0]][parts[1]] = data;
         }
         lcb(0);
-      });
+      }));
     }, function (err) {
       cb(0, stats);
     });
@@ -66,7 +68,7 @@ shstats.getAll = function (cb) {
 };
 
 shstats.resetAll = function (cb) {
-  gStats.list(function (err, statsKeys) {
+  gStats.list(_w(cb, function (err, statsKeys) {
     if (err) {
       return cb(err, statsKeys);
     }
@@ -82,5 +84,5 @@ shstats.resetAll = function (cb) {
     }, function (err) {
       cb(0, stats);
     });
-  });
+  }));
 };

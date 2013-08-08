@@ -8,11 +8,8 @@ var dnode = require("dnode");
 
 var sh = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-
-if (_.isUndefined(global.gServerStats)) {
-  global.gServerStats = {};
-}
 
 var ShCluster = exports;
 
@@ -28,7 +25,7 @@ if (_.isUndefined(global.dnodes)) {
 ShCluster.init = function (cb) {
   var self = this;
   shkeys.init(function (err) {
-    global.db.init(global.C.DB_OPTIONS, function (err, data) {
+    global.db.init(global.C.DB_OPTIONS, _w(cb, function (err, data) {
       if (err) {
         return cb(err, data);
       }
@@ -36,12 +33,11 @@ ShCluster.init = function (cb) {
       if (cluster.isWorker) {
         return cb(0);
       }
-      gLoader.get("kServer", global.server.serverId, function (err, server) {
+      gLoader.get("kServer", global.server.serverId, _w(cb, function (err, server) {
         server.set("clusterUrl", global.C.CLUSTER_URL);
         server.set("socketUrl", global.C.SOCKET_URL);
         shlog.info("set server info", server.getData());
-        global.db.sadd("serverList", global.server.serverId, function (err) {
-          gLoader.dump();
+        global.db.sadd("serverList", global.server.serverId, _w(cb, function (err) {
           if (err) {
             return cb(err, "unable to save to server list");
           }
@@ -50,14 +46,6 @@ ShCluster.init = function (cb) {
           gServer = dnode({
             event : function (msg, cb) {
               shlog.debug("server event recv: %j", msg);
-
-              if (msg.cmd === "channel.count") {
-                var ret = {};
-                ret[msg.channel] = self.getStat(msg.channel);
-                cb(ret);
-                return;
-              }
-
               // cmd = direct.user
               // toWid = workerId
               // toWsid = websocket id of user
@@ -83,9 +71,9 @@ ShCluster.init = function (cb) {
           gServer.listen(urlParts.port, urlParts.hostName);
 
           return cb(0, null);
-        });
-      });
-    });
+        }));
+      }));
+    }));
   });
 };
 
@@ -145,35 +133,19 @@ ShCluster.masterShutdown = function () {
     });
 };
 
-ShCluster.setStat = function (key, wid, value) {
-  if (_.isUndefined(global.gServerStats[key])) {
-    global.gServerStats[key] = {};
-  }
-  global.gServerStats[key][wid] = value;
-  shlog.info("server stats: %s:%s = %s", key, wid, value);
-};
-
-ShCluster.getStat = function (key) {
-  var ret = 0;
-  _.each(global.gServerStats[key], function (value, wid) {
-    ret += value;
-  });
-  return ret;
-};
-
 ShCluster.servers = function (cb) {
   var serverList = {};
-  global.db.smembers("serverList", function (err, servers) {
+  global.db.smembers("serverList", _w(cb, function (err, servers) {
     shlog.info("smembers err:", err, "data:", servers);
     if (err) {
       return cb(err, servers);
     }
     async.each(servers,
       function (item, lcb) {
-        gLoader.get("kServer", item, function (err, server) {
+        gLoader.get("kServer", item, _w(lcb, function (err, server) {
           serverList[item] = server.getData();
           lcb(0);
-        }, {checkCache: false});
+        }, {checkCache: false}));
       },
       function (err) {
         if (err) {
@@ -181,11 +153,11 @@ ShCluster.servers = function (cb) {
         }
         cb(0, serverList);
       });
-  });
+  }));
 };
 
 ShCluster.setLocate = function (user, socketId, cb) {
-  gLoader.get("kLocate", user.get("oid"), function (err, locate) {
+  gLoader.get("kLocate", user.get("oid"), _w(cb, function (err, locate) {
     locate.set("oid", user.get("oid"));
     locate.set("name", user.get("name"));
     locate.set("pict", user.get("pict"));
@@ -196,7 +168,7 @@ ShCluster.setLocate = function (user, socketId, cb) {
     locate.set("socketId", socketId);
     shlog.debug("locate set", locate.getData());
     locate.save(cb);
-  });
+  }));
 };
 
 ShCluster.removeLocate = function (uid, cb) {
@@ -204,13 +176,13 @@ ShCluster.removeLocate = function (uid, cb) {
 };
 
 ShCluster.locate = function (uid, cb) {
-  gLoader.exists("kLocate", uid, function (err, locateInfo) {
+  gLoader.exists("kLocate", uid, _w(cb, function (err, locateInfo) {
     cb(err, locateInfo);
-  }, {checkCache: false});
+  }, {checkCache: false}));
 };
 
 ShCluster.sendServer = function (serverId, data, cb) {
-  gLoader.exists("kServer", serverId, function (err, server) {
+  gLoader.exists("kServer", serverId, _w(cb, function (err, server) {
     if (err) {
       shlog.error("serverId-bad", "cannot find cluster id", serverId);
       return cb(1, sh.intMsg("serverId-bad", serverId));
@@ -247,40 +219,40 @@ ShCluster.sendServer = function (serverId, data, cb) {
         cb(0, data);
       });
     }
-  }, {checkCache: false});
+  }, {checkCache: false}));
 };
 
 ShCluster.sendServers = function (data, cb) {
   var ret = {};
   var self = this;
   var serverList = [];
-  global.db.smembers("serverList", function (err, servers) {
+  global.db.smembers("serverList", _w(cb, function (err, servers) {
     if (err) {
       return cb(err, servers);
     }
-    async.each(servers, function (serverId, lcb) {
-      self.sendServer(serverId, data, function (err, data) {
+    async.each(servers, _w(cb, function (serverId, lcb) {
+      self.sendServer(serverId, data, _w(lcb, function (err, data) {
         if (!err) {
           ret[serverId] = data;
         }
         lcb(0); // ingore any errors
-      });
+      }));
     }, function (error) {
       // ingore any errors
       cb(0, ret);
-    });
-  });
+    }));
+  }));
 };
 
 ShCluster.sendUser = function (uid, data, cb) {
   var self = this;
-  gLoader.exists("kLocate", uid, function (err, locateInfo) {
+  gLoader.exists("kLocate", uid, _w(cb, function (err, locateInfo) {
     if (err) {
       shlog.error("user_offline", "user is offline", uid);
       return cb(1, sh.intMsg("user-offline", uid));
     }
     self.sendUserWithLocate(locateInfo, cb);
-  }, {checkCache: false});
+  }, {checkCache: false}));
 };
 
 ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
@@ -296,14 +268,14 @@ ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
 
 ShCluster.home = function (oid, cb) {
   var self = this;
-  global.db.smembers("serverList", function (err, servers) {
+  global.db.smembers("serverList", _w(cb, function (err, servers) {
     shlog.debug("smembers err: %s, data: %j", err, servers);
     if (err) {
       return cb(err, servers);
     }
     var idx = sh.modString(oid, servers.length);
     var serverId = servers[idx];
-    gLoader.get("kServer", serverId, function (err, server) {
+    gLoader.get("kServer", serverId, _w(cb, function (err, server) {
       if (err) {
         shlog.error("serverId-bad", "cannot find cluster id", serverId);
         return cb(1, sh.intMsg("serverId-bad", serverId));
@@ -311,6 +283,6 @@ ShCluster.home = function (oid, cb) {
       shlog.debug("get home server oid: %s, idx: %s", oid, idx);
       shlog.debug("get home server data: %j", server.getData());
       return cb(0, server.getData());
-    }, {checkCache: false});
-  });
+    }, {checkCache: false}));
+  }));
 };

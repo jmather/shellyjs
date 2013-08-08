@@ -9,6 +9,7 @@ var sh = require(global.gBaseDir + "/src/shutil.js");
 var ShLoader = require(global.gBaseDir + "/src/shloader.js");
 var shcluster = require(global.gBaseDir + "/src/shcluster.js");
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var Socket = exports;
 var wss = null;
@@ -78,6 +79,10 @@ function makeCalls(msgs, req, res) {
   }
 }
 
+function onMessageError(err, data) {
+  sh.error("message-error", err, data);
+}
+
 function onMessage(data) {
   shlog.recv("live - %s", data);
   // parse packet
@@ -107,21 +112,25 @@ function onMessage(data) {
     req.session = res.ws.session;
     makeCalls(msgs, req, res);
   } else {
-    sh.fillSession(packet.session, req, res, function (err) {
+    sh.fillSession(packet.session, req, res, _w(onMessageError, function (err) {
       // req.session.valid now used to control access
       if (req.session.valid) {
         res.ws.session = req.session;   // SWD now storing session in ws so we can remove the ws.uid and ws.name
         res.ws.uid = req.session.uid;
         res.ws.name = req.session.user.get("name");
-        shcluster.setLocate(req.session.user, res.ws.id, function (err, data) {
+        shcluster.setLocate(req.session.user, res.ws.id, _w(onMessageError, function (err, data) {
           makeCalls(msgs, req, res);
-        });
+        }));
       } else {
         // some calls don't require session
         makeCalls(msgs, req, res);
       }
-    });
+    }));
   }
+}
+
+function onCloseError(err, data) {
+  sh.error("close-error", err, data);
 }
 
 function onClose() {
@@ -131,9 +140,9 @@ function onClose() {
 
   // clean up the global locator if there
   if (_.isString(this.uid)) {
-    shcluster.removeLocate(this.uid, function (err, data) {
+    shcluster.removeLocate(this.uid, _w(onCloseError, function (err, data) {
       // ignore and don't wait
-    });
+    }));
   }
 
   // clean up any channels

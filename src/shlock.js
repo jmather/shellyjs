@@ -7,7 +7,7 @@ var shlock = exports;
 shlock.acquire = function (key, cb) {
   var lkey = "lock:" + key;
   function tryLock(lkey, count, cb) {
-    global.db.seta([lkey, "foo", "NX", "EX", 5], _w(cb, function (err, data) {
+    global.db.set([lkey, "foo", "NX", "EX", 5], _w(cb, function (err, data) {
       if (err || data === null) {
         if (count < 3) {
           shlog.info("lock retry:", lkey, err, data);

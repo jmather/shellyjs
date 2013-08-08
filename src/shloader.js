@@ -6,6 +6,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var shkeys = require(global.gBaseDir + "/src/shkeys.js");
 var shlock = require(global.gBaseDir + "/src/shlock.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 function ShLoader(db) {
   if (_.isObject(db)) {
@@ -60,7 +61,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
   var self = this;
   var obj = new ShClass();
   if (opts.lock) {
-    shlock.acquire(key, function (err, data) {
+    shlock.acquire(key, _w(cb, function (err, data) {
       if (err) {
         return cb(err, data);
       }
@@ -73,16 +74,16 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
         }
         return cb(err, data);
       });
-    });
+    }));
   } else {
-    obj[funcName](params, function (err, data) {
+    obj[funcName](params, _w(cb, function (err, data) {
       if (!err) {
         shlog.info("cache store: %s", obj._key);
         self._objects[obj._key] = obj;
         return cb(0, obj);
       }
       return cb(err, data);
-    });
+    }));
   }
 };
 
@@ -108,14 +109,14 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
   delete this._objects[key];
 
   var self = this;
-  this._db.del(key, function (err, data) {
+  this._db.del(key, _w(cb, function (err, data) {
     if (self._locks[key]) {
       delete self._locks[key];
       shlock.release(key, cb);
     } else {
       cb(0);
     }
-  });
+  }));
 };
 
 ShLoader.prototype.dump = function (cb) {
@@ -123,20 +124,20 @@ ShLoader.prototype.dump = function (cb) {
   var self = this;
   async.each(Object.keys(this._objects), function (key, lcb) {
     shlog.info("dumping: %s", key);
-    self._objects[key].save(function (err, data) {
+    self._objects[key].save(_w(lcb, function (err, data) {
       if (data.code === "object-saved") {
         self._saves += 1;
       }
       if (self._locks[key]) {
         delete self._locks[key];
-        shlock.release(key, function (err, data) {
+        shlock.release(key, _w(lcb, function (err, data) {
           // ignore any errors, as we need to keep going
           lcb(0);
-        });
+        }));
       } else {
         lcb(0);
       }
-    });
+    }));
   }, function (err) {
     shlog.info("dump complete:", self._cacheHit, "misses:", self._cacheMiss, "saves:", self._saves);
     if (_.isFunction(cb)) {

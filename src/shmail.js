@@ -2,6 +2,7 @@ var _ = require("lodash");
 var async = require("async");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var shmail = exports;
 
@@ -29,13 +30,13 @@ shmail.send = function (templateName, locals, cb) {
   if (!locals.subject) {
     return cb(EmailAddressRequiredError);
   }
-  emailTemplates(templatesDir, function (err, template) {
+  emailTemplates(templatesDir, _w(cb, function (err, template) {
     if (err) {
       //console.log(err);
       return cb(err);
     }
     // Send a single email
-    template(templateName, locals, function (err, html, text) {
+    template(templateName, locals, _w(cb, function (err, html, text) {
       if (err) {
         //console.log(err);
         return cb(err);
@@ -53,14 +54,14 @@ shmail.send = function (templateName, locals, cb) {
         html: html,
         // generateTextFromHTML: true,
         text: text
-      }, function (err, responseStatus) {
+      }, _w(cb, function (err, responseStatus) {
         if (err) {
           shlog.error("sending:", locals.email, err);
           return cb(err);
         }
         shlog.info("sending:", locals.email, responseStatus.message);
         return cb(null, responseStatus.message, html, text);
-      });
-    });
-  });
+      }));
+    }));
+  }));
 };

@@ -10,6 +10,7 @@ var stackTrace = require("stack-trace");
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 var stats = require(global.gBaseDir + "/src/shstats.js");
 var session = require(global.gBaseDir + "/src/session.js");  // used by fill session
+var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
 var shutil = exports;
 
@@ -83,7 +84,7 @@ shutil.fillSession = function (sess, req, res, cb) {
   }
   var uid = sess.split(":")[1];
   shlog.info("loading user: uid = " + uid);
-  req.loader.get("kUser", uid, function (error, user) {
+  req.loader.get("kUser", uid, _w(cb, function (error, user) {
     if (error) {
       req.session.error = shutil.error("user_load", "unable to load user", {uid: uid, error: error, user: user});
       return cb(1);
@@ -93,7 +94,7 @@ shutil.fillSession = function (sess, req, res, cb) {
     req.session.uid = uid;
     req.session.user = user;
     cb(0);
-  });
+  }));
 };
 
 shutil.call = function (req, res, cb) {
@@ -232,7 +233,7 @@ shutil.call = function (req, res, cb) {
 shutil.fillProfiles = function (loader, userIds, cb) {
   var profiles = {};
   async.each(userIds, function (userId, lcb) {
-    loader.exists("kUser", userId, function (error, user) {
+    loader.exists("kUser", userId, _w(lcb, function (error, user) {
       if (error) {
         lcb(); // just skip and keep going
         return;
@@ -243,7 +244,7 @@ shutil.fillProfiles = function (loader, userIds, cb) {
         profiles[userId].name = "anon" + userId.substr(0, 4);
       }
       lcb();
-    });
+    }));
   }, function (error) {
     if (error) {
       cb(1, error);
@@ -257,7 +258,7 @@ shutil.fillProfiles = function (loader, userIds, cb) {
 shutil.extendProfiles = function (loader, profiles, cb) {
   var userIds = Object.keys(profiles);
   async.each(userIds, function (userId, lcb) {
-    loader.get("kUser", userId, function (error, user) {
+    loader.get("kUser", userId, _w(lcb, function (error, user) {
       if (error) {
         lcb(user);
         return;
@@ -267,7 +268,7 @@ shutil.extendProfiles = function (loader, profiles, cb) {
         profiles[userId].name = "anon" + userId.substr(0, 4);
       }
       lcb();
-    });
+    }));
   }, function (error) {
     if (error) {
       cb(1, error);
@@ -286,21 +287,4 @@ shutil.expressCrossDomain = function (req, res, next) {
     return;
   }
   next();
-};
-
-shutil.expressError = function (req, res, next) {
-  next();
-// SWD: this does not work as the stack keeps growing
-// the run does not work either, the stack has a race condition where
-// if the second call finishes before the first it pops the wrong domain
-/*
-  var dm = domain.create();
-  dm.on("error", function(err) {
-    next(err);
-    dm.dispose();
-  });
-  dm.enter();
-  next();
-*/
-//  dm.run(next); // does not work
 };
