@@ -68,7 +68,7 @@ shRedis.incr = function (key, amount, cb) {
 
 shRedis.decr = function (key, amount, cb) {
   shlog.info("decr", key);
-  gClient.incrby(key, amount, cb);
+  gClient.decrby(key, amount, cb);
 };
 
 shRedis.sadd = function (key, value, cb) {

@@ -17,7 +17,6 @@ if (_.isUndefined(global.gServerStats)) {
 var ShCluster = exports;
 
 var shkeys = require(global.gBaseDir + "/src/shkeys.js");
-//global.db = require(global.gBaseDir + "/src/shdb.js");
 global.db = require(global.gBaseDir + "/src/db/shredis.js");
 var gLoader = new ShLoader(global.db);
 var gServer = null;

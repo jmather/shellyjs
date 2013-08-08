@@ -14,20 +14,12 @@ var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 // sync ok - only done on cluster startup
 
 var dispatch = exports;
-
-var gDb = require(global.gBaseDir + "/src/shdb.js");
 var gLoader = null;
-var gDriver = null;
 
 dispatch.init = function (cb) {
-  gDb.init(function (err) {
-    if (err) {
-      return cb(err);
-    }
-    gLoader = new ShLoader(gDb);
-    gDriver = gDb.driver;
-    return cb(err);
-  });
+  // use global db for now
+  gLoader = new ShLoader();
+  return cb(0);
 };
 
 dispatch.shutdown = function (cb) {
@@ -35,10 +27,6 @@ dispatch.shutdown = function (cb) {
     function (lcb) {
       shlog.info("dumping loader");
       gLoader.dump(lcb);
-    },
-    function (lcb) {
-      shlog.info("closing db");
-      gDb.close(lcb);
     }
   ],
     function (err, results) {
