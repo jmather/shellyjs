@@ -97,6 +97,30 @@ shutil.fillSession = function (sess, req, res, cb) {
   }));
 };
 
+// load module
+// SWD for now clear cache each time - will add server command to reload a module
+shutil.createObj = function (moduleName, funcName) {
+  var Module = null;
+  var obj = null;
+  var cmdFile = global.gBaseDir + "/functions/" + moduleName + "/" + moduleName + ".js";
+  try {
+//    if (moduleName === "game" || moduleName === "tictactoe" || moduleName === "connect4") {
+//      cmdFile = global.gBaseDir + "/games/" + moduleName + "/" + moduleName + ".js";
+//    }
+    delete require.cache[require.resolve(cmdFile)];
+    Module = require(cmdFile);
+    if (_.isFunction(Module)) { // handle objects instead of module functions
+      obj = new Module();
+    } else {
+      obj = Module;
+    }
+    return obj;
+  } catch (e) {
+    console.log(cmdFile, e);
+    return null;
+  }
+};
+
 shutil.call = function (req, res, cb) {
   if (_.isUndefined(req.body.cmd)) {
     res.add(shutil.error("module_call", "invalid command", {cmd: req.body.cmd}));
@@ -112,22 +136,10 @@ shutil.call = function (req, res, cb) {
   }
   var moduleName = cmdParts[0];
   var funcName = cmdParts[1];
-  var cmdFile = global.gBaseDir + "/functions/" + moduleName + "/" + moduleName + ".js";
 
-  // load module
-  // SWD for now clear cache each time - will add server command to reload a module
-  var module = null;
-  try {
-    delete require.cache[require.resolve(cmdFile)];
-    module = require(cmdFile);
-  } catch (e) {
-    res.add(shutil.error("module_require", "unable to load module", {module: moduleName, message: e.message, stack: e.stack}));
-    return cb(1);
-  }
-
-  // check function
-  if (_.isUndefined(module[funcName])) {
-    res.add(shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
+  var module = shutil.createObj(moduleName, funcName);
+  if (!module) {
+    res.add(shutil.error("module_require", "unable to load module", {module: moduleName}));
     return cb(1);
   }
 
@@ -185,32 +197,46 @@ shutil.call = function (req, res, cb) {
     return;
   }
 
+  // handle object modules
+  var obj = module;
+/*
+  var className = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+  if (_.isObject(module[className])) {
+    obj = new module[className]();
+  }
+*/
+  // check function
+  if (_.isUndefined(obj[funcName])) {
+    res.add(shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
+    return cb(1);
+  }
+
   // init for modules to use to pass data
   if (_.isUndefined(req.env)) {
     req.env = {};
   }
 
   // ensure we have pre/post functions
-  if (!_.isFunction(module.pre)) {
+  if (!_.isFunction(obj.pre)) {
     shlog.info("no pre - using default");
-    module.pre = function (req, res, cb) {
+    obj.pre = function (req, res, cb) {
       cb(0);
     };
   }
-  if (!_.isFunction(module.post)) {
+  if (!_.isFunction(obj.post)) {
     shlog.info("no post - using default");
-    module.post = function (req, res, cb) {
+    obj.post = function (req, res, cb) {
       cb(0);
     };
   }
 
   // call the pre, function, post sequence
-  module.pre(req, res, _w(cb, function (error, data) {
+  obj.pre(req, res, _w(cb, function (error, data) {
     if (error) {
       shlog.info("pre error: ", error);
       return cb(error, data);
     }
-    module[funcName](req, res, _w(cb, function (error, data) {
+    obj[funcName](req, res, _w(cb, function (error, data) {
       var retError = error;
       var retData = data;
       if (error) {
@@ -218,7 +244,7 @@ shutil.call = function (req, res, cb) {
         shlog.info("func error: ", error);
         return cb(error, data);
       }
-      module.post(req, res, _w(cb, function (error, data) {
+      obj.post(req, res, _w(cb, function (error, data) {
         if (error) {
           return cb(error, data);
         }

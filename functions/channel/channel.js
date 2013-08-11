@@ -56,7 +56,7 @@ Channel.add = function (req, res, cb) {
       gender: req.session.user.get("gender"),
       age: req.session.user.get("age"),
       status: "on"});
-    Channel.sendInt(req.body.channel, event, _w(cb, function (err, locateList) {
+    Channel.sendInt(req.body.channel, event, null, _w(cb, function (err, locateList) {
       // send me a list of current users
       _.each(locateList, function (locateInfo, uid) {
         var event = sh.event("channel.user", {channel: req.body.channel, uid: uid,
@@ -112,13 +112,13 @@ Channel.remove = function (req, res, cb) {
   }));
 };
 
-Channel.sendInt = function (channel, event, cb) {
+Channel.sendInt = function (channel, event, excludeIds, cb) {
   global.db.smembers(channel, _w(cb, function (err, uidList) {
     if (err) {
       return cb(1);
     }
 
-    dispatch.sendUsers(uidList, event, null, _w(cb, function (err, locateList) {
+    dispatch.sendUsers(uidList, event, excludeIds, _w(cb, function (err, locateList) {
       if (_.isFunction(cb)) {
         return cb(0, locateList);
       }
@@ -137,7 +137,7 @@ Channel.send = function (req, res, cb) {
   };
   var event = sh.event("channel.message", {channel: req.body.channel, bank: [msgBlock]});
 
-  Channel.sendInt(req.body.channel, event, _w(cb, function (err, uidList) {
+  Channel.sendInt(req.body.channel, event, null, _w(cb, function (err, uidList) {
     // SWD don't really need to wait or care about send err
     res.add(sh.event("channel.send", {status: "sent", uids: uidList}));
     req.loader.get("kMessageBank", req.body.channel, _w(cb, function (err, ml) {

@@ -288,7 +288,7 @@ Game.turn = function (req, res, cb) {
     }
     if (gameData.status === "over") {
       // just users in game
-      channel.sendInt("game:" + gameId, sh.event("game.over", gameData), cb);
+      channel.sendInt("game:" + gameId, sh.event("game.over", gameData), null, cb);
     } else {
       // turn.next sent to all users online
       var event = sh.event("game.turn.next", {gameId: gameId,

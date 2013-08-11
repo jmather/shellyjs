@@ -213,7 +213,7 @@ connect4.turn = function (req, res, cb) {
   state.lastMove = {uid: uid, move: move, color: color};
   var event = sh.event("game.update", state.lastMove);
   res.add(event);
-  channel.sendInt("game:" + game.get("oid"), event, _w(cb, function (err, data) {
+  channel.sendInt("game:" + game.get("oid"), event, null, _w(cb, function (err, data) {
     var winSet = [];
     var win = checkWin(state.board, color, move.x, move.y, winSet);
     if (win) {
