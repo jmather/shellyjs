@@ -142,7 +142,6 @@ function addGamePlayingMulti(loader, players, game, cb) {
 
 Game.create = function (req, res, cb) {
   shlog.info("game.create");
-  var uid = req.session.uid;
 
   req.loader.create("kGame", sh.uuid(), _w(cb, function (err, game) {
     if (err) {
@@ -151,45 +150,45 @@ Game.create = function (req, res, cb) {
     }
 
     game.set("name", req.body.name);
-    game.set("ownerId", uid);
-    game.set("whoTurn", uid);
+    game.set("ownerId", req.session.uid);
+    game.set("whoTurn", req.session.uid);
 
     // add to request environment
     req.env.game = game;
 
-    // SWD - clean this up
     if (_.isUndefined(req.body.players)) {
-      addGamePlaying(req.loader, uid, game, _w(cb, function (error, data) {
-        game.setPlayer(uid, "ready");
-        sh.extendProfiles(req.loader, game.get("players"), _w(cb, function (error, data) {
-          if (error) {
-            res.add(sh.error("user-profiles", "unable to load users for this game", data));
-            return cb(1);
-          }
-          // SWD check if create exists
-          req.env.gameModule.create(req, res, cb);
-        }));
-      }));
-    } else {
-      _.each(req.body.players, function (playerId) {
-        game.setPlayer(playerId, "ready");
-      });
-      addGamePlayingMulti(req.loader, req.body.players, game, _w(cb, function (error, data) {
-        // SWD ignore any errors for now
-        if (error) {
-          shlog.error("add_players", "unable to add a player", data);
-        }
-        sh.extendProfiles(req.loader, game.get("players"), _w(cb, function (error, data) {
-          if (error) {
-            res.add(sh.error("user-profiles", "unable to load users for this game", data));
-            return cb(1);
-          }
-
-          // SWD check if create exists
-          req.env.gameModule.create(req, res, cb);
-        }));
-      }));
+      req.body.players = [req.session.uid];
     }
+    // add the players to the game
+    _.each(req.body.players, function (playerId) {
+      game.setPlayer(playerId, "ready");
+    });
+    addGamePlayingMulti(req.loader, req.body.players, game, _w(cb, function (error, data) {
+      // SWD ignore any errors for now
+      if (error) {
+        shlog.error("add_players", "unable to add a player", data);
+      }
+      // copy profile info
+      sh.extendProfiles(req.loader, game.get("players"), _w(cb, function (error, data) {
+        if (error) {
+          res.add(sh.error("user-profiles", "unable to load users for this game", data));
+          return cb(1);
+        }
+
+        if (!_.isFunction(req.env.gameModule.create)) {
+          res.add(sh.event("game.create", req.env.game.getData()));
+          return cb(0);
+        }
+        req.env.gameModule.create(req, res, _w(cb, function (err, data) {
+          if (data) {
+            res.add(sh.event("game.create", data));
+          } else {
+            res.add(sh.event("game.create", req.env.game.getData()));
+          }
+          return cb(0);
+        }));
+      }));
+    }));
   }));
 };
 
@@ -488,12 +487,12 @@ Game.playing = function (req, res, cb) {
       return cb(1);
     }
     fillGames(req.loader, playing.getData().currentGames, _w(cb, function (error, data) {
-      if (!error) {
-        res.add(sh.event("game.playing", data));
-        return cb(0);
+      if (error) {
+        res.add(sh.error("playing-fillgames", "unable to fill games in playing list", data));
+        return cb(1);
       }
-      res.add(sh.error("playing-fillgames", "unable to fill games in playing list", data));
-      return cb(1);
+      res.add(sh.event("game.playing", data));
+      return cb(0);
     }));
   }));
 };

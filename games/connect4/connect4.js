@@ -34,8 +34,6 @@ connect4.create = function (req, res, cb) {
   req.env.game.set("maxPlayers", 2);
   req.env.game.set("state", state);
 
-
-  res.add(sh.event("game.create", req.env.game.getData()));
   return cb(0);
 };
 

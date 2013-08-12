@@ -26,7 +26,6 @@ tictactoe.create = function (req, res, cb) {
   state.xes = req.session.uid;
   req.env.game.set("state", state);
 
-  res.add(sh.event("game.create", req.env.game.getData()));
   return cb(0);
 };
 
