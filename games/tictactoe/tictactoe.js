@@ -110,7 +110,11 @@ tictactoe.turn = function (req, res, cb) {
     gameBoard[move.x][move.y] = "O";
   }
   state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
-  channel.sendInt("game:" + game.get("oid"), sh.event("game.update", game.getData()));
+
+  // notify players of update
+  var event = sh.event("game.update", game.getData());
+  channel.sendInt("game:" + game.get("oid"), event);
+  res.add(event);
 
   var win = checkWin(gameBoard);
   if (win.winner !== "") {
@@ -119,7 +123,6 @@ tictactoe.turn = function (req, res, cb) {
     state.winner = uid;
     state.winnerSet = win.set;
     game.set("state", state);
-    res.add(sh.event("game.over", game.getData()));
     return cb(0);
   }
 
@@ -129,11 +132,8 @@ tictactoe.turn = function (req, res, cb) {
     state.winner = "";
     state.winnerSet = null;
     game.set("state", state);
-    res.add(sh.event("game.over", game.getData()));
     return cb(0);
   }
 
-  // send back the updated board
-  res.add(sh.event("game.update", game.getData()));
   return cb(0);
 };

@@ -94,6 +94,28 @@ Game.post = function (req, rs, cb) {
   return cb(0);
 };
 
+Game.notify = function (req, res, event) {
+  // notify any players in game
+  channel.sendInt("game:" + req.env.game.get("oid"), event);
+  // notify me - rest support
+  res.add(event);
+};
+
+Game.notifyTurn = function (req, res) {
+  // notify any players online
+  var gameData = req.env.game.getData();
+  var event = sh.event("game.turn.next", {gameId: gameData.oid,
+    gameName: gameData.name,
+    whoTurn: gameData.whoTurn,
+    name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
+    pic: ""});
+
+  // notify anyone that is onine
+  dispatch.sendUsers(gameData.playerOrder, event, req.session.oid); // exclude me
+  // noitify me - rest support
+  res.add(event);
+};
+
 function addGamePlaying(loader, uid, game, cb) {
   loader.get("kPlaying", uid, _w(cb, function (error, playing) {
     if (!error) {
@@ -288,8 +310,11 @@ Game.turn = function (req, res, cb) {
     }
     if (gameData.status === "over") {
       // just users in game
-      channel.sendInt("game:" + gameId, sh.event("game.over", gameData), null, cb);
+      Game.notify(req, res, sh.event("game.over", gameData));
+//      channel.sendInt("game:" + gameId, sh.event("game.over", gameData), null, cb);
     } else {
+      Game.notifyTurn(req, res);
+/*
       // turn.next sent to all users online
       var event = sh.event("game.turn.next", {gameId: gameId,
         gameName: gameData.name,
@@ -298,7 +323,9 @@ Game.turn = function (req, res, cb) {
         pic: ""});
       res.add(event); // send to me
       dispatch.sendUsers(gameData.playerOrder, event, req.session.uid, cb); // send to all other players
+ */
     }
+    cb(0);
   }));
 };
 
@@ -336,16 +363,20 @@ Game.reset = function (req, res, cb) {
     // ignore error as we need to send anyway
 
     // send to players in game and back to self
-    var event = sh.event("game.reset", gameData);
-    channel.sendInt("game:" + gameData.oid, event, req.session.uid);
-    res.add(event);
+    Game.notify(req, res, sh.event("game.reset", gameData));
+//    var event = sh.event("game.reset", gameData);
+//    channel.sendInt("game:" + gameData.oid, event, req.session.uid);
+//    res.add(event);
 
     // notify any players online
+    Game.notifyTurn(req, res);
+/*
     dispatch.sendUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
       gameName: gameData.name,
       whoTurn: gameData.whoTurn,
       name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
       pic: ""}));
+*/
     return cb(error);
   }));
 };

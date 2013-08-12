@@ -221,7 +221,6 @@ connect4.turn = function (req, res, cb) {
       game.set("whoTurn", "");
       state.winner = uid;
       state.winnerSet = winSet;
-      res.add(sh.event("game.over", game.getData()));
       return cb(0);
     }
 
@@ -230,7 +229,6 @@ connect4.turn = function (req, res, cb) {
       game.set("whoTurn", "");
       state.winner = "";
       state.winnerSet = null;
-      res.add(sh.event("game.over", game.getData()));
       return cb(0);
     }
     return cb(0);
