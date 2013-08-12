@@ -229,3 +229,8 @@ connect4.turn = function (req, res, cb) {
 
   return cb(0, state.lastMove);
 };
+
+connect4.foo = function (req, res, cb) {
+  res.add(sh.event("game.foo"));
+  return cb(0);
+};

@@ -15,19 +15,14 @@ var Game = exports;
 Game.desc = "game state and control module";
 Game.functions = {
   create: {desc: "create a new game", params: {name: {dtype: "string"}}, security: []},
-  start: {desc: "start a game", params: {gameId: {dtype: "string"}}, security: []},
-  join: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
-  leave: {desc: "leave an existing game", params: {gameId: {dtype: "string"}}, security: []},
-  kick: {desc: "kick a user out of game and prevent return", params: {gameId: {dtype: "string"}, kickId: {dtype: "string"}}, security: []},
-  turn: {desc: "calling user taking their turn", params: {gameId: {dtype: "string"}}, security: []},
-  end: {desc: "end a game", params: {gameId: {dtype: "string"}, message: {dtype: "string"}}, security: []},
   get: {desc: "get game object", params: {gameId: {dtype: "string"}}, security: []},
-  set: {desc: "set game object", params: {gameId: {dtype: "string"}, game: {dtype: "object"}}, security: []},
+  join: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
+  turn: {desc: "calling user taking their turn", params: {gameId: {dtype: "string"}}, security: []},
   reset: {desc: "reset game for another round", params: {gameId: {dtype: "string"}}, security: []},
-
-  list: {desc: "list all loaded games", params: {}, security: []},
+  leave: {desc: "leave an existing game", params: {gameId: {dtype: "string"}}, security: []},
   call: {desc: "call a game specific function", params: {gameId: {dtype: "string"}, func: {dtype: "string"}, args: {dtype: "object"}}, security: []},
 
+  list: {desc: "list all loaded games", params: {}, security: []},
   playing: {desc: "list all games user is currently playing", params: {}, security: []}
 };
 
@@ -195,24 +190,6 @@ Game.create = function (req, res, cb) {
   }));
 };
 
-Game.start = function (req, res, cb) {
-  var game = req.env.game;
-
-  game.set("status", "playing");
-
-  res.add(sh.event("game.start", game.getData()));
-  return cb(0);
-};
-
-Game.end = function (req, res, cb) {
-  var game = req.env.game;
-
-  game.set("status", "over");
-
-  res.add(sh.event("game.end", game.getData()));
-  return cb(0);
-};
-
 Game.join = function (req, res, cb) {
   var uid = req.session.uid;
   var game = req.env.game;
@@ -267,18 +244,6 @@ Game.leave = function (req, res, cb) {
   }, {lock: true}));
 };
 
-Game.kick = function (req, res, cb) {
-  var kickId = req.body.kickId;
-  var game = req.env.game;
-
-  // SWD check user
-  game.players[kickId] = {status: "kicked"};
-  game.setPlayer(kickId, "kicked");
-
-  res.add(sh.event("game.leave", game.get("players")));
-  return cb(0);
-};
-
 Game.turn = function (req, res, cb) {
   var uid = req.session.uid;
   var gameId = req.body.gameId;
@@ -331,16 +296,6 @@ Game.get = function (req, res, cb) {
   var game = req.env.game;
 
   res.add(sh.event("game.get", game.getData()));
-  return cb(0);
-};
-
-Game.set = function (req, res, cb) {
-  var game = req.env.game;
-  var newGameData = req.body.game;
-
-  game.setData(newGameData);
-
-  res.add(sh.event("game.set", game.getData()));
   return cb(0);
 };
 
