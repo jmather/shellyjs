@@ -4,6 +4,7 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
+var game = require(global.gBaseDir + "/functions/game/game.js");
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var connect4 = exports;
@@ -195,7 +196,6 @@ function checkWin(board, turn, column, row, winSet) {
 connect4.turn = function (req, res, cb) {
   var uid = req.session.uid;
   var move = req.body.move;
-  var game = req.env.game;
   var state = req.env.game.get("state");
   var board = state.board;
 
@@ -211,26 +211,25 @@ connect4.turn = function (req, res, cb) {
   board[move.x][move.y] = color;
 
   state.lastMove = {uid: uid, move: move, color: color};
-  var event = sh.event("game.update", state.lastMove);
-  res.add(event);
-  channel.sendInt("game:" + game.get("oid"), event, null, _w(cb, function (err, data) {
-    var winSet = [];
-    var win = checkWin(state.board, color, move.x, move.y, winSet);
-    if (win) {
-      game.set("status", "over");
-      game.set("whoTurn", "");
-      state.winner = uid;
-      state.winnerSet = winSet;
-      return cb(0);
-    }
 
-    if (checkFull(board)) {
-      game.set("status", "over");
-      game.set("whoTurn", "");
-      state.winner = "";
-      state.winnerSet = null;
-      return cb(0);
-    }
+  game.notify(req, res, sh.event("game.update", state.lastMove));
+
+  var winSet = [];
+  var win = checkWin(state.board, color, move.x, move.y, winSet);
+  if (win) {
+    req.env.game.set("status", "over");
+    req.env.game.set("whoTurn", "");
+    state.winner = uid;
+    state.winnerSet = winSet;
     return cb(0);
-  }));
+  }
+
+  if (checkFull(board)) {
+    req.env.game.set("status", "over");
+    req.env.game.set("whoTurn", "");
+    state.winner = "";
+    state.winnerSet = null;
+    return cb(0);
+  }
+  return cb(0);
 };

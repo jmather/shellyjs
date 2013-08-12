@@ -96,7 +96,7 @@ Game.post = function (req, rs, cb) {
 
 Game.notify = function (req, res, event) {
   // notify any players in game
-  channel.sendInt("game:" + req.env.game.get("oid"), event);
+  channel.sendInt("game:" + req.env.game.get("oid"), event, req.session.uid);
   // notify me - rest support
   res.add(event);
 };
@@ -111,7 +111,7 @@ Game.notifyTurn = function (req, res) {
     pic: ""});
 
   // notify anyone that is onine
-  dispatch.sendUsers(gameData.playerOrder, event, req.session.oid); // exclude me
+  dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // exclude me
   // noitify me - rest support
   res.add(event);
 };
