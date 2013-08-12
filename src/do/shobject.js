@@ -21,6 +21,21 @@ function ShObject() {
 
 module.exports = ShObject;
 
+ShObject.prototype.typeError = function (data) {
+  var self = this;
+  var badKeys = null;
+  Object.keys(data).forEach(function (key) {
+    if (Object.prototype.toString.call(data[key]) !== Object.prototype.toString.call(self._data[key])) {
+      if (!badKeys) {
+        badKeys = [key];
+      } else {
+        badKeys.push(key);
+      }
+    }
+  });
+  return badKeys;
+};
+
 ShObject.prototype.key = function () {
   return this._key;
 };

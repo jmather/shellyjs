@@ -17,7 +17,8 @@ function User() {
     email: "",
     age: 0,
     gender: "",
-    roles: []
+    roles: [],
+    blockEmails: []
   };
 }
 

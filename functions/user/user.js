@@ -37,6 +37,11 @@ user.set = function (req, res, cb) {
       res.add(sh.error("user-bad", "unable to load user", user));
       return cb(1);
     }
+    var keyType = user.typeError(userData);
+    if (keyType) {
+      res.add(sh.error("user-data", "type mismatch in user data", keyType));
+      return cb(1);
+    }
     user.setData(userData);
     res.add(sh.event("user.set", user.getData()));
     return cb(0);

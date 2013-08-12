@@ -98,6 +98,13 @@
                     } else {
                         saveData[editId] = JSON.parse(value);
                     }
+                    // allow flip into array or object - SWD temp fix for now
+                    if (value === "[]") {
+                        saveData[editId] = [];
+                    }
+                    if (value === "{}") {
+                        saveData[editId] = [];
+                    }
                 }
                 $span = $("<span/>");
                 $span.attr("editId", editId);
