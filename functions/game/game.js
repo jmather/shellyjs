@@ -304,28 +304,23 @@ Game.turn = function (req, res, cb) {
   gameData.status = "playing";  // turn looks valid, game module sets "over"
 
   //SWD make sure turn function is there
-  req.env.gameModule.turn(req, res, _w(cb, function (error) {
+  req.env.gameModule.turn(req, res, _w(cb, function (error, data) {
     if (error) {
       return cb(error);
     }
+    // just send the game.over
     if (gameData.status === "over") {
-      // just users in game
       Game.notify(req, res, sh.event("game.over", gameData));
-//      channel.sendInt("game:" + gameId, sh.event("game.over", gameData), null, cb);
-    } else {
-      Game.notifyTurn(req, res);
-/*
-      // turn.next sent to all users online
-      var event = sh.event("game.turn.next", {gameId: gameId,
-        gameName: gameData.name,
-        whoTurn: gameData.whoTurn,
-        name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
-        pic: ""});
-      res.add(event); // send to me
-      dispatch.sendUsers(gameData.playerOrder, event, req.session.uid, cb); // send to all other players
- */
+      return cb(0);
     }
-    cb(0);
+    // send the update, if no data given send the entire game
+    if (data) {
+      Game.notify(req, res, sh.event("game.update", data));
+    } else {
+      Game.notify(req, res, sh.event("game.update", gameData));
+    }
+    Game.notifyTurn(req, res);
+    return cb(0);
   }));
 };
 

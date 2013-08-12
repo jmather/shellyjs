@@ -209,6 +209,7 @@ function sendWs(data) {
 
 function sendCmd(cmd, data) {
   hideError();
+  hideInfo();
   if (typeof(data) === "undefined") {
     data = {};
   }
@@ -232,6 +233,7 @@ function sendRaw(data) {
 
 function sendRestCmd(cmd, data, cb) {
   hideError();
+  hideInfo();
   var obj = {};
   obj.session = Env.session;
   obj.cmd = cmd;

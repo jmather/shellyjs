@@ -111,11 +111,6 @@ tictactoe.turn = function (req, res, cb) {
   }
   state.lastMove = {uid: uid, move: move, color: gameBoard[move.x][move.y]};
 
-  // notify players of update
-  var event = sh.event("game.update", game.getData());
-  channel.sendInt("game:" + game.get("oid"), event);
-  res.add(event);
-
   var win = checkWin(gameBoard);
   if (win.winner !== "") {
     game.set("status", "over");

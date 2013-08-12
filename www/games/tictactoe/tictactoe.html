@@ -101,6 +101,7 @@ function setPlayers(playerList, whoTurn) {
 function setState(game) {
     $.cookie("shLastGame" + Env.user.oid, game.oid, { expires: 3650, path: "/" });
     hideError();
+    hideInfo();
 
     var gameBoard = game.state.gameBoard;
     for (var i = 0; i < 3; i++) {

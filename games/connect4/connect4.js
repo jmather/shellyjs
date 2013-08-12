@@ -4,7 +4,6 @@ var shlog = require(global.gBaseDir + "/src/shlog.js");
 var sh = require(global.gBaseDir + "/src/shutil.js");
 var _w = require(global.gBaseDir + "/src/shcb.js")._w;
 
-var game = require(global.gBaseDir + "/functions/game/game.js");
 var channel = require(global.gBaseDir + "/functions/channel/channel.js");
 
 var connect4 = exports;
@@ -212,8 +211,6 @@ connect4.turn = function (req, res, cb) {
 
   state.lastMove = {uid: uid, move: move, color: color};
 
-  game.notify(req, res, sh.event("game.update", state.lastMove));
-
   var winSet = [];
   var win = checkWin(state.board, color, move.x, move.y, winSet);
   if (win) {
@@ -231,5 +228,6 @@ connect4.turn = function (req, res, cb) {
     state.winnerSet = null;
     return cb(0);
   }
-  return cb(0);
+
+  return cb(0, state.lastMove);
 };
