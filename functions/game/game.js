@@ -307,17 +307,18 @@ Game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    // just send the game.over
-    if (gameData.status === "over") {
-      Game.notify(req, res, sh.event("game.over", gameData));
-      return cb(0);
-    }
     // send the update, if no data given send the entire game
     if (data) {
       Game.notify(req, res, sh.event("game.update", data));
     } else {
       Game.notify(req, res, sh.event("game.update", gameData));
     }
+    // send the game.over
+    if (gameData.status === "over") {
+      Game.notify(req, res, sh.event("game.over", gameData));
+      return cb(0);
+    }
+    // only send turn if not game.over
     Game.notifyTurn(req, res);
     return cb(0);
   }));
@@ -353,24 +354,19 @@ Game.reset = function (req, res, cb) {
     return cb(1);
   }
 
-  req.env.gameModule.reset(req, res, _w(cb, function (error) {
-    // ignore error as we need to send anyway
-
-    // send to players in game and back to self
-    Game.notify(req, res, sh.event("game.reset", gameData));
-//    var event = sh.event("game.reset", gameData);
-//    channel.sendInt("game:" + gameData.oid, event, req.session.uid);
-//    res.add(event);
+  if (!_.isFunction(req.env.gameModule.reset)) {
+    res.add(sh.event("game.reset", req.env.game.getData()));
+    return cb(0);
+  }
+  req.env.gameModule.reset(req, res, _w(cb, function (error, data) {
+    if (data) {
+      res.add(sh.event("game.reset", data));
+    } else {
+      res.add(sh.event("game.reset", req.env.game.getData()));
+    }
 
     // notify any players online
     Game.notifyTurn(req, res);
-/*
-    dispatch.sendUsers(gameData.playerOrder, sh.event("game.turn.next", {gameId: gameData.oid,
-      gameName: gameData.name,
-      whoTurn: gameData.whoTurn,
-      name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
-      pic: ""}));
-*/
     return cb(error);
   }));
 };
