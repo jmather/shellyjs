@@ -180,6 +180,9 @@ Game.create = function (req, res, cb) {
           return cb(0);
         }
         req.env.gameModule.create(req, res, _w(cb, function (err, data) {
+          if (error) {
+            return cb(error);
+          }
           if (data) {
             res.add(sh.event("game.create", data));
           } else {
@@ -302,23 +305,23 @@ Game.turn = function (req, res, cb) {
   gameData.turnsPlayed += 1;
   gameData.status = "playing";  // turn looks valid, game module sets "over"
 
-  //SWD make sure turn function is there
+  if (!_.isFunction(req.env.gameModule.turn)) {
+    res.add(sh.event("game.update", gameData));
+    return cb(0);
+  }
   req.env.gameModule.turn(req, res, _w(cb, function (error, data) {
     if (error) {
       return cb(error);
     }
-    // send the update, if no data given send the entire game
     if (data) {
       Game.notify(req, res, sh.event("game.update", data));
     } else {
       Game.notify(req, res, sh.event("game.update", gameData));
     }
-    // send the game.over
     if (gameData.status === "over") {
       Game.notify(req, res, sh.event("game.over", gameData));
       return cb(0);
     }
-    // only send turn if not game.over
     Game.notifyTurn(req, res);
     return cb(0);
   }));
@@ -359,15 +362,18 @@ Game.reset = function (req, res, cb) {
     return cb(0);
   }
   req.env.gameModule.reset(req, res, _w(cb, function (error, data) {
+    if (error) {
+      return cb(error);
+    }
+
     if (data) {
       res.add(sh.event("game.reset", data));
     } else {
       res.add(sh.event("game.reset", req.env.game.getData()));
     }
 
-    // notify any players online
     Game.notifyTurn(req, res);
-    return cb(error);
+    return cb(0);
   }));
 };
 
@@ -377,7 +383,7 @@ function getInfo(name) {
   var cmdFile = gGameDir + "/" + name + "/" + name + ".js";
 
   var m = {};
-  m.error = 0;
+  m.status = "ok";
   m.path = cmdFile;
   m.name = name;
   m.author = "scott";
@@ -389,6 +395,7 @@ function getInfo(name) {
     delete require.cache[require.resolve(cmdFile)];
     funcModule = require(cmdFile);
   } catch (e) {
+    m.status = "error"
     m.error = 100;
     m.info = "unable to load module";
     return m;
@@ -439,7 +446,6 @@ Game.call = function (req, res, cb) {
     res.add(sh.error("game-call-undefined", "function does not exist", {func: req.body.func}));
     return cb(1);
   }
-
   req.env.gameModule[req.body.func](req, res, cb);
 };
 
