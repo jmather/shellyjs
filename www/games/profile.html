@@ -18,21 +18,43 @@
 var Env = {{{EnvJson}}};
 
 function resetProfileSpans() {
-    var saveData = {};
     $(".profileEditSpan").replaceWith(function () {
         var editId = $(this).attr("id");
-        var value = $(this).val();
-        saveData[editId] = value;
-        Env.user[editId] = value;
         $span = $("<span/>");
         $span.attr("id", editId);
         $span.addClass("profileEditSpan");
-        $span.text(Env.user[editId]);
+        if (typeof(Env.user[editId]) === "object") {
+            $span.text(JSON.stringify(Env.user[editId]));
+        } else {
+            $span.text(Env.user[editId]);
+        }
         return $span;
     });
     $("#editProfile").css("display", "block");
     $("#saveProfile").css("display", "none");
     $("#cancelProfile").css("display", "none");
+}
+
+function getEditFields() {
+    var saveData = {};
+    var errors = [];
+    $(".profileEditSpan").each(function () {
+        var editId = $(this).attr("id");
+        var value = $(this).val();
+        if (typeof(Env.user[editId]) === "object") {
+            try {
+                saveData[editId] = JSON.parse(value);
+            } catch (e) {
+                errors.push(editId);
+                showError("bad value for:" + editId);
+            }
+        } else {
+            saveData[editId] = value;
+        }
+    });
+    if (errors.length) {
+        return false;
+    }
     return saveData;
 }
 
@@ -46,9 +68,26 @@ function updateProfile(user) {
     } else {
         $(".anonymousDiv").css("display", "block");
     }
+    $("#uid").text(Env.user.oid);
     $("#email").text(Env.user.email);
     $("#name").text(Env.user.name);
+    $("#gender").text(Env.user.gender);
+    $("#age").text(Env.user.age);
+    $("#pict").attr("src", Env.user.pict);
+    $("#blockEmails").text(JSON.stringify(Env.user.blockEmails));
+
     $("#shUserName").text(Env.user.name);
+}
+
+function refreshProfile() {
+    resetProfileSpans();
+    sendRestCmd("user.get", {}, function (error, data) {
+        console.log(data);
+        if (!error && data.event != "error") {
+            Env.user = data.data;
+            updateProfile();
+        }
+    });
 }
 
 function doRegister() {
@@ -96,7 +135,7 @@ function init() {
             $input = $("<input/>");
             $input.attr("id", editId);
             $input.addClass("profileEditSpan");
-            $input.val(Env.user[editId]);
+            $input.val($(this).text());
             return $input;
         });
         $("#editProfile").css("display", "none");
@@ -109,11 +148,15 @@ function init() {
     });
 
     $("#saveProfile").click(function () {
-        var saveData = resetProfileSpans();
+        var saveData = getEditFields();
+        if (!saveData) {
+            return;
+        }
         console.log("set", saveData);
         var res = sendRestCmd("user.set", {user: saveData}, function (error, data) {
             if(!error) {
                 console.log("ret", data);
+                refreshProfile();
                 if (data.event === "error") {
                     showError(data.message + " - " + data.data.toString());
                     return;
@@ -180,8 +223,8 @@ function init() {
     <div class="gameBoxHeaderDiv">Profile Information</div>
     <div id="profileContent" class="gameBoxInnerDiv">
         <table>
-            <tr><td class="userTd">user id:</td><td><span id="uid">{{Env.user.oid}}</span></td></tr>
             <tr><td class="userTd">device id:</td><td><span id="token">{{Env.token}}</span></td></tr>
+            <tr><td class="userTd">user id:</td><td><span id="uid">{{Env.user.oid}}</span></td></tr>
             <tr id="emailRow"><td class="userTd">email:</td><td><span id="email">{{Env.user.email}}</span></td></tr>
             <tr><td class="userTd">name:</td><td><span id="name" class="profileEditSpan">{{Env.user.name}}</span></td></tr>
             <tr><td class="userTd">gender:</td><td><span id="gender" class="profileEditSpan">{{Env.user.gender}}</span></td></tr>

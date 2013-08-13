@@ -64,10 +64,7 @@ ShSet.prototype.get = function (field, cb) {
       return cb(1, sh.intMsg("hget-null", value));
     }
     try {
-      console.log(value);
       var data = JSON.parse(value);
-//      self._hash = crypto.createHash("md5").update(value).digest("hex");
-//      self._data = _.merge(self._data, savedData);
       return cb(0, data);
     } catch (e) {
       return cb(1, sh.intMsg("set-parse", {message: e.message, value: value}));

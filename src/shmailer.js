@@ -14,7 +14,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
     timeSent: new Date().getTime(),
     retries: 0
   };
-  _.merge(baseInfo, emailInfo);
+  _.assign(baseInfo, emailInfo);
   mailer.send(baseInfo.template, baseInfo, _w(cb, function (err, responseStatus, html, text) {
     if (err) {
       var errorMsg = sh.intMsg(err.code, err.message);

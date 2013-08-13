@@ -40,13 +40,6 @@ User.prototype.loadOrCreate = function (uid, cb) {
   });
 };
 
-User.prototype.setData = function (data) {
-  ShObject.prototype.setData.call(this, data);
-  if (!_.isUndefined(data.roles)) {
-    this._data.roles = data.roles;
-  }
-};
-
 User.prototype.hasRole = function (role) {
   return _.contains(this._data.roles, role);
 };

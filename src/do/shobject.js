@@ -69,7 +69,7 @@ ShObject.prototype.load = function (oid, cb) {
     try {
       var savedData = JSON.parse(value);
       self._hash = crypto.createHash("md5").update(value).digest("hex");
-      self._data = _.merge(self._data, savedData);
+      self._data = _.assign(self._data, savedData);
     } catch (e) {
       return cb(1, sh.intMsg("object-parse", {message: e.message, value: value}));
     }
@@ -122,5 +122,5 @@ ShObject.prototype.getData = function () {
 };
 
 ShObject.prototype.setData = function (data) {
-  this._data = _.merge(this._data, data);
+  _.assign(this._data, data);
 };
