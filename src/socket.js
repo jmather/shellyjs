@@ -43,6 +43,11 @@ function add(data) {
   if (_.isUndefined(this.msgs)) {
     this.msgs = [];
   }
+  if (data.event === "error") {
+    data.inputs = this.req.body;
+    stats.incr("errors", "socket");
+    shlog.error("send %j", data);  // log all errors
+  }
   this.msgs.push(data);
 }
 
@@ -50,11 +55,6 @@ function add(data) {
 function sendAll() {
   var self = this;
   _.each(this.msgs, function (data) {
-    if (data.event === "error") {
-      data.inputs = self.req.body;
-      stats.incr("errors", "socket");
-      shlog.error("send %j", data);  // log all errors
-    }
     sh.sendWs(self.ws, 0, data);
   });
   this.msgs = [];
