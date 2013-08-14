@@ -47,6 +47,7 @@ Game.pre = function (req, res, cb) {
       req.env.gameModule = module;
       return cb(0);
     });
+    return; // nothing else to do for game.create
   }
 
   // load the module and game
@@ -61,7 +62,7 @@ Game.pre = function (req, res, cb) {
       if (req.body.cmd === "game.leave") {  // always alow user to remove a bad game
         return cb(0);
       }
-      res.add(sh.error("game-load", "unable to load game data"));
+      res.add(sh.error("game-load", "unable to load game data", game));
       return cb(1);
     }
     req.env.game = game;
@@ -272,14 +273,14 @@ Game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
-    if (data) {
-      Game.notify(req, res, sh.event("game.update", data));
-    } else {
-      Game.notify(req, res, sh.event("game.update", gameData));
+    // fill in data from gameModule
+    if (!data) {
+      data = gameData;
     }
+    Game.notify(req, res, sh.event("game.update", data));
     if (gameData.status === "over") {
       Game.notify(req, res, sh.event("game.over", gameData));
-      return cb(0);
+      return cb(0);  // no one has next turn, so end
     }
     Game.notifyTurn(req, res);
     return cb(0);
@@ -307,20 +308,19 @@ Game.reset = function (req, res, cb) {
   }
 
   if (!_.isFunction(req.env.gameModule.reset)) {
-    res.add(sh.event("game.reset", req.env.game.getData()));
+    Game.notify(req, res, sh.event("game.reset", req.env.game.getData()));
+    Game.notifyTurn(req, res);
     return cb(0);
   }
   req.env.gameModule.reset(req, res, _w(cb, function (error, data) {
     if (error) {
       return cb(error);
     }
-
-    if (data) {
-      res.add(sh.event("game.reset", data));
-    } else {
-      res.add(sh.event("game.reset", req.env.game.getData()));
+    // fill in data from gameModule
+    if (!data) {
+      data = req.env.game.getData();
     }
-
+    Game.notify(req, res, sh.event("game.reset", data));
     Game.notifyTurn(req, res);
     return cb(0);
   }));

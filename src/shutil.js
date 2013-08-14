@@ -89,7 +89,7 @@ shutil.fillSession = function (sess, req, res, cb) {
     return cb(1);
   }
   if (!session.check(sess)) {
-    req.session.error = shutil.error("bad-session", "bad session data");
+    req.session.error = shutil.error("session-bad", "bad session data");
     return cb(1);
   }
   var uid = sess.split(":")[1];

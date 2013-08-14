@@ -91,7 +91,7 @@ describe("general negative tests", function () {
       st.call({cmd: "module.list"},
         function (err, res) {
           res.body.should.have.property("event", "error");
-          res.body.should.have.property("code", "no_session");
+          res.body.should.have.property("code", "session-bad");
           done();
         });
     });
@@ -99,7 +99,7 @@ describe("general negative tests", function () {
       st.call({cmd: "module.list", session: "bad"},
         function (err, res) {
           res.body.should.have.property("event", "error");
-          res.body.should.have.property("code", "bad_session");
+          res.body.should.have.property("code", "session-bad");
           done();
         });
     });
@@ -107,7 +107,7 @@ describe("general negative tests", function () {
       st.call({cmd: "module.list", session: "1:foo:foo:0"},
         function (err, res) {
           res.body.should.have.property("event", "error");
-          res.body.should.have.property("code", "bad_session");
+          res.body.should.have.property("code", "session-bad");
           done();
         });
     });
@@ -115,7 +115,7 @@ describe("general negative tests", function () {
       st.call({cmd: "module.list", session: "1:13:bad:0"},
         function (err, res) {
           res.body.should.have.property("event", "error");
-          res.body.should.have.property("code", "bad_session");
+          res.body.should.have.property("code", "session-bad");
           done();
         });
     });
@@ -125,7 +125,7 @@ describe("general negative tests", function () {
       st.call({cmd: "module.list", session: sess},
         function (err, res) {
           res.body.should.have.property("event", "error");
-          res.body.should.have.property("code", "bad_session");
+          res.body.should.have.property("code", "session-bad");
           done();
         });
     });
@@ -133,6 +133,7 @@ describe("general negative tests", function () {
       st.userCall({cmd: "system.config"},
         function (err, res) {
           res.body.should.have.property("event", "error");
+          res.body.should.have.property("code", "function-perms");
           done();
         });
     });

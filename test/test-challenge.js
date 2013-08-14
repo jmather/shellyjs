@@ -102,7 +102,7 @@ describe("challenge module", function () {
   });
 
   describe("user2 accept user1's challenge", function () {
-    it("user2 accpet", function (done) {
+    it("user2 accept", function (done) {
       gConn2.call("challenge.accept", {chId: gRChId},
         function (err, res) {
           res[0].should.have.property("event", "challenge.accept");
