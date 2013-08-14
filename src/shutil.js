@@ -26,6 +26,16 @@ shutil.modString = function (str, m) {
   return sum % m;
 };
 
+shutil.require = function (cmdFile, cb) {
+  try {
+    delete require.cache[require.resolve(cmdFile)];
+    var module = require(cmdFile);
+    return cb(0, module);
+  } catch (e) {
+    return cb(1, shutil.intMsg("module-require", {file: cmdFile, message: e.toString()}));
+  }
+};
+
 shutil.sendWs = function (ws, error, data) {
   var msg = JSON.stringify(data);
   shlog.send(error, "live uid:%s len:%d data:%s", ws.uid, msg.length, msg);
@@ -73,20 +83,20 @@ shutil.intMsg = function (code, data) {
 
 shutil.fillSession = function (sess, req, res, cb) {
   req.session = {valid: false,
-    error: shutil.error("no_session", "missing session data")};
+    error: shutil.error("session-bad", "missing session data")};
 
   if (_.isUndefined(sess)) {
     return cb(1);
   }
   if (!session.check(sess)) {
-    req.session.error = shutil.error("bad_session", "bad session data");
+    req.session.error = shutil.error("bad-session", "bad session data");
     return cb(1);
   }
   var uid = sess.split(":")[1];
   shlog.info("loading user: uid = " + uid);
   req.loader.get("kUser", uid, _w(cb, function (error, user) {
     if (error) {
-      req.session.error = shutil.error("user_load", "unable to load user", {uid: uid, error: error, user: user});
+      req.session.error = shutil.error("user-load", "unable to load user", {uid: uid, error: error, user: user});
       return cb(1);
     }
     shlog.info("user loaded: " + uid);
@@ -98,27 +108,21 @@ shutil.fillSession = function (sess, req, res, cb) {
 };
 
 // load module
-// SWD for now clear cache each time - will add server command to reload a module
-shutil.createObj = function (moduleName, funcName) {
+shutil.createObj = function (moduleName, cb) {
   var Module = null;
   var obj = null;
   var cmdFile = global.gBaseDir + "/functions/" + moduleName + "/" + moduleName + ".js";
-  try {
-//    if (moduleName === "game" || moduleName === "tictactoe" || moduleName === "connect4") {
-//      cmdFile = global.gBaseDir + "/games/" + moduleName + "/" + moduleName + ".js";
-//    }
-    delete require.cache[require.resolve(cmdFile)];
-    Module = require(cmdFile);
+  shutil.require(cmdFile, function (err, Module) { // first letter caps as it could be class
+    if (err) {
+      return cb(err, Module);
+    }
     if (_.isFunction(Module)) { // handle objects instead of module functions
       obj = new Module();
     } else {
       obj = Module;
     }
-    return obj;
-  } catch (e) {
-    console.log(cmdFile, e);
-    return null;
-  }
+    cb(0, obj);
+  });
 };
 
 shutil.call = function (req, res, cb) {
@@ -137,122 +141,118 @@ shutil.call = function (req, res, cb) {
   var moduleName = cmdParts[0];
   var funcName = cmdParts[1];
 
-  var module = shutil.createObj(moduleName, funcName);
-  if (!module) {
-    res.add(shutil.error("module_require", "unable to load module", {module: moduleName}));
-    return cb(1);
-  }
+  shutil.createObj(moduleName, function (err, module) {
+    if (err) {
+      res.add(shutil.error("module-load", "unable to load module", module));
+      return cb(1);
+    }
 
-  // check function def
-  if (_.isUndefined(module.functions[funcName])) {
-    res.add(shutil.error("module_function", "function description does not exist", {module: moduleName, function: funcName}));
-    return cb(1);
-  }
+    // check function def
+    if (_.isUndefined(module.functions[funcName])) {
+      res.add(shutil.error("module-function", "function description does not exist", {module: moduleName, function: funcName}));
+      return cb(1);
+    }
 
-  // check session required
-  if (!req.session.valid) {
-    if (_.isUndefined(module.functions[funcName].noSession) || !module.functions[funcName].noSession) {
-      if (_.isUndefined(req.session.error)) {
-        req.session.error = shutil.error("invalid_session", "no session data");
+    // check session required
+    if (!req.session.valid) {
+      if (_.isUndefined(module.functions[funcName].noSession) || !module.functions[funcName].noSession) {
+        if (_.isUndefined(req.session.error)) {
+          req.session.error = shutil.error("invalid-session", "no session data");
+        }
+        res.add(req.session.error);
+        return cb(1);
       }
-      res.add(req.session.error);
-      return cb(1);
     }
-  }
 
-  // check function perms
-  if (module.functions[funcName].security.length > 0) {
-    var hasPerms = _.find(module.functions[funcName].security, function (value) {
-      return req.session.user.hasRole(value);
-    });
-    if (!hasPerms) {
-      res.add(shutil.error("function_perms", "user does not have permision to call this function", {module: moduleName,
-        function: funcName, security: module.functions[funcName].security}));
-      return cb(1);
+    // check function perms
+    if (module.functions[funcName].security.length > 0) {
+      var hasPerms = _.find(module.functions[funcName].security, function (value) {
+        return req.session.user.hasRole(value);
+      });
+      if (!hasPerms) {
+        res.add(shutil.error("function-perms", "user does not have permision to call this function", {module: moduleName,
+          function: funcName, security: module.functions[funcName].security}));
+        return cb(1);
+      }
     }
-  }
 
-  // validate params
-  this.paramsOk = true;
-  _.each(module.functions[funcName].params, function (value, key) {
-    if (!_.isUndefined(value.optional) || value.optional === true) {
+    // validate params
+    this.paramsOk = true;
+    _.each(module.functions[funcName].params, function (value, key) {
+      if (!_.isUndefined(value.optional) || value.optional === true) {
+        return;
+      }
+      if (_.isUndefined(req.body[key])) {
+        this.paramsOk = false;
+        res.add(shutil.error("param-required", "missing required parameter", {cmd: req.body.cmd, key: key}));
+        return cb(1);
+      }
+      var ptype = typeof req.body[key];
+      if (_.isArray(req.body[key])) {
+        ptype = "array";
+      }
+      if (ptype !== value.dtype) {
+        this.paramsOk = false;
+        res.add(shutil.error("param-type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
+        return cb(1);
+      }
+    }, this);
+    if (!this.paramsOk) {
       return;
     }
-    if (_.isUndefined(req.body[key])) {
-      this.paramsOk = false;
-      res.add(shutil.error("param-required", "missing required parameter", {cmd: req.body.cmd, key: key}));
+
+    // handle object modules
+    var obj = module;
+
+    // check function
+    if (_.isUndefined(obj[funcName])) {
+      res.add(shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
       return cb(1);
     }
-    var ptype = typeof req.body[key];
-    if (_.isArray(req.body[key])) {
-      ptype = "array";
+
+    // init for modules to use to pass data
+    if (_.isUndefined(req.env)) {
+      req.env = {};
     }
-    if (ptype !== value.dtype) {
-      this.paramsOk = false;
-      res.add(shutil.error("param-type", "parameter needs to be a " + value.dtype, {key: key, value: req.body[key], type: ptype}));
-      return cb(1);
+
+    // ensure we have pre/post functions
+    if (!_.isFunction(obj.pre)) {
+      shlog.info("no pre - using default");
+      obj.pre = function (req, res, cb) {
+        cb(0);
+      };
     }
-  }, this);
-  if (!this.paramsOk) {
-    return;
-  }
-
-  // handle object modules
-  var obj = module;
-/*
-  var className = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
-  if (_.isObject(module[className])) {
-    obj = new module[className]();
-  }
-*/
-  // check function
-  if (_.isUndefined(obj[funcName])) {
-    res.add(shutil.error("module_function", "function does not exist in module", {module: moduleName, function: funcName}));
-    return cb(1);
-  }
-
-  // init for modules to use to pass data
-  if (_.isUndefined(req.env)) {
-    req.env = {};
-  }
-
-  // ensure we have pre/post functions
-  if (!_.isFunction(obj.pre)) {
-    shlog.info("no pre - using default");
-    obj.pre = function (req, res, cb) {
-      cb(0);
-    };
-  }
-  if (!_.isFunction(obj.post)) {
-    shlog.info("no post - using default");
-    obj.post = function (req, res, cb) {
-      cb(0);
-    };
-  }
-
-  // call the pre, function, post sequence
-  obj.pre(req, res, _w(cb, function (error, data) {
-    if (error) {
-      shlog.info("pre error: ", error);
-      return cb(error, data);
+    if (!_.isFunction(obj.post)) {
+      shlog.info("no post - using default");
+      obj.post = function (req, res, cb) {
+        cb(0);
+      };
     }
-    obj[funcName](req, res, _w(cb, function (error, data) {
-      var retError = error;
-      var retData = data;
+
+    // call the pre, function, post sequence
+    obj.pre(req, res, _w(cb, function (error, data) {
       if (error) {
-        // bail out, no post as function failed
-        shlog.info("func error: ", error);
+        shlog.info("pre error: ", error);
         return cb(error, data);
       }
-      obj.post(req, res, _w(cb, function (error, data) {
+      obj[funcName](req, res, _w(cb, function (error, data) {
+        var retError = error;
+        var retData = data;
         if (error) {
+          // bail out, no post as function failed
+          shlog.info("func error: ", error);
           return cb(error, data);
         }
-        // return data from actual function call
-        cb(retError, retData);
+        obj.post(req, res, _w(cb, function (error, data) {
+          if (error) {
+            return cb(error, data);
+          }
+          // return data from actual function call
+          cb(retError, retData);
+        }));
       }));
     }));
-  }));
+  });
 };
 
 // takes array of uids

@@ -1,4 +1,6 @@
 var fs = require("fs");
+var path = require("path");
+var async = require("async");
 var _ = require("lodash");
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
@@ -10,66 +12,65 @@ exports.functions = {
   info: {desc: "get info for a single module", params: {name: {dtype: "string"}}, security: []}
 };
 
-function getInfo(name) {
-  shlog.info("getInfo name=" + name);
-  var funcDir = global.gBaseDir + "/functions";
-  var cmdFile = funcDir + "/" + name + "/" + name + ".js";
+exports.getInfo = function (fn, cb) {
+  shlog.info("getInfo fn=" + fn);
 
   var m = {};
   m.error = 0;
-  m.path = cmdFile;
-  m.name = name;
-  m.author = "scott";
-  m.desc = "none";
+  m.path = fn;
+  m.name = path.basename(fn, ".js");
+  m.author = "";
+  m.desc = "";
   m.functions = {};
 
-  var funcModule = null;
-  try {
-    delete require.cache[require.resolve(cmdFile)];
-    funcModule = require(cmdFile);
-  } catch (e) {
-    m.error = 100;
-    m.info = "unable to load module";
-    return m;
-  }
-  if (!_.isUndefined(funcModule.desc)) {
-    m.desc = funcModule.desc;
-  }
-  if (!_.isUndefined(funcModule.functions)) {
-    m.functions = funcModule.functions;
-  }
-  return m;
-}
+  sh.require(fn, function (err, module) {
+    if (err) {
+      m.error = 100;
+      m.message = module;
+      return cb(1, m);
+    }
+    if (!_.isUndefined(module.desc)) {
+      m.desc = module.desc;
+    }
+    if (!_.isUndefined(module.functions)) {
+      m.functions = module.functions;
+    }
+    return cb(0, m);
+  });
+};
 
 exports.info = function (req, res, cb) {
   shlog.info("module.info name=" + req.body.name);
-  var m = getInfo(req.body.name);
-  res.add(sh.event("module.info", m));
-  return cb(0);
+  // SWD centralize this path construction
+  var funcDir = global.gBaseDir + "/functions";
+  var moduleFn = funcDir + "/" + req.body.name + "/" + req.body.name + ".js";
+  var m = exports.getInfo(moduleFn, function (err, m) {
+    // error still returns info object
+    res.add(sh.event("module.info", m));
+    return cb(0);
+  });
 };
 
 exports.list = function (req, res, cb) {
   var modules = {};
   var funcDir = global.gBaseDir + "/functions";
   fs.readdir(funcDir, function (err, files) {
-    var error = 0;
-    var fileCount = files.length;
-    files.forEach(function (entry) {
+    async.each(files, function (entry, lcb) {
       var fn = funcDir + "/" + entry;
       fs.stat(fn, function (err, stat) {
         if (stat.isDirectory()) {
-          var m = getInfo(entry);
-          if (m.error) {
-            error = 1;
-          }
-          modules[m.name] = m;
-        }
-        fileCount -= 1;
-        if (fileCount === 0) {
-          res.add(sh.event("module.list", modules));
-          return cb(0);
+          var moduleFn = fn + "/" + entry + ".js";
+          exports.getInfo(moduleFn, function (err, m) {
+            modules[m.name] = m;
+            return lcb(0);
+          });
+        } else {
+          return lcb(0);
         }
       });
+    }, function (error) {
+      res.add(sh.event("module.list", modules));
+      cb(0);
     });
   });
 };
