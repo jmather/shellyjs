@@ -15,6 +15,7 @@ var gConnAdmin = null;
 var gGameId = "";
 var gWhoTurn = "";
 var gConns = [];
+var gRoundCount = 2;
 var gMatchWait = 9000;
 
 function playGame() {
@@ -60,6 +61,24 @@ function playGame() {
       });
   });
 }
+
+function playRound() {
+  describe("take turns", function () {
+    playGame();
+  });
+
+  describe("reset game", function () {
+    it("reset", function (done) {
+      gConn1.call("game.reset", {gameId: gGameId},
+        function (err, res) {
+          res[0].should.have.property("event", "game.reset");
+          gWhoTurn = res[0].data.whoTurn;
+          done();
+        });
+    });
+  });
+}
+
 
 describe("basic user create and game play", function () {
 
@@ -180,24 +199,11 @@ describe("basic user create and game play", function () {
     });
   });
 
-  describe("take turns", function () {
-    playGame();
-  });
 
-  describe("reset game", function () {
-    it("reset", function (done) {
-      gConn1.call("game.reset", {gameId: gGameId},
-        function (err, res) {
-          res[0].should.have.property("event", "game.reset");
-          gWhoTurn = res[0].data.whoTurn;
-          done();
-        });
-    });
-  });
-
-  describe("take turns", function () {
-    playGame();
-  });
+  var i = 0;
+  for (i = 0; i < gRoundCount; i += 1) {
+    playRound();
+  }
 
   describe("both users leave game", function () {
     it("user1 leave", function (done) {
