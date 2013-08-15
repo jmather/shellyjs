@@ -4,6 +4,7 @@ var WebSocket = require('ws');
 
 var ws = new WebSocket('ws://localhost:5110');
 var gWaitInt = 0;
+var gTurnSleep = 10;
 
 var gMoveSet = [
   [0, 0],
@@ -17,8 +18,18 @@ var gMoveSet = [
   [2, 2]
 ];
 
-var gSession = "1:51:xxxx:0";
 var gUid = "51";
+if (_.isString(process.argv[2])) {
+  gUid = process.argv[2];
+}
+console.log("gUid = ", gUid);
+var gSession = "1:" + gUid + ":xxxx:0";
+
+var gSubmitNext = false;
+if (_.isString(process.argv[3])) {
+  gSubmitNext = true;
+}
+
 
 function sendCmd(cmd, params) {
   var baseCmd = {
@@ -36,9 +47,15 @@ function waitForGame() {
 }
 
 ws.on('open', function () {
-  sendCmd("channel.add", {channel: "lobby:0"});
-  sendCmd("game.playing");
-  gWaitInt = setInterval(waitForGame, 5000);
+  sendCmd("channel.add", {channel: "lobby:tictactoe:0"});
+//  sendCmd("game.playing");  // joins all current games
+  if (gSubmitNext) {
+    // put match request in
+    sendCmd("match.add", {name: "tictactoe"});
+  } else {
+    // wait for someone else to enter before add
+    gWaitInt = setInterval(waitForGame, 5000);
+  }
 });
 
 ws.on('close', function () {
@@ -85,7 +102,7 @@ ws.on('message', function (message) {
     if (msg.data.whoTurn === gUid) {
       setTimeout(function () {
         makeMove(msg.data);
-      }, 1000);
+      }, gTurnSleep);
     }
   } else if (msg.event === "game.playing") {
     _.each(msg.data, function (gameInfo, gameId) {
@@ -98,5 +115,11 @@ ws.on('message', function (message) {
     if (msg.data.whoTurn === gUid) {
       sendCmd("game.get", {gameId: msg.data.gameId});  // trigger a move base on gameBoard
     }
+  } else if (msg.event === "game.over") {
+    if (gSubmitNext) {
+      // play again
+      sendCmd("game.reset", {gameId: msg.data.oid});
+    }
   }
+
 });
