@@ -63,7 +63,7 @@ Env.gameName = getURLParameter("gn", "connect4");
 Env.channel = "lobby:" + Env.gameName + ":0";
 
 function removeUser(listName, uid) {
-    $(".userId" + listName + uid).remove();
+    $("#userId" + listName + uid).remove();
 }
 
 function addUser(listName, profile) {
@@ -73,42 +73,44 @@ function addUser(listName, profile) {
     }
 
     // if already added just update status
-    var $newGame = $(".userId" + listName + profile.uid);
-    if ($newGame.length > 0) {
+    var $newUser = $("#userId" + listName + profile.uid);
+    if ($newUser.length > 0) {
         if (profile.status === "on")
         {
-            $newGame.find("#onlineStatus").css("display", "block");
+            $newUser.remove();
+            $("#" + listName).prepend($newUser);
+            $newUser.find("#onlineStatus").css("display", "block");
         } else {
-            $newGame.find("#onlineStatus").css("display", "none");
+            $newUser.find("#onlineStatus").css("display", "none");
         }
         return;
     }
 
     // create user
-    $newGame = $("#userTemplate").clone();
-    $newGame.find("#userName").text(profile.name);
-    $newGame.find("#userName").addClass("playerName" + profile.uid);
-    $newGame.find("#userPict").attr("src", profile.pict);
-    $newGame.find("#userGender").text(profile.gender);
-    $newGame.find("#userAge").text(profile.age);
-    $newGame.addClass("activeUser" + listName);
-    $newGame.addClass("userId" + listName + profile.uid);
-    $newGame.attr("uid", profile.uid);
-    $newGame.css("display", "block");
+    $newUser = $("#userTemplate").clone();
+    $newUser.attr("id", "userId" + listName + profile.uid);
+    $newUser.attr("uid", profile.uid);
+    $newUser.addClass("activeUser" + listName);
+    $newUser.find("#userName").text(profile.name);
+    $newUser.find("#userName").addClass("playerName" + profile.uid);
+    $newUser.find("#userPict").attr("src", profile.pict);
+    $newUser.find("#userGender").text(profile.gender);
+    $newUser.find("#userAge").text(profile.age);
+    $newUser.css("display", "block");
 
     if (profile.status === "on")
     {
-        $newGame.find("#onlineStatus").css("display", "block");
+        $newUser.find("#onlineStatus").css("display", "block");
     }
 
-    $newGame.find("#userChallenge").click(function () {
+    $newUser.find("#userChallenge").click(function () {
         var toUid =$(this).parent().attr("uid");
         sendCmd("challenge.make", {toUid: toUid, game: Env.gameName});
 
     });
 
     // userList or suggestList
-    $("#" + listName).prepend($newGame);
+    $("#" + listName).prepend($newUser);
 }
 
 function setUserInfo(listName, profiles) {
