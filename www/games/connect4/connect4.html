@@ -46,6 +46,7 @@
             Env.gameId = pgameId.toString();
         }
         Env.channel = "game:" + Env.gameId;
+        Env.userStatus = {};
 
         function shellyInit() {
             messageReset();
@@ -120,7 +121,8 @@
                 $newPlayer.addClass("uid" + key);
                 $newPlayer.addClass("activePlayer");
 
-                if(key === Env.user.oid) {
+                if (Env.userStatus[Env.user.oid] === "on")
+                {
                     $newPlayer.find("#playerStatus").text("on");
                 }
 
@@ -221,6 +223,7 @@
                 return;
             }
             if (msg.event === "channel.user") {
+                Env.userStatus[msg.data.uid] = msg.data.status;  // cache for game reset
                 $(".uid"+msg.data.uid).find("#playerStatus").text(msg.data.status);
                 return;
             }
