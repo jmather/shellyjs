@@ -52,7 +52,6 @@ function matchLoop() {
         setTimeout(function () {matchLoop(); }, 5000);
         return;
       }
-      var uidList = [];
       global.db.spop(matchKey(gGameName), _w(matchError, function (err, uid2) {
         if (err || uid2 === null) {
           // add first user popped back in
@@ -86,11 +85,10 @@ function matchLoop() {
             var startInfo = {};
             startInfo.gameName = gGameName;
             startInfo.gameId = req.env.game.get("oid");
-            dispatch.sendUsers(req.body.players, sh.event("challenge.start", startInfo));
+            dispatch.sendUsers(req.body.players, sh.event("match.made", startInfo));
           });
         }));
 
-        dispatch.sendUsers(uidList, sh.event("game.matcher", "gameId and info here"));
         matchLoop();
       }));
     }));

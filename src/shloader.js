@@ -33,7 +33,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
     opts.lock = true; // always lock the creates
   }
   if (_.isObject(opts)) {
-    opts = _.assign(opts, pOpts);
+    _.assign(opts, pOpts);
   }
 
   // check cache

@@ -21,18 +21,18 @@ if (_.isUndefined(global.sockets)) {
 // send directly to user using socket id in global map
 Socket.sendDirect = function (wsId, data) {
   if (_.isUndefined(data)) {
-    shlog.info("bad send data:", data);
+    shlog.error("bad send data:", data);
     return false;
   }
   var ws = global.sockets[wsId];
   if (_.isUndefined(ws)) {
-    shlog.info("global socket not found:", wsId);
+    shlog.error("global socket not found:", wsId);
     return false;
   }
   try {
     sh.sendWs(ws, 0, data);
   } catch (e) {
-    shlog.info("global socket dead:", wsId, e);
+    shlog.error("global socket dead:", wsId, e);
     return false;
   }
   return true;

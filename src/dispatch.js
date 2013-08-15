@@ -64,13 +64,13 @@ dispatch.sendUser = function (uid, data, cb) {
 };
 
 dispatch.sendUsers = function (uids, data, excludeIds, cb) {
-  shlog.info("sendUsers:", uids, excludeIds);
   if (_.isString(excludeIds)) {
     excludeIds = [excludeIds];
   }
   if (_.isUndefined(excludeIds) || excludeIds === null) {
     excludeIds = [];
   }
+  shlog.info("sendUsers:", uids, excludeIds);
 
   var locateList = {};
   async.each(uids, function (uid, lcb) {

@@ -145,7 +145,7 @@ ShCluster.servers = function (cb) {
         gLoader.get("kServer", item, _w(lcb, function (err, server) {
           serverList[item] = server.getData();
           lcb(0);
-        }, {checkCache: false}));
+        }), {checkCache: false});
       },
       function (err) {
         if (err) {
@@ -178,7 +178,7 @@ ShCluster.removeLocate = function (uid, cb) {
 ShCluster.locate = function (uid, cb) {
   gLoader.exists("kLocate", uid, _w(cb, function (err, locateInfo) {
     cb(err, locateInfo);
-  }, {checkCache: false}));
+  }), {checkCache: false});
 };
 
 ShCluster.sendServer = function (serverId, data, cb) {
@@ -219,7 +219,7 @@ ShCluster.sendServer = function (serverId, data, cb) {
         cb(0, data);
       });
     }
-  }, {checkCache: false}));
+  }), {checkCache: false});
 };
 
 ShCluster.sendServers = function (data, cb) {
@@ -252,7 +252,7 @@ ShCluster.sendUser = function (uid, data, cb) {
       return cb(1, sh.intMsg("user-offline", uid));
     }
     self.sendUserWithLocate(locateInfo, cb);
-  }, {checkCache: false}));
+  }), {checkCache: false});
 };
 
 ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
@@ -283,6 +283,6 @@ ShCluster.home = function (oid, cb) {
       shlog.debug("get home server oid: %s, idx: %s", oid, idx);
       shlog.debug("get home server data: %j", server.getData());
       return cb(0, server.getData());
-    }, {checkCache: false}));
+    }), {checkCache: false});
   }));
 };

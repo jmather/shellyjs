@@ -129,7 +129,8 @@ function processEvent(res, from) {
         setMatchInfo(res.data);
         return;
     }
-    if (res.event == "match.made") {
+    if (res.event == "match.made" ||
+            res.event == "challenge.start") {
         gameInit(res.data.gameName, res.data.gameId);
         return;
     }

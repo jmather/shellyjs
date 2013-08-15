@@ -108,7 +108,7 @@ function addUser(listName, profile) {
     });
 
     // userList or suggestList
-    $("#" + listName).append($newGame);
+    $("#" + listName).prepend($newGame);
 }
 
 function setUserInfo(listName, profiles) {
@@ -154,7 +154,8 @@ function processEvent(res, from) {
         setUserInfo("suggestedUserList", res.data);
         return;
     }
-    if (res.event == "challenge.start") {
+    if (res.event == "challenge.start" ||
+            res.event == "match.made") {
         gameInit(res.data.gameName, res.data.gameId);
         return;
     }
