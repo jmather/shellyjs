@@ -4,7 +4,7 @@ var WebSocket = require('ws');
 
 var ws = new WebSocket('ws://localhost:5110');
 var gWaitInt = 0;
-var gTurnSleep = 10;
+var gTurnSleep = 1000;
 
 var gMoveSet = [
   [0, 0],
