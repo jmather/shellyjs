@@ -20,6 +20,9 @@ global.CDEF("HEART_BEAT", 30 * 1000);
 global.CDEF("CLUSTER_URL", "tcp://localhost:5151");
 global.CDEF("NUM_WORKERS", 2);
 
+// logs
+global.CDEF("LOG_STACKTRACE", true);
+
 // db
 global.CDEF("DB_SCOPE", "dev:");
 global.CDEF("DB_WRAPPER", "/src/db/shredis.js");

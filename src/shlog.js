@@ -54,13 +54,16 @@ if (cluster.worker !== null) {
 }
 
 shlog.log = function () {
-  // SWD likely disable module filter for prod
-  var trace = stackTrace.get();
-  var callerFn = trace[1].getFileName();
-  var callerName = path.basename(callerFn, ".js");
-  if (callerName === "shlog") { // ignore calls from this module
-    callerFn = trace[2].getFileName();
+  var callerName = "prod";
+  // SWD: too slow for prod - might change to pass in module name to keep filters in prod
+  if (global.C.LOG_STACKTRACE) {
+    var trace = stackTrace.get();
+    var callerFn = trace[1].getFileName();
     callerName = path.basename(callerFn, ".js");
+    if (callerName === "shlog") { // ignore calls from this module
+      callerFn = trace[2].getFileName();
+      callerName = path.basename(callerFn, ".js");
+    }
   }
 
   var args = Array.prototype.slice.call(arguments);
