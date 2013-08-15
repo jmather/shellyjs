@@ -48,7 +48,7 @@ function waitForGame() {
 
 ws.on('open', function () {
   sendCmd("channel.add", {channel: "lobby:tictactoe:0"});
-//  sendCmd("game.playing");  // joins all current games
+  sendCmd("game.playing");  // joins all current games
   if (gSubmitNext) {
     // put match request in
     sendCmd("match.add", {name: "tictactoe"});
