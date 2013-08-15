@@ -36,7 +36,7 @@ function waitForGame() {
 }
 
 ws.on('open', function () {
-  sendCmd("channel2.add", {channel: "lobby:0"});
+  sendCmd("channel.add", {channel: "lobby:0"});
   sendCmd("game.playing");
   gWaitInt = setInterval(waitForGame, 5000);
 });
@@ -51,8 +51,10 @@ ws.on('error', function (error) {
 });
 
 function makeMove(game) {
-  for (var i=0; i<3; i++) {
-    for (var j=0; j<3; j++) {
+  var i = 0;
+  for (i = 0; i < 3; i += 1) {
+    var j = 0;
+    for (j = 0; j < 3; j += 1) {
       if (game.state.gameBoard[i][j] === "") {
         sendCmd("game.turn", {gameId: game.oid, move: {x: i, y: j}});
         return;
@@ -63,10 +65,11 @@ function makeMove(game) {
 
 ws.on('message', function (message) {
   console.log('received: %s', message);
+  var msg = null;
   try {
-  var msg = JSON.parse(message);
+    msg = JSON.parse(message);
   } catch (e) {
-    console.error("unabel to parse message");
+    console.error("unabel to parse message", e.toString());
     return;
   }
   if (msg.event === "match.count") {
@@ -75,10 +78,10 @@ ws.on('message', function (message) {
     }
   } else if (msg.event === "match.made") {
     sendCmd("game.join", {gameId: msg.data.gameId});
-    sendCmd("channel2.add", {channel: "game:" + msg.data.gameId});
-  } else if (msg.event === "game.info"
-    || msg.event === "game.reset"
-    || msg.event === "game.join") {
+    sendCmd("channel.add", {channel: "game:" + msg.data.gameId});
+  } else if (msg.event === "game.get"
+      || msg.event === "game.reset"
+      || msg.event === "game.join") {
     if (msg.data.whoTurn === gUid) {
       setTimeout(function () {
         makeMove(msg.data);
@@ -86,7 +89,7 @@ ws.on('message', function (message) {
     }
   } else if (msg.event === "game.playing") {
     _.each(msg.data, function (gameInfo, gameId) {
-      sendCmd("channel2.add", {channel: "game:" + gameId});
+      sendCmd("channel.add", {channel: "game:" + gameId});
       if(gameInfo.whoTurn === gUid) {
         sendCmd("game.get", {gameId: gameId});  // trigger a move base on gameBoard
       }
