@@ -216,7 +216,7 @@ connect4.turn = function (req, res, cb) {
     req.env.game.set("whoTurn", "");
     state.winner = uid;
     state.winnerSet = winSet;
-    return cb(0);
+    return cb(0, state.lastMove);
   }
 
   if (checkFull(board)) {
@@ -224,7 +224,7 @@ connect4.turn = function (req, res, cb) {
     req.env.game.set("whoTurn", "");
     state.winner = "";
     state.winnerSet = null;
-    return cb(0);
+    return cb(0, state.lastMove);
   }
 
   return cb(0, state.lastMove);
