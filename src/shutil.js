@@ -26,6 +26,22 @@ shutil.modString = function (str, m) {
   return sum % m;
 };
 
+shutil.secure = function (obj) {
+  var outObj = {};
+  _.each(obj, function (value, key) {
+    if (key.indexOf("PASS") > -1 || key.indexOf("pass") > -1) {
+      outObj[key] = "<secured>";
+    } else {
+      if (_.isObject(value) && !_.isArray(value)) {
+        outObj[key] = shutil.secure(value);
+      } else {
+        outObj[key] = value;
+      }
+    }
+  });
+  return outObj;
+}
+
 shutil.require = function (cmdFile, cb) {
   try {
     delete require.cache[require.resolve(cmdFile)];

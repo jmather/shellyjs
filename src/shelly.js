@@ -36,17 +36,17 @@ global.PACKAGE = require(global.gBaseDir + "/package.json");
 // number of times SIGINT or SIGQUIT called
 var gKillCount = 0;
 
-var shutil = require(global.gBaseDir + "/src/shutil.js");
+var sh = require(global.gBaseDir + "/src/shutil.js");
 /*jslint stupid: true */
 // OK as this is only called once during startup
 function serverInfo() {
   var serverInfoFn = global.configBase + "/server.json";
   var serverData = {};
-  if (!fs.existsSync(serverInfoFn)) {
-    serverData.serverId = shutil.uuid();
-    fs.writeFileSync(serverInfoFn, JSON.stringify(serverData));
-  } else {
+  if (fs.existsSync(serverInfoFn)) {
     serverData = require(serverInfoFn);
+  } else {
+    serverData.serverId = sh.uuid();
+    fs.writeFileSync(serverInfoFn, JSON.stringify(serverData));
   }
   return serverData;
 }
@@ -58,7 +58,7 @@ if (cluster.isMaster) {
   shlog.info("loaded:", new Date());
   shlog.info("server:", global.server);
   shlog.info("configBase:", global.configBase);
-  shlog.info("config:", global.C);
+  shlog.info("config:", sh.secure(global.C));
 }
 
 require(global.gBaseDir + "/src/shcb.js").leanStacks(true);

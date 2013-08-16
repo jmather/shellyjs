@@ -87,8 +87,7 @@ system.statsReset = function (req, res, cb) {
 
 system.config = function (req, res, cb) {
   shlog.debug("system.config");
-
-  res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONFIG: global.C, PACKAGE: global.PACKAGE}));
+  res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONFIG: sh.secure(global.C), PACKAGE: global.PACKAGE}));
   return cb(0);
 };
 
