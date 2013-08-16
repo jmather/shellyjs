@@ -160,6 +160,7 @@ function shutdown() {
     shlog.info("master SIGINT - graceful shutdown");
     // waits for all client processes to end
     shCluster.masterShutdown();
+    return;
   }
 
   if (gWorkerModule) {
