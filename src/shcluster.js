@@ -37,48 +37,50 @@ ShCluster.init = function (cb) {
         server.set("clusterUrl", global.C.CLUSTER_URL);
         server.set("socketUrl", global.C.SOCKET_URL);
         shlog.info("set server info", server.getData());
-        global.db.sadd("serverList", global.server.serverId, _w(cb, function (err) {
-          if (err) {
-            return cb(err, "unable to save to server list");
-          }
-
-          // start dnode
-          gServer = dnode({
-            event : function (msg, cb) {
-              shlog.debug("server event recv: %j", msg);
-              // cmd = direct.user
-              // toWid = workerId
-              // toWsid = websocket id of user
-              // data = object to forward to user socket
-              if (_.isUndefined(msg.cmd)) {
-                shlog.error("server event: bad command %j", msg);
-                return;
-              }
-              if (_.isUndefined(msg.toWsid)) {
-                shlog.error("server event: socket id %j", msg);
-                return;
-              }
-              if (_.isUndefined(msg.toWid) || _.isUndefined(cluster.workers[msg.toWid])) {
-                shlog.error("server event: bad worker id %j", msg);
-                return;
-              }
-              cluster.workers[msg.toWid].send(msg);
-              cb("ok");
+        gLoader.dump(function (err) {
+          global.db.sadd("serverList", global.server.serverId, _w(cb, function (err) {
+            if (err) {
+              return cb(err, "unable to save to server list");
             }
-          });
-          var urlParts = url.parse(global.C.CLUSTER_URL);
-          shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
-          gServer.listen(urlParts.port, urlParts.hostName);
 
-          return cb(0, null);
-        }));
+            // start dnode
+            gServer = dnode({
+              event : function (msg, cb) {
+                shlog.debug("server event recv: %j", msg);
+                // cmd = direct.user
+                // toWid = workerId
+                // toWsid = websocket id of user
+                // data = object to forward to user socket
+                if (_.isUndefined(msg.cmd)) {
+                  shlog.error("server event: bad command %j", msg);
+                  return;
+                }
+                if (_.isUndefined(msg.toWsid)) {
+                  shlog.error("server event: socket id %j", msg);
+                  return;
+                }
+                if (_.isUndefined(msg.toWid) || _.isUndefined(cluster.workers[msg.toWid])) {
+                  shlog.error("server event: bad worker id %j", msg);
+                  return;
+                }
+                cluster.workers[msg.toWid].send(msg);
+                cb("ok");
+              }
+            });
+            var urlParts = url.parse(global.C.CLUSTER_URL);
+            shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
+            gServer.listen(urlParts.port, urlParts.hostName);
+
+            return cb(0, null);
+          }));
+        });
       }));
     }));
   });
 };
 
 ShCluster.shutdown = function () {
-  shlog.info("shutdown: cluster clients");
+  shlog.info("shutdown: cluster dnode clients");
   _.each(global.dnodes, function (obj) {
     shlog.info("shutdown: closing client:", obj.d.serverId);
     obj.d.end();

@@ -214,7 +214,7 @@ Socket.start = function () {
   });
 };
 
-Socket.close = function (cb) {
+Socket.shutdown = function (cb) {
   try {
     wss.close(1001, "server going down");
 

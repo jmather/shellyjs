@@ -18,19 +18,20 @@ global.CDEF("HEART_BEAT", 30 * 1000);
 
 // cluster options
 global.CDEF("CLUSTER_URL", "tcp://localhost:5151");
-global.CDEF("CLUSTER_NUM_SOCKETS", 1);
-global.CDEF("CLUSTER_NUM_RESTS", 1);
-global.CDEF("CLUSTER_NUM_ADMINS", 1);
+global.CDEF("CLUSTER_NUM_SOCKET", 2);
+global.CDEF("CLUSTER_NUM_REST", 1);
+global.CDEF("CLUSTER_NUM_ADMIN", 1);
 global.CDEF("CLUSTER_NUM_GAMES", 1);
-global.CDEF("CLUSTER_NUM_MATCHERS", 1);
-global.CDEF("CLUSTER_NUM_MAILERS", 1);
-global.CDEF({
-  "socket": {file: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKETS},
-  "rest": {file: "/src/rest.js", num: global.C.CLUSTER_NUM_SOCKETS},
-  "admin": {file: "/src/admin.js", num: global.C.CLUSTER_NUM_SOCKETS},
-  "games": {file: "/src/games.js", num: global.C.CLUSTER_NUM_SOCKETS},
-  "matcher": {file: "/src/shmatcher.js", num: global.C.CLUSTER_NUM_SOCKETS},
-  "mailer": {file: "/src/shmailer.js", num: global.C.CLUSTER_NUM_SOCKETS}
+global.CDEF("CLUSTER_NUM_MATCHER", 1);
+global.CDEF("CLUSTER_NUM_MAILER", 1);
+global.CDEF("CLUSTER", {
+  "socket": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: null},
+  "rest": {src: "/src/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
+  "admin": {src: "/src/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
+  "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
+  "matcher-ttt": {src: "/src/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["tictactoe"]},
+  "matcher-connect4": {src: "/src/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["connect4"]},
+  "mailer": {src: "/src/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
 });
 
 // logs

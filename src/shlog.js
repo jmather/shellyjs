@@ -31,7 +31,6 @@ var gDebug = {
 //	"send": {},
 //  "dispatch": {},
 //  "shcluster": {},
-  "shellyd": {},
   "shelly": {}
 };
 

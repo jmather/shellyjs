@@ -64,6 +64,8 @@ if (cluster.isMaster) {
 require(global.gBaseDir + "/src/shcb.js").leanStacks(true);
 
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
+var gWorkerModule = null;
+
 var mailer = require(global.gBaseDir + "/src/shmailer.js");
 var matcher = require(global.gBaseDir + "/src/shmatcher.js");
 var rest = null;
@@ -105,56 +107,18 @@ shCluster.init(function (err, data) {
     return;
   }
   if (cluster.isMaster) {
-    var i = 0;
-    var p = null;
-    for (i = 0; i < global.C.CLUSTER_NUM_SOCKETS; i += 1) {
-      p = cluster.fork({WTYPE: "socket"});
-      p.on("message", onWorkerMessage);
-    }
-    for (i = 0; i < global.C.CLUSTER_NUM_RESTS; i += 1) {
-      p = cluster.fork({WTYPE: "rest"});
-      p.on("message", onWorkerMessage);
-    }
-    for (i = 0; i < global.C.CLUSTER_NUM_ADMINS; i += 1) {
-      p = cluster.fork({WTYPE: "admin"});
-      p.on("message", onWorkerMessage);
-    }
-    for (i = 0; i < global.C.CLUSTER_NUM_GAMES; i += 1) {
-      p = cluster.fork({WTYPE: "games"});
-      p.on("message", onWorkerMessage);
-    }
-    for (i = 0; i < global.C.CLUSTER_NUM_MAILERS; i += 1) {
-      p = cluster.fork({WTYPE: "mailer"});
-      p.on("message", onWorkerMessage);
-    }
-    for (i = 0; i < global.C.CLUSTER_NUM_MATCHERS; i += 1) {
-      _.each(global.games, startMatcher);
-    }
-
+    _.each(global.C.CLUSTER, function (info, name) {
+      var i = 0;
+      for (i = 0; i < info.num; i += 1) {
+        var p = cluster.fork({WTYPE: name});
+        p.on("message", onWorkerMessage);
+      }
+    });
   } else {
-    if (process.env.WTYPE === "socket") {
-      // already loaded as sendDirect is used
-      shlog.info("starting socket");
-      global.socket.start();
-    } else if (process.env.WTYPE === "rest") {
-      shlog.info("starting rest");
-      rest = require(global.gBaseDir + "/src/rest.js");
-      rest.start();
-    } else if (process.env.WTYPE === "admin") {
-      shlog.info("starting admin");
-      admin = require(global.gBaseDir + "/src/admin.js");
-      admin.start();
-    } else if (process.env.WTYPE === "games") {
-      shlog.info("starting games");
-      games = require(global.gBaseDir + "/src/games.js");
-      games.start();
-    } else if (process.env.WTYPE === "mailer") {
-      shlog.info("starting mailer");
-      mailer.start();
-    } else if (process.env.WTYPE === "matcher") {
-      shlog.info("starting matcher:", process.env.GAMENAME);
-      matcher.start(process.env.GAMENAME);
-    }
+    shlog.info("starting:", process.env.WTYPE);
+    var workerInfo = global.C.CLUSTER[process.env.WTYPE];
+    gWorkerModule = require(global.gBaseDir + workerInfo.src);
+    gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
   }
 });
 
@@ -162,6 +126,10 @@ shCluster.init(function (err, data) {
 process.on("message", function (msg) {
   shlog.debug("onMessage: %j", msg);
   if (msg.cmd === "user.direct") {
+    if (process.env.WTYPE !== "socket") {
+      shlog.error("non-socket got a sendDirect", msg);
+      return;
+    }
     global.socket.sendDirect(msg.toWsid, msg.data);
     return;
   }
@@ -194,44 +162,13 @@ function shutdown() {
     shCluster.masterShutdown();
   }
 
-//  server.shutdown(function () {
-//    shCluster.shutdown();
-//  });
-
-  if (process.env.WTYPE === "socket") {
-    shlog.info("shutting down socket");
-    global.socket.close(function () {
+  if (gWorkerModule) {
+    gWorkerModule.shutdown(function () {
+      shlog.info("shutdown:", process.env.WTYPE);
       shCluster.shutdown();
     });
-  }
-  if (process.env.WTYPE === "rest") {
-    shlog.info("shutting down rest");
-    rest.shutdown(function () {
-      shCluster.shutdown();
-    });
-  }
-  if (process.env.WTYPE === "admin") {
-    shlog.info("shutting down admin");
-    admin.shutdown(function () {
-      shCluster.shutdown();
-    });
-  }
-  if (process.env.WTYPE === "games") {
-    shlog.info("shutting down games");
-    games.shutdown(function () {
-      shCluster.shutdown();
-    });
-  }
-  if (process.env.WTYPE === "mailer") {
-    shlog.info("shutdown mailer");
-    mailer.shutdown(function (err) {
-      shCluster.shutdown();
-    });
-  } else if (process.env.WTYPE === "matcher") {
-    shlog.info("shutdown matcher:", process.env.GAMENAME);
-    matcher.shutdown(function (err) {
-      shCluster.shutdown();
-    });
+  } else {
+    shCluster.shutdown();
   }
 }
 
