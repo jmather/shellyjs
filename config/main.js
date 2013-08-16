@@ -18,7 +18,20 @@ global.CDEF("HEART_BEAT", 30 * 1000);
 
 // cluster options
 global.CDEF("CLUSTER_URL", "tcp://localhost:5151");
-global.CDEF("NUM_WORKERS", 2);
+global.CDEF("CLUSTER_NUM_SOCKETS", 1);
+global.CDEF("CLUSTER_NUM_RESTS", 1);
+global.CDEF("CLUSTER_NUM_ADMINS", 1);
+global.CDEF("CLUSTER_NUM_GAMES", 1);
+global.CDEF("CLUSTER_NUM_MATCHERS", 1);
+global.CDEF("CLUSTER_NUM_MAILERS", 1);
+global.CDEF({
+  "socket": {file: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKETS},
+  "rest": {file: "/src/rest.js", num: global.C.CLUSTER_NUM_SOCKETS},
+  "admin": {file: "/src/admin.js", num: global.C.CLUSTER_NUM_SOCKETS},
+  "games": {file: "/src/games.js", num: global.C.CLUSTER_NUM_SOCKETS},
+  "matcher": {file: "/src/shmatcher.js", num: global.C.CLUSTER_NUM_SOCKETS},
+  "mailer": {file: "/src/shmailer.js", num: global.C.CLUSTER_NUM_SOCKETS}
+});
 
 // logs
 global.CDEF("LOG_STACKTRACE", true);
@@ -44,7 +57,6 @@ global.CDEF("DEFAULT_ADMIN_PASSWORD", "");
 // email settings
 global.CDEF("EMAIL_NOSEND", true);
 global.CDEF("EMAIL_QUEUE", true);
-global.CDEF("EMAIL_CONSUMER", true);
 global.CDEF("EMAIL_DEFAULT_FROM", "Game Shelly <shelly@gameshelly.com>");
 global.CDEF("EMAIL_TRANSPORT", "SMTP");
 global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "XXXX", pass: "XXXX"}});

@@ -103,18 +103,20 @@ rest.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var restServer = rest.listen(global.C.REST_PORT, function () {
-  shlog.info("rest server listening: %s", global.C.restPort);
-});
+var restServer = null;
+exports.start = function () {
+  restServer = rest.listen(global.C.REST_PORT, function () {
+    shlog.info("rest server listening: %s", global.C.restPort);
+  });
 
-restServer.on("error", function (err) {
-  shlog.error(err);
-});
+  restServer.on("error", function (err) {
+    shlog.error(err);
+  });
+};
 
-exports.close = function (cb) {
-  if (restServer.address()) {
-    restServer.close(cb);
-    return;
+exports.shutdown = function (cb) {
+  if (restServer && restServer.address()) {
+    restServer.close();  // do not wait for close given keep-alives
   }
   cb();
 };

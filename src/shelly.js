@@ -64,11 +64,12 @@ if (cluster.isMaster) {
 require(global.gBaseDir + "/src/shcb.js").leanStacks(true);
 
 var shCluster = require(global.gBaseDir + "/src/shcluster.js");
-var shellyd = require(global.gBaseDir + "/src/shellyd.js");
 var mailer = require(global.gBaseDir + "/src/shmailer.js");
 var matcher = require(global.gBaseDir + "/src/shmatcher.js");
-var socket = require(global.gBaseDir + "/src/socket.js");
-
+var rest = null;
+var admin = null;
+var games = null;
+global.socket = require(global.gBaseDir + "/src/socket.js");
 
 // SWD: this need to moved to a config file
 global.games = {};
@@ -92,40 +93,67 @@ function onWorkerMessage(msg) {
   }
 }
 
+// avoids function in loop
+function startMatcher(gameInfo, gameName) {
+  var p = cluster.fork({WTYPE: "matcher", GAMENAME: gameName});
+  p.on("message", onWorkerMessage);
+}
+
 shCluster.init(function (err, data) {
   if (err) {
-    shlog.error("unable to start shcluster module");
+    shlog.error("unable to start shcluster module", err, data);
     return;
   }
   if (cluster.isMaster) {
     var i = 0;
     var p = null;
-    for (i = 0; i < global.C.NUM_WORKERS; i += 1) {
-      p = cluster.fork({WTYPE: "shellyd"});
+    for (i = 0; i < global.C.CLUSTER_NUM_SOCKETS; i += 1) {
+      p = cluster.fork({WTYPE: "socket"});
       p.on("message", onWorkerMessage);
     }
-    // fork a mail processor
-    if (global.C.EMAIL_CONSUMER) {
+    for (i = 0; i < global.C.CLUSTER_NUM_RESTS; i += 1) {
+      p = cluster.fork({WTYPE: "rest"});
+      p.on("message", onWorkerMessage);
+    }
+    for (i = 0; i < global.C.CLUSTER_NUM_ADMINS; i += 1) {
+      p = cluster.fork({WTYPE: "admin"});
+      p.on("message", onWorkerMessage);
+    }
+    for (i = 0; i < global.C.CLUSTER_NUM_GAMES; i += 1) {
+      p = cluster.fork({WTYPE: "games"});
+      p.on("message", onWorkerMessage);
+    }
+    for (i = 0; i < global.C.CLUSTER_NUM_MAILERS; i += 1) {
       p = cluster.fork({WTYPE: "mailer"});
       p.on("message", onWorkerMessage);
     }
-    // fork a match processor
-    // SWD: should these just fork the shmatcher module directly
-    // SWD: loop this over the global matchInfo
-    _.each(global.games, function (gameInfo, gameName) {
-      p = cluster.fork({WTYPE: "matcher", GAMENAME: gameName});
-      p.on("message", onWorkerMessage);
-    });
+    for (i = 0; i < global.C.CLUSTER_NUM_MATCHERS; i += 1) {
+      _.each(global.games, startMatcher);
+    }
+
   } else {
-    if (process.env.WTYPE === "mailer") {
+    if (process.env.WTYPE === "socket") {
+      // already loaded as sendDirect is used
+      shlog.info("starting socket");
+      global.socket.start();
+    } else if (process.env.WTYPE === "rest") {
+      shlog.info("starting rest");
+      rest = require(global.gBaseDir + "/src/rest.js");
+      rest.start();
+    } else if (process.env.WTYPE === "admin") {
+      shlog.info("starting admin");
+      admin = require(global.gBaseDir + "/src/admin.js");
+      admin.start();
+    } else if (process.env.WTYPE === "games") {
+      shlog.info("starting games");
+      games = require(global.gBaseDir + "/src/games.js");
+      games.start();
+    } else if (process.env.WTYPE === "mailer") {
       shlog.info("starting mailer");
       mailer.start();
     } else if (process.env.WTYPE === "matcher") {
       shlog.info("starting matcher:", process.env.GAMENAME);
       matcher.start(process.env.GAMENAME);
-    } else if (process.env.WTYPE === "shellyd") {
-      shlog.info("starting shellyd");
-      shellyd.start();
     }
   }
 });
@@ -134,7 +162,7 @@ shCluster.init(function (err, data) {
 process.on("message", function (msg) {
   shlog.debug("onMessage: %j", msg);
   if (msg.cmd === "user.direct") {
-    socket.sendDirect(msg.toWsid, msg.data);
+    global.socket.sendDirect(msg.toWsid, msg.data);
     return;
   }
   shlog.error("bad_message", "unknown command", msg);
@@ -165,6 +193,35 @@ function shutdown() {
     // waits for all client processes to end
     shCluster.masterShutdown();
   }
+
+//  server.shutdown(function () {
+//    shCluster.shutdown();
+//  });
+
+  if (process.env.WTYPE === "socket") {
+    shlog.info("shutting down socket");
+    global.socket.close(function () {
+      shCluster.shutdown();
+    });
+  }
+  if (process.env.WTYPE === "rest") {
+    shlog.info("shutting down rest");
+    rest.shutdown(function () {
+      shCluster.shutdown();
+    });
+  }
+  if (process.env.WTYPE === "admin") {
+    shlog.info("shutting down admin");
+    admin.shutdown(function () {
+      shCluster.shutdown();
+    });
+  }
+  if (process.env.WTYPE === "games") {
+    shlog.info("shutting down games");
+    games.shutdown(function () {
+      shCluster.shutdown();
+    });
+  }
   if (process.env.WTYPE === "mailer") {
     shlog.info("shutdown mailer");
     mailer.shutdown(function (err) {
@@ -175,12 +232,6 @@ function shutdown() {
     matcher.shutdown(function (err) {
       shCluster.shutdown();
     });
-  } else if (process.env.WTYPE === "shellyd") {
-    shlog.info("shutdown shellyd");
-    shellyd.shutdown(function (err) {
-      shCluster.shutdown();
-    });
-
   }
 }
 

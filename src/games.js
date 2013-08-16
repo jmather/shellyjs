@@ -113,18 +113,20 @@ app.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var gameServer = app.listen(global.C.GAMES_PORT, function () {
-  shlog.info("game server listening: %d", gameServer.address().port);
-});
+var gameServer = null;
+exports.start = function () {
+  gameServer = app.listen(global.C.GAMES_PORT, function () {
+    shlog.info("game server listening: %d", gameServer.address().port);
+  });
 
-gameServer.on("error", function (err) {
-  shlog.error(err);
-});
+  gameServer.on("error", function (err) {
+    shlog.error(err);
+  });
+};
 
-exports.close = function (cb) {
-  if (gameServer.address()) {
-    gameServer.close(cb);
-    return;
+exports.shutdown = function (cb) {
+  if (gameServer && gameServer.address()) {
+    gameServer.close();  // do not wait for close given keep-alives
   }
   cb();
 };

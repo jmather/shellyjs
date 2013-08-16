@@ -133,18 +133,20 @@ app.use(function (err, req, res, next) {
 
 //********** server init and handlers
 
-var adminServer = app.listen(global.C.ADMIN_PORT, function () {
-  shlog.info("admin server listening: %d", adminServer.address().port);
-});
+var adminServer = null;
+exports.start = function () {
+  var adminServer = app.listen(global.C.ADMIN_PORT, function () {
+    shlog.info("admin server listening: %d", adminServer.address().port);
+  });
 
-adminServer.on("error", function (err) {
-  shlog.error(err);
-});
+  adminServer.on("error", function (err) {
+    shlog.error(err);
+  });
+};
 
-exports.close = function (cb) {
-  if (adminServer.address()) {
-    adminServer.close(cb);
-    return;
+exports.shutdown = function (cb) {
+  if (adminServer && adminServer.address()) {
+    adminServer.close();
   }
   cb();
 };

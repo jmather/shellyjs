@@ -6,12 +6,11 @@ global.CDEF("SOCKET_PORT", 6110);
 
 // cluster options
 global.CDEF("CLUSTER_URL", "tcp://localhost:6151");
-global.CDEF("NUM_WORKERS", 1);
+// don't run a queue processor on this server
+global.CDEF("CLUSTER_NUM_MAILERS", 0);
 
 // send email direct
 //global.CDEF("EMAIL_QUEUE", false);
-// don't run a queue processor - no keys in this config
-global.CDEF("EMAIL_CONSUMER", false);
 
 
 // pick up all the other default configs
