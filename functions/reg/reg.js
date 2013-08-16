@@ -166,7 +166,10 @@ exports.login = function (req, res, cb) {
 
 exports.anonymous = function (req, res, cb) {
 
-  //SWD check reg signature
+  if (!global.C.REG_ALLOW_ANONYMOUS) {
+    res.add(sh.error("reg-denied", "anonymous registration is not allowed"));
+    return cb(1);
+  }
 
   var token = sanitize(req.body.token).trim();
   try {

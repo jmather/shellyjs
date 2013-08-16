@@ -23,6 +23,9 @@ global.CDEF("NUM_WORKERS", 2);
 // logs
 global.CDEF("LOG_STACKTRACE", true);
 
+// registration
+global.CDEF("REG_ALLOW_ANONYMOUS", true);
+
 // db
 global.CDEF("DB_SCOPE", "dev:");
 global.CDEF("DB_WRAPPER", "/src/db/shredis.js");
