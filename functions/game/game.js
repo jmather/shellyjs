@@ -67,6 +67,13 @@ Game.pre = function (req, res, cb) {
     }
     req.env.game = game;
 
+    if (req.body.cmd !== "game.join") {
+      if (!_.isObject(game.get("players")[req.session.uid])) {
+        res.add(sh.error("game-denied", "you are not a player in this game"));
+        return cb(1);
+      }
+    }
+
     var gameFile = gGameDir + "/" + game.get("name") + "/" + game.get("name") + ".js";
     sh.require(gameFile, function (err, module) {
       if (err) {
