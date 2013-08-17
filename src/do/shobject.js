@@ -91,7 +91,7 @@ ShObject.prototype.save = function (cb) {
   var currHash = crypto.createHash("md5").update(JSON.stringify(this._data)).digest("hex");
 
   if (currHash === this._hash) {
-    shlog.info("dfltgrp", "ignoring save - object not modified: %s", this._key);
+    shlog.info("shobject", "ignoring save - object not modified: %s", this._key);
     return cb(0, sh.intMsg("object-same", "object has not changed"));
   }
   var now = new Date().getTime();
@@ -103,7 +103,7 @@ ShObject.prototype.save = function (cb) {
     if (err) {
       return cb(2, sh.intMsg("set-failed", res));
     }
-    shlog.info("dfltgrp", "object saved: %s", self._key);
+    shlog.info("shobject", "object saved: %s", self._key);
     self._hash = currHash;
     return cb(0, sh.intMsg("object-saved", self._key));
   });

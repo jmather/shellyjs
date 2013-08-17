@@ -34,7 +34,7 @@ Channel.list = function (req, res, cb) {
 };
 
 Channel.add = function (req, res, cb) {
-  shlog.info("dfltgrp", "channel.add: ", req.body.channel, req.session.uid);
+  shlog.info("channel", "channel.add: ", req.body.channel, req.session.uid);
 
   if (_.isUndefined(res.ws)) {
     res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
@@ -80,7 +80,7 @@ Channel.add = function (req, res, cb) {
 };
 
 Channel.removeInt = function (channel, uid, cb) {
-  shlog.info("dfltgrp", "removeInt: ", channel, uid);
+  shlog.info("channel", "removeInt: ", channel, uid);
 
   global.db.srem(channel, uid, _w(cb, function (err, data) {
     // ignore the error and just send the off
@@ -95,7 +95,7 @@ Channel.removeInt = function (channel, uid, cb) {
 };
 
 Channel.remove = function (req, res, cb) {
-  shlog.info("dfltgrp", "channel.remove: ", req.body.channel, req.session.uid);
+  shlog.info("channel", "channel.remove: ", req.body.channel, req.session.uid);
 
   if (_.isUndefined(res.ws)) {
     res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
@@ -127,7 +127,7 @@ Channel.sendInt = function (channel, event, excludeIds, cb) {
 };
 
 Channel.send = function (req, res, cb) {
-  shlog.info("dfltgrp", "channel.message: ", req.body.channel, req.body.message);
+  shlog.info("channel", "channel.message: ", req.body.channel, req.body.message);
 
   var msgBlock = {
     from: req.session.uid,

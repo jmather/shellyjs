@@ -16,11 +16,11 @@ object.functions = {
 };
 
 object.create = function (req, res, cb) {
-  shlog.info("dfltgrp", "object.create");
+  shlog.info("object", "object.create");
 
   req.loader.create("kObject", sh.uuid(), _w(cb, function (err, obj) {
     if (err) {
-      res.add(sh.error("object-create", "unable to create object", data));
+      res.add(sh.error("object-create", "unable to create object", obj));
       return cb(1);
     }
     obj.set(req.body.object);
@@ -30,7 +30,7 @@ object.create = function (req, res, cb) {
 };
 
 object.delete = function (req, res, cb) {
-  shlog.info("dfltgrp", "object.delete");
+  shlog.info("object", "object.delete");
 
   req.loader.delete("kObject", req.body.oid, _w(cb, function (err, data) {
     if (err) {

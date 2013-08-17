@@ -42,7 +42,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
     if (_.isObject(this._objects[key])) {
       // if asking for lock we must have it for cached version
       if (!opts.lock || (opts.lock && this._locks[key])) {
-        shlog.info("dfltgrp", "cache hit: %s", key);
+        shlog.info("shloader", "cache hit: %s", key);
         this._cacheHit += 1;
         return cb(0, this._objects[key]);
       }
@@ -57,7 +57,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
     return cb(1, sh.intMsg("module-load-failed", shkeys.moduleFile(keyType)));
   }
 
-  shlog.info("dfltgrp", "%s: %s - %s", funcName, keyType, params);
+  shlog.info("shloader", "%s: %s - %s", funcName, keyType, params);
   var self = this;
   var obj = new ShClass();
   if (opts.lock) {
@@ -67,7 +67,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
       }
       obj[funcName](params, function (err, data) {
         if (!err) {
-          shlog.info("dfltgrp", "cache store: %s", obj._key);
+          shlog.info("shloader", "cache store: %s", obj._key);
           self._objects[obj._key] = obj;
           self._locks[obj._key] = true;
           return cb(0, obj);
@@ -78,7 +78,7 @@ ShLoader.prototype.loadHelper = function (funcName, keyType, params, cb, pOpts) 
   } else {
     obj[funcName](params, _w(cb, function (err, data) {
       if (!err) {
-        shlog.info("dfltgrp", "cache store: %s", obj._key);
+        shlog.info("shloader", "cache store: %s", obj._key);
         self._objects[obj._key] = obj;
         return cb(0, obj);
       }
@@ -105,7 +105,7 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
   }
 
   var key = shkeys.get(keyType, params);
-  shlog.info("dfltgrp", "delete object", key);
+  shlog.info("shloader", "delete object", key);
   delete this._objects[key];
 
   var self = this;
@@ -120,10 +120,10 @@ ShLoader.prototype.delete = function (keyType, params, cb) {
 };
 
 ShLoader.prototype.dump = function (cb) {
-  shlog.info("dfltgrp", "dump start");
+  shlog.info("shloader", "dump start");
   var self = this;
   async.each(Object.keys(this._objects), function (key, lcb) {
-    shlog.info("dfltgrp", "dumping: %s", key);
+    shlog.info("shloader", "dumping: %s", key);
     self._objects[key].save(_w(lcb, function (err, data) {
       if (data.code === "object-saved") {
         self._saves += 1;
@@ -139,7 +139,7 @@ ShLoader.prototype.dump = function (cb) {
       }
     }));
   }, function (err) {
-    shlog.info("dfltgrp", "dump complete:", self._cacheHit, "misses:", self._cacheMiss, "saves:", self._saves);
+    shlog.info("shloader", "dump complete:", self._cacheHit, "misses:", self._cacheMiss, "saves:", self._saves);
     if (_.isFunction(cb)) {
       cb(0);
     }

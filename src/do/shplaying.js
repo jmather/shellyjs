@@ -18,14 +18,14 @@ util.inherits(Playing, ShObject);
 module.exports = Playing;
 
 Playing.prototype.addGame = function (game) {
-  shlog.info("dfltgrp", "add game:", game.get("oid"), game.get("name"));
+  shlog.info("shplaying", "add game:", game.get("oid"), game.get("name"));
 
   var ts = new Date().getTime();
   this._data.currentGames[game.get("oid")] = {name: game.get("name"), lastJoin: ts};
 };
 
 Playing.prototype.removeGame = function (gameId) {
-  shlog.info("dfltgrp", "remove game:", gameId);
+  shlog.info("shplaying", "remove game:", gameId);
 
   delete this._data.currentGames[gameId];
 };

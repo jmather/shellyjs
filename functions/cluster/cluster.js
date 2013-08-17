@@ -16,7 +16,7 @@ cluster.functions = {
 };
 
 cluster.servers = function (req, res, cb) {
-  shlog.info("dfltgrp", "cluster.servers");
+  shlog.info("cluster", "cluster.servers");
 
   shcluster.servers(_w(cb, function (err, serverList) {
     if (err) {
@@ -29,7 +29,7 @@ cluster.servers = function (req, res, cb) {
 };
 
 cluster.locate = function (req, res, cb) {
-  shlog.info("dfltgrp", "cluster.locate");
+  shlog.info("cluster", "cluster.locate");
 
   shcluster.locate(req.body.uid, _w(cb, function (err, locate) {
     if (err) {
@@ -42,7 +42,7 @@ cluster.locate = function (req, res, cb) {
 };
 
 cluster.sendUser = function (req, res, cb) {
-  shlog.info("dfltgrp", "cluster.send");
+  shlog.info("cluster", "cluster.send");
 
   shcluster.sendUser(req.body.uid, req.body.data, _w(cb, function (err, data) {
     if (err) {
@@ -55,7 +55,7 @@ cluster.sendUser = function (req, res, cb) {
 };
 
 cluster.home = function (req, res, cb) {
-  shlog.info("dfltgrp", "cluster.home");
+  shlog.info("cluster", "cluster.home");
 
   shcluster.home(req.body.oid, _w(cb, function (err, data) {
     if (err) {

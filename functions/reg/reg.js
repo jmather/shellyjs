@@ -116,7 +116,7 @@ exports.login = function (req, res, cb) {
 
   var email = sanitize(req.body.email).trim();
   var password = sanitize(req.body.password).trim();
-  shlog.info("dfltgrp", "login attempt:", email);
+  shlog.info("reg", "login attempt:", email);
   try {
     if (email !== global.C.DEFAULT_ADMIN_NAME) {
       check(email, 102).isEmail();
@@ -154,7 +154,7 @@ exports.login = function (req, res, cb) {
         user.set("email", email);
       }
 
-      shlog.info("dfltgrp", "login success:", email);
+      shlog.info("reg", "login success:", email);
       var out = {};
       out.email = email;
       out.session = session.create(em.get("uid"));

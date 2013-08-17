@@ -22,7 +22,7 @@ function challengeId(uid, game) {
 }
 
 Challenges.prototype.addSend = function (toUid, game) {
-  shlog.info("dfltgrp", "challenge.addSend:", toUid, game);
+  shlog.info("shchallenges", "challenge.addSend:", toUid, game);
 
   var ts = new Date().getTime();
   var chId = challengeId(toUid, game);
@@ -32,13 +32,13 @@ Challenges.prototype.addSend = function (toUid, game) {
 };
 
 Challenges.prototype.removeSend = function (chId) {
-  shlog.info("dfltgrp", "challenge.removeSend:", chId);
+  shlog.info("shchallenges", "challenge.removeSend:", chId);
 
   delete this._data.sent[chId];
 };
 
 Challenges.prototype.addRecieved = function (fromUid, game, data) {
-  shlog.info("dfltgrp", "challenge.addRecieved:", fromUid, game);
+  shlog.info("shchallenges", "challenge.addRecieved:", fromUid, game);
 
   var ts = new Date().getTime();
   var chId = challengeId(fromUid, game);
@@ -48,7 +48,7 @@ Challenges.prototype.addRecieved = function (fromUid, game, data) {
 };
 
 Challenges.prototype.removeRecieved = function (chId) {
-  shlog.info("dfltgrp", "challenge.removeRecieved:", chId);
+  shlog.info("shchallenges", "challenge.removeRecieved:", chId);
 
   delete this._data.recieved[chId];
 };

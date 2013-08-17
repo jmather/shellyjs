@@ -38,16 +38,16 @@ function matchError(err, data) {
 
 function matchLoop() {
   global.db.scard(matchKey(gGameName), _w(matchError, function (err, data) {
-    shlog.debug("dfltgrp", matchKey(gGameName), data);
+    shlog.debug("shmatcher", matchKey(gGameName), data);
     if (err || data < 2) {
       // empty set, wait and loop
-      shlog.debug("dfltgrp", "not enough users", matchKey(gGameName), data);
+      shlog.debug("shmatcher", "not enough users", matchKey(gGameName), data);
       setTimeout(function () {matchLoop(); }, 5000);
       return;
     }
     // try match - spop 2
     global.db.spop(matchKey(gGameName), _w(matchError, function (err, uid1) {
-      shlog.info("dfltgrp", "pop user", matchKey(gGameName), data);
+      shlog.info("shmatcher", "pop user", matchKey(gGameName), data);
       if (err || uid1 === null) {
         setTimeout(function () {matchLoop(); }, 5000);
         return;
@@ -55,9 +55,9 @@ function matchLoop() {
       global.db.spop(matchKey(gGameName), _w(matchError, function (err, uid2) {
         if (err || uid2 === null) {
           // add first user popped back in
-          shlog.info("dfltgrp", "error getting second user", err, uid2);
+          shlog.info("shmatcher", "error getting second user", err, uid2);
           global.db.sadd(matchKey(gGameName), uid1, function (err, data) {
-            shlog.info("dfltgrp", "add first user back to set", uid1);
+            shlog.info("shmatcher", "add first user back to set", uid1);
             // ignore for now
           });
           setTimeout(function () {matchLoop(); }, 5000);
@@ -74,11 +74,11 @@ function matchLoop() {
         req.body.players = [uid1, uid2];
         var res = {};
         res.add = add;
-        shlog.info("dfltgrp", "match made, create game", req.body.players);
+        shlog.info("shmatcher", "match made, create game", req.body.players);
         sh.call(req, res, _w(matchError, function (error) {
           if (error) {
             // problem - push the uids back
-            shlog.error("dfltgrp", error, res.msgs);
+            shlog.error("shmatcher", error, res.msgs);
             return;
           }
           gLoader.dump(function (err) {
@@ -108,17 +108,17 @@ shmatcher.start = function (gameName) {
   // can do this as matcher is per process
   gGameName = gameName;
   process.on("uncaughtException", function (error) {
-    shlog.error("dfltgrp", "uncaughtException", error.stack);
+    shlog.error("shmatcher", "uncaughtException", error.stack);
     // restart the loop
     matchLoop();
   });
 
   gLoader = new ShLoader();
-  shlog.info("dfltgrp", "starting matcher");
+  shlog.info("shmatcher", "starting matcher");
   matchLoop();
 };
 
 shmatcher.shutdown = function (cb) {
-  shlog.info("dfltgrp", "shutdown matcher");
+  shlog.info("shmatcher", "shutdown matcher");
   cb(0);
 };

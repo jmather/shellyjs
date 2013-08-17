@@ -18,7 +18,7 @@ shmailer.sendEmail = function (emailInfo, cb) {
   mailer.send(baseInfo.template, baseInfo, _w(cb, function (err, responseStatus, html, text) {
     if (err) {
       var errorMsg = sh.intMsg(err.code, err.message);
-      shlog.error("dfltgrp", errorMsg);
+      shlog.error("shmailer", errorMsg);
       return cb(1, errorMsg);
     }
     return cb(0, {error: err, status: responseStatus});
@@ -32,7 +32,7 @@ function sendError(err, data) {
 
 function sendLoop() {
   global.db.spop("jobs:email", _w(sendError, function (err, data) {
-    shlog.debug("dfltgrp", "mailer check:", err, data);
+    shlog.debug("shmailer", "mailer check:", err, data);
     if (!err && data === null) {
       // no emails, wait and loop
       setTimeout(sendLoop, 5000);
@@ -40,7 +40,7 @@ function sendLoop() {
     }
 
     var emailInfo = JSON.parse(data);
-    shlog.info("dfltgrp", "sending:", emailInfo.email, emailInfo.template);
+    shlog.info("shmailer", "sending:", emailInfo.email, emailInfo.template);
     shmailer.sendEmail(emailInfo, _w(sendError, function (err, data) {
       if (err) {
         // add back to set
@@ -49,7 +49,7 @@ function sendLoop() {
           // ignore for now
         });
       }
-      shlog.info("dfltgrp", "sent:", err, data);
+      shlog.info("shmailer", "sent:", err, data);
     }));
     sendLoop();
   }));
@@ -67,16 +67,16 @@ shmailer.queueList = function (cb) {
 
 shmailer.start = function () {
   process.on("uncaughtException", function (error) {
-    shlog.error("dfltgrp", "uncaughtException", error.stack);
+    shlog.error("shmailer", "uncaughtException", error.stack);
     // restart the loop
     sendLoop();
   });
 
-  shlog.info("dfltgrp", "starting mailer");
+  shlog.info("shmailer", "starting mailer");
   sendLoop();
 };
 
 shmailer.shutdown = function (cb) {
-  shlog.info("dfltgrp", "shutdown mailer");
+  shlog.info("shmailer", "shutdown mailer");
   cb(0);
 };

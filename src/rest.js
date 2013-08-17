@@ -29,7 +29,7 @@ function sendAll() {
     if (data.event === "error") {
       data.inputs = self.req.body;
       stats.incr("errors", "rest");
-      shlog.error("dfltgrp", "send %j", data);  // log all errors
+      shlog.error("rest", "send %j", data);  // log all errors
     }
   });
   this.send(this.msgs);
@@ -41,7 +41,7 @@ function clear() {
 }
 
 rest.use(function (req, res, next) {
-  shlog.info("dfltgrp", "session check");
+  shlog.info("rest", "session check");
 
   req.loader = new ShLoader();
   res.add = add;
@@ -96,7 +96,7 @@ rest.use(function (err, req, res, next) {
   }
 
   res.status(500);
-  shlog.error("dfltgrp", "rest error %s %j", err, err.stack);
+  shlog.error("rest", "rest error %s %j", err, err.stack);
   res.send(sh.error("rest-error", err.message, { message: err.message, stack: err.stack }));
 });
 
@@ -106,11 +106,11 @@ rest.use(function (err, req, res, next) {
 var restServer = null;
 exports.start = function () {
   restServer = rest.listen(global.C.REST_PORT, function () {
-    shlog.info("dfltgrp", "rest server listening: %s", global.C.restPort);
+    shlog.info("rest", "rest server listening: %s", global.C.restPort);
   });
 
   restServer.on("error", function (err) {
-    shlog.error("dfltgrp", err);
+    shlog.error("rest", err);
   });
 };
 

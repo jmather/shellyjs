@@ -21,18 +21,18 @@ if (_.isUndefined(global.sockets)) {
 // send directly to user using socket id in global map
 Socket.sendDirect = function (wsId, data) {
   if (_.isUndefined(data)) {
-    shlog.error("dfltgrp", "bad send data:", data);
+    shlog.error("socket", "bad send data:", data);
     return false;
   }
   var ws = global.sockets[wsId];
   if (_.isUndefined(ws)) {
-    shlog.error("dfltgrp", "global socket not found:", wsId);
+    shlog.error("socket", "global socket not found:", wsId);
     return false;
   }
   try {
     sh.sendWs(ws, 0, data);
   } catch (e) {
-    shlog.error("dfltgrp", "global socket dead:", wsId, e);
+    shlog.error("socket", "global socket dead:", wsId, e);
     return false;
   }
   return true;
@@ -46,7 +46,7 @@ function add(data) {
   if (data.event === "error") {
     data.inputs = this.req.body;
     stats.incr("errors", "socket");
-    shlog.error("dfltgrp", "send %j", data);  // log all errors
+    shlog.error("socket", "send %j", data);  // log all errors
   }
   this.msgs.push(data);
 }
@@ -143,7 +143,7 @@ function onCloseError(err, data) {
 }
 
 function onClose() {
-  shlog.info("dfltgrp", "(" + this.id + ") socket: close");
+  shlog.info("socket", "(" + this.id + ") socket: close");
 
   clearInterval(this.hbTimer);
 
@@ -156,7 +156,7 @@ function onClose() {
 
   // clean up any channels
   _.each(this.channels, function (value, key) {
-    shlog.info("dfltgrp", "removing", key);
+    shlog.info("socket", "removing", key);
     channel.removeInt(key, this.uid);
   }, this);
 
@@ -164,18 +164,18 @@ function onClose() {
 }
 
 function onError(err) {
-  shlog.error("dfltgrp", "(" + this.id + ")", err);
+  shlog.error("socket", "(" + this.id + ")", err);
 }
 
 function handleConnect(ws) {
   if (global.shutdown) {
     // just in case someone sneaks in
-    shlog.error("dfltgrp", "connect after shutdown");
+    shlog.error("socket", "connect after shutdown");
     ws.close();
     return;
   }
 
-  shlog.info("dfltgrp", "(" + ws.id + ") socket: connect");
+  shlog.info("socket", "(" + ws.id + ") socket: connect");
   ws.uid = 0;
   ws.games = [];
   ws.hbTimer = null;
@@ -194,7 +194,7 @@ function handleConnect(ws) {
 
 Socket.start = function () {
   wss = new WebSocketServer({port: global.C.SOCKET_PORT});
-  shlog.info("dfltgrp", "socketserver listening: " + global.C.SOCKET_PORT);
+  shlog.info("socket", "socketserver listening: " + global.C.SOCKET_PORT);
   var connCount = 1;
 
   wss.on("connection", function (ws) {
@@ -210,7 +210,7 @@ Socket.start = function () {
   }); // end wss.on-connection
 
   wss.on("error", function (err) {
-    shlog.error("dfltgrp", err);
+    shlog.error("socket", err);
   });
 };
 

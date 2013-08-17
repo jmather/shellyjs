@@ -56,10 +56,10 @@ shmail.send = function (templateName, locals, cb) {
         text: text
       }, _w(cb, function (err, responseStatus) {
         if (err) {
-          shlog.error("dfltgrp", "sending:", locals.email, err);
+          shlog.error("shmail", "sending:", locals.email, err);
           return cb(err);
         }
-        shlog.info("dfltgrp", "sending:", locals.email, responseStatus.message);
+        shlog.info("shmail", "sending:", locals.email, responseStatus.message);
         return cb(null, responseStatus.message, html, text);
       }));
     }));

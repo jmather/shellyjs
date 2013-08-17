@@ -9,7 +9,7 @@ var shkeys = exports;
 var gKeyTypes = {};
 
 shkeys.init = function (cb) {
-  shlog.info("dfltgrp", "object init");
+  shlog.info("shkeys", "object init");
 
   var funcDir = global.gBaseDir + "/src/do";
   fs.readdir(funcDir, function (err, files) {
@@ -21,9 +21,9 @@ shkeys.init = function (cb) {
       var obj = new ObjModule();
       if (!_.isUndefined(obj._keyType) && !_.isUndefined(obj._keyFormat)) {
         gKeyTypes[obj._keyType] = {tpl: obj._keyFormat, file: fn};
-        shlog.info("dfltgrp", "object factory:", obj._keyType, fn);
+        shlog.info("shkeys", "object factory:", obj._keyType, fn);
       } else {
-        shlog.info("dfltgrp", "bad data object missing keyType or keyFormat", fn);
+        shlog.info("shkeys", "bad data object missing keyType or keyFormat", fn);
       }
     });
     return cb(0);

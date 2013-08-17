@@ -13,7 +13,7 @@ exports.functions = {
 };
 
 exports.getInfo = function (fn, cb) {
-  shlog.info("dfltgrp", "getInfo fn=" + fn);
+  shlog.info("module", "getInfo fn=" + fn);
 
   var m = {};
   m.error = 0;
@@ -40,7 +40,7 @@ exports.getInfo = function (fn, cb) {
 };
 
 exports.info = function (req, res, cb) {
-  shlog.info("dfltgrp", "module.info name=" + req.body.name);
+  shlog.info("module", "module.info name=" + req.body.name);
   // SWD centralize this path construction
   var funcDir = global.gBaseDir + "/functions";
   var moduleFn = funcDir + "/" + req.body.name + "/" + req.body.name + ".js";

@@ -7,7 +7,7 @@ var shSqlite = exports;
 var sqlite3 = require("sqlite3");
 
 shSqlite.init = function (options, cb) {
-  shlog.info("dfltgrp", "sqlite3 init", options);
+  shlog.info("shsqlite", "sqlite3 init", options);
   this.options = options;
 
   var _this = this;
@@ -23,7 +23,7 @@ shSqlite.init = function (options, cb) {
 };
 
 shSqlite.get = function (key, cb) {
-  shlog.info("dfltgrp", "get", key);
+  shlog.info("shsqlite", "get", key);
 
   this.client.get("SELECT value FROM store WHERE key = ?", key, function (err, row) {
     cb(err, row ? row.value : null);
@@ -31,20 +31,20 @@ shSqlite.get = function (key, cb) {
 };
 
 shSqlite.set = function (key, value, cb) {
-  shlog.info("dfltgrp", "set", key, value);
+  shlog.info("shsqlite", "set", key, value);
 
   this.client.run("REPLACE INTO store VALUES (?, ?)", key, value, cb);
 };
 
 
 shSqlite.del = function (key, cb) {
-  shlog.info("dfltgrp", "del", key);
+  shlog.info("shsqlite", "del", key);
 
   this.client.run("DELETE FROM store WHERE key = ?", key, cb);
 };
 
 shSqlite.decr = function (key, amount, cb) {
-  shlog.info("dfltgrp", "decr", key);
+  shlog.info("shsqlite", "decr", key);
 
   var self = this;
   this.client.run("UPDATE store SET value = value - ? WHERE key = ?", amount, key, function (err) {
@@ -57,7 +57,7 @@ shSqlite.decr = function (key, amount, cb) {
 };
 
 shSqlite.incr = function (key, amount, cb) {
-  shlog.info("dfltgrp", "incr", key);
+  shlog.info("shsqlite", "incr", key);
 
   var self = this;
   this.client.run("UPDATE store SET value = value + ? WHERE key = ?", amount, key, function (err) {
@@ -93,7 +93,7 @@ shSqlite.dequeue = function (queueName, uid, cb) {
         return;
       }
       self.set(queueName, JSON.stringify(infoNew), function (err) {
-        shlog.info("dfltgrp", "set", queueName, err);
+        shlog.info("shsqlite", "set", queueName, err);
         self.client.run("COMMIT", function (err) {
           cb(0);
         });
@@ -110,7 +110,7 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
       if (row === null) {
         // nothing in queue - set it
         self.set(queueName, JSON.stringify([data]), function (err) {
-          shlog.info("dfltgrp", "set", queueName, err);
+          shlog.info("shsqlite", "set", queueName, err);
           self.client.run("COMMIT", function (err) {
             cb(0, null);
           });
@@ -124,7 +124,7 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
         return item.uid === data.uid;
       });
       if (found.length !== 0) {
-        shlog.info("dfltgrp", "user queued already", queueName, data.uid, found);
+        shlog.info("shsqlite", "user queued already", queueName, data.uid, found);
         self.client.run("COMMIT", function (err) {
           return cb(2, null);
         });
@@ -134,7 +134,7 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
       if (info.length + 1 < minMatches) {
         info.push(data);
         self.set(queueName, JSON.stringify(info), function (err) {
-          shlog.info("dfltgrp", "add user to existing queue", queueName, err);
+          shlog.info("shsqlite", "add user to existing queue", queueName, err);
           self.client.run("COMMIT", function (err) {
             cb(0, null);
           });
@@ -144,7 +144,7 @@ shSqlite.popOrPush = function (queueName, minMatches, data, cb) {
 
       // match made - send list back
       self.del(queueName, function (err) {
-        shlog.info("dfltgrp", "clear queue", queueName, err);
+        shlog.info("shsqlite", "clear queue", queueName, err);
         self.client.run("COMMIT", function (err) {
           cb(0, info);
         });
