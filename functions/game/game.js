@@ -55,9 +55,8 @@ Game.pre = function (req, res, cb) {
   if (req.body.cmd === "game.get") {  // no need to lock the gets
     opts.lock = false;
   }
-  var gameId = req.body.gameId;
-  shlog.info("game", "game.pre: populating game info for " + gameId);
-  req.loader.exists("kGame", gameId, _w(cb, function (error, game) {
+  shlog.info("game", "game.pre: populating game info for " + req.body.gameId);
+  req.loader.exists("kGame", req.body.gameId, _w(cb, function (error, game) {
     if (error) {
       if (req.body.cmd === "game.leave") {  // always alow user to remove a bad game
         return cb(0);
@@ -208,7 +207,7 @@ Game.join = function (req, res, cb) {
     addGamePlaying(req.loader, uid, game, _w(cb, function (error, data) {
       game.setPlayer(uid, "ready");
 
-      channel.sendInt("game:" + game.get("oid"), sh.event("game.user.join", {gameId: game.get("gameId"), uid: uid}));
+      channel.sendInt("game:" + game.get("oid"), sh.event("game.user.join", {gameId: game.get("oid"), uid: uid}));
 
       // just extend the profile added uid
       sh.extendProfiles(req.loader, game.get("players"), _w(cb, function (error, data) {
@@ -247,8 +246,6 @@ Game.leave = function (req, res, cb) {
 };
 
 Game.turn = function (req, res, cb) {
-  var uid = req.session.uid;
-  var gameId = req.body.gameId;
   var gameData = req.env.game.getData();
 
   if (Object.keys(gameData.players).length < gameData.minPlayers) {
@@ -259,12 +256,12 @@ Game.turn = function (req, res, cb) {
     res.add(sh.event("game.over", gameData));
     return cb(0);
   }
-  if (gameData.whoTurn !== uid) {
+  if (gameData.whoTurn !== req.session.uid) {
     res.add(sh.error("game-noturn", "not your turn", {whoTurn: gameData.whoTurn}));
     return cb(1);
   }
 
-  var nextIndex = gameData.playerOrder.indexOf(uid) + 1;
+  var nextIndex = gameData.playerOrder.indexOf(req.session.uid) + 1;
   if (nextIndex === gameData.playerOrder.length) {
     nextIndex = 0;
   }
