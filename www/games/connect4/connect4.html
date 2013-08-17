@@ -200,7 +200,7 @@
                 if(msg.data.gameId === Env.gameId) {
                     setWhoTurn(msg.data.whoTurn);
                 } else if (msg.data.whoTurn === Env.user.oid) {
-                    updateMyTurns(msg.data.gameId, msg.data.gameName, msg.data.whoTurn);
+                    updateMyTurns(msg.data.gameId, msg.data);
                 }
                 return;
             }

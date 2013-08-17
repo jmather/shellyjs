@@ -111,12 +111,12 @@ function setLobbyGames(gameList) {
     $newGame.addClass("activeGame");
     $newGame.attr("gameId", gameId);
     $newGame.attr("gameName", gameList[gameId].name);
+    $newGame.attr("gameUrl", gameList[gameId].gameUrl);
     $newGame.css("display", "block");
 
     $newGame.find("#myGameJoin").click(function () {
-      var gameId = $(this).parent().attr("gameId");
-      var gameName = $(this).parent().attr("gameName");
-      gameInit(gameName, gameId);
+      var gameUrl = $(this).parent().attr("gameUrl");
+      window.location.href = gameUrl;
     });
     $newGame.find("#myGameRemove").click(function (event) {
       $(event.target).parent().remove();
@@ -132,25 +132,25 @@ function setLobbyGames(gameList) {
   }
 }
 
-function updateMyTurns(gameId, gameName, whoTurn) {
+function updateMyTurns(gameId, game) {
   if (gameId === Env.gameId) {
     return;
   }
-  if (whoTurn !== Env.user.oid) {
+  if (game.whoTurn !== Env.user.oid) {
     return;
   }
   var $newGame = $("#gameTemplate").clone();
-  $newGame.find("#gameName").text(gameName.substr(0, 6) + "-" + gameId.substr(0, 4) + "..");
+  $newGame.find("#gameName").text(game.gameName.substr(0, 6) + "-" + gameId.substr(0, 4) + "..");
   $newGame.addClass("myGameId" + gameId);
   $newGame.addClass("activeGame");
   $newGame.attr("gameId", gameId);
-  $newGame.attr("gameName", gameName);
+  $newGame.attr("gameName", game.gameName);
+  $newGame.attr("gameUrl", game.gameUrl);
   $newGame.css("display", "block");
 
   $newGame.find("#myGameJoin").click(function () {
-    var gameId = $(this).parent().attr("gameId");
-    var gameName = $(this).parent().attr("gameName");
-    gameInit(gameName, gameId);
+    var gameUrl = $(this).parent().attr("gameUrl");
+    window.location.href = gameUrl;
   });
   $newGame.find("#myGameRemove").click(function (event) {
     $(event.target).parent().remove();
@@ -166,7 +166,7 @@ function updateMyTurns(gameId, gameName, whoTurn) {
 function setMyTurns(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {
-    updateMyTurns(gameId, gameList[gameId].name, gameList[gameId].whoTurn);
+    updateMyTurns(gameId, gameList[gameId]);
   }
 }
 
