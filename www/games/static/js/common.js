@@ -201,7 +201,6 @@ ws.onerror = function (evt) {
 
 // assumes global ws object
 function sendWs(data) {
-  data.session = Env.session;
   var msg = JSON.stringify(data);
   log("socket", "send", msg);
   ws.send(msg);
