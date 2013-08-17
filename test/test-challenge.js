@@ -108,6 +108,7 @@ describe("challenge module", function () {
           res[0].should.have.property("event", "challenge.accept");
           res[1].should.have.property("event", "challenge.start");
           res[1].data.should.have.property("gameId");
+          res[1].data.should.have.property("gameUrl");
           gGameId = res[1].data.gameId;
           done();
         });
@@ -301,6 +302,7 @@ describe("challenge module", function () {
           res[0].should.have.property("event", "challenge.accept");
           res[1].should.have.property("event", "challenge.start");
           res[1].data.should.have.property("gameId");
+          res[1].data.should.have.property("gameUrl");
           gGameId = res[1].data.gameId;
           done();
         });
@@ -386,6 +388,7 @@ describe("challenge module", function () {
           res[0].should.have.property("event", "challenge.accept");
           res[1].should.have.property("event", "challenge.start");
           res[1].data.should.have.property("gameId");
+          res[1].data.should.have.property("gameUrl");
           gGameId = res[1].data.gameId;
           done();
         });

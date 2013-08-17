@@ -73,9 +73,8 @@ function hideInfo() {
   $("#infoMessage").css("display", "none");
 }
 
-function gameInit(gameName, gameId) {
-  var url = "/" + gameName + "/" + gameName + ".html?gameId=" + gameId;
-  window.location.href = url;
+function gameInit(startInfo) {
+  window.location.href = startInfo.gameUrl;
 }
 
 function setLobbyTurn(gameId, whoTurn, profile) {

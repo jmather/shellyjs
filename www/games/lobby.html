@@ -158,7 +158,7 @@ function processEvent(res, from) {
     }
     if (res.event == "challenge.start" ||
             res.event == "match.made") {
-        gameInit(res.data.gameName, res.data.gameId);
+        gameInit(res.data);
         return;
     }
     if (res.event == "system.connInfo") {

@@ -162,6 +162,7 @@ Challenge.accept = function (req, res, cb) {
         var startInfo = {};
         startInfo.gameName = req.env.game.get("name");
         startInfo.gameId = req.env.game.get("oid");
+        startInfo.gameUrl = global.C.GAMES_URL + global.games[startInfo.gameName].url + "?gameId=" + startInfo.gameId;
         var event = sh.event("challenge.start", startInfo);
         res.add(event);
         dispatch.sendUsers(req.body.players, event, req.session.uid);

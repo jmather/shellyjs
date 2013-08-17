@@ -74,6 +74,7 @@ var games = null;
 global.socket = require(global.gBaseDir + "/src/socket.js");
 
 // SWD: this need to moved to a config file
+// pre-validate all the options are set - specially the url
 global.games = {};
 global.games.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
 global.games.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/connect4.html"};
