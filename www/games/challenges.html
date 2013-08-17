@@ -70,7 +70,6 @@ function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
         return;
     }
-    console.log("here", chId, challenge);
     var $newChallenge = $("#challengeTemplate").clone();
     $newChallenge.find("#challengerName").text(challenge.name);
     $newChallenge.find("#challengerAge").text(challenge.age);
@@ -80,7 +79,6 @@ function addChallenge(chId, challenge) {
     $newChallenge.addClass("activeChallenge");
     $newChallenge.attr("id", chId);
     $newChallenge.css("display", "block");
-    console.log("here");
 
     $newChallenge.find("#challengeAccept").attr("chId", chId);
     $newChallenge.find("#challengeDecline").attr("chId", chId);

@@ -77,7 +77,7 @@ function addUser(listName, profile) {
     if ($newUser.length > 0) {
         if (profile.status === "on")
         {
-            $newUser.remove();
+            $newUser.detach();
             $("#" + listName).prepend($newUser);
             $newUser.find("#onlineStatus").css("display", "block");
         } else {
