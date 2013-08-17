@@ -35,7 +35,7 @@ global.CDEF("CLUSTER", {
 });
 
 // logs
-global.CDEF("LOG_STACKTRACE", true);
+global.CDEF("LOG_STACKTRACE", false);
 
 // registration
 global.CDEF("REG_ALLOW_ANONYMOUS", true);

@@ -19,7 +19,7 @@ util.inherits(PlayerSet, ShObject);
 module.exports = PlayerSet;
 
 PlayerSet.prototype.add = function (player) {
-  shlog.info("add player:", player.get("name"), player.get("oid"));
+  shlog.info("dfltgrp", "add player:", player.get("name"), player.get("oid"));
   if (_.isObject(this._data.set[player.get("oid")])) {
     return;
   }

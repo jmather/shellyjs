@@ -18,7 +18,7 @@ util.inherits(MessageBank, ShObject);
 module.exports = MessageBank;
 
 MessageBank.prototype.add = function (msg) {
-  shlog.info("add message:", msg.from, msg.message);
+  shlog.info("dfltgrp", "add message:", msg.from, msg.message);
 
   this._data.bank.push(msg);
   if (this._data.bank.length > this._max) {

@@ -16,14 +16,14 @@ var adminBase = global.gBaseDir + "/www/admin";
 var adminStatic = adminBase + "/static";
 var adminLogin = adminBase + "/login";
 
-shlog.info("admin directory: " + adminBase);
+shlog.info("dfltgrp", "admin directory: " + adminBase);
 
 // ensure admin user
 var reg = require(global.gBaseDir + "/functions/reg/reg.js");
 var loader = new ShLoader();
 reg.verifyUser(loader, global.C.DEFAULT_ADMIN_NAME, global.C.DEFAULT_ADMIN_PASSWORD, function (error, data) {
   if (error) {
-    shlog.error("unable to load or create default admin", data);
+    shlog.error("dfltgrp", "unable to load or create default admin", data);
   }
   loader.dump();
 });
@@ -43,28 +43,28 @@ app.use(function (req, res, next) {
     return next();
   }
 
-  shlog.info("session check", req.path);
+  shlog.info("dfltgrp", "session check", req.path);
 
   // SWD little clunky to deal with express vs restify diffs
   req.body = {};
   req.body.cmd = "admin.page";
   if (_.isUndefined(req.cookies.shSession)) {
-    shlog.info("redirect - no session");
+    shlog.info("dfltgrp", "redirect - no session");
     res.redirect("/login/index.html");
     return 0;
   }
-  shlog.info("found cookie shSession: ", req.cookies.shSession);
+  shlog.info("dfltgrp", "found cookie shSession: ", req.cookies.shSession);
 
   req.loader = new ShLoader();
   sh.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
     if (error) {
-      shlog.info("redirect - bad session");
+      shlog.info("dfltgrp", "redirect - bad session");
       res.redirect("/login/index.html");
       return 0;
     }
     // double check the role
     if (!_.contains(req.session.user.get("roles"), "admin")) {
-      shlog.info("redirect - user does not have admin role", req.session.user.get("roles"));
+      shlog.info("dfltgrp", "redirect - user does not have admin role", req.session.user.get("roles"));
       res.redirect("/login/index.html");
       return 0;
     }
@@ -75,7 +75,7 @@ app.use(function (req, res, next) {
 });
 
 app.get("/login/*.html", function (req, res) {
-  shlog.info("in login", req.url);
+  shlog.info("dfltgrp", "in login", req.url);
   var env = {};
   env.version = global.PACKAGE.version;
   env.token = req.cookies.shToken;
@@ -101,7 +101,7 @@ function createEnv(req) {
 }
 
 app.get("*.html", function (req, res) {
-  shlog.info("%s %s", req.method, req.url);
+  shlog.info("dfltgrp", "%s %s", req.method, req.url);
   var env = createEnv(req);
 
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
@@ -111,7 +111,7 @@ app.get("*.html", function (req, res) {
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 
 app.use("/", function (req, res) {
-  shlog.info("default handler - default page");
+  shlog.info("dfltgrp", "default handler - default page");
   res.redirect("/index.html");
   return 0;
 });
@@ -119,7 +119,7 @@ app.use("/", function (req, res) {
 //********** error handling
 
 app.use(function (err, req, res, next) {
-  shlog.error("admin error", err, err.stack);
+  shlog.error("dfltgrp", "admin error", err, err.stack);
   var env = createEnv(req);
   env.error = {message: err.message, stack: err.stack};
 
@@ -136,11 +136,11 @@ app.use(function (err, req, res, next) {
 var adminServer = null;
 exports.start = function () {
   var adminServer = app.listen(global.C.ADMIN_PORT, function () {
-    shlog.info("admin server listening: %d", adminServer.address().port);
+    shlog.info("dfltgrp", "admin server listening: %d", adminServer.address().port);
   });
 
   adminServer.on("error", function (err) {
-    shlog.error(err);
+    shlog.error("dfltgrp", err);
   });
 };
 

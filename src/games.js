@@ -15,7 +15,7 @@ var commonStatic = global.gBaseDir + "/www/common";
 var gamesBase = global.gBaseDir + "/www/games";
 var gamesStatic = gamesBase + "/static";
 
-shlog.info("games directory: " + gamesBase);
+shlog.info("dfltgrp", "games directory: " + gamesBase);
 
 var app = express();
 app.use(express.favicon(gamesStatic + "/images/favicon.ico"));
@@ -30,19 +30,19 @@ app.use(function (req, res, next) {
     return next();
   }
 
-  shlog.info("session check", req.path);
+  shlog.info("dfltgrp", "session check", req.path);
   if (_.isUndefined(req.cookies.shSession)) {
-    shlog.info("redirect - no session");
+    shlog.info("dfltgrp", "redirect - no session");
     res.redirect("/login/index.html");
     return 0;
   }
-  shlog.info("found cookie shSession: ", req.cookies.shSession);
+  shlog.info("dfltgrp", "found cookie shSession: ", req.cookies.shSession);
 
   // there is no dump and these page do not modify objects
   req.loader = new ShLoader();
   sh.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
     if (error) {
-      shlog.info("redirect - bad session");
+      shlog.info("dfltgrp", "redirect - bad session");
       res.redirect("/login/index.html");
       return 0;
     }
@@ -53,7 +53,7 @@ app.use(function (req, res, next) {
 });
 
 app.get("/login/*.html", function (req, res) {
-  shlog.info("in login", req.url);
+  shlog.info("dfltgrp", "in login", req.url);
   var env = {};
   env.version = global.PACKAGE.version;
   env.token = req.cookies.shToken;
@@ -85,7 +85,7 @@ function renderPage(req, res, env) {
 }
 
 app.get("*.html", function (req, res) {
-  shlog.info("%s %s", req.method, req.url);
+  shlog.info("dfltgrp", "%s %s", req.method, req.url);
   var env = createEnv(req);
   renderPage(req, res, env);
 });
@@ -93,7 +93,7 @@ app.get("*.html", function (req, res) {
 app.use("/", express.static(gamesBase));  // catch all for any example js files
 
 app.use("/", function (req, res) {
-  shlog.info("default handler - goto lobby");
+  shlog.info("dfltgrp", "default handler - goto lobby");
   res.redirect("/home.html");
   return 0;
 });
@@ -101,7 +101,7 @@ app.use("/", function (req, res) {
 //********** error handling
 
 app.use(function (err, req, res, next) {
-  shlog.error("game error", err, err.stack);
+  shlog.error("dfltgrp", "game error", err, err.stack);
   var env = createEnv(req);
   env.error = {message: err.message, stack: err.stack};
 
@@ -116,11 +116,11 @@ app.use(function (err, req, res, next) {
 var gameServer = null;
 exports.start = function () {
   gameServer = app.listen(global.C.GAMES_PORT, function () {
-    shlog.info("game server listening: %d", gameServer.address().port);
+    shlog.info("dfltgrp", "game server listening: %d", gameServer.address().port);
   });
 
   gameServer.on("error", function (err) {
-    shlog.error(err);
+    shlog.error("dfltgrp", err);
   });
 };
 

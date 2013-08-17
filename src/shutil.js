@@ -54,7 +54,7 @@ shutil.require = function (cmdFile, cb) {
 
 shutil.sendWs = function (ws, error, data) {
   var msg = JSON.stringify(data);
-  shlog.send(error, "live uid:%s len:%d data:%s", ws.uid, msg.length, msg);
+  shlog.debug("send", error, "live uid:%s len:%d data:%s", ws.uid, msg.length, msg);
   ws.send(msg);
 };
 
@@ -109,13 +109,13 @@ shutil.fillSession = function (sess, req, res, cb) {
     return cb(1);
   }
   var uid = sess.split(":")[1];
-  shlog.info("loading user: uid = " + uid);
+  shlog.info("dfltgrp", "loading user: uid = " + uid);
   req.loader.get("kUser", uid, _w(cb, function (error, user) {
     if (error) {
       req.session.error = shutil.error("user-load", "unable to load user", {uid: uid, error: error, user: user});
       return cb(1);
     }
-    shlog.info("user loaded: " + uid);
+    shlog.info("dfltgrp", "user loaded: " + uid);
     req.session.valid = true;
     req.session.uid = uid;
     req.session.user = user;
@@ -148,7 +148,7 @@ shutil.call = function (req, res, cb) {
   }
   stats.incr("cmds", req.body.cmd);
 
-  shlog.info("cmd = " + req.body.cmd);
+  shlog.info("dfltgrp", "cmd = " + req.body.cmd);
   var cmdParts = req.body.cmd.split(".");
   if (cmdParts.length < 2) {
     res.add(shutil.error("module_call", "invalid command", {cmd: req.body.cmd}));
@@ -233,13 +233,13 @@ shutil.call = function (req, res, cb) {
 
     // ensure we have pre/post functions
     if (!_.isFunction(obj.pre)) {
-      shlog.info("no pre - using default");
+      shlog.info("dfltgrp", "no pre - using default");
       obj.pre = function (req, res, cb) {
         cb(0);
       };
     }
     if (!_.isFunction(obj.post)) {
-      shlog.info("no post - using default");
+      shlog.info("dfltgrp", "no post - using default");
       obj.post = function (req, res, cb) {
         cb(0);
       };
@@ -248,7 +248,7 @@ shutil.call = function (req, res, cb) {
     // call the pre, function, post sequence
     obj.pre(req, res, _w(cb, function (error, data) {
       if (error) {
-        shlog.info("pre error: ", error);
+        shlog.info("dfltgrp", "pre error: ", error);
         return cb(error, data);
       }
       obj[funcName](req, res, _w(cb, function (error, data) {
@@ -256,7 +256,7 @@ shutil.call = function (req, res, cb) {
         var retData = data;
         if (error) {
           // bail out, no post as function failed
-          shlog.info("func error: ", error);
+          shlog.info("dfltgrp", "func error: ", error);
           return cb(error, data);
         }
         obj.post(req, res, _w(cb, function (error, data) {

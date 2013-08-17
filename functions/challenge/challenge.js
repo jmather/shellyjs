@@ -132,7 +132,7 @@ function sendAccept(req, res, cb) {
         {"s": session.create(challengeUser.get("oid")), "gameId": req.env.game.get("oid")}
       ),
       template: "accepted"};
-    shlog.info(emailInfo);
+    shlog.info("dfltgrp", emailInfo);
 
     sendEmail(emailInfo, req, res, cb);
   }));
@@ -254,7 +254,7 @@ function sendChallenge(req, res, cb) {
         {"s": session.create(challengeUser.get("oid")), "chId": res.chRecievedId}
       ),
       template: "challenge"};
-    shlog.info(emailInfo);
+    shlog.info("dfltgrp", emailInfo);
 
     sendEmail(emailInfo, req, res, cb);
   }));
@@ -271,7 +271,7 @@ Challenge.email = function (req, res, cb) {
       return cb(error);
     }
     if (error === 2) {
-      shlog.info("user already created", data.get("uid"));
+      shlog.info("dfltgrp", "user already created", data.get("uid"));
       // existing email map object
       req.body.toUid = data.get("uid");
       res.clear();

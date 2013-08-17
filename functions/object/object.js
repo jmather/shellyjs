@@ -16,7 +16,7 @@ object.functions = {
 };
 
 object.create = function (req, res, cb) {
-  shlog.info("object.create");
+  shlog.info("dfltgrp", "object.create");
 
   req.loader.create("kObject", sh.uuid(), _w(cb, function (err, obj) {
     if (err) {
@@ -30,7 +30,7 @@ object.create = function (req, res, cb) {
 };
 
 object.delete = function (req, res, cb) {
-  shlog.info("object.delete");
+  shlog.info("dfltgrp", "object.delete");
 
   req.loader.delete("kObject", req.body.oid, _w(cb, function (err, data) {
     if (err) {

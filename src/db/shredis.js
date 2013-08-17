@@ -13,13 +13,13 @@ var gCmds = ["get", "set", "del", "incrby", "decrby", "sadd", "srem", "spop", "s
   "hset", "hdel", "hgetall"];
 
 shRedis.init = function (options, cb) {
-  shlog.info("db init");
+  shlog.info("dfltgrp", "db init");
   try {
     this.funcUp();
     gClient = redis.createClient();
     shRedis.driver = gClient;
     gClient.on("ready", function () {
-      shlog.info("db ready");
+      shlog.info("dfltgrp", "db ready");
       return cb(0);
     });
   } catch (e) {

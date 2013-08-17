@@ -12,7 +12,7 @@ var sessionFormat = "uid=%s;ts=%s;secret=%s";
 var sessionVersion = 1;
 
 session.create = function (uid) {
-  shlog.info("session.create");
+  shlog.info("dfltgrp", "session.create");
 
   var ts = new Date().getTime();
 
@@ -23,7 +23,7 @@ session.create = function (uid) {
 };
 
 session.check = function (key) {
-  shlog.info("session.check key=" + key);
+  shlog.info("dfltgrp", "session.check key=" + key);
   if (_.isUndefined(key)) {
     return false;
   }

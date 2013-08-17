@@ -26,12 +26,12 @@ dispatch.init = function (cb) {
 dispatch.shutdown = function (cb) {
   async.series([
     function (lcb) {
-      shlog.info("dumping loader");
+      shlog.info("dfltgrp", "dumping loader");
       gLoader.dump(lcb);
     }
   ],
     function (err, results) {
-      shlog.info("dispatch shutdown done.");
+      shlog.info("dfltgrp", "dispatch shutdown done.");
       cb(0);
     });
 };
@@ -45,17 +45,17 @@ dispatch.sendUser = function (uid, data, cb) {
     if (l.serverId === global.server.serverId) {
       // user is on this server
       if (l.workerId === cluster.worker.id) {
-        shlog.info("sendUser - local socket:", l.socketId);
+        shlog.info("dfltgrp", "sendUser - local socket:", l.socketId);
         socket.sendDirect(l.socketId, data);
         return cb(0, locateInfo);
       }
-      shlog.info("sendUser - local cluster workerId:", l.workerId, "socketId:", l.socketId);
+      shlog.info("dfltgrp", "sendUser - local cluster workerId:", l.workerId, "socketId:", l.socketId);
       process.send({cmd: "user.direct", wid: cluster.worker.id, toWid: l.workerId, toWsid: l.socketId, data: data});
       return cb(0, locateInfo);
     }
 
     // user is on different server
-    shlog.info("sendUser - remote server:", l.serverId, "workerId:", l.workerId, "socketId:", l.socketId);
+    shlog.info("dfltgrp", "sendUser - remote server:", l.serverId, "workerId:", l.workerId, "socketId:", l.socketId);
     shcluster.sendUserWithLocate(locateInfo, data, _w(cb, function (err, data) {
       // SWD ignore the error for now
       return cb(0, locateInfo);
@@ -70,7 +70,7 @@ dispatch.sendUsers = function (uids, data, excludeIds, cb) {
   if (_.isUndefined(excludeIds) || excludeIds === null) {
     excludeIds = [];
   }
-  shlog.info("sendUsers:", uids, excludeIds);
+  shlog.info("dfltgrp", "sendUsers:", uids, excludeIds);
 
   var locateList = {};
   async.each(uids, function (uid, lcb) {
@@ -79,7 +79,7 @@ dispatch.sendUsers = function (uids, data, excludeIds, cb) {
     }
     dispatch.sendUser(uid, data, _w(lcb, function (err, locateInfo) {
       if (err) {
-        shlog.info("bad user send", err, locateInfo);
+        shlog.info("dfltgrp", "bad user send", err, locateInfo);
         return lcb();
       }
       locateList[uid] = locateInfo.getData();

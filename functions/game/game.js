@@ -56,7 +56,7 @@ Game.pre = function (req, res, cb) {
     opts.lock = false;
   }
   var gameId = req.body.gameId;
-  shlog.info("game.pre: populating game info for " + gameId);
+  shlog.info("dfltgrp", "game.pre: populating game info for " + gameId);
   req.loader.exists("kGame", gameId, _w(cb, function (error, game) {
     if (error) {
       if (req.body.cmd === "game.leave") {  // always alow user to remove a bad game
@@ -87,7 +87,7 @@ Game.pre = function (req, res, cb) {
 };
 
 Game.post = function (req, rs, cb) {
-  shlog.info("game.post");
+  shlog.info("dfltgrp", "game.post");
   return cb(0);
 };
 
@@ -138,7 +138,7 @@ function addGamePlayingMulti(loader, players, game, cb) {
 }
 
 Game.create = function (req, res, cb) {
-  shlog.info("game.create");
+  shlog.info("dfltgrp", "game.create");
 
   req.loader.create("kGame", sh.uuid(), _w(cb, function (err, game) {
     if (err) {
@@ -163,7 +163,7 @@ Game.create = function (req, res, cb) {
     addGamePlayingMulti(req.loader, req.body.players, game, _w(cb, function (error, data) {
       // SWD ignore any errors for now
       if (error) {
-        shlog.error("add_players", "unable to add a player", data);
+        shlog.error("dfltgrp", "add_players", "unable to add a player", data);
       }
       // copy profile info
       sh.extendProfiles(req.loader, game.get("players"), _w(cb, function (error, data) {
@@ -334,7 +334,7 @@ Game.reset = function (req, res, cb) {
 };
 
 Game.list = function (req, res, cb) {
-  shlog.info("game.list");
+  shlog.info("dfltgrp", "game.list");
 
   var games = {};
   var gameDir = global.gBaseDir + "/games";
@@ -360,7 +360,7 @@ Game.list = function (req, res, cb) {
 };
 
 Game.call = function (req, res, cb) {
-  shlog.info("game.call - req.body.func");
+  shlog.info("dfltgrp", "game.call - req.body.func");
   var module = req.env.gameModule;
 
   if (_.isUndefined(module[req.body.func])) {

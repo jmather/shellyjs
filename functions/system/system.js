@@ -20,7 +20,7 @@ system.functions = {
 };
 
 system.connInfo = function (req, res, cb) {
-  shlog.info("system.connInfo");
+  shlog.info("dfltgrp", "system.connInfo");
 
   var wsid = 0;
   if (_.isObject(res.ws)) {
@@ -38,7 +38,7 @@ system.connInfo = function (req, res, cb) {
 };
 
 system.stat = function (req, res, cb) {
-  shlog.debug("system.stat", req.body.domain, req.body.key);
+  shlog.debug("dfltgrp", "system.stat", req.body.domain, req.body.key);
 
   stats.get(req.body.domain, req.body.key, _w(cb, function (err, data) {
     if (err) {
@@ -51,7 +51,7 @@ system.stat = function (req, res, cb) {
 };
 
 system.statReset = function (req, res, cb) {
-  shlog.debug("system.statGet", req.body.domain, req.body.key);
+  shlog.debug("dfltgrp", "system.statGet", req.body.domain, req.body.key);
 
   stats.reset(req.body.domain, req.body.key, _w(cb, function (err, data) {
     res.add(sh.event("system.statReset", {domain: req.body.domain, key: req.body.key, value: data}));
@@ -60,7 +60,7 @@ system.statReset = function (req, res, cb) {
 };
 
 system.stats = function (req, res, cb) {
-  shlog.debug("system.stats");
+  shlog.debug("dfltgrp", "system.stats");
 
   stats.getAll(_w(cb, function (err, stats) {
     if (err) {
@@ -73,7 +73,7 @@ system.stats = function (req, res, cb) {
 };
 
 system.statsReset = function (req, res, cb) {
-  shlog.debug("system.statsReset");
+  shlog.debug("dfltgrp", "system.statsReset");
 
   stats.resetAll(_w(cb, function (err, stats) {
     if (err) {
@@ -86,13 +86,13 @@ system.statsReset = function (req, res, cb) {
 };
 
 system.config = function (req, res, cb) {
-  shlog.debug("system.config");
+  shlog.debug("dfltgrp", "system.config");
   res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONFIG: sh.secure(global.C), PACKAGE: global.PACKAGE}));
   return cb(0);
 };
 
 system.rawGet = function (req, res, cb) {
-  shlog.debug("system.rawGet");
+  shlog.debug("dfltgrp", "system.rawGet");
 
   global.db.get(req.body.key, _w(cb, function (err, data) {
     if (err) {
@@ -105,7 +105,7 @@ system.rawGet = function (req, res, cb) {
 };
 
 system.rawSet = function (req, res, cb) {
-  shlog.debug("system.rawSet");
+  shlog.debug("dfltgrp", "system.rawSet");
 
   global.db.set(req.body.key, JSON.stringify(req.body.data), _w(cb, function (err, data) {
     if (err) {

@@ -55,10 +55,10 @@ global.shutdown = false;
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 if (cluster.isMaster) {
-  shlog.info("loaded:", new Date());
-  shlog.info("server:", global.server);
-  shlog.info("configBase:", global.configBase);
-  shlog.info("config:", sh.secure(global.C));
+  shlog.info("shelly", "loaded:", new Date());
+  shlog.info("shelly", "server:", global.server);
+  shlog.info("shelly", "configBase:", global.configBase);
+  shlog.info("shelly", "config:", sh.secure(global.C));
 }
 
 require(global.gBaseDir + "/src/shcb.js").leanStacks(true);
@@ -80,7 +80,7 @@ global.games.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 
 
 // master received message from worker
 function onWorkerMessage(msg) {
-  shlog.debug("master recv: %j", msg);
+  shlog.debug("shelly", "master recv: %j", msg);
 
   if (msg.toWid === "all") {
     // forward to all workers, except sender
@@ -103,7 +103,7 @@ function startMatcher(gameInfo, gameName) {
 
 shCluster.init(function (err, data) {
   if (err) {
-    shlog.error("unable to start shcluster module", err, data);
+    shlog.error("shelly", "unable to start shcluster module", err, data);
     return;
   }
   if (cluster.isMaster) {
@@ -115,7 +115,7 @@ shCluster.init(function (err, data) {
       }
     });
   } else {
-    shlog.info("starting:", process.env.WTYPE);
+    shlog.info("shelly", "starting:", process.env.WTYPE);
     var workerInfo = global.C.CLUSTER[process.env.WTYPE];
     gWorkerModule = require(global.gBaseDir + workerInfo.src);
     gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
@@ -124,40 +124,40 @@ shCluster.init(function (err, data) {
 
 // receive message from master
 process.on("message", function (msg) {
-  shlog.debug("onMessage: %j", msg);
+  shlog.debug("shelly", "onMessage: %j", msg);
   if (msg.cmd === "user.direct") {
     if (process.env.WTYPE !== "socket") {
-      shlog.error("non-socket got a sendDirect", msg);
+      shlog.error("shelly", "non-socket got a sendDirect", msg);
       return;
     }
     global.socket.sendDirect(msg.toWsid, msg.data);
     return;
   }
-  shlog.error("bad_message", "unknown command", msg);
+  shlog.error("shelly", "bad_message", "unknown command", msg);
 });
 
 cluster.on("online", function (worker) {
-  shlog.debug("worker online:", worker.id);
+  shlog.debug("shelly", "worker online:", worker.id);
 });
 
 cluster.on("disconnect", function (worker) {
-  shlog.debug("worker disconnect:", worker.id);
+  shlog.debug("shelly", "worker disconnect:", worker.id);
 });
 
 cluster.on("exit", function (worker) {
-  shlog.debug("worker exit:", worker.id);
+  shlog.debug("shelly", "worker exit:", worker.id);
 });
 
 // listen for these also to unreg the server
 process.on("uncaughtException", function (error) {
-  shlog.error("uncaughtException", error.stack);
+  shlog.error("shelly", "uncaughtException", error.stack);
 });
 
 function shutdown() {
   global.shutdown = true;
 
   if (cluster.isMaster) {
-    shlog.info("master SIGINT - graceful shutdown");
+    shlog.info("shelly", "master SIGINT - graceful shutdown");
     // waits for all client processes to end
     shCluster.masterShutdown();
     return;
@@ -165,7 +165,7 @@ function shutdown() {
 
   if (gWorkerModule) {
     gWorkerModule.shutdown(function () {
-      shlog.info("shutdown:", process.env.WTYPE);
+      shlog.info("shelly", "shutdown:", process.env.WTYPE);
       shCluster.shutdown();
     });
   } else {

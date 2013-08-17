@@ -36,7 +36,7 @@ ShCluster.init = function (cb) {
       gLoader.get("kServer", global.server.serverId, _w(cb, function (err, server) {
         server.set("clusterUrl", global.C.CLUSTER_URL);
         server.set("socketUrl", global.C.SOCKET_URL);
-        shlog.info("set server info", server.getData());
+        shlog.info("dfltgrp", "set server info", server.getData());
         gLoader.dump(function (err) {
           global.db.sadd("serverList", global.server.serverId, _w(cb, function (err) {
             if (err) {
@@ -46,21 +46,21 @@ ShCluster.init = function (cb) {
             // start dnode
             gServer = dnode({
               event : function (msg, cb) {
-                shlog.debug("server event recv: %j", msg);
+                shlog.debug("dfltgrp", "server event recv: %j", msg);
                 // cmd = direct.user
                 // toWid = workerId
                 // toWsid = websocket id of user
                 // data = object to forward to user socket
                 if (_.isUndefined(msg.cmd)) {
-                  shlog.error("server event: bad command %j", msg);
+                  shlog.error("dfltgrp", "server event: bad command %j", msg);
                   return;
                 }
                 if (_.isUndefined(msg.toWsid)) {
-                  shlog.error("server event: socket id %j", msg);
+                  shlog.error("dfltgrp", "server event: socket id %j", msg);
                   return;
                 }
                 if (_.isUndefined(msg.toWid) || _.isUndefined(cluster.workers[msg.toWid])) {
-                  shlog.error("server event: bad worker id %j", msg);
+                  shlog.error("dfltgrp", "server event: bad worker id %j", msg);
                   return;
                 }
                 cluster.workers[msg.toWid].send(msg);
@@ -68,7 +68,7 @@ ShCluster.init = function (cb) {
               }
             });
             var urlParts = url.parse(global.C.CLUSTER_URL);
-            shlog.info("starting cluster server on:", urlParts.hostname, urlParts.port);
+            shlog.info("dfltgrp", "starting cluster server on:", urlParts.hostname, urlParts.port);
             gServer.listen(urlParts.port, urlParts.hostName);
 
             return cb(0, null);
@@ -80,20 +80,20 @@ ShCluster.init = function (cb) {
 };
 
 ShCluster.shutdown = function () {
-  shlog.info("shutdown: cluster dnode clients");
+  shlog.info("dfltgrp", "shutdown: cluster dnode clients");
   _.each(global.dnodes, function (obj) {
-    shlog.info("shutdown: closing client:", obj.d.serverId);
+    shlog.info("dfltgrp", "shutdown: closing client:", obj.d.serverId);
     obj.d.end();
     delete global.dnodes[obj.d.serverId];
   });
 
   async.series([
     function (cb) {
-      shlog.info("shutdown: dumping loader");
+      shlog.info("dfltgrp", "shutdown: dumping loader");
       gLoader.dump(cb);
     },
     function (cb) {
-      shlog.info("shutdown: db");
+      shlog.info("dfltgrp", "shutdown: db");
       global.db.close(cb);
     }
   ],
@@ -104,33 +104,33 @@ ShCluster.shutdown = function () {
 
 var loopUntilNoWorkers = function () {
   if (Object.keys(cluster.workers).length > 0) {
-    shlog.info("there are still " + Object.keys(cluster.workers).length + " workers...");
+    shlog.info("dfltgrp", "there are still " + Object.keys(cluster.workers).length + " workers...");
     setTimeout(loopUntilNoWorkers, 1000);
   } else {
-    shlog.info("all workers gone, shutdown master");
+    shlog.info("dfltgrp", "all workers gone, shutdown master");
     ShCluster.shutdown();
   }
 };
 
 ShCluster.masterShutdown = function () {
   // take server offline right away
-  shlog.info("shutdown: cluster socket server");
+  shlog.info("dfltgrp", "shutdown: cluster socket server");
   if (gServer) {
     gServer.end();
   }
 
   async.series([
     function (cb) {
-      shlog.info("shutdown: delete server from serverList");
+      shlog.info("dfltgrp", "shutdown: delete server from serverList");
       global.db.srem("serverList", global.server.serverId, cb);
     },
     function (cb) {
-      shlog.info("shutdown: delete kServer object");
+      shlog.info("dfltgrp", "shutdown: delete kServer object");
       gLoader.delete("kServer", global.server.serverId, cb);
     }
   ],
     function (err, results) {
-      shlog.info("cluster length " + Object.keys(cluster.workers).length);
+      shlog.info("dfltgrp", "cluster length " + Object.keys(cluster.workers).length);
       setTimeout(loopUntilNoWorkers, 1000);
     });
 };
@@ -138,7 +138,7 @@ ShCluster.masterShutdown = function () {
 ShCluster.servers = function (cb) {
   var serverList = {};
   global.db.smembers("serverList", _w(cb, function (err, servers) {
-    shlog.info("smembers err:", err, "data:", servers);
+    shlog.info("dfltgrp", "smembers err:", err, "data:", servers);
     if (err) {
       return cb(err, servers);
     }
@@ -168,7 +168,7 @@ ShCluster.setLocate = function (user, socketId, cb) {
     locate.set("serverId", global.server.serverId);
     locate.set("workerId", shlog.workerId);
     locate.set("socketId", socketId);
-    shlog.debug("locate set", locate.getData());
+    shlog.debug("dfltgrp", "locate set", locate.getData());
     locate.save(cb);
   }));
 };
@@ -186,38 +186,38 @@ ShCluster.locate = function (uid, cb) {
 ShCluster.sendServer = function (serverId, data, cb) {
   gLoader.exists("kServer", serverId, _w(cb, function (err, server) {
     if (err) {
-      shlog.error("serverId-bad", "cannot find cluster id", serverId);
+      shlog.error("dfltgrp", "serverId-bad", "cannot find cluster id", serverId);
       return cb(1, sh.intMsg("serverId-bad", serverId));
     }
     var urlParts = url.parse(server.get("clusterUrl"));
     if (_.isUndefined(global.dnodes[serverId])) {
-      shlog.info("creating client for:", serverId);
+      shlog.info("dfltgrp", "creating client for:", serverId);
       var d = dnode.connect(urlParts.port, urlParts.hostname);
       d.serverId = serverId;
       d.on("error", function (err, data) {
-        shlog.info("socket error - removing:", serverId);
+        shlog.info("dfltgrp", "socket error - removing:", serverId);
         delete global.dnodes[serverId];
       });
       d.on("fail", function (err, data) {
-        shlog.info("socket fail - removing:", serverId);
+        shlog.info("dfltgrp", "socket fail - removing:", serverId);
         delete global.dnodes[serverId];
       });
       d.on("end", function (err, data) {
-        shlog.info("socket end - removing:", serverId);
+        shlog.info("dfltgrp", "socket end - removing:", serverId);
         delete global.dnodes[serverId];
       });
       d.on('remote', function (remote, conn) {
-        shlog.debug("send(connect):", conn.serverId, urlParts.hostname, urlParts.port, data);
+        shlog.debug("dfltgrp", "send(connect):", conn.serverId, urlParts.hostname, urlParts.port, data);
         global.dnodes[conn.serverId] = {d: conn, remote: remote};
         remote.event(data, function (data) {
-          shlog.debug("response: %j", data);
+          shlog.debug("dfltgrp", "response: %j", data);
           cb(0, data);
         });
       });
     } else {
-      shlog.debug("send(cached):", serverId, urlParts.hostname, urlParts.port, data);
+      shlog.debug("dfltgrp", "send(cached):", serverId, urlParts.hostname, urlParts.port, data);
       global.dnodes[serverId].remote.event(data, function (data) {
-        shlog.debug("response: %j", data);
+        shlog.debug("dfltgrp", "response: %j", data);
         cb(0, data);
       });
     }
@@ -250,7 +250,7 @@ ShCluster.sendUser = function (uid, data, cb) {
   var self = this;
   gLoader.exists("kLocate", uid, _w(cb, function (err, locateInfo) {
     if (err) {
-      shlog.error("user_offline", "user is offline", uid);
+      shlog.error("dfltgrp", "user_offline", "user is offline", uid);
       return cb(1, sh.intMsg("user-offline", uid));
     }
     self.sendUserWithLocate(locateInfo, cb);
@@ -264,14 +264,14 @@ ShCluster.sendUserWithLocate = function (locateInfo, data, cb) {
   msg.toWid = locateInfo.get("workerId");
   msg.toWsid = locateInfo.get("socketId");
   msg.data = data;
-  shlog.debug("send remote:", msg);
+  shlog.debug("dfltgrp", "send remote:", msg);
   this.sendServer(msg.serverId, msg, cb);
 };
 
 ShCluster.home = function (oid, cb) {
   var self = this;
   global.db.smembers("serverList", _w(cb, function (err, servers) {
-    shlog.debug("smembers err: %s, data: %j", err, servers);
+    shlog.debug("dfltgrp", "smembers err: %s, data: %j", err, servers);
     if (err) {
       return cb(err, servers);
     }
@@ -279,11 +279,11 @@ ShCluster.home = function (oid, cb) {
     var serverId = servers[idx];
     gLoader.get("kServer", serverId, _w(cb, function (err, server) {
       if (err) {
-        shlog.error("serverId-bad", "cannot find cluster id", serverId);
+        shlog.error("dfltgrp", "serverId-bad", "cannot find cluster id", serverId);
         return cb(1, sh.intMsg("serverId-bad", serverId));
       }
-      shlog.debug("get home server oid: %s, idx: %s", oid, idx);
-      shlog.debug("get home server data: %j", server.getData());
+      shlog.debug("dfltgrp", "get home server oid: %s, idx: %s", oid, idx);
+      shlog.debug("dfltgrp", "get home server data: %j", server.getData());
       return cb(0, server.getData());
     }), {checkCache: false});
   }));
