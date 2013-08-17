@@ -273,7 +273,7 @@ Game.turn = function (req, res, cb) {
   gameData.status = "playing";  // turn looks valid, game module sets "over"
 
   if (!_.isFunction(req.env.gameModule.turn)) {
-    res.add(sh.event("game.update", gameData));
+    res.add(sh.event("game.turn", gameData));
     return cb(0);
   }
   req.env.gameModule.turn(req, res, _w(cb, function (error, data) {
@@ -284,7 +284,7 @@ Game.turn = function (req, res, cb) {
     if (!data) {
       data = gameData;
     }
-    Game.notify(req, res, sh.event("game.update", data));
+    Game.notify(req, res, sh.event("game.turn", data));
     if (gameData.status === "over") {
       Game.notify(req, res, sh.event("game.over", gameData));
       return cb(0);  // no one has next turn, so end

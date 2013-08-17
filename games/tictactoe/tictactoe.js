@@ -55,7 +55,6 @@ function checkFull(gb) {
 function checkWin(gb) {
   var res = {winner: "", set: null};
 
-  shlog.log("checkWin");
   var i;
   for (i = 0; i < 3; i += 1) {
     if (gb[i][0] === gb[i][1] && gb[i][0] === gb[i][2]) {

@@ -188,7 +188,7 @@
                 showError(msg.message);
                 return;
             }
-            if (msg.event === "game.update") {
+            if (msg.event === "game.turn") {
                 var move = msg.data.move;
                 if (Env.user.oid !== msg.data.uid) { // ignore our own moves
                     gBoard[move.x][move.y] = msg.data.color;
