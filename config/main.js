@@ -36,6 +36,7 @@ global.CDEF("CLUSTER", {
 
 // logs
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
+//global.CDEF("LOG_CONSOLE_OPTS", { level: "debug", colorize: true, timestamp: false });
 
 // registration
 global.CDEF("REG_ALLOW_ANONYMOUS", true);
