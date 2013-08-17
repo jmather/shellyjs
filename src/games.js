@@ -8,6 +8,7 @@ var _ = require("lodash");
 
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shcall = require(global.C.BASEDIR + "/src/shcall.js");
 var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
@@ -40,7 +41,7 @@ app.use(function (req, res, next) {
 
   // there is no dump and these page do not modify objects
   req.loader = new ShLoader();
-  sh.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
+  shcall.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
     if (error) {
       shlog.info("games", "redirect - bad session");
       res.redirect("/login/index.html");

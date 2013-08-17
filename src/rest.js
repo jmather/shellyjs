@@ -5,6 +5,7 @@ var _ = require("lodash");
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var stats = require(global.C.BASEDIR + "/src/shstats.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shcall = require(global.C.BASEDIR + "/src/shcall.js");
 var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
@@ -48,7 +49,7 @@ rest.use(function (req, res, next) {
   res.sendAll = sendAll;
   res.clear = clear;
 
-  sh.fillSession(req.body.session, req, res, _w(next, function (error, data) {
+  shcall.fillSession(req.body.session, req, res, _w(next, function (error, data) {
     // session.valid now used to control access to functions
     return next();
   }));
@@ -70,7 +71,7 @@ function respond(req, res, next) {
 
   async.eachSeries(msgs, function (item, cb) {
     req.body = item;
-    sh.call(req, res, _w(next, function (err, data) {
+    shcall.make(req, res, _w(next, function (err, data) {
       if (err === 100) { // unknown exception
         res.add(sh.error("call-error", "call failed", data));
       }

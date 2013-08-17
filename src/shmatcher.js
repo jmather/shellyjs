@@ -2,8 +2,8 @@ var _ = require("lodash");
 
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shcall = require(global.C.BASEDIR + "/src/shcall.js");
 var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
-var mailer = require(global.C.BASEDIR + "/src/shmail.js");
 var dispatch = require(global.C.BASEDIR + "/src/dispatch.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
@@ -75,7 +75,7 @@ function matchLoop() {
         var res = {};
         res.add = add;
         shlog.info("shmatcher", "match made, create game", req.body.players);
-        sh.call(req, res, _w(matchError, function (error) {
+        shcall.make(req, res, _w(matchError, function (error) {
           if (error) {
             // problem - push the uids back
             shlog.error("shmatcher", error, res.msgs);

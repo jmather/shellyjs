@@ -6,6 +6,7 @@ var _ = require("lodash");
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var stats = require(global.C.BASEDIR + "/src/shstats.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shcall = require(global.C.BASEDIR + "/src/shcall.js");
 var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
 var shcluster = require(global.C.BASEDIR + "/src/shcluster.js");
 var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
@@ -30,7 +31,7 @@ Socket.sendDirect = function (wsId, data) {
     return false;
   }
   try {
-    sh.sendWs(ws, 0, data);
+    sh.sendWs(ws, data);
   } catch (e) {
     shlog.error("socket", "global socket dead:", wsId, e);
     return false;
@@ -55,7 +56,7 @@ function add(data) {
 function sendAll() {
   var self = this;
   _.each(this.msgs, function (data) {
-    sh.sendWs(self.ws, 0, data);
+    sh.sendWs(self.ws, data);
   });
   this.msgs = [];
 }
@@ -73,7 +74,7 @@ function makeCalls(msgs, req, res) {
     // process each message with same loader
     async.eachSeries(msgs, function (item, cb) {
       req.body = item;
-      sh.call(req, res, _w(callError, function (err, data) {
+      shcall.make(req, res, _w(callError, function (err, data) {
         if (err === 100) { // unknown exception
           res.add(sh.error("call-error", "call failed", data));
         }
@@ -99,7 +100,7 @@ function onMessage(data) {
   try {
     packet = JSON.parse(data);
   } catch (err) {
-    sh.sendWs(this, 1, sh.error("socket-parse", "unable to parse json message", { message: err.message, stack: err.stack }));
+    sh.sendWs(this, sh.error("socket-parse", "unable to parse json message", { message: err.message, stack: err.stack }));
     return;
   }
 
@@ -121,7 +122,7 @@ function onMessage(data) {
     req.session = res.ws.session;
     makeCalls(msgs, req, res);
   } else {
-    sh.fillSession(packet.session, req, res, _w(onMessageError, function (err) {
+    shcall.fillSession(packet.session, req, res, _w(onMessageError, function (err) {
       // req.session.valid now used to control access
       if (req.session.valid) {
         res.ws.session = req.session;   // SWD now storing session in ws so we can remove the ws.uid and ws.name
@@ -183,7 +184,7 @@ function handleConnect(ws) {
   var loader = new ShLoader();
 
   var heartBeat = function () {
-    sh.sendWs(ws, 0, sh.event("heartbeat", {interval: global.C.HEART_BEAT}));
+    sh.sendWs(ws, sh.event("heartbeat", {interval: global.C.HEART_BEAT}));
   };
   ws.hbTimer = setInterval(heartBeat, global.C.HEART_BEAT);
 
@@ -206,7 +207,7 @@ Socket.start = function () {
     try {
       handleConnect(ws);
     } catch (err) {
-      sh.sendWs(ws, 1, sh.error("socket-connect", "connection - " + err.message, { message: err.message, stack: err.stack }));
+      sh.sendWs(ws, sh.error("socket-connect", "connection - " + err.message, { message: err.message, stack: err.stack }));
     }
   }); // end wss.on-connection
 

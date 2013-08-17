@@ -4,6 +4,7 @@ var _ = require("lodash");
 
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shcall = require(global.C.BASEDIR + "/src/shcall.js");
 var session = require(global.C.BASEDIR + "/src/session.js");
 var dispatch = require(global.C.BASEDIR + "/src/dispatch.js");
 var mailer = require(global.C.BASEDIR + "/src/shmailer.js");
@@ -150,7 +151,7 @@ Challenge.accept = function (req, res, cb) {
     req.body.cmd = "game.create";     // change the command so we can forward
     req.body.name = gameName;
     req.body.players = [req.session.uid, fromUid];
-    sh.call(req, res, _w(cb, function (error) {
+    shcall.make(req, res, _w(cb, function (error) {
       if (error) {
         return cb(error);
       }
@@ -266,7 +267,7 @@ Challenge.email = function (req, res, cb) {
   req.body.cmd = "reg.create";
   req.body.password = "XXXXXX";
   req.body.toUid = null;
-  sh.call(req, res, _w(cb, function (error, data) {
+  shcall.make(req, res, _w(cb, function (error, data) {
     res.msgs = []; // SWD clear the reg.create event - dont' want it  - should also switch this to res.clear
     if (error && error !== 2) {
       return cb(error);
@@ -281,7 +282,7 @@ Challenge.email = function (req, res, cb) {
       req.body.toUid = data.get("oid");
     }
     req.body.cmd = "challenge.make";
-    sh.call(req, res, _w(cb, function (error, data) {
+    shcall.make(req, res, _w(cb, function (error, data) {
       if (error) {
         return cb(error);
       }
