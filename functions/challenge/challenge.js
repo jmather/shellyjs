@@ -129,9 +129,7 @@ function sendAccept(req, res, cb) {
       playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify(
         {"s": session.create(challengeUser.get("oid")), "gn": req.env.game.get("name")}
       ),
-      gameUrl: global.C.GAMES_URL + global.games[req.env.game.get("name")].url + "?" + querystring.stringify(
-        {"s": session.create(challengeUser.get("oid")), "gameId": req.env.game.get("oid")}
-      ),
+      gameUrl: sh.gameUrl(req.env.game.get("name"), {"s": session.create(challengeUser.get("oid")), "gameId": req.env.game.get("oid")}),
       template: "accepted"};
     shlog.info("challenge", emailInfo);
 
@@ -163,7 +161,7 @@ Challenge.accept = function (req, res, cb) {
         var startInfo = {};
         startInfo.gameName = req.env.game.get("name");
         startInfo.gameId = req.env.game.get("oid");
-        startInfo.gameUrl = global.C.GAMES_URL + global.games[startInfo.gameName].url + "?gameId=" + startInfo.gameId;
+        startInfo.gameUrl = sh.gameUrl(startInfo.gameName, {"gameId": startInfo.gameId});
         var event = sh.event("challenge.start", startInfo);
         res.add(event);
         dispatch.sendUsers(req.body.players, event, req.session.uid);

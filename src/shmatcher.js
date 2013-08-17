@@ -85,7 +85,7 @@ function matchLoop() {
             var startInfo = {};
             startInfo.gameName = gGameName;
             startInfo.gameId = req.env.game.get("oid");
-            startInfo.gameUrl = global.C.GAMES_URL + global.games[startInfo.gameName].url + "?gameId=" + startInfo.gameId;
+            startInfo.gameUrl = sh.gameUrl(startInfo.gameName, {"gameId": startInfo.gameId});
             dispatch.sendUsers(req.body.players, sh.event("match.made", startInfo));
           });
         }));

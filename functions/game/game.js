@@ -379,7 +379,7 @@ function fillGames(loader, gameList, cb) {
       gameList[gameId].gameName = game.get("name");
       gameList[gameId].whoTurn = game.get("whoTurn");
       gameList[gameId].players = game.get("players");
-      gameList[gameId].gameUrl = global.C.GAMES_URL + global.games[game.get("name")].url + "?gameId=" + game.get("oid");
+      gameList[gameId].gameUrl = sh.gameUrl(game.get("name"), {"gameId": game.get("oid")});
       lcb();
 /* SWD expensive call with cache turned off
       shcluster.home(gameId, function (err, server) {

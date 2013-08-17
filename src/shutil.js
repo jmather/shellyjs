@@ -1,6 +1,7 @@
 var path = require("path");
 var util = require("util");
 var domain = require("domain");
+var querystring = require("querystring");
 
 var _ = require("lodash");
 var async = require("async");
@@ -96,6 +97,10 @@ shutil.intMsg = function (code, data) {
 
   return res;
 };
+
+shutil.gameUrl = function (gameName, params) {
+  return global.C.GAMES_URL + global.games[gameName].url + "?" + querystring.stringify(params);
+}
 
 // takes array of uids
 shutil.fillProfiles = function (loader, userIds, cb) {
