@@ -54,7 +54,7 @@ user.aget = function (req, res, cb) {
   req.loader.exists("kUser", uid, _w(cb, function (error, user) {
     if (error) {
       res.add(sh.error("user-aget", "user does not exist", user));
-      return;
+      return cb(1);
     }
     res.add(sh.event("user.get", user.getData()));
     return cb(0);
