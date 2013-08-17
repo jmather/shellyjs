@@ -136,7 +136,7 @@ app.use(function (err, req, res, next) {
 var adminServer = null;
 exports.start = function () {
   var adminServer = app.listen(global.C.ADMIN_PORT, function () {
-    shlog.info("admin", "admin server listening: %d", adminServer.address().port);
+    shlog.system("admin", "server listening: %s", global.C.ADMIN_URL);
   });
 
   adminServer.on("error", function (err) {

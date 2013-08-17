@@ -105,6 +105,8 @@ shmatcher.queueList = function (gameName, cb) {
 };
 
 shmatcher.start = function (gameName) {
+  shlog.system("shmatcher", "started game =", gameName);
+
   // can do this as matcher is per process
   gGameName = gameName;
   process.on("uncaughtException", function (error) {

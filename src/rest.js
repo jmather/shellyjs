@@ -106,7 +106,7 @@ rest.use(function (err, req, res, next) {
 var restServer = null;
 exports.start = function () {
   restServer = rest.listen(global.C.REST_PORT, function () {
-    shlog.info("rest", "rest server listening: %s", global.C.restPort);
+    shlog.system("rest", "server listening: %s", global.C.REST_URL);
   });
 
   restServer.on("error", function (err) {

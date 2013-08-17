@@ -66,6 +66,7 @@ shmailer.queueList = function (cb) {
 };
 
 shmailer.start = function () {
+  shlog.system("shmailer", "started");
   process.on("uncaughtException", function (error) {
     shlog.error("shmailer", "uncaughtException", error.stack);
     // restart the loop

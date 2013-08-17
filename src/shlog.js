@@ -32,18 +32,30 @@ var gDebug = {
   "shelly": {}
 };
 
+var logLevels = {
+  levels: {
+    debug: 1,
+    verbose: 2,
+    info: 3,
+    warn: 4,
+    error: 5,
+    system: 6
+  },
+  colors: {
+    verbose: 'cyan',
+    debug: 'blue',
+    info: 'green',
+    warn: 'yellow',
+    error: 'red',
+    system: 'white'
+  }
+};
+
 var winston = require("winston");
 winston.remove(winston.transports.Console);
-//winston.add(winston.transports.Console, { level: "debug", colorize: true, timestamp: false });
-winston.add(winston.transports.Console, { level: "info", colorize: true, timestamp: false });
-// emerg      system is unusable
-// alert      action must be taken immediately
-// crit       critical conditions
-// err        error conditions
-// warning    warning conditions
-// notice     normal, but significant, condition
-// info       informational message
-// debug      debug-level message
+winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);
+winston.setLevels(logLevels.levels);
+winston.addColors(logLevels.colors);
 
 shlog.workerId = 0;
 if (cluster.worker !== null) {
@@ -51,9 +63,9 @@ if (cluster.worker !== null) {
 }
 
 shlog.log = function (level, args) {
-  var group = args[0];
-  if (level === "error" || !_.isUndefined(gDebug[group])) {
-    var msg = util.format("%d %s", shlog.workerId, util.format.apply(this, args));
+  var group = args.shift();
+  if (level === "error" || level === "system" || !_.isUndefined(gDebug[group])) {
+    var msg = util.format("%d %s - %s", shlog.workerId, group, util.format.apply(this, args));
 //    if (msg.length > 80) {
 //      msg = msg.substr(0, 80) + "...";
 //    }
@@ -74,4 +86,9 @@ shlog.info = function () {
 shlog.error = function () {
   var args = Array.prototype.slice.call(arguments);
   this.log("error", args);
+};
+
+shlog.system = function () {
+  var args = Array.prototype.slice.call(arguments);
+  this.log("system", args);
 };

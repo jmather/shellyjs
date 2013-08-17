@@ -55,9 +55,9 @@ global.shutdown = false;
 
 var shlog = require(global.gBaseDir + "/src/shlog.js");
 if (cluster.isMaster) {
-  shlog.info("shelly", "loaded:", new Date());
-  shlog.info("shelly", "server:", global.server);
-  shlog.info("shelly", "configBase:", global.configBase);
+  shlog.system("shelly", "loaded:", new Date());
+  shlog.system("shelly", "server:", global.server);
+  shlog.system("shelly", "configBase:", global.configBase);
   shlog.info("shelly", "config:", sh.secure(global.C));
 }
 
@@ -157,7 +157,7 @@ function shutdown() {
   global.shutdown = true;
 
   if (cluster.isMaster) {
-    shlog.info("shelly", "master SIGINT - graceful shutdown");
+    shlog.system("shelly", "master SIGINT - graceful shutdown");
     // waits for all client processes to end
     shCluster.masterShutdown();
     return;

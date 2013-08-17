@@ -116,7 +116,7 @@ app.use(function (err, req, res, next) {
 var gameServer = null;
 exports.start = function () {
   gameServer = app.listen(global.C.GAMES_PORT, function () {
-    shlog.info("games", "game server listening: %d", gameServer.address().port);
+    shlog.system("games", "server listening: %s", global.C.GAMES_URL);
   });
 
   gameServer.on("error", function (err) {

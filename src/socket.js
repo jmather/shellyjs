@@ -193,8 +193,9 @@ function handleConnect(ws) {
 }
 
 Socket.start = function () {
-  wss = new WebSocketServer({port: global.C.SOCKET_PORT});
-  shlog.info("socket", "socketserver listening: " + global.C.SOCKET_PORT);
+  wss = new WebSocketServer({port: global.C.SOCKET_PORT}, function () {
+    shlog.system("socket", "server listening: " + global.C.SOCKET_URL);
+  });
   var connCount = 1;
 
   wss.on("connection", function (ws) {

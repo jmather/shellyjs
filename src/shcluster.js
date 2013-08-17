@@ -98,13 +98,19 @@ ShCluster.shutdown = function () {
     }
   ],
     function (err, results) {
+      if (cluster.isMaster) {
+        shlog.system("shcluster", "master exit");
+      } else {
+        shlog.info("shcluster", "worker exit");
+      }
       process.exit();
     });
 };
 
 var loopUntilNoWorkers = function () {
-  if (Object.keys(cluster.workers).length > 0) {
-    shlog.info("shcluster", "there are still " + Object.keys(cluster.workers).length + " workers...");
+  var workerCount = Object.keys(cluster.workers).length;
+  if (workerCount > 0) {
+    shlog.info("shcluster", "there are still " + workerCount + " workers...");
     setTimeout(loopUntilNoWorkers, 1000);
   } else {
     shlog.info("shcluster", "all workers gone, shutdown master");
@@ -130,7 +136,7 @@ ShCluster.masterShutdown = function () {
     }
   ],
     function (err, results) {
-      shlog.info("shcluster", "cluster length " + Object.keys(cluster.workers).length);
+      shlog.system("shcluster", "master waiting for " + Object.keys(cluster.workers).length + " workers...");
       setTimeout(loopUntilNoWorkers, 1000);
     });
 };
