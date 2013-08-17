@@ -1,6 +1,6 @@
 var _ = require("lodash");
 var async = require("async");
-var shlog = require(global.gBaseDir + "/src/shlog.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 
 var shSqlite = exports;
 

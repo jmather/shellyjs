@@ -1,11 +1,11 @@
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-var mailer = require(global.gBaseDir + "/src/shmail.js");
-var dispatch = require(global.gBaseDir + "/src/dispatch.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
+var mailer = require(global.C.BASEDIR + "/src/shmail.js");
+var dispatch = require(global.C.BASEDIR + "/src/dispatch.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var shmatcher = exports;
 

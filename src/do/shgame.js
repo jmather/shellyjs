@@ -2,9 +2,9 @@ var util = require("util");
 var events = require("events");
 var _ = require("lodash");
 
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var ShObject = require(global.gBaseDir + "/src/do/shobject.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var ShObject = require(global.C.BASEDIR + "/src/do/shobject.js");
 
 function Game() {
   ShObject.call(this);

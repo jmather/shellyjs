@@ -1,8 +1,8 @@
 var _ = require("lodash");
 var async = require("async");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var shmail = exports;
 

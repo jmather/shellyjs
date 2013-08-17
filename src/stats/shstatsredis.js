@@ -1,5 +1,5 @@
 var _ = require("lodash");
-var sh = require(global.gBaseDir + "/src/shutil.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
 
 var shstatsredis = exports;
 

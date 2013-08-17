@@ -1,9 +1,9 @@
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
-var mailer = require(global.gBaseDir + "/src/shmail.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
+var mailer = require(global.C.BASEDIR + "/src/shmail.js");
 
 var shmailer = exports;
 

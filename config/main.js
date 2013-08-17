@@ -46,7 +46,7 @@ global.CDEF("DB_SCOPE", "dev:");
 global.CDEF("DB_WRAPPER", "/src/db/shredis.js");
 global.CDEF("DB_OPTIONS", {});
 //global.C.db.wrapper = "/src/db/shsqlite.js";
-//global.C.db.options = {filename: global.gBaseDir + "/db/sqlite3.db"};
+//global.C.db.options = {filename: global.C.BASEDIR + "/db/sqlite3.db"};
 
 // stats
 global.CDEF("STATS_WRAPPER", "/src/stats/shstatsredis.js");

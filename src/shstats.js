@@ -1,7 +1,7 @@
 var async = require("async");
 var _ = require("lodash");
-var gStats = require(global.gBaseDir + global.C.STATS_WRAPPER);
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var gStats = require(global.C.BASEDIR + global.C.STATS_WRAPPER);
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var shstats = exports;
 

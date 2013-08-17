@@ -2,7 +2,7 @@ var fs = require("fs");
 var util = require("util");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 
 var shkeys = exports;
 
@@ -11,7 +11,7 @@ var gKeyTypes = {};
 shkeys.init = function (cb) {
   shlog.info("shkeys", "object init");
 
-  var funcDir = global.gBaseDir + "/src/do";
+  var funcDir = global.C.BASEDIR + "/src/do";
   fs.readdir(funcDir, function (err, files) {
     var error = 0;
     var fileCount = files.length;

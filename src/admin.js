@@ -6,20 +6,20 @@ var url = require("url");
 var engines = require("consolidate");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
-var commonStatic = global.gBaseDir + "/www/common";
-var adminBase = global.gBaseDir + "/www/admin";
+var commonStatic = global.C.BASEDIR + "/www/common";
+var adminBase = global.C.BASEDIR + "/www/admin";
 var adminStatic = adminBase + "/static";
 var adminLogin = adminBase + "/login";
 
 shlog.info("admin", "admin directory: " + adminBase);
 
 // ensure admin user
-var reg = require(global.gBaseDir + "/functions/reg/reg.js");
+var reg = require(global.C.BASEDIR + "/functions/reg/reg.js");
 var loader = new ShLoader();
 reg.verifyUser(loader, global.C.DEFAULT_ADMIN_NAME, global.C.DEFAULT_ADMIN_PASSWORD, function (error, data) {
   if (error) {

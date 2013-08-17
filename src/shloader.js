@@ -2,11 +2,11 @@ var fs = require("fs");
 var _ = require("lodash");
 var async = require("async");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var shkeys = require(global.gBaseDir + "/src/shkeys.js");
-var shlock = require(global.gBaseDir + "/src/shlock.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shkeys = require(global.C.BASEDIR + "/src/shkeys.js");
+var shlock = require(global.C.BASEDIR + "/src/shlock.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 function ShLoader(db) {
   if (_.isObject(db)) {

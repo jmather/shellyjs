@@ -2,14 +2,14 @@ var fs = require("fs");
 var _ = require("lodash");
 var async = require("async");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var dispatch = require(global.gBaseDir + "/src/dispatch.js");
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
-var module = require(global.gBaseDir + "/functions/module/module.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var dispatch = require(global.C.BASEDIR + "/src/dispatch.js");
+var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
+var module = require(global.C.BASEDIR + "/functions/module/module.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
-var gGameDir = global.gBaseDir + "/games";
+var gGameDir = global.C.BASEDIR + "/games";
 
 var Game = exports;
 
@@ -334,7 +334,7 @@ Game.list = function (req, res, cb) {
   shlog.info("game", "game.list");
 
   var games = {};
-  var gameDir = global.gBaseDir + "/games";
+  var gameDir = global.C.BASEDIR + "/games";
   fs.readdir(gameDir, function (err, files) {
     async.each(files, function (entry, lcb) {
       var fn = gameDir + "/" + entry;

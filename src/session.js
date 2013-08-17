@@ -3,7 +3,7 @@ var util = require("util");
 var crypto = require("crypto");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 
 var session = exports;
 

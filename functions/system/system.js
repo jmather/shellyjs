@@ -1,9 +1,9 @@
 var cluster = require("cluster");
 var _ = require("lodash");
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var stats = require(global.gBaseDir + "/src/shstats.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var stats = require(global.C.BASEDIR + "/src/shstats.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var system = exports;
 
@@ -87,7 +87,7 @@ system.statsReset = function (req, res, cb) {
 
 system.config = function (req, res, cb) {
   shlog.debug("system", "system.config");
-  res.add(sh.event("system.config", {gBaseDir: global.gBaseDir, CONFIG: sh.secure(global.C), PACKAGE: global.PACKAGE}));
+  res.add(sh.event("system.config", {CONFIG: sh.secure(global.C), PACKAGE: global.PACKAGE}));
   return cb(0);
 };
 

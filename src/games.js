@@ -6,13 +6,13 @@ var url = require("url");
 var engines = require("consolidate");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
-var commonStatic = global.gBaseDir + "/www/common";
-var gamesBase = global.gBaseDir + "/www/games";
+var commonStatic = global.C.BASEDIR + "/www/common";
+var gamesBase = global.C.BASEDIR + "/www/games";
 var gamesStatic = gamesBase + "/static";
 
 shlog.info("games", "games directory: " + gamesBase);

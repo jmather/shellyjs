@@ -3,8 +3,8 @@ var crypto = require("crypto");
 var _ = require("lodash");
 var request = require("supertest");
 
-//var sh = require(global.gBaseDir + "/src/shutil.js");
-//var shlog = require(global.gBaseDir + "/src/shlog.js");
+//var sh = require(global.C.BASEDIR + "/src/shutil.js");
+//var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 
 function ShConnect(server) {
   this._started = 0;

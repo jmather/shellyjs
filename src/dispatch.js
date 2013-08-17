@@ -7,10 +7,10 @@ var dnode = require("dnode");
 var shutil = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
 var shcluster = require(__dirname + "/shcluster.js");
-var ShLoader = require(global.gBaseDir + "/src/shloader.js");
-var socket = require(global.gBaseDir + "/src/socket.js");
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
+var socket = require(global.C.BASEDIR + "/src/socket.js");
+var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 // sync ok - only done on cluster startup
 

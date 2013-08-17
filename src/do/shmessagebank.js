@@ -1,7 +1,7 @@
 var util = require("util");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var ShObject = require(global.gBaseDir + "/src/do/shobject.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var ShObject = require(global.C.BASEDIR + "/src/do/shobject.js");
 
 function MessageBank() {
   ShObject.call(this);

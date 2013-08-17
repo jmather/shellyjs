@@ -1,10 +1,10 @@
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
-var channel = require(global.gBaseDir + "/functions/channel/channel.js");
+var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
 
 var connect4 = exports;
 

@@ -2,14 +2,14 @@ var querystring = require("querystring");
 var async = require("async");
 var _ = require("lodash");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var sh = require(global.gBaseDir + "/src/shutil.js");
-var session = require(global.gBaseDir + "/src/session.js");
-var dispatch = require(global.gBaseDir + "/src/dispatch.js");
-var mailer = require(global.gBaseDir + "/src/shmailer.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var session = require(global.C.BASEDIR + "/src/session.js");
+var dispatch = require(global.C.BASEDIR + "/src/dispatch.js");
+var mailer = require(global.C.BASEDIR + "/src/shmailer.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
-var ShSet = require(global.gBaseDir + "/src/ds/shset.js");
+var ShSet = require(global.C.BASEDIR + "/src/ds/shset.js");
 
 var Challenge = exports;
 

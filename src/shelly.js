@@ -4,15 +4,15 @@ var path = require("path");
 var cluster = require("cluster");
 var _ = require("lodash");
 
-global.gBaseDir = path.dirname(__dirname);
+global.C = {};
+global.C.BASEDIR = path.dirname(__dirname);
 
-global.configBase = global.gBaseDir + "/config";
+global.C.CONFIGDIR = global.C.BASEDIR + "/config";
 // first param alters config dir
 if (_.isString(process.argv[2])) {
-  global.configBase = process.argv[2];
+  global.C.CONFIGDIR = process.argv[2];
 }
 
-global.C = {};
 global.CDEF = function (name, value) {
   if (_.isUndefined(global.C[name])) {
     global.C[name] = value;
@@ -20,27 +20,27 @@ global.CDEF = function (name, value) {
 };
 // load configs with private key and per machine overrides
 /*jslint stupid: true */
-var keyConfigFn = global.configBase + "/keys.js";
+var keyConfigFn = global.C.CONFIGDIR + "/keys.js";
 if (fs.existsSync(keyConfigFn)) {
   require(keyConfigFn);
 }
 // load configs with per machine overrides
-var machineConfigFn = global.configBase + "/" + os.hostname() + ".js";
+var machineConfigFn = global.C.CONFIGDIR + "/" + os.hostname() + ".js";
 /*jslint stupid: true */
 if (fs.existsSync(machineConfigFn)) {
   require(machineConfigFn);
 }
-require(global.configBase + "/main.js");
-global.PACKAGE = require(global.gBaseDir + "/package.json");
+require(global.C.CONFIGDIR + "/main.js");
+global.PACKAGE = require(global.C.BASEDIR + "/package.json");
 
 // number of times SIGINT or SIGQUIT called
 var gKillCount = 0;
 
-var sh = require(global.gBaseDir + "/src/shutil.js");
+var sh = require(global.C.BASEDIR + "/src/shutil.js");
 /*jslint stupid: true */
 // OK as this is only called once during startup
 function serverInfo() {
-  var serverInfoFn = global.configBase + "/server.json";
+  var serverInfoFn = global.C.CONFIGDIR + "/server.json";
   var serverData = {};
   if (fs.existsSync(serverInfoFn)) {
     serverData = require(serverInfoFn);
@@ -53,25 +53,20 @@ function serverInfo() {
 global.server = serverInfo();
 global.shutdown = false;
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 if (cluster.isMaster) {
   shlog.system("shelly", "loaded:", new Date());
   shlog.system("shelly", "server:", global.server);
-  shlog.system("shelly", "configBase:", global.configBase);
+  shlog.system("shelly", "configBase:", global.C.CONFIGDIR);
   shlog.info("shelly", "config:", sh.secure(global.C));
 }
 
-require(global.gBaseDir + "/src/shcb.js").leanStacks(true);
+require(global.C.BASEDIR + "/src/shcb.js").leanStacks(true);
 
-var shCluster = require(global.gBaseDir + "/src/shcluster.js");
+var shCluster = require(global.C.BASEDIR + "/src/shcluster.js");
 var gWorkerModule = null;
 
-var mailer = require(global.gBaseDir + "/src/shmailer.js");
-var matcher = require(global.gBaseDir + "/src/shmatcher.js");
-var rest = null;
-var admin = null;
-var games = null;
-global.socket = require(global.gBaseDir + "/src/socket.js");
+global.socket = require(global.C.BASEDIR + "/src/socket.js");
 
 // SWD: this need to moved to a config file
 // pre-validate all the options are set - specially the url
@@ -118,7 +113,7 @@ shCluster.init(function (err, data) {
   } else {
     shlog.info("shelly", "starting:", process.env.WTYPE);
     var workerInfo = global.C.CLUSTER[process.env.WTYPE];
-    gWorkerModule = require(global.gBaseDir + workerInfo.src);
+    gWorkerModule = require(global.C.BASEDIR + workerInfo.src);
     gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
   }
 });

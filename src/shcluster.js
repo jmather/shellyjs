@@ -8,13 +8,13 @@ var dnode = require("dnode");
 
 var sh = require(__dirname + "/shutil.js");
 var shlog = require(__dirname + "/shlog.js");
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
-var ShLoader = require(global.gBaseDir + "/src/shloader.js");
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
+var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
 
 var ShCluster = exports;
 
-var shkeys = require(global.gBaseDir + "/src/shkeys.js");
-global.db = require(global.gBaseDir + "/src/db/shredis.js");
+var shkeys = require(global.C.BASEDIR + "/src/shkeys.js");
+global.db = require(global.C.BASEDIR + "/src/db/shredis.js");
 var gLoader = new ShLoader(global.db);
 var gServer = null;
 

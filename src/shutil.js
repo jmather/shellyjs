@@ -7,10 +7,10 @@ var async = require("async");
 var uuid = require("node-uuid");
 var stackTrace = require("stack-trace");
 
-var shlog = require(global.gBaseDir + "/src/shlog.js");
-var stats = require(global.gBaseDir + "/src/shstats.js");
-var session = require(global.gBaseDir + "/src/session.js");  // used by fill session
-var _w = require(global.gBaseDir + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/src/shlog.js");
+var stats = require(global.C.BASEDIR + "/src/shstats.js");
+var session = require(global.C.BASEDIR + "/src/session.js");  // used by fill session
+var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var shutil = exports;
 
@@ -127,7 +127,7 @@ shutil.fillSession = function (sess, req, res, cb) {
 shutil.createObj = function (moduleName, cb) {
   var Module = null;
   var obj = null;
-  var cmdFile = global.gBaseDir + "/functions/" + moduleName + "/" + moduleName + ".js";
+  var cmdFile = global.C.BASEDIR + "/functions/" + moduleName + "/" + moduleName + ".js";
   shutil.require(cmdFile, function (err, Module) { // first letter caps as it could be class
     if (err) {
       return cb(err, Module);
