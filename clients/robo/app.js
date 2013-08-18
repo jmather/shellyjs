@@ -1,22 +1,12 @@
 var _ = require("lodash");
 var WebSocket = require('ws');
 
+var Ai = require(__dirname + "/ai.js");
+var gAi = null;
 
 var ws = new WebSocket('ws://localhost:5110');
 var gWaitInt = 0;
 var gTurnSleep = 1000;
-
-var gMoveSet = [
-  [0, 0],
-  [0, 1],
-  [0, 2],
-  [1, 0],
-  [1, 1],
-  [1, 2],
-  [2, 0],
-  [2, 1],
-  [2, 2]
-];
 
 var gUid = "51";
 if (_.isString(process.argv[2])) {
@@ -68,16 +58,8 @@ ws.on('error', function (error) {
 });
 
 function makeMove(game) {
-  var i = 0;
-  for (i = 0; i < 3; i += 1) {
-    var j = 0;
-    for (j = 0; j < 3; j += 1) {
-      if (game.state.gameBoard[i][j] === "") {
-        sendCmd("game.turn", {gameId: game.oid, move: {x: i, y: j}});
-        return;
-      }
-    }
-  }
+  var move = gAi.calculateMove(game.state.gameBoard);
+  sendCmd("game.turn", {gameId: game.oid, move: {x: move[1], y: move[0]}});
 }
 
 ws.on('message', function (message) {
@@ -97,8 +79,13 @@ ws.on('message', function (message) {
     sendCmd("game.join", {gameId: msg.data.gameId});
     sendCmd("channel.add", {channel: "game:" + msg.data.gameId});
   } else if (msg.event === "game.get"
-      || msg.event === "game.reset"
-      || msg.event === "game.join") {
+      || msg.event === "game.join"
+      || msg.event === "game.reset") {
+    var side = "O";
+    if (msg.data.state.xes === gUid) {
+      side = "X";
+    }
+    gAi = new Ai(side);
     if (msg.data.whoTurn === gUid) {
       setTimeout(function () {
         makeMove(msg.data);
