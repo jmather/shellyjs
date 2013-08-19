@@ -42,7 +42,7 @@ exports.getInfo = function (fn, cb) {
 exports.info = function (req, res, cb) {
   shlog.info("module", "module.info name=" + req.body.name);
   // SWD centralize this path construction
-  var funcDir = global.C.BASEDIR + "/functions";
+  var funcDir = global.C.BASEDIR + "/apis";
   var moduleFn = funcDir + "/" + req.body.name + "/" + req.body.name + ".js";
   var m = exports.getInfo(moduleFn, function (err, m) {
     // error still returns info object
@@ -53,7 +53,7 @@ exports.info = function (req, res, cb) {
 
 exports.list = function (req, res, cb) {
   var modules = {};
-  var funcDir = global.C.BASEDIR + "/functions";
+  var funcDir = global.C.BASEDIR + "/apis";
   fs.readdir(funcDir, function (err, files) {
     async.each(files, function (entry, lcb) {
       var fn = funcDir + "/" + entry;

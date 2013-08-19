@@ -9,7 +9,7 @@ var sh = require(global.C.BASEDIR + "/src/shutil.js");
 var shcall = require(global.C.BASEDIR + "/src/shcall.js");
 var ShLoader = require(global.C.BASEDIR + "/src/shloader.js");
 var shcluster = require(global.C.BASEDIR + "/src/shcluster.js");
-var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
+var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var Socket = exports;

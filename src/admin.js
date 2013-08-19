@@ -20,7 +20,7 @@ var adminLogin = adminBase + "/login";
 shlog.info("admin", "admin directory: " + adminBase);
 
 // ensure admin user
-var reg = require(global.C.BASEDIR + "/functions/reg/reg.js");
+var reg = require(global.C.BASEDIR + "/apis/reg/reg.js");
 var loader = new ShLoader();
 reg.verifyUser(loader, global.C.DEFAULT_ADMIN_NAME, global.C.DEFAULT_ADMIN_PASSWORD, function (error, data) {
   if (error) {

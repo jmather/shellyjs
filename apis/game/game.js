@@ -5,8 +5,8 @@ var async = require("async");
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
 var dispatch = require(global.C.BASEDIR + "/src/dispatch.js");
-var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
-var module = require(global.C.BASEDIR + "/functions/module/module.js");
+var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
+var module = require(global.C.BASEDIR + "/apis/module/module.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
 var gGameDir = global.C.BASEDIR + "/games";

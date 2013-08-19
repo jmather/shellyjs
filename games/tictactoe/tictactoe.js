@@ -3,7 +3,7 @@ var _ = require("lodash");
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
 
-var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
+var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 
 var tictactoe = exports;
 

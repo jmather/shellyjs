@@ -37,7 +37,7 @@ shcall.fillSession = function (sess, req, res, cb) {
 shcall.createObj = function (moduleName, cb) {
   var Module = null;
   var obj = null;
-  var cmdFile = global.C.BASEDIR + "/functions/" + moduleName + "/" + moduleName + ".js";
+  var cmdFile = global.C.BASEDIR + "/apis/" + moduleName + "/" + moduleName + ".js";
   sh.require(cmdFile, function (err, Module) { // first letter caps as it could be class
     if (err) {
       return cb(err, Module);

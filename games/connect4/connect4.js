@@ -4,7 +4,7 @@ var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
 
-var channel = require(global.C.BASEDIR + "/functions/channel/channel.js");
+var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 
 var connect4 = exports;
 
