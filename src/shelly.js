@@ -38,7 +38,11 @@ function serverInfo() {
   return serverData;
 }
 
+var gConfig = {};
+
 function initConfig(config) {
+  gConfig = config;
+
   // set any configs passed in
   _.assign(global.C, config);
 
@@ -91,7 +95,15 @@ function onWorkerMessage(msg) {
   }
 }
 
-shelly.start = function (config) {
+// console.log(cluster.isMaster, global.C.BASEDIR + "/src/shelly.js");
+if (cluster.isMaster) {
+  cluster.setupMaster({
+    exec : global.C.BASEDIR + "/src/shelly.js"
+  });
+}
+
+shelly.start = function (config, cb) {
+  cb = cb || function () {};
   initConfig(config);
 
   // all configs loaded - ok to load sh* modules
@@ -116,7 +128,7 @@ shelly.start = function (config) {
   shCluster.init(function (err, data) {
     if (err) {
       shlog.error("shelly", "unable to start shcluster module", err, data);
-      return;
+      return cb(1);
     }
     if (cluster.isMaster) {
       _.each(global.C.CLUSTER, function (info, name) {
@@ -133,6 +145,8 @@ shelly.start = function (config) {
       gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
     }
   });
+
+  return cb(0);
 };
 
 shelly.shutdown = function () {
@@ -157,6 +171,7 @@ shelly.shutdown = function () {
 
 cluster.on("online", function (worker) {
   shlog.debug("shelly", "worker online:", worker.id);
+  worker.send({cmd: "shelly.start", config: gConfig});
 });
 
 cluster.on("disconnect", function (worker) {
@@ -169,7 +184,14 @@ cluster.on("exit", function (worker) {
 
 // receive message from master
 process.on("message", function (msg) {
-  shlog.debug("shelly", "onMessage: %j", msg);
+  if (shlog) { // not init until start is called for config
+    shlog.debug("shelly", "onMessage: %j", msg);
+  }
+
+  if (msg.cmd === "shelly.start") {
+    shelly.start(msg.config);
+    return;
+  }
   if (msg.cmd === "user.direct") {
     if (process.env.WTYPE !== "socket") {
       shlog.error("shelly", "non-socket got a sendDirect", msg);
