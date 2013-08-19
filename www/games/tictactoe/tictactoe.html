@@ -12,52 +12,8 @@
 
 <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
 <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
+<link rel="stylesheet" type="text/css" href="tictactoe.css">
 
-<style type="text/css">
-    button {
-        font-size: 8pt;
-    }
-    .gameBoardDiv {
-        width: 291px;
-        float:left;
-    }
-    .gamePlayersDiv,
-    .gameInfoDiv {
-        width: 200px;
-    }
-
-    .otherTurnsDiv {
-        width: 291px;
-    }
-    #gameMyTurnList {
-        overflow: auto;
-        height: 75px;
-    }
-
-
-    .tictac {
-        display: block;
-        float: left;
-        border-style: solid;
-        border-color: #bbb #888 #666 #aaa;
-        border-width: 3px 4px 4px 3px;
-        width: 90px;
-        height: 50px;
-        background: #ccc;
-        color: #333;
-        line-height: 50px;
-        text-align: center;
-        text-decoration: none;
-        font-weight: 900;
-        font-size: xx-large;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-</style>
 <script language="javascript">
 var Env = {{{EnvJson}}};
 
@@ -72,28 +28,28 @@ if (pgameId !== null) {
 function setPlayers(playerList, whoTurn) {
     $(".activePlayer").remove();
     for (playerId in playerList) {
-        var $newGame = $("#playerTemplate").clone();
+        var $newPlayer = $("#playerTemplate").clone();
         if (playerId === Env.user.oid) {
-            $newGame.find("#playerName").text("me");
-            $newGame.find("#playerKick").remove();
-            $newGame.find("#playerStatus").remove();
+            $newPlayer.find("#playerName").text("me");
+            $newPlayer.find("#playerKick").remove();
+            $newPlayer.find("#playerStatus").remove();
         } else {
-            $newGame.find("#playerName").addClass("playerName" + playerId);
-            $newGame.find("#playerName").text(playerList[playerId].name);
+            $newPlayer.find("#playerName").addClass("playerName" + playerId);
+            $newPlayer.find("#playerName").text(playerList[playerId].name);
         }
-        $newGame.addClass("playerId" + playerId);
-        $newGame.addClass("activePlayer");
-        $newGame.css("display", "block");
+        $newPlayer.addClass("playerId" + playerId);
+        $newPlayer.addClass("activePlayer");
+        $newPlayer.css("display", "block");
 
         if (typeof (Env.players[playerId]) != "undefined") {
-            $newGame.find("#playerStatus").text(Env.players[playerId].status);
+            $newPlayer.find("#playerStatus").text(Env.players[playerId].status);
         }
 
-        $newGame.find("#playerKick").click(function () {
+        $newPlayer.find("#playerKick").click(function () {
             var playerId = $(this).parent().attr("playerId");
         });
 
-        $("#playerList").append($newGame);
+        $("#playerList").append($newPlayer);
     }
     $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
 }
@@ -102,6 +58,7 @@ function setState(game) {
     $.cookie("shLastGame" + Env.user.oid, game.oid, { expires: 3650, path: "/" });
     hideError();
     hideInfo();
+    $(".gameOverDiv").css("display", "none");
 
     var gameBoard = game.state.gameBoard;
     for (var i = 0; i < 3; i++) {
@@ -123,7 +80,17 @@ function setState(game) {
 
     if (game.status == "over") {
         showInfo("game over");
-        $("#gameWinner").text(game.players[game.state.winner].name);
+        if (game.state.winner === "") {
+            $("#gameWinner").text("everyone");
+            showGameOver("Draw Game");
+        } else {
+            $("#gameWinner").text(game.players[game.state.winner].name);
+            if (game.state.winner === Env.user.oid) {
+                showGameOver("You Won");
+            } else {
+                showGameOver("You Lost");
+            }
+        }
     } else {
         $("#gameWinner").text("");
     }
@@ -147,24 +114,9 @@ function setState(game) {
     setPlayers(game.players, game.whoTurn);
 }
 
-function clearState() {
-    $.cookie("shLastGame" + Env.user.oid, "0", { expires: 3650, path: "/" });
-
-    hideError();
-    for (var i = 0; i < 3; i++) {
-        for (var j = 0; j < 3; j++) {
-            $("#x" + i + "y" + j).text("");
-            $("#x" + i + "y" + j).css("background", "#ccc");
-        }
-    }
-
-    $("#gameId").text("");
-    $("#gameStatus").text("");
-    $("#whoTurn").text("");
-    $("#gameWinner").text("");
-    $("#gamePlaying").text("");
-
-    $(".activePlayer").remove();
+function showGameOver(msg) {
+    $(".gameOverDiv").css("display", "block");
+    $(".gameOverDiv p").text(msg);
 }
 
 function shellyInit() {
@@ -178,14 +130,14 @@ function shellyInit() {
         sendRaw({session: Env.session,
             batch: [ {cmd: "game.join", gameId: Env.gameId},
                 {cmd: "game.playing"},
-                {cmd: "channel.add", channel: "game:" + Env.gameId}
+                {cmd: "channel.add", channel: "game:" + Env.gameId, _pt: "foo"}
             ]});
     }
 }
 
 function processEvent(res, from) {
     if (typeof(res.event) == "undefined") {
-        log(from, "error", "old message: " + JSON.stringify(res));
+        log(from, "error", "odd message: " + JSON.stringify(res));
         return;
     }
     if (res.event == "heartbeat") {
@@ -196,19 +148,11 @@ function processEvent(res, from) {
         log(from, "error", JSON.stringify(res));
         return;
     }
-    if (typeof(res.cb) !== "undefined") {
-        console.log("handler:", res.cb, res.data);
-        window[res.cb](res.data);
-        return;
+    if (typeof(res._pt) !== "undefined") {
+        // just show the pass through data as example
+        console.log("handler:", res.event, res._pt);
     }
     if (res.event == "game.join") {
-        // turn off live events for old game
-        var newGameId = res.data.oid;
-        var oldGameId = Env.gameId;
-        if (typeof (oldGameId) !== "undefined" && oldGameId != newGameId) {
-            sendCmd("channel.remove", {channel: "game:" + oldGameId})
-            Env.players = {};  // reset the player list
-        }
         setState(res.data);
         return;
     }
@@ -247,7 +191,7 @@ function init() {
         new FastClick(document.body);
     }, false);
 
-    $(".tictac").click(function () {
+    $(".tictactoeDiv").click(function () {
         var id = $(this).attr("id");
         var x = id.slice(1, 2);
         var y = id.slice(3, 4);
@@ -266,20 +210,21 @@ function init() {
 <body>
 {{> header}}
 {{> gameNav}}
-{{> errorBox}}
+
+<div class="gameOverDiv"><p>You XXXX</p></div>
 
 <div class="gameBoardDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv" style="">Game Board</div>
     <div>
-        <div id="x0y0" class="tictac"></div>
-        <div id="x1y0" class="tictac"></div>
-        <div id="x2y0" class="tictac"></div>
-        <div id="x0y1" class="tictac"></div>
-        <div id="x1y1" class="tictac"></div>
-        <div id="x2y1" class="tictac"></div>
-        <div id="x0y2" class="tictac"></div>
-        <div id="x1y2" class="tictac"></div>
-        <div id="x2y2" class="tictac"></div>
+        <div id="x0y0" class="tictactoeDiv"></div>
+        <div id="x1y0" class="tictactoeDiv"></div>
+        <div id="x2y0" class="tictactoeDiv"></div>
+        <div id="x0y1" class="tictactoeDiv"></div>
+        <div id="x1y1" class="tictactoeDiv"></div>
+        <div id="x2y1" class="tictactoeDiv"></div>
+        <div id="x0y2" class="tictactoeDiv"></div>
+        <div id="x1y2" class="tictactoeDiv"></div>
+        <div id="x2y2" class="tictactoeDiv"></div>
     </div>
 </div>
 
@@ -306,6 +251,7 @@ function init() {
     </div>
 </div>
 <div style="clear: both;"></div>
+{{> errorBox}}
 
 <div class="otherTurnsDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Other Turns</div>
