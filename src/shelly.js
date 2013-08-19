@@ -43,11 +43,11 @@ function initConfig(config) {
   _.assign(global.C, config);
 
   // setup the dir to load all other configs from
-  global.CDEF("CONFIGDIR", global.C.BASEDIR + "/config");
-  // first param alters config dir
+  // check the command line - SWD: process these better
   if (_.isString(process.argv[2])) {
     global.CDEF("CONFIGDIR", process.argv[2]);
   }
+  global.CDEF("CONFIGDIR", global.C.BASEDIR + "/config");
 
   // load configs with private keys
   /*jslint stupid: true */
@@ -90,42 +90,6 @@ function onWorkerMessage(msg) {
     cluster.workers[msg.toWid].send(msg);
   }
 }
-
-// receive message from master
-process.on("message", function (msg) {
-  shlog.debug("shelly", "onMessage: %j", msg);
-  if (msg.cmd === "user.direct") {
-    if (process.env.WTYPE !== "socket") {
-      shlog.error("shelly", "non-socket got a sendDirect", msg);
-      return;
-    }
-    global.socket.sendDirect(msg.toWsid, msg.data);
-    return;
-  }
-  shlog.error("shelly", "bad_message", "unknown command", msg);
-});
-
-cluster.on("online", function (worker) {
-  shlog.debug("shelly", "worker online:", worker.id);
-});
-
-cluster.on("disconnect", function (worker) {
-  shlog.debug("shelly", "worker disconnect:", worker.id);
-});
-
-cluster.on("exit", function (worker) {
-  shlog.debug("shelly", "worker exit:", worker.id);
-});
-
-// if we got here someone missed a _w call
-process.on("uncaughtException", function (error) {
-  if (shlog) {
-    shlog.error("shelly", "uncaughtException", error.stack);
-  } else {
-    console.log("shelly", "pre-shlog uncaughtException", error.stack);
-  }
-  // SWD: should try and unreg this server as it just went down
-});
 
 shelly.start = function (config) {
   initConfig(config);
@@ -190,6 +154,42 @@ shelly.shutdown = function () {
     shCluster.shutdown();
   }
 };
+
+cluster.on("online", function (worker) {
+  shlog.debug("shelly", "worker online:", worker.id);
+});
+
+cluster.on("disconnect", function (worker) {
+  shlog.debug("shelly", "worker disconnect:", worker.id);
+});
+
+cluster.on("exit", function (worker) {
+  shlog.debug("shelly", "worker exit:", worker.id);
+});
+
+// receive message from master
+process.on("message", function (msg) {
+  shlog.debug("shelly", "onMessage: %j", msg);
+  if (msg.cmd === "user.direct") {
+    if (process.env.WTYPE !== "socket") {
+      shlog.error("shelly", "non-socket got a sendDirect", msg);
+      return;
+    }
+    global.socket.sendDirect(msg.toWsid, msg.data);
+    return;
+  }
+  shlog.error("shelly", "bad_message", "unknown command", msg);
+});
+
+// if we got here someone missed a _w call
+process.on("uncaughtException", function (error) {
+  if (shlog) {
+    shlog.error("shelly", "uncaughtException", error.stack);
+  } else {
+    console.log("shelly", "pre-shlog uncaughtException", error.stack);
+  }
+  // SWD: should try and unreg this server as it just went down
+});
 
 process.on("SIGINT", function () {
   if (gKillCount < 1) {
