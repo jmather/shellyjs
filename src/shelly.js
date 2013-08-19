@@ -4,6 +4,8 @@ var path = require("path");
 var cluster = require("cluster");
 var _ = require("lodash");
 
+var shelly = exports;
+
 global.C = {};
 global.C.BASEDIR = path.dirname(__dirname);
 
@@ -91,33 +93,6 @@ function onWorkerMessage(msg) {
   }
 }
 
-// avoids function in loop
-function startMatcher(gameInfo, gameName) {
-  var p = cluster.fork({WTYPE: "matcher", GAMENAME: gameName});
-  p.on("message", onWorkerMessage);
-}
-
-shCluster.init(function (err, data) {
-  if (err) {
-    shlog.error("shelly", "unable to start shcluster module", err, data);
-    return;
-  }
-  if (cluster.isMaster) {
-    _.each(global.C.CLUSTER, function (info, name) {
-      var i = 0;
-      for (i = 0; i < info.num; i += 1) {
-        var p = cluster.fork({WTYPE: name});
-        p.on("message", onWorkerMessage);
-      }
-    });
-  } else {
-    shlog.info("shelly", "starting:", process.env.WTYPE);
-    var workerInfo = global.C.CLUSTER[process.env.WTYPE];
-    gWorkerModule = require(global.C.BASEDIR + workerInfo.src);
-    gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
-  }
-});
-
 // receive message from master
 process.on("message", function (msg) {
   shlog.debug("shelly", "onMessage: %j", msg);
@@ -149,7 +124,30 @@ process.on("uncaughtException", function (error) {
   shlog.error("shelly", "uncaughtException", error.stack);
 });
 
-function shutdown() {
+shelly.start = function() {
+  shCluster.init(function (err, data) {
+    if (err) {
+      shlog.error("shelly", "unable to start shcluster module", err, data);
+      return;
+    }
+    if (cluster.isMaster) {
+      _.each(global.C.CLUSTER, function (info, name) {
+        var i = 0;
+        for (i = 0; i < info.num; i += 1) {
+          var p = cluster.fork({WTYPE: name});
+          p.on("message", onWorkerMessage);
+        }
+      });
+    } else {
+      shlog.info("shelly", "starting:", process.env.WTYPE);
+      var workerInfo = global.C.CLUSTER[process.env.WTYPE];
+      gWorkerModule = require(global.C.BASEDIR + workerInfo.src);
+      gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
+    }
+  });
+};
+
+shelly.shutdown = function () {
   global.shutdown = true;
 
   if (cluster.isMaster) {
@@ -172,7 +170,7 @@ function shutdown() {
 process.on("SIGINT", function () {
   if (gKillCount < 1) {
     gKillCount += 1;
-    shutdown();
+    shelly.shutdown();
   } else {
     process.exit();
   }
@@ -181,7 +179,7 @@ process.on("SIGINT", function () {
 process.on("SIGQUIT", function () {
   if (gKillCount < 1) {
     gKillCount += 1;
-    shutdown();
+    shelly.shutdown();
   } else {
     process.exit();
   }
