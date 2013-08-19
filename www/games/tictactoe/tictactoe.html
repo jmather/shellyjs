@@ -82,7 +82,7 @@ function setState(game) {
         showInfo("game over");
         if (game.state.winner === "") {
             $("#gameWinner").text("everyone");
-            showGameOver("Draw Game");
+            showGameOver("It's a Draw");
         } else {
             $("#gameWinner").text(game.players[game.state.winner].name);
             if (game.state.winner === Env.user.oid) {
