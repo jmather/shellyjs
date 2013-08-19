@@ -44,6 +44,9 @@ function add(data) {
   if (_.isUndefined(this.msgs)) {
     this.msgs = [];
   }
+  if (this.req.body._pt) {
+    data._pt = this.req.body._pt;
+  }
   if (data.event === "error") {
     data.inputs = this.req.body;
     stats.incr("errors", "socket");
@@ -53,6 +56,8 @@ function add(data) {
 }
 
 // res.send - sends all events or errors
+// currently we pass each message on socket, not the array
+// SWD: should test if sending all at once is better for socket layer
 function sendAll() {
   var self = this;
   _.each(this.msgs, function (data) {

@@ -20,19 +20,19 @@ function add(data) {
   if (_.isUndefined(this.msgs)) {
     this.msgs = [];
   }
+  if (this.req.body._pt) {
+    data._pt = this.req.body._pt;
+  }
+  if (data.event === "error") {
+    data.inputs = this.req.body;
+    stats.incr("errors", "rest");
+    shlog.error("socket", "send %j", data);  // log all errors
+  }
   this.msgs.push(data);
 }
 
 // res.send - sends all events or errors
 function sendAll() {
-  var self = this;
-  _.each(this.msgs, function (data) {
-    if (data.event === "error") {
-      data.inputs = self.req.body;
-      stats.incr("errors", "rest");
-      shlog.error("rest", "send %j", data);  // log all errors
-    }
-  });
   this.send(this.msgs);
   this.msgs = [];
 }
