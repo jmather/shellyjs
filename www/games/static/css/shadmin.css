@@ -126,6 +126,7 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
 }
 
 #errorMessage {
+    margin-top: 5px;
     padding-left: 5px;
     padding-right: 5px;
     border-style: ridge;
@@ -144,6 +145,7 @@ p.ltb { text-indent: 0; margin-top: 3.08em }
 }
 
 #infoMessage {
+    margin-top: 5px;
     padding-left: 5px;
     padding-right: 5px;
     border-style: ridge;
