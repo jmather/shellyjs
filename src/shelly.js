@@ -6,39 +6,24 @@ var _ = require("lodash");
 
 var shelly = exports;
 
+// number of times SIGINT or SIGQUIT called
+var gKillCount = 0;
+global.shutdown = false;
+
 global.C = {};
 global.C.BASEDIR = path.dirname(__dirname);
 
-global.C.CONFIGDIR = global.C.BASEDIR + "/config";
-// first param alters config dir
-if (_.isString(process.argv[2])) {
-  global.C.CONFIGDIR = process.argv[2];
-}
+var shlog = null;
+var sh = null;
+var shCluster = null;
+var gWorkerModule = null;
 
 global.CDEF = function (name, value) {
   if (_.isUndefined(global.C[name])) {
     global.C[name] = value;
   }
 };
-// load configs with private key and per machine overrides
-/*jslint stupid: true */
-var keyConfigFn = global.C.CONFIGDIR + "/keys.js";
-if (fs.existsSync(keyConfigFn)) {
-  require(keyConfigFn);
-}
-// load configs with per machine overrides
-var machineConfigFn = global.C.CONFIGDIR + "/" + os.hostname() + ".js";
-/*jslint stupid: true */
-if (fs.existsSync(machineConfigFn)) {
-  require(machineConfigFn);
-}
-require(global.C.CONFIGDIR + "/main.js");
-global.PACKAGE = require(global.C.BASEDIR + "/package.json");
 
-// number of times SIGINT or SIGQUIT called
-var gKillCount = 0;
-
-var sh = require(global.C.BASEDIR + "/src/shutil.js");
 /*jslint stupid: true */
 // OK as this is only called once during startup
 function serverInfo() {
@@ -52,29 +37,42 @@ function serverInfo() {
   }
   return serverData;
 }
-global.server = serverInfo();
-global.shutdown = false;
 
-var shlog = require(global.C.BASEDIR + "/src/shlog.js");
-if (cluster.isMaster) {
-  shlog.system("shelly", "loaded:", new Date());
-  shlog.system("shelly", "server:", global.server);
-  shlog.system("shelly", "configBase:", global.C.CONFIGDIR);
-  shlog.info("shelly", "config:", sh.secure(global.C));
+function initConfig(config) {
+  // set any configs passed in
+  _.assign(global.C, config);
+
+  // setup the dir to load all other configs from
+  global.CDEF("CONFIGDIR", global.C.BASEDIR + "/config");
+  // first param alters config dir
+  if (_.isString(process.argv[2])) {
+    global.CDEF("CONFIGDIR", process.argv[2]);
+  }
+
+  // load configs with private keys
+  /*jslint stupid: true */
+  var keyConfigFn = global.C.CONFIGDIR + "/keys.js";
+  if (fs.existsSync(keyConfigFn)) {
+    require(keyConfigFn);
+  }
+  // load configs with per machine overrides
+  var machineConfigFn = global.C.CONFIGDIR + "/" + os.hostname() + ".js";
+  /*jslint stupid: true */
+  if (fs.existsSync(machineConfigFn)) {
+    require(machineConfigFn);
+  }
+  // load the main config
+  require(global.C.CONFIGDIR + "/main.js");
+
+  // load the package info
+  global.PACKAGE = require(global.C.BASEDIR + "/package.json");
+
+  // SWD: this need to moved to a config file
+  // pre-validate all the options are set - specially the url
+  global.games = {};
+  global.games.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
+  global.games.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/connect4.html"};
 }
-
-require(global.C.BASEDIR + "/src/shcb.js").leanStacks(true);
-
-var shCluster = require(global.C.BASEDIR + "/src/shcluster.js");
-var gWorkerModule = null;
-
-global.socket = require(global.C.BASEDIR + "/src/socket.js");
-
-// SWD: this need to moved to a config file
-// pre-validate all the options are set - specially the url
-global.games = {};
-global.games.tictactoe = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/tictactoe/tictactoe.html"};
-global.games.connect4 = {minPlayers: 2, maxPlayers: 2, created: 0, lastCreated: 0, url: "/connect4/connect4.html"};
 
 // master received message from worker
 function onWorkerMessage(msg) {
@@ -119,12 +117,38 @@ cluster.on("exit", function (worker) {
   shlog.debug("shelly", "worker exit:", worker.id);
 });
 
-// listen for these also to unreg the server
+// if we got here someone missed a _w call
 process.on("uncaughtException", function (error) {
-  shlog.error("shelly", "uncaughtException", error.stack);
+  if (shlog) {
+    shlog.error("shelly", "uncaughtException", error.stack);
+  } else {
+    console.log("shelly", "pre-shlog uncaughtException", error.stack);
+  }
+  // SWD: should try and unreg this server as it just went down
 });
 
-shelly.start = function() {
+shelly.start = function (config) {
+  initConfig(config);
+
+  // all configs loaded - ok to load sh* modules
+  require(global.C.BASEDIR + "/src/shcb.js").leanStacks(true);
+  shlog = require(global.C.BASEDIR + "/src/shlog.js");
+  sh = require(global.C.BASEDIR + "/src/shutil.js");
+  shCluster = require(global.C.BASEDIR + "/src/shcluster.js");
+
+  //  used in cluster bus to forward commands in process.on - message
+  global.socket = require(global.C.BASEDIR + "/src/socket.js");
+
+  // server info for cluster
+  global.server = serverInfo();
+
+  if (cluster.isMaster) {
+    shlog.system("shelly", "loaded:", new Date());
+    shlog.system("shelly", "server:", global.server);
+    shlog.system("shelly", "configBase:", global.C.CONFIGDIR);
+    shlog.info("shelly", "config:", sh.secure(global.C));
+  }
+
   shCluster.init(function (err, data) {
     if (err) {
       shlog.error("shelly", "unable to start shcluster module", err, data);
@@ -165,7 +189,7 @@ shelly.shutdown = function () {
   } else {
     shCluster.shutdown();
   }
-}
+};
 
 process.on("SIGINT", function () {
   if (gKillCount < 1) {

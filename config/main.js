@@ -66,3 +66,6 @@ global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "XXXX", p
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {AWSAccessKeyID: "XXXX", AWSSecretKey: "XXXX"});
 //global.CDEF("EMAIL_TRANSPORT", "SMTP");
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Postmark", auth: {user: "XXXX", pass: "XXXX"}});
+
+// extended directories
+//global.CDEF("EXT_API_DIR", "");
