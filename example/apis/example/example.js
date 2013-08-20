@@ -9,7 +9,7 @@ example.functions = {
 };
 
 example.hello = function (req, res, cb) {
-  res.add(sh.event("example.hello", "world override"));
+  res.add(sh.event("example.hello", "world"));
   return cb(0);
 };
 

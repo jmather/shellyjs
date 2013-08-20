@@ -80,6 +80,7 @@
             }
             $section.append($functionDiv);
         }
+
         function initParams(module, func)
         {
             console.log(module, func);
@@ -129,9 +130,9 @@
         }
 
         function setupModules(err, msg) {
-            if(msg.event === "error") {
-                console.log(msg);
-                alert(msg.message);
+            if(msg[0].event === "error") {
+                $("#errorMessage").css("display", "block");
+                $("#errorMessage").text(msg[0].message);
                 return;
             }
 
@@ -147,6 +148,8 @@
             gOutputEdit = new jsoneditor.JSONFormatter(outputContainer);
 
             if (gLastModule) {
+                $("#apiNone").css("display", "none");
+                $("#apiBrowser").css("display", "block");
                 initParams(gLastModule, gLastFunction);
             }
         }
@@ -189,8 +192,9 @@
 {{> header}}
 {{> adminNav}}
 
-<div id="noApis">
+<div id="apiNone" style="width: 100%; text-align: center; margin-top: 100px;">
     No APIs to display
+    <div id="errorMessage"></div>
 </div>
 <div id="apiBrowser" style="display: none;">
     <div id="accordion" class="coreAccordion" style="float:left">
