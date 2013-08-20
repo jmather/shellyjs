@@ -102,6 +102,7 @@ Game.notifyTurn = function (req, res) {
   var gameData = req.env.game.getData();
   var event = sh.event("game.turn.next", {gameId: gameData.oid,
     gameName: gameData.name,
+    gameUrl: sh.gameUrl(gameData.name, {gameId: gameData.oid}),
     whoTurn: gameData.whoTurn,
     name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
     pic: ""});
