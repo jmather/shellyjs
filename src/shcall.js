@@ -1,3 +1,4 @@
+var fs = require("fs");
 var _ = require("lodash");
 
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
@@ -33,21 +34,36 @@ shcall.fillSession = function (sess, req, res, cb) {
   }));
 };
 
+shcall.locateApi = function (moduleName, cb) {
+  var coreApiFile = global.C.BASEDIR + "/apis/" + moduleName + "/" + moduleName + ".js";
+  if (!global.C.APP_API_DIR) {
+    return cb(coreApiFile);
+  }
+  var appApiFile = global.C.APP_API_DIR + "/" + moduleName + "/" + moduleName + ".js";
+  fs.exists(appApiFile, function (exists) {
+    if (exists) {
+      shlog.info("shcall", "using app api file:", appApiFile);
+      return cb(appApiFile);
+    }
+    return cb(coreApiFile);
+  });
+}
+
 // load module
 shcall.createObj = function (moduleName, cb) {
-  var Module = null;
   var obj = null;
-  var cmdFile = global.C.BASEDIR + "/apis/" + moduleName + "/" + moduleName + ".js";
-  sh.require(cmdFile, function (err, Module) { // first letter caps as it could be class
-    if (err) {
-      return cb(err, Module);
-    }
-    if (_.isFunction(Module)) { // handle objects instead of module functions
-      obj = new Module();
-    } else {
-      obj = Module;
-    }
-    cb(0, obj);
+  shcall.locateApi(moduleName, function (cmdFile) {
+    sh.require(cmdFile, function (err, Module) { // first letter caps as it could be class
+      if (err) {
+        return cb(err, Module);
+      }
+      if (_.isFunction(Module)) { // handle objects instead of module functions
+        obj = new Module();
+      } else {
+        obj = Module;
+      }
+      cb(0, obj);
+    });
   });
 };
 
@@ -75,8 +91,12 @@ shcall.make = function (req, res, cb) {
 
     // check function def
     if (_.isUndefined(module.functions[funcName])) {
-      res.add(sh.error("module-function", "function description does not exist", {module: moduleName, function: funcName}));
-      return cb(1);
+      shcall.locateApi(moduleName, function (apiFile) {
+        res.add(sh.error("module-function", "function description does not exist",
+          {module: moduleName, function: funcName, file: apiFile}));
+        return cb(1);
+      });
+      return;
     }
 
     // check session required

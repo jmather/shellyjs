@@ -8,7 +8,8 @@ var sh = require(global.C.BASEDIR + "/src/shutil.js");
 
 exports.desc = "utility functions for shelly modules";
 exports.functions = {
-  list: {desc: "list all modules installed", params: {}, security: []},
+  core: {desc: "list all core APIs installed", params: {}, security: []},
+  app: {desc: "list all application APIs installed", params: {}, security: []},
   info: {desc: "get info for a single module", params: {name: {dtype: "string"}}, security: []}
 };
 
@@ -35,7 +36,14 @@ exports.getInfo = function (fn, cb) {
     if (!_.isUndefined(module.functions)) {
       m.functions = module.functions;
     }
-    return cb(0, m);
+    if (!global.C.APP_API_DIR) {
+      return cb(0, m);
+    }
+    var appApiFile = global.C.APP_API_DIR + "/" + m.name + "/" + m.name + ".js";
+    fs.exists(appApiFile, function (exists) {
+      m.override = exists;
+      return cb(0, m);
+    });
   });
 };
 
@@ -51,12 +59,11 @@ exports.info = function (req, res, cb) {
   });
 };
 
-exports.list = function (req, res, cb) {
+function apiInfoByDir(dir, cb) {
   var modules = {};
-  var funcDir = global.C.BASEDIR + "/apis";
-  fs.readdir(funcDir, function (err, files) {
+  fs.readdir(dir, function (err, files) {
     async.each(files, function (entry, lcb) {
-      var fn = funcDir + "/" + entry;
+      var fn = dir + "/" + entry;
       fs.stat(fn, function (err, stat) {
         if (stat.isDirectory()) {
           var moduleFn = fn + "/" + entry + ".js";
@@ -69,8 +76,28 @@ exports.list = function (req, res, cb) {
         }
       });
     }, function (error) {
-      res.add(sh.event("module.list", modules));
-      cb(0);
+      return cb(0, modules);
     });
+  });
+}
+
+exports.core = function (req, res, cb) {
+  var apiDir = global.C.BASEDIR + "/apis";
+
+  apiInfoByDir(apiDir, function (err, modules) {
+    res.add(sh.event("module.core", modules));
+    return cb(0);
+  });
+};
+
+exports.app = function (req, res, cb) {
+  if (!global.C.APP_API_DIR) {
+    res.add(sh.error("api-dir-missing", "the APP_API_DIR is not set"));
+    return cb(1);
+  }
+
+  apiInfoByDir(global.C.APP_API_DIR, function (err, modules) {
+    res.add(sh.event("module.app", modules));
+    return cb(0);
   });
 };

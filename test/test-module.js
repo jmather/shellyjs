@@ -16,11 +16,22 @@ describe("module module", function () {
     });
   });
 
-  describe("CMD module.list", function () {
+  describe("CMD module.core", function () {
     it("list info for all core modules", function (done) {
-      st.adminCall({cmd: "module.list"},
+      st.adminCall({cmd: "module.core"},
         function (err, res) {
-          res.body.should.have.property("event", "module.list");
+          res.body.should.have.property("event", "module.core");
+          done();
+        });
+    });
+  });
+
+  describe("CMD module.app", function () {
+    it("list info for all app modules", function (done) {
+      st.adminCall({cmd: "module.app"},
+        function (err, res) {
+// will get error if not set
+//          res.body.should.have.property("event", "module.app");
           done();
         });
     });

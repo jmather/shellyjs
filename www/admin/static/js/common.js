@@ -1,3 +1,10 @@
+function getURLParameter(name, dflt) {
+  var p = decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+  if (p === null && typeof(dflt) !== "undefined") {
+    p = dflt;
+  }
+  return p;
+}
 
 function shCallRaw(packet, cb) {
 //  console.log(packet);

@@ -88,7 +88,7 @@ describe("general negative tests", function () {
 
   describe("security", function () {
     it("no session", function (done) {
-      st.call({cmd: "module.list"},
+      st.call({cmd: "module.core"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -96,7 +96,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad session format", function (done) {
-      st.call({cmd: "module.list", session: "bad"},
+      st.call({cmd: "module.core", session: "bad"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -104,7 +104,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad session signature", function (done) {
-      st.call({cmd: "module.list", session: "1:foo:foo:0"},
+      st.call({cmd: "module.core", session: "1:foo:foo:0"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -112,7 +112,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad session data", function (done) {
-      st.call({cmd: "module.list", session: "1:13:bad:0"},
+      st.call({cmd: "module.core", session: "1:13:bad:0"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -122,7 +122,7 @@ describe("general negative tests", function () {
     it("bad session time", function (done) {
       var parts = st.session("user").split(":");
       var sess = parts[0] + ":" + parts[1] + ":" + parts[2] + ":0";
-      st.call({cmd: "module.list", session: sess},
+      st.call({cmd: "module.core", session: sess},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");

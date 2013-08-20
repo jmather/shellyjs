@@ -54,8 +54,10 @@
 
         var gInputEdit = null;
         var gOutputEdit = null;
-        var gLastModule = "game";
-        var gLastFunction = "create";
+        var gLastModule = null;
+        var gLastFunction = null;
+
+        var gInitCmd = getURLParameter("api", "module.core");
 
         function createModule(name, m)
         {
@@ -66,6 +68,10 @@
             var $functionDiv = $("<div></div>");
             // list the functions
             for (fkey in m.functions) {
+                if (gLastModule === null) {
+                    gLastModule = name;
+                    gLastFunction = fkey;
+                }
                 $functionDiv.append("<div class='setFunctionDiv' module='" + name + "' function='" + fkey + "'>" + fkey + "</div>");
 //                        $functionLink.text(fkey);
 //                        $functionLink.attr("href", "function/"+mkey+"/"+fkey);
@@ -128,6 +134,7 @@
                 alert(msg.message);
                 return;
             }
+
             Env.modules = msg[0].data;
             for (mkey in Env.modules) {
                 createModule(mkey, Env.modules[mkey]);
@@ -139,14 +146,16 @@
             var outputContainer = document.getElementById("outputEditor");
             gOutputEdit = new jsoneditor.JSONFormatter(outputContainer);
 
-            initParams(gLastModule, gLastFunction);
+            if (gLastModule) {
+                initParams(gLastModule, gLastFunction);
+            }
         }
 
         $(init);
         function init() {
             $("#shSubTitle").text("APIs");
 
-            shCall({cmd:"module.list"}, setupModules);
+            shCall({cmd: gInitCmd}, setupModules);
 
             $(".setFunctionDiv").click(function(event) {
                 gLastModule = $(this).attr("module");
@@ -180,32 +189,37 @@
 {{> header}}
 {{> adminNav}}
 
-<div id="accordion" class="coreAccordion" style="float:left">
+<div id="noApis">
+    No APIs to display
 </div>
-<div style="float:left;">
-<table border="0">
-    <tr>
-        <td class="nameCell">module:</td><td><span id="moduleName">{module_name}</span>.<span id="functionName">{function_name}</span></td>
-    </tr>
-    <tr>
-        <td class="nameCell" style="vertical-align: text-top;">params:</td><td><div id="functionParams">{function_params}</div></td>
-    </tr>
-    <tr>
-        <td class="nameCell">description:</td><td><div id="functionDescription">{function_description}</div></td>
-    </tr>
-    <tr>
-        <td class="nameCell">security:</td><td><div id="functionSecurity">{function_security}</div></td>
-    </tr>
-    <tr>
-        <td class="nameCell">nosession:</td><td><div id="functionNoSession">{function_noSession}</div></td>
-    </tr>
-</table>
-<div id="inputEditor"></div>
-<div>
-    <td><button id="callFunction">call function</button></td>
-    <td><button id="resetFunction" style="float:right;">reset</button></td>
-</div>
-<div id="outputEditor"></div>
+<div id="apiBrowser" style="display: none;">
+    <div id="accordion" class="coreAccordion" style="float:left">
+    </div>
+    <div style="float:left;">
+        <table border="0">
+            <tr>
+                <td class="nameCell">module:</td><td><span id="moduleName">{module_name}</span>.<span id="functionName">{function_name}</span></td>
+            </tr>
+            <tr>
+                <td class="nameCell" style="vertical-align: text-top;">params:</td><td><div id="functionParams">{function_params}</div></td>
+            </tr>
+            <tr>
+                <td class="nameCell">description:</td><td><div id="functionDescription">{function_description}</div></td>
+            </tr>
+            <tr>
+                <td class="nameCell">security:</td><td><div id="functionSecurity">{function_security}</div></td>
+            </tr>
+            <tr>
+                <td class="nameCell">nosession:</td><td><div id="functionNoSession">{function_noSession}</div></td>
+            </tr>
+        </table>
+        <div id="inputEditor"></div>
+        <div>
+            <td><button id="callFunction">call function</button></td>
+            <td><button id="resetFunction" style="float:right;">reset</button></td>
+        </div>
+        <div id="outputEditor"></div>
+    </div>
 </div>
 
 {{> footer}}
