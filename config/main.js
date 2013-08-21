@@ -31,10 +31,10 @@ global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 global.CDEF("CLUSTER", {
-  "socket": {src: "/lib/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: null},
-  "rest": {src: "/lib/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
-  "admin": {src: "/lib/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
-  "games": {src: "/lib/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
+  "socket": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: null},
+  "rest": {src: "/src/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
+  "admin": {src: "/src/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
+  "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
   "matcher-ttt": {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["tictactoe"]},
   "matcher-connect4": {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["connect4"]},
   "mailer": {src: "/lib/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}

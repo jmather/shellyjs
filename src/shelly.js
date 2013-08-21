@@ -95,10 +95,9 @@ function onWorkerMessage(msg) {
   }
 }
 
-// console.log(cluster.isMaster, global.C.BASEDIR + "/lib/shelly.js");
 if (cluster.isMaster) {
   cluster.setupMaster({
-    exec : global.C.BASEDIR + "/lib/shelly.js"
+    exec : global.C.BASEDIR + "/src/shelly.js"
   });
 }
 
@@ -113,7 +112,7 @@ shelly.start = function (config, cb) {
   shCluster = require(global.C.BASEDIR + "/lib/shcluster.js");
 
   //  used in cluster bus to forward commands in process.on - message
-  global.socket = require(global.C.BASEDIR + "/lib/socket.js");
+  global.socket = require(global.C.BASEDIR + "/src/socket.js");
 
   // server info for cluster
   global.server = serverInfo();
