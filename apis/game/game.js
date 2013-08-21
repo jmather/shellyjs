@@ -335,10 +335,13 @@ Game.list = function (req, res, cb) {
   shlog.info("game", "game.list");
 
   var games = {};
-  var gameDir = global.C.BASEDIR + "/games";
-  fs.readdir(gameDir, function (err, files) {
+  fs.readdir(global.C.GAMES_API_DIR, function (err, files) {
+    if (err) {
+      res.add(sh.error("game-dir-failed", "unable to read game directory", err));
+      return cb(1);
+    }
     async.each(files, function (entry, lcb) {
-      var fn = gameDir + "/" + entry;
+      var fn = global.C.GAMES_API_DIR + "/" + entry;
       fs.stat(fn, function (err, stat) {
         if (stat.isDirectory()) {
           var gameFn = fn + "/" + entry + ".js";
