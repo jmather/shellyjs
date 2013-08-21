@@ -10,6 +10,8 @@ var EMPTY = -1;
 var YELLOW = 0;
 var RED = 1;
 
+connect4.url = "/connect4/connect4.html";
+
 connect4.create = function (req, res, cb) {
   var board = [];
   var i, j;

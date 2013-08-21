@@ -25,6 +25,44 @@ Game.functions = {
   playing: {desc: "list all games user is currently playing", params: {}, security: []}
 };
 
+function gameInit(dir, cb) {
+  if (_.isUndefined(global.games)) {
+    global.games = {};
+  }
+  fs.readdir(dir, function (err, files) {
+    if (err) {
+      cb(err);
+    }
+    async.each(files, function (entry, lcb) {
+      var fn = dir + "/" + entry;
+      fs.stat(fn, function (err, stat) {
+        if (stat.isDirectory()) {
+          var moduleFn = fn + "/" + entry + ".js";
+          var module = null;
+          try {
+            module = require(moduleFn);
+          } catch (e) {}
+          if (module) {
+            shlog.info("game", "game found", entry, module.url);
+            global.games[entry] = {};
+            if (_.isString(module.url)) {
+              global.games[entry].url = module.url;
+            }
+          }
+          return lcb(0);
+        }
+        return lcb(0);
+      });
+    }, function (error) {
+      return cb(0);
+    });
+  });
+}
+
+Game.init = function (cb) {
+  gameInit(global.C.GAMES_API_DIR, cb);
+};
+
 Game.pre = function (req, res, cb) {
   req.env.game = null;
 

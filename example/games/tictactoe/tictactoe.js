@@ -11,6 +11,8 @@ var gDefaultBoard = [
   ["", "", ""]
 ];
 
+tictactoe.url = "/tictactoe/tictactoe.html";
+
 tictactoe.create = function (req, res, cb) {
   req.env.game.set("minPlayers", 2);
   req.env.game.set("maxPlayers", 2);

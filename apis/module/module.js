@@ -20,6 +20,7 @@ exports.getInfo = function (fn, cb) {
   m.error = 0;
   m.path = fn;
   m.name = path.basename(fn, ".js");
+  m.url = "";
   m.author = "";
   m.desc = "";
   m.functions = {};
@@ -32,6 +33,9 @@ exports.getInfo = function (fn, cb) {
     }
     if (!_.isUndefined(module.desc)) {
       m.desc = module.desc;
+    }
+    if (!_.isUndefined(module.url)) {
+      m.url = module.url;
     }
     if (!_.isUndefined(module.functions)) {
       m.functions = module.functions;
