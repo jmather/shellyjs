@@ -6,7 +6,6 @@ var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 
 var connect4 = exports;
 
-var COLUMN_FULL = -2;
 var EMPTY = -1;
 var YELLOW = 0;
 var RED = 1;
