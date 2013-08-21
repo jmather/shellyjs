@@ -1,5 +1,3 @@
-var _ = require("lodash");
-
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
 
@@ -18,10 +16,10 @@ tictactoe.create = function (req, res, cb) {
   req.env.game.set("maxPlayers", 2);
 
   var state = {};
-  state.gameBoard = _.clone(gDefaultBoard);
+  state.gameBoard = gDefaultBoard.slice(0);
   // first player is always X
   state.xes = req.session.uid;
-  state.winner = 0;
+  state.winner = "";
   state.winnerSet = null;
   state.xes = req.session.uid;
   req.env.game.set("state", state);
@@ -31,7 +29,7 @@ tictactoe.create = function (req, res, cb) {
 
 tictactoe.reset = function (req, res, cb) {
   var state = req.env.game.get("state");
-  state.gameBoard = _.clone(gDefaultBoard);
+  state.gameBoard = gDefaultBoard.slice(0);
   state.winner = 0;
   state.winnerSet = null;
   state.xes = req.session.uid;

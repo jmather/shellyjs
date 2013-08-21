@@ -1,5 +1,3 @@
-var _ = require("lodash");
-
 var shlog = require(global.C.BASEDIR + "/src/shlog.js");
 var sh = require(global.C.BASEDIR + "/src/shutil.js");
 var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
