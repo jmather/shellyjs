@@ -62,6 +62,9 @@ exports.info = function (req, res, cb) {
 function apiInfoByDir(dir, cb) {
   var modules = {};
   fs.readdir(dir, function (err, files) {
+    if (err) {
+      cb(err);
+    }
     async.each(files, function (entry, lcb) {
       var fn = dir + "/" + entry;
       fs.stat(fn, function (err, stat) {
@@ -85,6 +88,10 @@ exports.core = function (req, res, cb) {
   var apiDir = global.C.BASEDIR + "/apis";
 
   apiInfoByDir(apiDir, function (err, modules) {
+    if (err) {
+      res.add(sh.error("module-list-bad", "unable to list core modules", err));
+      return cb(1);
+    }
     res.add(sh.event("module.core", modules));
     return cb(0);
   });
@@ -97,6 +104,10 @@ exports.app = function (req, res, cb) {
   }
 
   apiInfoByDir(global.C.APP_API_DIR, function (err, modules) {
+    if (err) {
+      res.add(sh.error("module-list-bad", "unable to list app modules", err));
+      return cb(1);
+    }
     res.add(sh.event("module.app", modules));
     return cb(0);
   });
