@@ -11,6 +11,12 @@ global.CDEF("REST_URL", "http://" + global.C.DNS_NAME + ":" + global.C.REST_PORT
 global.CDEF("GAMES_PORT", 5102);
 global.CDEF("GAMES_URL", "http://" + global.C.DNS_NAME + ":" + global.C.GAMES_PORT);
 
+// directory for any external module added to system
+global.CDEF("APP_API_DIR", global.C.BASEDIR + "/example/apis");
+
+// directory used by apis/game.js to load specfic game mechanics
+global.CDEF("GAMES_API_DIR", global.C.BASEDIR + "/example/games");
+
 // socket options
 global.CDEF("SOCKET_PORT", 5110);
 global.CDEF("SOCKET_URL", "ws://" + global.C.DNS_NAME + ":" + global.C.SOCKET_PORT);

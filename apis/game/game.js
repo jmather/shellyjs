@@ -38,7 +38,7 @@ Game.pre = function (req, res, cb) {
 
   // just load the module
   if (req.body.cmd === "game.create") {
-    var gameFile = gGameDir + "/" + req.body.name + "/" + req.body.name + ".js";
+    var gameFile = global.C.GAMES_API_DIR + "/" + req.body.name + "/" + req.body.name + ".js";
     sh.require(gameFile, function (err, module) {
       if (err) {
         res.add(sh.error("game-require", "unable to load game module", module));
@@ -73,7 +73,7 @@ Game.pre = function (req, res, cb) {
       }
     }
 
-    var gameFile = gGameDir + "/" + game.get("name") + "/" + game.get("name") + ".js";
+    var gameFile = global.C.GAMES_API_DIR + "/" + game.get("name") + "/" + game.get("name") + ".js";
     sh.require(gameFile, function (err, module) {
       if (err) {
         res.add(sh.error("game-require", "unable to load game module", module));
