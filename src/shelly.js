@@ -117,11 +117,13 @@ shelly.start = function (config, cb) {
       shlog.error("shelly", "unable to start shcluster module", err, data);
       return cb(1);
     }
-    // add workers for game matchers (global.games set in cluster.init
-    _.each(global.games, function (info, gameName) {
-      global.C.CLUSTER["matcher-" + gameName] = {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: [gameName]};
-    });
 
+    if (global.C.CLUSTER_AUTO_GAME_MATCHER) {
+      // add workers for game matchers (global.games set in cluster.init
+      _.each(global.games, function (info, gameName) {
+        global.C.CLUSTER["matcher-" + gameName] = {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: [gameName]};
+      });
+    }
     if (cluster.isMaster) {
       shlog.system("shelly", "loaded:", new Date());
       shlog.system("shelly", "server:", global.server);

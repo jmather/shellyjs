@@ -37,6 +37,7 @@ global.CDEF("CLUSTER", {
   "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
   "mailer": {src: "/lib/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
 });
+global.CDEF("CLUSTER_AUTO_GAME_MATCHER", true); // auto adds matcher processes per game
 
 // logs
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
