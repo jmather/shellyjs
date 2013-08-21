@@ -26,11 +26,41 @@ describe("module system", function () {
     });
   });
 
-  describe("CMD system.stats", function () {
-    it("get server statistics data", function (done) {
-      st.adminCall({cmd: "system.stats"},
+  describe("CMD system.connInfo", function () {
+    it("get socket connection info", function (done) {
+      st.adminCall({cmd: "system.connInfo"},
         function (err, res) {
-          res.body.should.have.property("event", "system.stats");
+          res.body.should.have.property("event", "system.connInfo");
+          res.body.should.have.property("data");
+          res.body.data.should.have.property("serverId");
+          res.body.data.should.have.property("wid");
+          res.body.data.should.have.property("wsid");
+          done();
+        });
+    });
+  });
+
+  var ts = new Date().getTime();
+  describe("CMD system.rawSet", function () {
+    it("set object in the datastore with raw key", function (done) {
+      st.adminCall({cmd: "system.rawSet", key: "foo", value: {ts: ts}},
+        function (err, res) {
+          res.body.should.have.property("event", "system.rawSet");
+          res.body.should.have.property("data");
+          done();
+        });
+    });
+  });
+
+  describe("CMD system.rawGet", function () {
+    it("get object from the datastore with raw key", function (done) {
+      st.adminCall({cmd: "system.rawGet", key: "foo"},
+        function (err, res) {
+          res.body.should.have.property("event", "system.rawGet");
+          res.body.should.have.property("data");
+          res.body.data.should.have.property("key", "foo");
+          res.body.data.should.have.property("value");
+          res.body.data.value.should.have.property("ts", ts);
           done();
         });
     });
