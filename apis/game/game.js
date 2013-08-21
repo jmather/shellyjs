@@ -9,8 +9,6 @@ var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 var module = require(global.C.BASEDIR + "/apis/module/module.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
-var gGameDir = global.C.BASEDIR + "/games";
-
 var Game = exports;
 
 Game.desc = "game state and control module";
