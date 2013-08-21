@@ -35,8 +35,6 @@ global.CDEF("CLUSTER", {
   "rest": {src: "/src/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
   "admin": {src: "/src/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
   "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
-  "matcher-ttt": {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["tictactoe"]},
-  "matcher-connect4": {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["connect4"]},
   "mailer": {src: "/lib/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
 });
 

@@ -38,6 +38,7 @@ function serverInfo() {
   return serverData;
 }
 
+// used to pass config to each worker in "shelly.start" message
 var gConfig = {};
 
 function initConfig(config) {
@@ -111,19 +112,21 @@ shelly.start = function (config, cb) {
   // server info for cluster
   global.server = serverInfo();
 
-  if (cluster.isMaster) {
-    shlog.system("shelly", "loaded:", new Date());
-    shlog.system("shelly", "server:", global.server);
-    shlog.system("shelly", "configBase:", global.C.CONFIGDIR);
-    shlog.info("shelly", "config:", sh.secure(global.C));
-  }
-
   shCluster.init(function (err, data) {
     if (err) {
       shlog.error("shelly", "unable to start shcluster module", err, data);
       return cb(1);
     }
+    // add workers for game matchers (global.games set in cluster.init
+    _.each(global.games, function (info, gameName) {
+      global.C.CLUSTER["matcher-" + gameName] = {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: [gameName]};
+    });
+
     if (cluster.isMaster) {
+      shlog.system("shelly", "loaded:", new Date());
+      shlog.system("shelly", "server:", global.server);
+      shlog.system("shelly", "configBase:", global.C.CONFIGDIR);
+      shlog.info("shelly", "config:", sh.secure(global.C));
       _.each(global.C.CLUSTER, function (info, name) {
         var i = 0;
         for (i = 0; i < info.num; i += 1) {
