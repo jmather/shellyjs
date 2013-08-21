@@ -1,4 +1,9 @@
-var shelly = require(__dirname + "/../src/shelly.js");
+try {
+  var shelly = require("shelly");
+} catch (e) {}
+if (!shelly) { // handle direct run from module location
+  shelly = require(__dirname + "/../src/shelly.js");
+}
 
 shelly.start({
   APP_API_DIR: __dirname + "/apis",
