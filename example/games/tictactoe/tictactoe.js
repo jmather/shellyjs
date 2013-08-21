@@ -1,5 +1,5 @@
-var shlog = require(global.C.BASEDIR + "/src/shlog.js");
-var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 
 var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 

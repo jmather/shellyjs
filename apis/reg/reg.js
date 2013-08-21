@@ -4,10 +4,10 @@ var _ = require("lodash");
 var check = require("validator").check;
 var sanitize = require("validator").sanitize;
 
-var shlog = require(global.C.BASEDIR + "/src/shlog.js");
-var sh = require(global.C.BASEDIR + "/src/shutil.js");
-var session = require(global.C.BASEDIR + "/src/session.js");
-var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+var session = require(global.C.BASEDIR + "/lib/session.js");
+var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
 var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
 var passwordVersion = 1;

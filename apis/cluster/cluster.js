@@ -1,9 +1,9 @@
 var _ = require("lodash");
 
-var shlog = require(global.C.BASEDIR + "/src/shlog.js");
-var sh = require(global.C.BASEDIR + "/src/shutil.js");
-var shcluster = require(global.C.BASEDIR + "/src/shcluster");
-var _w = require(global.C.BASEDIR + "/src/shcb.js")._w;
+var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+var shcluster = require(global.C.BASEDIR + "/lib/shcluster");
+var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
 var cluster = exports;
 

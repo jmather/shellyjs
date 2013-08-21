@@ -31,13 +31,13 @@ global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 global.CDEF("CLUSTER", {
-  "socket": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: null},
-  "rest": {src: "/src/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
-  "admin": {src: "/src/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
-  "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
-  "matcher-ttt": {src: "/src/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["tictactoe"]},
-  "matcher-connect4": {src: "/src/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["connect4"]},
-  "mailer": {src: "/src/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
+  "socket": {src: "/lib/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: null},
+  "rest": {src: "/lib/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
+  "admin": {src: "/lib/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
+  "games": {src: "/lib/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
+  "matcher-ttt": {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["tictactoe"]},
+  "matcher-connect4": {src: "/lib/shmatcher.js", num: global.C.CLUSTER_NUM_MATCHER, args: ["connect4"]},
+  "mailer": {src: "/lib/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
 });
 
 // logs
@@ -49,14 +49,14 @@ global.CDEF("REG_ALLOW_ANONYMOUS", true);
 
 // db
 global.CDEF("DB_SCOPE", "dev:");
-global.CDEF("DB_WRAPPER", "/src/db/shredis.js");
+global.CDEF("DB_WRAPPER", "/lib/db/shredis.js");
 global.CDEF("DB_OPTIONS", {});
-//global.C.db.wrapper = "/src/db/shsqlite.js";
+//global.C.db.wrapper = "/lib/db/shsqlite.js";
 //global.C.db.options = {filename: global.C.BASEDIR + "/db/sqlite3.db"};
 
 // stats
-global.CDEF("STATS_WRAPPER", "/src/stats/shstatsredis.js");
-//global.CDEF("STATS_WRAPPER", "/src/stats/shstatsmem.js";
+global.CDEF("STATS_WRAPPER", "/lib/stats/shstatsredis.js");
+//global.CDEF("STATS_WRAPPER", "/lib/stats/shstatsmem.js";
 
 // default admin
 global.CDEF("DEFAULT_ADMIN_NAME", "shelly");

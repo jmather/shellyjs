@@ -1,4 +1,4 @@
-var sh = require(global.C.BASEDIR + "/src/shutil.js");
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 
 var example = exports;
 
