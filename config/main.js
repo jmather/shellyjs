@@ -48,10 +48,10 @@ global.CDEF("REG_ALLOW_ANONYMOUS", true);
 
 // db
 global.CDEF("DB_SCOPE", "dev:");
-global.CDEF("DB_WRAPPER", "/lib/db/shredis.js");
+global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
 global.CDEF("DB_OPTIONS", {});
-//global.C.db.wrapper = "/lib/db/shsqlite.js";
-//global.C.db.options = {filename: global.C.BASEDIR + "/db/sqlite3.db"};
+//global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shsqlite.js");
+//global.CDEF("DB_OPTIONS", {filename: global.C.BASEDIR + "/db/sqlite3.db"});
 
 // stats
 global.CDEF("STATS_WRAPPER", "/lib/stats/shstatsredis.js");
