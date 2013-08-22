@@ -27,7 +27,8 @@ Socket.sendDirect = function (wsId, data) {
   }
   var ws = global.sockets[wsId];
   if (_.isUndefined(ws)) {
-    shlog.error("socket", "global socket not found:", wsId);
+    console.trace();
+    shlog.error("socket", "global socket not found:", {wsId: wsId, data: data});
     return false;
   }
   try {
