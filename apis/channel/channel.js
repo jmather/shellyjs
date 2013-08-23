@@ -143,6 +143,6 @@ Channel.send = function (req, res, cb) {
     req.loader.get("kMessageBank", req.body.channel, _w(cb, function (err, ml) {
       ml.add(msgBlock);
       return cb(0, uidList);
-    }, {lock: true}));
+    }), {lock: true});
   }));
 };

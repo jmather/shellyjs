@@ -48,6 +48,8 @@ global.CDEF("REG_ALLOW_ANONYMOUS", true);
 
 // db
 global.CDEF("DB_SCOPE", "dev:");
+global.CDEF("DB_LOCK_RETRIES", 5);
+global.CDEF("DB_LOCK_SLEEP", 1000);
 //global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
 //global.CDEF("DB_OPTIONS", {});
 global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shsqlite.js");

@@ -14,7 +14,6 @@ Suggest.functions = {
 };
 
 Suggest.list = function (req, res, cb) {
-
   var set = "any";
   req.loader.get("kPlayerSet", "any", _w(cb, function (err, players) {
     if (err) {
@@ -31,7 +30,6 @@ Suggest.list = function (req, res, cb) {
 };
 
 Suggest.add = function (req, res, cb) {
-
   var set = "any";
   req.loader.get("kPlayerSet", "any", _w(cb, function (err, players) {
     if (err) {
@@ -42,5 +40,5 @@ Suggest.add = function (req, res, cb) {
 
     res.add(sh.event("suggest.add", {status: "ok"}));
     return cb(0);
-  }, {lock: true}));
+  }), {lock: true});
 };

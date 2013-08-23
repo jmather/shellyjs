@@ -118,7 +118,7 @@ Game.pre = function (req, res, cb) {
       req.env.gameModule = module;
       return cb(0);
     });
-  }, opts));
+  }), opts);
 };
 
 Game.post = function (req, rs, cb) {
@@ -155,7 +155,7 @@ function addGamePlaying(loader, uid, game, cb) {
       playing.addGame(game);
     }
     cb(error, playing);
-  }, {lock: true}));
+  }), {lock: true});
 }
 
 function addGamePlayingMulti(loader, players, game, cb) {
@@ -279,7 +279,7 @@ Game.leave = function (req, res, cb) {
     }
     res.add(sh.event("game.leave", req.body.gameId));
     return cb(0);
-  }, {lock: true}));
+  }), {lock: true});
 };
 
 Game.turn = function (req, res, cb) {

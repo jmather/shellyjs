@@ -45,7 +45,7 @@ user.set = function (req, res, cb) {
     user.setData(userData);
     res.add(sh.event("user.set", user.getData()));
     return cb(0);
-  }, {lock: true}));
+  }), {lock: true});
 };
 
 user.aget = function (req, res, cb) {
@@ -73,7 +73,7 @@ user.aset = function (req, res, cb) {
     user.setData(newUser);
     res.add(sh.event("user.get", user.getData()));
     return cb(0);
-  }, {lock: true}));
+  }), {lock: true});
 };
 
 user.profiles = function (req, res, cb) {

@@ -276,7 +276,7 @@ exports.downgrade = function (req, res, cb) {
       res.add(sh.error("user-bad", "unable to load user", {userId: uid}));
       return cb(1);
     }
-  }, {lock: true}));
+  }), {lock: true});
 };
 
 exports.create = function (req, res, cb) {
@@ -314,8 +314,8 @@ exports.create = function (req, res, cb) {
         out.session = session.create(em.get("uid"));
         res.add(sh.event("reg.create", out));
         return cb(0, user);
-      }));
-    }, {lock: true}));
+      }), {lock: true});
+    }));
   }));
 };
 
