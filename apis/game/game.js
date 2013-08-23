@@ -266,11 +266,6 @@ Game.join = function (req, res, cb) {
 
 Game.enter = function (req, res, cb) {
   var game = req.env.game;
-  var players = game.get("players");
-  if (_.isUndefined(players[req.session.uid])) {
-    res.add(sh.error("game-denied", "you are not a player in this game"));
-    return cb(1);
-  }
 
   channel.sendInt("game:" + game.get("oid"), sh.event("game.user.enter", {gameId: game.get("oid"), uid: req.session.uid}));
 
