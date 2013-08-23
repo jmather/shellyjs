@@ -54,7 +54,7 @@
             sendRaw({session: Env.session,
                 batch: [{cmd: "system.connInfo"},
                     {cmd: "user.get"},
-                    {cmd: "game.join", gameId: Env.gameId},
+                    {cmd: "game.enter", gameId: Env.gameId},
                     {cmd: "game.playing"},
                     {cmd: "channel.add", channel: Env.channel}
                 ]});
@@ -208,7 +208,7 @@
                 setMyTurns(msg.data);
                 return;
             }
-            if (msg.event === "game.join") {
+            if (msg.event === "game.enter") {
                 resetBoard(msg);
                 return;
             }

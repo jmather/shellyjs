@@ -128,7 +128,7 @@ function shellyInit() {
     }
     if (Env.gameId !== "0") {
         sendRaw({session: Env.session,
-            batch: [ {cmd: "game.join", gameId: Env.gameId},
+            batch: [ {cmd: "game.enter", gameId: Env.gameId},
                 {cmd: "game.playing"},
                 {cmd: "channel.add", channel: "game:" + Env.gameId, _pt: "foo"}
             ]});
@@ -152,7 +152,7 @@ function processEvent(res, from) {
         // just show the pass through data as example
         console.log("handler:", res.event, res._pt);
     }
-    if (res.event == "game.join") {
+    if (res.event == "game.enter") {
         setState(res.data);
         return;
     }

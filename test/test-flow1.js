@@ -181,18 +181,19 @@ describe("basic user create and game play", function () {
   });
 
 
-  describe("both users join the matched game", function () {
-    it("user1 join", function (done) {
-      gConn1.call("game.join", {gameId: gGameId},
+  describe("both users enter the matched game", function () {
+    it("user1 enter", function (done) {
+      gConn1.call("game.enter", {gameId: gGameId},
         function (err, res) {
-          res[0].should.have.property("event", "game.join");
+          res[0].should.have.property("event", "game.enter");
           done();
         });
     });
     it("user2 join", function (done) {
-      gConn2.call("game.join", {gameId: gGameId},
+      gConn2.call("game.enter", {gameId: gGameId},
         function (err, res) {
-          res[0].should.have.property("event", "game.join");
+          res[0].should.have.property("event", "game.enter");
+          res[0].data.should.have.property("whoTurn");
           gWhoTurn = res[0].data.whoTurn;
           done();
         });

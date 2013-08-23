@@ -15,7 +15,8 @@ Game.desc = "game state and control module";
 Game.functions = {
   create: {desc: "create a new game", params: {name: {dtype: "string"}}, security: []},
   get: {desc: "get game object", params: {gameId: {dtype: "string"}}, security: []},
-  join: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
+  join: {desc: "join an game as a new user", params: {gameId: {dtype: "string"}}, security: []},
+  enter: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
   turn: {desc: "calling user taking their turn", params: {gameId: {dtype: "string"}}, security: []},
   reset: {desc: "reset game for another round", params: {gameId: {dtype: "string"}}, security: []},
   leave: {desc: "leave an existing game", params: {gameId: {dtype: "string"}}, security: []},
@@ -88,7 +89,8 @@ Game.pre = function (req, res, cb) {
 
   // load the module and game
   var opts = {lock: true};
-  if (req.body.cmd === "game.get") {  // no need to lock the gets
+  if (req.body.cmd === "game.get" ||
+      req.body.cmd === "game.enter") {  // no need to lock the gets or enters
     opts.lock = false;
   }
   shlog.info("game", "game.pre: populating game info for " + req.body.gameId);
@@ -260,6 +262,20 @@ Game.join = function (req, res, cb) {
     res.add(sh.event("game.join", game.getData()));
     return cb(0);
   }
+};
+
+Game.enter = function (req, res, cb) {
+  var game = req.env.game;
+  var players = game.get("players");
+  if (_.isUndefined(players[req.session.uid])) {
+    res.add(sh.error("game-denied", "you are not a player in this game"));
+    return cb(1);
+  }
+
+  channel.sendInt("game:" + game.get("oid"), sh.event("game.user.enter", {gameId: game.get("oid"), uid: req.session.uid}));
+
+  res.add(sh.event("game.enter", game.getData()));
+  return cb(0);
 };
 
 Game.leave = function (req, res, cb) {
