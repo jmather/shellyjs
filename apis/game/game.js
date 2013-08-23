@@ -15,8 +15,8 @@ Game.desc = "game state and control module";
 Game.functions = {
   create: {desc: "create a new game", params: {name: {dtype: "string"}}, security: []},
   get: {desc: "get game object", params: {gameId: {dtype: "string"}}, security: []},
-  join: {desc: "join an game as a new user", params: {gameId: {dtype: "string"}}, security: []},
-  enter: {desc: "join an existing game", params: {gameId: {dtype: "string"}}, security: []},
+  join: {desc: "join a game as a new user", params: {gameId: {dtype: "string"}}, security: []},
+  enter: {desc: "enter a game where you are already a player", params: {gameId: {dtype: "string"}}, security: []},
   turn: {desc: "calling user taking their turn", params: {gameId: {dtype: "string"}}, security: []},
   reset: {desc: "reset game for another round", params: {gameId: {dtype: "string"}}, security: []},
   leave: {desc: "leave an existing game", params: {gameId: {dtype: "string"}}, security: []},
