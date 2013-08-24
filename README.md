@@ -1,4 +1,4 @@
-shelly
+Shelly
 ======
 
   API server via HTTP and Websockets
@@ -16,7 +16,7 @@ shelly.start({}, function (err, data) {
 
 ## Quick Start
 
- The quickest way to get started with shelly is to run the example app that comes with it.
+ The quickest way to get started with Shelly is to run the example app that comes with it.
 
  Install Shelly:
 
@@ -37,12 +37,12 @@ shelly.start({}, function (err, data) {
  
  Create an API:
  
-    $ cp -r ~/node_modules/shelly/example/* .
+    $ cp -r node_modules/shelly/example/* .
     $ node app.js
     
  Modify the API:
  
-    Edit ~/apis/example/example.js
+    vim apis/example/example.js
     
  Test in admin:
  
