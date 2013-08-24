@@ -6,7 +6,7 @@ var sanitize = require("validator").sanitize;
 
 var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var session = require(global.C.BASEDIR + "/lib/session.js");
+var session = require(global.C.BASEDIR + "/lib/shsession.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
 var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";

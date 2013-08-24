@@ -5,8 +5,8 @@ var _ = require("lodash");
 var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 var shcall = require(global.C.BASEDIR + "/lib/shcall.js");
-var session = require(global.C.BASEDIR + "/lib/session.js");
-var dispatch = require(global.C.BASEDIR + "/lib/dispatch.js");
+var session = require(global.C.BASEDIR + "/lib/shsession.js");
+var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
 var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 

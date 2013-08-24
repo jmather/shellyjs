@@ -4,7 +4,7 @@ var async = require("async");
 
 var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var dispatch = require(global.C.BASEDIR + "/lib/dispatch.js");
+var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
 var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
 var module = require(global.C.BASEDIR + "/apis/api/api.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
