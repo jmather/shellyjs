@@ -86,7 +86,7 @@ describe("basic user create and game play", function () {
     gConn1 = new ShConnect("localhost");
     gConn2 = new ShConnect("localhost");
     gConnAdmin = new ShConnect("localhost");
-    gConnAdmin.login("shelly", "", function (err, res) {
+    gConnAdmin.login("shelly", "shelly", function (err, res) {
       res[0].should.have.property("event", "reg.login");
       // pre-mop up these users
       gConnAdmin.call("reg.remove", {email: gEmail1}, function (err, res) {

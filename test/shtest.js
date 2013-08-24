@@ -46,7 +46,7 @@ shtest.session = function (utype) {
 
 shtest.init = function (email, password, cb) {
   var self = this;
-  this.call({cmd: "reg.login", email: "shelly", password: ""}, function (err, res) {
+  this.call({cmd: "reg.login", email: "shelly", password: "shelly"}, function (err, res) {
     if (err) {
       cb(err, res);
       return;
