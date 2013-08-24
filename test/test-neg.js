@@ -17,7 +17,7 @@ describe("general negative tests", function () {
     });
   });
 
-  describe("modules and functions", function () {
+  describe("apis and functions", function () {
     it("missing command", function (done) {
       st.userCall({},
         function (err, res) {
@@ -39,7 +39,7 @@ describe("general negative tests", function () {
           done();
         });
     });
-    it("bad module name", function (done) {
+    it("bad api name", function (done) {
       st.userCall({cmd: "bad.config"},
         function (err, res) {
           res.body.should.have.property("event", "error");
@@ -47,7 +47,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad function name", function (done) {
-      st.userCall({cmd: "module.bad"},
+      st.userCall({cmd: "api.bad"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
@@ -57,28 +57,28 @@ describe("general negative tests", function () {
 
   describe("parameters", function () {
     it("missing param", function (done) {
-      st.userCall({cmd: "module.info"},
+      st.userCall({cmd: "api.info"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
         });
     });
     it("bad type integer", function (done) {
-      st.userCall({cmd: "module.info", name: 0},
+      st.userCall({cmd: "api.info", name: 0},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
         });
     });
     it("bad type object", function (done) {
-      st.userCall({cmd: "module.info", name: {}},
+      st.userCall({cmd: "api.info", name: {}},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
         });
     });
     it("bad type array", function (done) {
-      st.userCall({cmd: "module.info", name: []},
+      st.userCall({cmd: "api.info", name: []},
         function (err, res) {
           res.body.should.have.property("event", "error");
           done();
@@ -88,7 +88,7 @@ describe("general negative tests", function () {
 
   describe("security", function () {
     it("no session", function (done) {
-      st.call({cmd: "module.core"},
+      st.call({cmd: "api.core"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -96,7 +96,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad session format", function (done) {
-      st.call({cmd: "module.core", session: "bad"},
+      st.call({cmd: "api.core", session: "bad"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -104,7 +104,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad session signature", function (done) {
-      st.call({cmd: "module.core", session: "1:foo:foo:0"},
+      st.call({cmd: "api.core", session: "1:foo:foo:0"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -112,7 +112,7 @@ describe("general negative tests", function () {
         });
     });
     it("bad session data", function (done) {
-      st.call({cmd: "module.core", session: "1:13:bad:0"},
+      st.call({cmd: "api.core", session: "1:13:bad:0"},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");
@@ -122,7 +122,7 @@ describe("general negative tests", function () {
     it("bad session time", function (done) {
       var parts = st.session("user").split(":");
       var sess = parts[0] + ":" + parts[1] + ":" + parts[2] + ":0";
-      st.call({cmd: "module.core", session: sess},
+      st.call({cmd: "api.core", session: sess},
         function (err, res) {
           res.body.should.have.property("event", "error");
           res.body.should.have.property("code", "session-bad");

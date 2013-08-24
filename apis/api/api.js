@@ -6,15 +6,15 @@ var _ = require("lodash");
 var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 
-exports.desc = "utility functions for shelly modules";
+exports.desc = "utility functions for shelly apis";
 exports.functions = {
   core: {desc: "list all core APIs installed", params: {}, security: []},
   app: {desc: "list all application APIs installed", params: {}, security: []},
-  info: {desc: "get info for a single module", params: {name: {dtype: "string"}}, security: []}
+  info: {desc: "get info for a single api", params: {name: {dtype: "string"}}, security: []}
 };
 
 exports.getInfo = function (fn, cb) {
-  shlog.info("module", "getInfo fn=" + fn);
+  shlog.info("api", "getInfo fn=" + fn);
 
   var m = {};
   m.error = 0;
@@ -25,20 +25,20 @@ exports.getInfo = function (fn, cb) {
   m.desc = "";
   m.functions = {};
 
-  sh.require(fn, function (err, module) {
+  sh.require(fn, function (err, api) {
     if (err) {
       m.error = 100;
-      m.message = module;
+      m.message = api;
       return cb(1, m);
     }
-    if (!_.isUndefined(module.desc)) {
-      m.desc = module.desc;
+    if (!_.isUndefined(api.desc)) {
+      m.desc = api.desc;
     }
-    if (!_.isUndefined(module.url)) {
-      m.url = module.url;
+    if (!_.isUndefined(api.url)) {
+      m.url = api.url;
     }
-    if (!_.isUndefined(module.functions)) {
-      m.functions = module.functions;
+    if (!_.isUndefined(api.functions)) {
+      m.functions = api.functions;
     }
     if (!global.C.APP_API_DIR) {
       return cb(0, m);
@@ -52,19 +52,19 @@ exports.getInfo = function (fn, cb) {
 };
 
 exports.info = function (req, res, cb) {
-  shlog.info("module", "module.info name=" + req.body.name);
+  shlog.info("api", "api.info name=" + req.body.name);
   // SWD centralize this path construction
   var funcDir = global.C.BASEDIR + "/apis";
-  var moduleFn = funcDir + "/" + req.body.name + "/" + req.body.name + ".js";
-  var m = exports.getInfo(moduleFn, function (err, m) {
+  var apiFn = funcDir + "/" + req.body.name + "/" + req.body.name + ".js";
+  var m = exports.getInfo(apiFn, function (err, m) {
     // error still returns info object
-    res.add(sh.event("module.info", m));
+    res.add(sh.event("api.info", m));
     return cb(0);
   });
 };
 
 function apiInfoByDir(dir, cb) {
-  var modules = {};
+  var apis = {};
   fs.readdir(dir, function (err, files) {
     if (err) {
       cb(err);
@@ -73,9 +73,9 @@ function apiInfoByDir(dir, cb) {
       var fn = dir + "/" + entry;
       fs.stat(fn, function (err, stat) {
         if (stat.isDirectory()) {
-          var moduleFn = fn + "/" + entry + ".js";
-          exports.getInfo(moduleFn, function (err, m) {
-            modules[m.name] = m;
+          var apiFn = fn + "/" + entry + ".js";
+          exports.getInfo(apiFn, function (err, m) {
+            apis[m.name] = m;
             return lcb(0);
           });
         } else {
@@ -83,7 +83,7 @@ function apiInfoByDir(dir, cb) {
         }
       });
     }, function (error) {
-      return cb(0, modules);
+      return cb(0, apis);
     });
   });
 }
@@ -91,12 +91,12 @@ function apiInfoByDir(dir, cb) {
 exports.core = function (req, res, cb) {
   var apiDir = global.C.BASEDIR + "/apis";
 
-  apiInfoByDir(apiDir, function (err, modules) {
+  apiInfoByDir(apiDir, function (err, apis) {
     if (err) {
-      res.add(sh.error("module-list-bad", "unable to list core modules", err));
+      res.add(sh.error("api-list-bad", "unable to list core apis", err));
       return cb(1);
     }
-    res.add(sh.event("module.core", modules));
+    res.add(sh.event("api.core", apis));
     return cb(0);
   });
 };
@@ -107,12 +107,12 @@ exports.app = function (req, res, cb) {
     return cb(1);
   }
 
-  apiInfoByDir(global.C.APP_API_DIR, function (err, modules) {
+  apiInfoByDir(global.C.APP_API_DIR, function (err, apis) {
     if (err) {
-      res.add(sh.error("module-list-bad", "unable to list app modules", err));
+      res.add(sh.error("api-list-bad", "unable to list app apis", err));
       return cb(1);
     }
-    res.add(sh.event("module.app", modules));
+    res.add(sh.event("api.app", apis));
     return cb(0);
   });
 };
