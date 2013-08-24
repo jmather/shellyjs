@@ -41,9 +41,11 @@ shelly.start({}, function (err, data) {
     $ node app.js
     
  Modify the API:
+ 
     Edit ~/apis/example/example.js
     
  Test in admin:
+ 
     http://localhost:5100/core.html?api=api.app
 
 ## Features
