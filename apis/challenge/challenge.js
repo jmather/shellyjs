@@ -10,7 +10,7 @@ var dispatch = require(global.C.BASEDIR + "/lib/dispatch.js");
 var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
-var ShSet = require(global.C.BASEDIR + "/lib/ds/shset.js");
+var ShHash = require(global.C.BASEDIR + "/lib/shhash.js");
 
 var Challenge = exports;
 
@@ -29,14 +29,14 @@ Challenge.functions = {
 
 function chRemove(fromUid, toUid, gameName, cb) {
   var sendId = toUid + ":" + gameName;
-  var sentSet = new ShSet("sent:" + fromUid);
+  var sentSet = new ShHash("sent:" + fromUid);
   var sentData = {};
   sentSet.remove(sendId, _w(cb, function (err, data) {
     if (err) {
       return cb(err, sh.intMsg("sent-remove", {error: err, data: data}));
     }
     var recvId = fromUid + ":" + gameName;
-    var recvSet = new ShSet("recv:" + toUid);
+    var recvSet = new ShHash("recv:" + toUid);
     recvSet.remove(recvId, _w(cb, function (err, data) {
       if (err) {
         return cb(err, sh.intMsg("recv-remove", {error: err, data: data}));
@@ -58,14 +58,14 @@ Challenge.make = function (req, res, cb) {
 
   var sendId = req.body.toUid + ":" + req.body.game;
   var sendData = {toUid: req.body.toUid, game: req.body.game};
-  var sentSet = new ShSet("sent:" + req.session.uid);
+  var sentSet = new ShHash("sent:" + req.session.uid);
   sentSet.set(sendId, sendData, _w(cb, function (err, data) {
     if (err) {
       res.add(sh.error("challenges-sentset", "unable to save challenge sent", {error: err, data: data}));
       return cb(err);
     }
     var recvId = req.session.uid + ":" + req.body.game;
-    var recvSet = new ShSet("recv:" + req.body.toUid);
+    var recvSet = new ShHash("recv:" + req.body.toUid);
     var recvData = {
       fromUid: req.session.uid,
       game: req.body.game,
@@ -202,7 +202,7 @@ Challenge.withdraw = function (req, res, cb) {
 };
 
 Challenge.list = function (req, res, cb) {
-  var test = new ShSet("recv:" + req.session.uid);
+  var test = new ShHash("recv:" + req.session.uid);
   test.getAll(_w(cb, function (err, data) {
     if (err) {
       res.add(sh.error("challenges-getall", "unable to load challenge list", {error: err, data: data}));
@@ -214,7 +214,7 @@ Challenge.list = function (req, res, cb) {
 };
 
 Challenge.listSent = function (req, res, cb) {
-  var test = new ShSet("sent:" + req.session.uid);
+  var test = new ShHash("sent:" + req.session.uid);
   test.getAll(_w(cb, function (err, data) {
     if (err) {
       res.add(sh.error("challenges-getall", "unable to load challenge list", {error: err, data: data}));
@@ -226,7 +226,7 @@ Challenge.listSent = function (req, res, cb) {
 };
 
 Challenge.alist = function (req, res, cb) {
-  var test = new ShSet("recv:" + req.body.uid);
+  var test = new ShHash("recv:" + req.body.uid);
   test.getAll(_w(cb, function (err, data) {
     if (err) {
       res.add(sh.error("challenges-getall", "unable to load challenge list", {error: err, data: data}));
