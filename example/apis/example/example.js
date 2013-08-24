@@ -2,7 +2,7 @@ var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 
 var example = exports;
 
-example.desc = "utility functions for shelly modules";
+example.desc = "example api";
 example.functions = {
   hello: {desc: "simple hello world api example", params: {}, security: []},
   echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []}
