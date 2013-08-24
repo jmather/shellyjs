@@ -28,7 +28,7 @@ shelly.start({}, function (err, data) {
     
  Explore:
  
-    Game examples - http://localhost:5102
+    Login/Game examples - http://localhost:5102
     Admin - http://localhost:5100 (default admin user: "shelly", password: "shelly"
     
 ## Create an API
@@ -87,6 +87,8 @@ If called via http the response is an array of JSON.stringified data, while the 
  Test in admin:
  
     http://localhost:5100/core.html?api=api.app
+
+By default the api files are reloaded each call.  This option should be turned off for production.
 
 ## Features
 
