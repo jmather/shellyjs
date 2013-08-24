@@ -62,7 +62,7 @@ global.CDEF("DB_OPTIONS", {filename: global.C.BASEDIR + "/db/sqlite3.db"});
 
 // default admin
 global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
-global.CDEF("DEFAULT_ADMIN_PASSWORD", "");
+global.CDEF("DEFAULT_ADMIN_PASSWORD", "shelly");
 
 // email settings
 global.CDEF("EMAIL_NOSEND", true);
