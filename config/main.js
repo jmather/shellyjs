@@ -64,6 +64,10 @@ global.CDEF("DB_OPTIONS", {filename: global.C.BASEDIR + "/db/sqlite3.db"});
 global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
 global.CDEF("DEFAULT_ADMIN_PASSWORD", "shelly");
 
+// session config
+global.CDEF("SESSION_PRIVATE_KEY", "session-key-here");
+
+
 // email settings
 global.CDEF("EMAIL_NOSEND", true);
 global.CDEF("EMAIL_QUEUE", true);
