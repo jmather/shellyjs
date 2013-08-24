@@ -6,7 +6,7 @@ shelly
 ```js
 var shelly = require('shelly');
 
-shelly.start(function (err, data) {
+shelly.start({}, function (err, data) {
 });
 ```
 
@@ -35,7 +35,7 @@ shelly.start(function (err, data) {
 
  Follow Quick Start
  
- Create and API:
+ Create an API:
  
     $ cp -r ~/node_modules/shelly/example/* .
     $ node app.js
@@ -50,7 +50,7 @@ shelly.start(function (err, data) {
 
   * Drop in API support
   * APIs supported over HTTP (REST-ish) and Websockets
-  * Several Built-in APIs
+  * Several built-in APIs
   * Web based API testing
   * User online/offline detection
   * Push events
@@ -58,6 +58,7 @@ shelly.start(function (err, data) {
   * Role bases per function API security
   * Per server and multi-server clustering
   * Async job queues (email)
+  * Object presistence, caching, and locking
   * Plugable data storage (Production: Redis, Developement: sqlite)
   * Server side statistics
   * Logging
