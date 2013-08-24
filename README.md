@@ -44,6 +44,46 @@ shelly.start({}, function (err, data) {
  
     vim apis/example/example.js
     
+```js
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+
+var example = exports;
+
+example.desc = "example api";
+example.functions = {
+  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []}
+};
+
+example.echo = function (req, res, cb) {
+  res.add(sh.event("example.echo", req.body.param1));
+  return cb(0);
+};
+```
+
+1. APIs are defined by files placed in the "apis" directory and in a subdirectory with the same name "apis/example/example.js".
+
+2. They are called via a json post or websocket send:
+
+```json
+{
+  "session": "<acquired from reg call>",
+  "cmd": "example.echo",
+  "param1": "foo"
+}
+````
+
+3. "res.add()" is then used to send back JSON.stringified data.  All Shelly built in APIs use the utility functions "sh.event()" and "sh.error()" to wrap the returned data in the following envelope.
+
+```json
+{
+  "event": "example.echo",
+  "ts": 1377384505451,
+  "data": "foo"
+}
+```
+
+If called via http the response is an array of JSON.stringified data, while the websocket sends each data object via an onmessage event.
+    
  Test in admin:
  
     http://localhost:5100/core.html?api=api.app
