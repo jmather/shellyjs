@@ -36,6 +36,7 @@ app.set("views", adminBase);
 app.engine("html", engines.hogan);
 app.use("/common", express.static(commonStatic));
 app.use("/static", express.static(adminStatic));
+app.use("/docs", express.static(global.C.BASEDIR + "/www/docs"));
 app.use(express.cookieParser());
 
 app.use(function (req, res, next) {
