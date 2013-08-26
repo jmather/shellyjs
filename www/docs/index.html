@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html">
+  <head>
+    <meta charset="utf-8">
+    <title>Shelly Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- styles -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="bootstrap/css/docs.css" rel="stylesheet">
+    <link href="bootstrap/js/google-code-prettify/prettify.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="bootstrap/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="bootstrap/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="bootstrap/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="bootstrap/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="bootstrap/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="bootstrap/ico/favicon.png">
+  </head>
+
+  <body data-spy="scroll" data-target=".bs-docs-sidebar">
+
+  <!-- Navbar
+  ================================================== -->
+  <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+          <div class="container">
+              <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <a class="brand" href="./index.html">Shelly</a>
+              <div class="nav-collapse collapse">
+                  <ul class="nav">
+                      <li class="">
+                          <a href="./index.html">Home</a>
+                      </li>
+                      <li class="">
+                          <a href="./learn.html">Tutorials</a>
+                      </li>
+                      <li class="">
+                          <a href="./docs.html">Docs</a>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
+    <!-- Subhead
+    ================================================== -->
+    <header class="jumbotron subhead">
+        <div class="container">
+            <h1>Shelly</h1>
+            <p class="lead">API server over HTTP and Websockets.
+        </div>
+    </header>
+    <div class="container">
+
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="span4">
+                <h2>Install</h2>
+                <p>Install Node.js: <a href="http://www.nodejs.org">Node.js</a></p>
+                <p>Install shelly:
+                <pre class="prettyprint lang-bash">$ npm install shelly</pre>
+                </p>
+                <p><a href="https://github.com/sdale511/shelly">GitHub Repo</a></p>
+            </div>
+            <div class="span4">
+                <h2>Quick Start</h2>
+                <p>Run the example app:
+                  <pre class="prettyprint lang-bash">$ node node_modules/shelly/example/app.js</pre>
+                </p>
+                <p>Explore admin: <a href="http://localhost:5100">http://localhost:5100/</a></p>
+                <p>(admin user: "shelly", password: "shelly")</p>
+                <p>Explore example games: <a href="http://localhost:5102">http://localhost:5102/</a></p>
+            </div>
+            <div class="span4">
+                <h2>Learn</h2>
+                <p>Work through the tutorials:</p>
+                <p><a href="learn.html#createApi">Create an API</a></p>
+                <p><a href="learn.html#testApi">Test an API</a></p>
+                <p><a href="learn.html#runCluster">Run a two server cluster</a></p>
+                <p><a href="learn.html">View all Tutorials</a></p>
+            </div>
+        </div>
+
+        <hr>
+        <div class="row">
+            <div class="featurelist span5 offset1">
+                <h3>Features</h3>
+                <ul>
+                <li>Drop in API support</li>
+                <li>APIs over HTTP (REST-ish)</li>
+                <li>APIs over Websockets</li>
+                <li>Several built-in APIs</li>
+                <li>Web based API testing</li>
+                <li>User online/offline detection</li>
+                <li>Push events</li>
+                <li>Parameter validation</li>
+                <li>Role bases per function API security</li>
+                <li>Per server and multi-server clustering</li>
+                <li>Async job queues (email)</li>
+                <li>Object presistence, caching, and locking</li>
+                <li>Plugable data storage</li>
+                <li>Server side statistics</li>
+                <li>Logging</li>
+                </ul>
+            </div>
+            <div class="builtinlist span5">
+                <h3>Built-in APIs</h3>
+                <ul>
+                <li>reg.js - login, anonymous registration</li>
+                <li>channel.js - sync and async messaging</li>
+                <li>game.js - turn based game control</li>
+                <li>match.js - matches users and creates games</li>
+                <li>challenge.js - allows users to send/accept challenges</li>
+                <li>suggest.js - suggests users that may want to play</li>
+                <li>object.js - generic object CRUD</li>
+                <li>stats.js - access to internal server statistics</li>
+                <li>api.js - access to installed API definitions</li>
+                <li>cluster.js - cluster information and control</li>
+                <li>system.js - system information</li>
+                <li>user.js - user control</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Skool51 2013</p>
+        </footer>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+    <script src="bootstrap/js/jquery.js"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+
+    <!--
+    <script src="bootstrap/js/holder/holder.js"></script>
+        <script src="bootstrap/js/google-code-prettify/prettify.js"></script>
+        <script src="bootstrap/js/application.js"></script>
+        -->
+<script>
+    $(function(){
+    var $window = $(window)
+    console.log("here");
+
+    // side bar
+    setTimeout(function () {
+    $('.bs-docs-sidenav').affix({
+    offset: {
+    top: function () { return $window.width() <= 980 ? 290 : 210 }
+    , bottom: 270
+    }
+    })
+    }, 100)
+    });
+</script>
+
+  </body>
+</html>

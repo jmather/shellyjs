@@ -1,3 +1,20 @@
+/* Skool51 adds
+-------------------------------------------------- */
+
+pre {
+  font-size: 12px;
+}
+
+.featurelist p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.builtinlist p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
 /* Add additional stylesheets below
 -------------------------------------------------- */
 /*
