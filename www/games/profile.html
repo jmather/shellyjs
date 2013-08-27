@@ -179,16 +179,9 @@ function init() {
 }
 </script>
     <style>
-        .anonymousDiv {
-            width: 500px;
-        }
-        .profileInfoDiv {
-            width: 500px;
-        }
         #profileContent {
             height: 250px;
         }
-
         .userTd {
             text-align: right;
             height: 20px;
@@ -201,43 +194,90 @@ function init() {
 </head>
 <body>
 {{> header}}
-{{> gameNav}}
-{{> errorBox}}
 
-<div class="gameBoxDiv anonymousDiv" style="float:left;">
-    <div class="gameBoxHeaderDiv">Upgrade Account</div>
-    <div class="gameBoxInnerDiv">
-        <p>You are currently using an anonymous account.</p>
-        <p>Your information will not transfer to other devices and may be lost if you reset your browser or device.</p>
-        <p>Please register below to preserve your data and play from any device.</p>
-        <table>
-            <tr><td class="userTd">email:</td></td><td><input type="text" id="regEmail"></input></td></tr>
-            <tr><td class="userTd">password:</td></td><td><input type="password" id="regPassword"></input></td></tr>
-            <tr><td class="userId">verify password:</td></td><td><input type="password" id="regPasswordVerify"></input></td></tr>
-        </table>
-        <button id="registerNow" style="float:right">register</button>
+<div class="container">
+    <div class="row">
+        <div class="span6 offset3">
+        {{> errorBox}}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="gameBoxDiv anonymousDiv span6 offset3">
+            <div class="gameBoxHeaderDiv">Upgrade Account</div>
+            <div class="gameBoxInnerDiv">
+                <p>You are currently using an anonymous account.</p>
+
+                <p>Your information will not transfer to other devices and may be lost if you reset your browser or
+                    device.</p>
+
+                <p>Please register below to preserve your data and play from any device.</p>
+                <table>
+                    <tr>
+                        <td class="userTd">email:</td>
+                        </td>
+                        <td><input type="text" id="regEmail"></input></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">password:</td>
+                        </td>
+                        <td><input type="password" id="regPassword"></input></td>
+                    </tr>
+                    <tr>
+                        <td class="userId">verify password:</td>
+                        </td>
+                        <td><input type="password" id="regPasswordVerify"></input></td>
+                    </tr>
+                </table>
+                <button id="registerNow" style="float:right">register</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="profileInfoDiv gameBoxDiv span6 offset3">
+            <div class="gameBoxHeaderDiv">Profile Information</div>
+            <div id="profileContent" class="gameBoxInnerDiv">
+                <table>
+                    <tr>
+                        <td class="userTd">device id:</td>
+                        <td><span id="token">{{Env.token}}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">user id:</td>
+                        <td><span id="uid">{{Env.user.oid}}</span></td>
+                    </tr>
+                    <tr id="emailRow">
+                        <td class="userTd">email:</td>
+                        <td><span id="email">{{Env.user.email}}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">name:</td>
+                        <td><span id="name" class="profileEditSpan">{{Env.user.name}}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">gender:</td>
+                        <td><span id="gender" class="profileEditSpan">{{Env.user.gender}}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">age:</td>
+                        <td><span id="age" class="profileEditSpan">{{Env.user.age}}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">picture:</td>
+                        <td><img id="pict" src="{{Env.user.pict}}"/></td>
+                    </tr>
+                    <tr>
+                        <td class="userTd">blockEmails:</td>
+                        <td><span id="blockEmails" class="profileEditSpan">{{Env.user.blockEmails}}</span></td>
+                    </tr>
+                </table>
+                <button id="saveProfile" style="float:right">save</button>
+                <button id="editProfile" style="float:right">edit</button>
+                <button id="cancelProfile" style="float:right">cancel</button>
+            </div>
+        </div>
     </div>
 </div>
-
-<div class="profileInfoDiv gameBoxDiv" style="float:left;">
-    <div class="gameBoxHeaderDiv">Profile Information</div>
-    <div id="profileContent" class="gameBoxInnerDiv">
-        <table>
-            <tr><td class="userTd">device id:</td><td><span id="token">{{Env.token}}</span></td></tr>
-            <tr><td class="userTd">user id:</td><td><span id="uid">{{Env.user.oid}}</span></td></tr>
-            <tr id="emailRow"><td class="userTd">email:</td><td><span id="email">{{Env.user.email}}</span></td></tr>
-            <tr><td class="userTd">name:</td><td><span id="name" class="profileEditSpan">{{Env.user.name}}</span></td></tr>
-            <tr><td class="userTd">gender:</td><td><span id="gender" class="profileEditSpan">{{Env.user.gender}}</span></td></tr>
-            <tr><td class="userTd">age:</td><td><span id="age" class="profileEditSpan">{{Env.user.age}}</span></td></tr>
-            <tr><td class="userTd">picture:</td><td><img id="pict" src="{{Env.user.pict}}"/></td></tr>
-            <tr><td class="userTd">blockEmails:</td><td><span id="blockEmails" class="profileEditSpan">{{Env.user.blockEmails}}</span></td></tr>
-        </table>
-        <button id="saveProfile" style="float:right">save</button>
-        <button id="editProfile" style="float:right">edit</button>
-        <button id="cancelProfile" style="float:right">cancel</button>
-    </div>
-</div>
-<div style="clear:both"></div>
 
 <div class="commLogDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>

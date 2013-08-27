@@ -27,7 +27,8 @@ function doLogin() {
       debug.info(res);
       if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
-        window.location.href = "/home.html";
+        console.log("all good", res[0].data.session);
+        window.location.href = "/index.html";
       } else {
         error(res[0].message);
       }
@@ -64,7 +65,7 @@ function doRegister() {
       debug.info(res);
       if (res[0].event === "reg.create") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
-        window.location.href = "/home.html";
+        window.location.href = "/index.html";
       } else {
         error(res[0].message);
       }
@@ -96,7 +97,7 @@ function doAnonymous() {
       debug.info(res);
       if (res[0].event === "reg.anonymous") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
-        window.location.href = "/home.html";
+        window.location.href = "/index.html";
       } else {
         if (res[0].code === "user_upgraded") {
           $("#upgradeDiv").css("display", "block");

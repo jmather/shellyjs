@@ -95,7 +95,7 @@ app.use("/", express.static(gamesBase));  // catch all for any example js files
 
 app.use("/", function (req, res) {
   shlog.info("games", "default handler - goto lobby");
-  res.redirect("/home.html");
+  res.redirect("/index.html");
   return 0;
 });
 

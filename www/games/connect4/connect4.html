@@ -15,27 +15,33 @@
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
-
-	<title>Connect 4</title>
-	<style>
+    <style>
         .gameInfoDiv,
         .messageLogDiv,
         .otherTurnsDiv {
-            float:left;
-            margin-left: 20px;
-            width: 250px;
+            width: 230px;
         }
 
         #gameMyTurnList {
-            height: 75px;
+            height: 123px;
         }
 
         #cr-stage {
-            float: left;
-            margin:5px auto;
+            margin-left:10px;
         }
 
-	</style>
+        #chatInput {
+            height: 15px;
+            margin-top: 2px;
+            margin-bottom: 0px;
+            font-size: 10px;
+            line-height: normal;
+            padding: 2px;
+        }
+
+    </style>
+
+	<title>Connect 4</title>
     <script language="javascript">
         var Env = {{{EnvJson}}};
         setSession();
@@ -270,11 +276,14 @@
 </head>
 <body>
 {{> header}}
-{{> gameNav}}
 {{> errorBox}}
 
-<div id="cr-stage"></div>
+<div class="container">
 
+<div class="row">
+<div id="cr-stage" class="span6"></div>
+
+<div class="span3">
 <div class="gameInfoDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv" style="">Game Info</div>
     <div class="gameBoxInnerDiv">
@@ -284,6 +293,7 @@
         <button id="gameReset" style="float:right">reset</button>
     </div>
 </div>
+
 <div class="gameInfoDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv" style="">Players</div>
     <div class="gameBoxInnerDiv" id="playerList">
@@ -297,7 +307,7 @@
     <div class="gameBoxInnerDiv" readonly>
         <div id="messageLog" style="overflow: auto;" readonly></div>
         <div class="gameBoxFooterDiv">
-            <input id="chatInput" type="text" style="width: 75%;"></input/>
+            <input id="chatInput" type="text" style="width: 70%;"></input/>
             <button id="sendChat" style="float:right;">send</button>
         </div>
     </div>
@@ -313,6 +323,9 @@
             <div style="clear:both"></div>
         </div>
     </div>
+</div>
+</div>
+</div>
 </div>
 
 <div style="clear:both"></div>

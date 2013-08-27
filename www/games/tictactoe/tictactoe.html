@@ -209,64 +209,75 @@ function init() {
 </head>
 <body>
 {{> header}}
-{{> gameNav}}
 
-<div class="gameOverDiv"><p>You XXXX</p></div>
+<div class="container">
 
-<div class="gameBoardDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv" style="">Game Board</div>
-    <div>
-        <div id="x0y0" class="tictactoeDiv"></div>
-        <div id="x1y0" class="tictactoeDiv"></div>
-        <div id="x2y0" class="tictactoeDiv"></div>
-        <div id="x0y1" class="tictactoeDiv"></div>
-        <div id="x1y1" class="tictactoeDiv"></div>
-        <div id="x2y1" class="tictactoeDiv"></div>
-        <div id="x0y2" class="tictactoeDiv"></div>
-        <div id="x1y2" class="tictactoeDiv"></div>
-        <div id="x2y2" class="tictactoeDiv"></div>
-    </div>
-</div>
-
-
-<div style="float:left;">
-    <div class="gameInfoDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv" style="">Game Info</div>
-        <div class="gameBoxInnerDiv">
-            <div>game id: <span id="gameId"></span></div>
-            <div>status: <span id="gameStatus"></span></div>
-            <div>whose turn: <span id="whoTurn"></span></div>
-            <div>winner: <span id="gameWinner"></span></div>
-            <div>playing: <span id="gamePlaying"></span></div>
-            <button id="gameReset" style="float:right">reset</button>
+    <div class="row">
+        <div class="gameBoardDiv gameBoxDiv span4 offset2" style="width: 293px;">
+            <div class="gameOverDiv"><p>You XXXX</p></div>
+            <div class="gameBoxHeaderDiv">Game Board</div>
+            <table>
+                <tr>
+                    <td><div id="x0y0" class="tictactoeDiv"></div></td>
+                    <td><div id="x1y0" class="tictactoeDiv"></div></td>
+                    <td><div id="x2y0" class="tictactoeDiv"></div></td>
+                </tr>
+                <tr>
+                    <td><div id="x0y1" class="tictactoeDiv"></div></td>
+                    <td><div id="x1y1" class="tictactoeDiv"></div></td>
+                    <td><div id="x2y1" class="tictactoeDiv"></div></td>
+                </tr>
+                <tr>
+                    <td><div id="x0y2" class="tictactoeDiv"></div></td>
+                    <td><div id="x1y2" class="tictactoeDiv"></div></td>
+                    <td><div id="x2y2" class="tictactoeDiv"></div></td>
+                </tr>
+            </table>
         </div>
-    </div>
-    <div class="gamePlayersDiv gameBoxDiv">
-        <div class="gameBoxHeaderDiv" style="">Game Players</div>
-        <div id="playerList" class="gameBoxInnerDiv">
-            <div id="playerTemplate" style="display:none;">
-                <span id="playerName">player-0</span> <span id="playerStatus">offline</span> </span> <span id="playerTurn"></span>
+        <div class="gamePlayersDiv gameBoxDiv span4">
+            <div class="gameBoxHeaderDiv" style="">Game Players</div>
+            <div id="playerList" class="gameBoxInnerDiv">
+                <div id="playerTemplate" style="display:none;">
+                    <span id="playerName">player-0</span> <span id="playerStatus">offline</span> </span> <span
+                        id="playerTurn"></span>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div style="clear: both;"></div>
-{{> errorBox}}
 
-<div class="otherTurnsDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Other Turns</div>
-    <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
-        <div id="gameTemplate" style="display:none;">
-            <span id="gameName">game-0</span>
-            <span id="gameTurn"></span>
-            <button style="float:right;" id="myGameRemove">remove</button>
-            <button style="float:right;" id="myGameJoin">play</button>
-            <div style="clear:both"></div>
+    <div class="row">
+        <div class="span7 offset3">
+            {{> errorBox}}
         </div>
     </div>
-</div>
 
-<div style="clear: both;"></div>
+    <div class="row">
+        <div class="gameInfoDiv gameBoxDiv span4 offset2" style="width: 293px;">
+            <div class="gameBoxHeaderDiv" style="">Game Info</div>
+            <div id="gameInfoData" class="gameBoxInnerDiv">
+                <div>game id: <span id="gameId"></span></div>
+                <div>status: <span id="gameStatus"></span></div>
+                <div>whose turn: <span id="whoTurn"></span></div>
+                <div>winner: <span id="gameWinner"></span></div>
+                <div>playing: <span id="gamePlaying"></span></div>
+                <button id="gameReset" style="float:right">reset</button>
+            </div>
+        </div>
+        <div class="otherTurnsDiv gameBoxDiv span4">
+            <div class="gameBoxHeaderDiv">Other Turns</div>
+            <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
+                <div id="gameTemplate" style="display:none;">
+                    <span id="gameName">game-0</span>
+                    <span id="gameTurn"></span>
+                    <button style="float:right;" id="myGameRemove">remove</button>
+                    <button style="float:right;" id="myGameJoin">play</button>
+                    <div style="clear:both"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 <div class="commLogDiv gameBoxDiv">
   <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>

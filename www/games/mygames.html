@@ -177,35 +177,45 @@ function init() {
 </head>
 <body>
 {{> header}}
-{{> gameNav}}
 {{> errorBox }}
 
-<div class="gameTurnsGroup">
-<div class="gameListDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Your Turn</div>
-    <div id="gameMyTurnList" class="gameBoxInnerDiv">
-        <div id="gameTemplate" style="display:none;">
-            <span id="gameName">game-0</span>
-            <span id="gameTurn"></span>
-            <button style="float:right;" id="myGameRemove">remove</button>
-            <button style="float:right;" id="myGameJoin">play</button>
-            <div style="clear:both"></div>
+<div class="container">
+    <div class="row">
+        <div class="gameTurnsGroup span5 offset1">
+            <div class="gameListDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv">Your Turn</div>
+                <div id="gameMyTurnList" class="gameBoxInnerDiv">
+                    <div id="gameTemplate" style="display:none;">
+                        <span id="gameName">game-0</span>
+                        <span id="gameTurn"></span>
+                        <button style="float:right;" id="myGameRemove">remove</button>
+                        <button style="float:right;" id="myGameJoin">play</button>
+                        <div style="clear:both"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gameListDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv" style="text-align: right;">Their Turn</div>
+                <div id="gameOppTurnList" class="gameBoxInnerDiv">
+                </div>
+            </div>
+
+            <div class="gameListDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv" style="text-align: center">Finished Games</div>
+                <div id="gameDoneList" class="gameBoxInnerDiv">
+                </div>
+            </div>
+        </div>
+        <div class="span5">
+            <div class="challengesDiv gameBoxDiv" style="height: 100%;">
+                <div class="gameBoxHeaderDiv">Challenges</div>
+                <div id="challengesList" class="gameBoxInnerDiv">
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<div class="gameListDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv" style="text-align: right;">Their Turn</div>
-    <div id="gameOppTurnList" class="gameBoxInnerDiv">
-    </div>
-</div>
-
-<div class="gameListDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv" style="text-align: center">Finished Games</div>
-    <div id="gameDoneList" class="gameBoxInnerDiv">
-    </div>
-</div>
- </div>
 
 <div style="clear:both"></div>
 

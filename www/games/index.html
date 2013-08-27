@@ -43,7 +43,7 @@ function showGames() {
 $(init);
 function init() {
     $("#shSystem").text("Example");
-    $("#shSubTitle").text("Home");
+    $("#shSubTitle").text("Play");
 
     showGames();
 
@@ -59,23 +59,17 @@ function init() {
 </head>
 <body>
 {{> header}}
-{{> gameNav}}
 {{> errorBox}}
 
-<div id="gameList">
-    <div id="gameTemplate" class="gameBoxDiv" style="display: none; float:left;">
-        <div id="gameName" class="gameBoxHeaderDiv">Game 1</div>
-        <div class="gameBoxInnerDiv">
-            Nice game to play
-            <button id="gamePlayBtn">play</button>
+<div class="container">
+
+    <div id="gameList" class="row" style="margin-top: 60px;">
+        <div id="gameTemplate" class="span4" style="display:none; text-align:center;">
+            <p id="gameName">Game1</p>
+            <button id="gamePlayBtn">play &raquo;</button>
         </div>
     </div>
-</div>
 
-<div style="clear:both"></div>
-<div class="commLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Comm Log<button id="showHideLog" style="float:right;">+</button></div>
-    <div id="commLog" class="gameBoxInnerDiv" readonly></div>
 </div>
 
 {{> footer}}

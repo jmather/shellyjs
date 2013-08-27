@@ -1,12 +1,47 @@
-<div class="shHeaderDiv">
-    <div class="topDiv">
-        <div class="topBarDiv"></div>
-        <div class="title">
-            Shelly <span id="shSystem">Games</span> - <span id="shSubTitle"></span>
-        </div>
-        <div class="userInfo">
-            <span id="shUserName">{{Env.user.name}}</span> - <a href="/login/logout.html">logout</a>
+
+<!-- Navbar
+================================================== -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="./index.html">Shelly</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li class="">
+                        <a href="/index.html">Play</a>
+                    </li>
+                    <li class="">
+                        <a href="/mygames.html">My Games</a>
+                    </li>
+                    <li class="">
+                        <a href="/profile.html">Profile</a>
+                    </li>
+                    <li class="">
+                        <a href="/about.html">About</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
-    <div class="bottomBarDiv"></div>
 </div>
+
+<!-- Subhead
+================================================== -->
+<header class="jumbotron subhead" style="padding: 5px 0px;">
+    <div class="container" style="height: 30px;">
+        <p class="">Shelly Examples - <span id="shSubTitle"></span>
+        <span class="pull-right">
+            <span id="shUserName">{{Env.user.name}}</span> - <a href="/login/logout.html">logout</a>
+        </span>
+        </p>
+    </div>
+</header>
+
+<link href="/common/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link href="/common/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="/common/bootstrap/css/docs.css" rel="stylesheet">

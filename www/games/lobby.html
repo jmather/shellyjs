@@ -222,7 +222,6 @@ function init() {
 </head>
 <body>
 {{> header}}
-{{> gameNav}}
 {{> errorBox }}
 
 <div style="float:left">
@@ -253,36 +252,38 @@ function init() {
 <div class="suggestedUsersDiv gameBoxDiv">
     <div class="gameBoxHeaderDiv">
         <div>Challenge someone</div>
-        <div class="FilterListDiv">
-            Level:
-            <select class="FilterSelect">
-                <option value="any">Any</option>
-                <option value="beginner">beginner</option>
-                <option value="intermediate">intermediate</option>
-                <option value="advanced">advanced</option>
-                <option value="pro">pro</option>
-            </select>
-            Gender:
-            <select class="FilterSelect">
-                <option value="any">Any</option>
-                <option value="male">M</option>
-                <option value="female">F</option>
-            </select>
-            Age:
-            <select class="FilterSelect">
-                <option value="any">Any</option>
-                <option value="10s">10s</option>
-                <option value="20s">20s</option>
-                <option value="30s">30s</option>
-                <option value="40s">40s</option>
-                <option value="50s">50s</option>
-                <option value="60s">60s</option>
-                <option value="70s">70s</option>
-                <option value="80s">80s</option>
-                <option value="90s">90s</option>
-                <option value="100s">100s</option>
-            </select>
-        </div>
+        <!--
+                <div class="FilterListDiv">
+                    Level:
+                    <select class="FilterSelect">
+                        <option value="any">Any</option>
+                        <option value="beginner">beginner</option>
+                        <option value="intermediate">intermediate</option>
+                        <option value="advanced">advanced</option>
+                        <option value="pro">pro</option>
+                    </select>
+                    Gender:
+                    <select class="FilterSelect">
+                        <option value="any">Any</option>
+                        <option value="male">M</option>
+                        <option value="female">F</option>
+                    </select>
+                    Age:
+                    <select class="FilterSelect">
+                        <option value="any">Any</option>
+                        <option value="10s">10s</option>
+                        <option value="20s">20s</option>
+                        <option value="30s">30s</option>
+                        <option value="40s">40s</option>
+                        <option value="50s">50s</option>
+                        <option value="60s">60s</option>
+                        <option value="70s">70s</option>
+                        <option value="80s">80s</option>
+                        <option value="90s">90s</option>
+                        <option value="100s">100s</option>
+                    </select>
+                </div>
+        -->
     </div>
     <div id="suggestedUserList" class="gameBoxInnerDiv">
         <div id="userTemplate" style="display:none;">
