@@ -44,6 +44,25 @@ function showGames() {
     }
 }
 
+function processEvent(msg) {
+    var count = 0;
+    if (msg.event === "challenge.list") {
+        for (chid in msg.data) {
+            count += 1;
+        }
+        console.log(count);
+        $("#myGamesCount").text(count);
+        return;
+    }
+}
+
+function shellyInit() {
+    sendRaw({session: Env.session,
+        batch: [{cmd: "game.playing"},
+            {cmd: "challenge.list"}
+        ]});
+}
+
 $(init);
 function init() {
     $("#shSystem").text("Example");
@@ -56,6 +75,8 @@ function init() {
     window.addEventListener("load", function () {
         new FastClick(document.body);
     }, false);
+
+    ws.connect(Env.socketUrl);
 }
 </script>
     <style>

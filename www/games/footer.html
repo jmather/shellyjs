@@ -1,6 +1,35 @@
-<div style="clear:both"></div>
-<div>
+<div class="commLogDiv gameBoxDiv">
+    <div class="gameBoxHeaderDiv">Comm Log</div>
+    <div id="commLog" class="gameBoxInnerDiv" readonly style="height: 200px;"></div>
 </div>
+
+<!-- popup dialog that shows waiting for match -->
+<style>
+    .waitOptionDiv {
+        margin: 10px;
+    }
+    .ui-dialog-titlebar {
+        display: none;
+    }
+</style>
+<div id="dialog" style="display:none" title="Ready to Play">
+    <div class="waitOptionDiv">waiting for user to join you...</div>
+    <div class="waitOptionDiv">Or give us your email and we will notify you.</div>
+    <div class="waitOptionDiv">Or come back later.</div>
+</div>
+
+<!-- modal dialog for server disconnected -->
+<div id="serverConnectDlg" style="height: 150px; display:none">
+    <div class="waitOptionDiv">Lost contact with server.</div>
+    <div class="waitOptionDiv">Reconnecting...</div>
+</div>
+
+<div class="sh-footer-tools btn-toolbar">
+    <div class="btn-group">
+        <a id="shShowLog" class="btn" href="#"><i class="icon-list"></i></a>
+    </div>
+</div>
+<div>
   <div class="shSession"></div>
   <div class="shToken"></div>
   <div class="shVersion">{{Env.version}}</div>

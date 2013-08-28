@@ -17,8 +17,8 @@ var Env = {{{EnvJson}}};
 
 $(init);
 function init() {
+    $("#shHeaderUserInfo").css("display", "none");
     $("#shSubTitle").text("Login");
-    $(".shHeaderDiv .userInfo").css("display", "none");
 
     $("#loginBtn").click(function(e) {
         doLogin();

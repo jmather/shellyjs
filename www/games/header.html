@@ -16,7 +16,9 @@
                         <a href="/index.html">Play</a>
                     </li>
                     <li class="">
-                        <a href="/mygames.html">My Games</a>
+                        <a href="/mygames.html">My Games
+                            <span id="myGamesCount" class="badge badge-important"></span>
+                        </a>
                     </li>
                     <li class="">
                         <a href="/profile.html">Profile</a>
@@ -35,7 +37,7 @@
 <header class="jumbotron subhead" style="padding: 5px 0px;">
     <div class="container" style="height: 30px;">
         <p class="">Shelly Examples - <span id="shSubTitle"></span>
-        <span class="pull-right">
+        <span id="shHeaderUserInfo" class="pull-right">
             <span id="shUserName">{{Env.user.name}}</span> - <a href="/login/logout.html">logout</a>
         </span>
         </p>

@@ -18,6 +18,8 @@ var Env = {{{EnvJson}}};
 
 $(init);
 function init() {
+    $("#shHeaderUserInfo").css("display", "none");
+
     Env.shToken = $.cookie("shToken");
     if (typeof (Env.shToken) === "undefined") {
         debug.info("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);

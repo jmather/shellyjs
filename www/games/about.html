@@ -3,10 +3,12 @@
 <head>
 <title>Lobby</title>
     <link rel="stylesheet" href="/common/jquery-ui-1.10.2/css/smoothness/jquery-ui.css" />
-    <script src="/common/jquery-1.9.1.js"></script>
-    <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
+
+    <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
+    <script src="/static/js/common.js"></script>
 
     <script language="javascript">
 var Env = {{{EnvJson}}};
@@ -16,6 +18,7 @@ function init() {
     $("#shSystem").text("Example");
     $("#shSubTitle").text("About");
 
+    commInit();
 
     $("#about").text(JSON.stringify(Env, undefined, 2))
 }

@@ -175,7 +175,9 @@ var ws = new ReconnectingWebSocket();
 ws.onopen = function (evt) {
   console.log("serverUrl:", Env.socketUrl);
   log("socket", "onopen", Env.socketUrl);
-  shellyInit();
+  if (typeof shellyInit === "function"){
+    shellyInit();
+  }
   try {
     $("#serverConnectDlg").dialog("close");
   } catch (e) {}
@@ -188,7 +190,9 @@ ws.onmessage = function (evt) {
     Env.user = msg.data;
     $("#shUserName").text(Env.user.name);
   }
-  processEvent(msg, "socket");
+  if (typeof processEvent === "function") {
+    processEvent(msg, "socket");
+  }
 }
 ws.onclose = function (evt) {
   log("socket", "onclose", JSON.stringify(evt));
@@ -328,13 +332,12 @@ function sendMessage(msg) {
 
 function commInit()
 {
-  $("#showHideLog").click(function () {
-    if ($(this).text() === "+") {
-      $(this).text("-");
-      $("#commLog").css("height", "200px");
+  $("#shShowLog").click(function () {
+    console.log($(".commLogDiv").css("display"));
+    if ($(".commLogDiv").css("display") === "block") {
+      $(".commLogDiv").css("display", "none");
     } else {
-      $(this).text("+");
-      $("#commLog").css("height", "0px");
+      $(".commLogDiv").css("display", "block");
     }
   });
 }
