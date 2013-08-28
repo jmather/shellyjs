@@ -54,6 +54,7 @@
                 $newKv.find("#value").text(userValue(key));
                 $("#userEditor").append($newKv);
             }
+            $(".found-key-div").css("display", "block");
             $(".edit-user-btn").css("display", "none");
             $(".display-user-btn").css("display", "block");
         }
@@ -122,6 +123,7 @@
         function processFind(err, res) {
             showError(false);
             $(".user-key-value-div").remove();
+            $(".found-key-div").css("display", "none");
             $(".edit-user-btn").css("display", "none");
             $(".display-user-btn").css("display", "none");
             if (err || res[0].event == "error") {
@@ -190,7 +192,7 @@
             <div class="gameBoxInnerDiv">
                 <div class="span1"><h4>Email:</h4></div>
                 <div class="input-append" style="margin-top: 7px;">
-                    <input id="email" class="span6" type="text">
+                    <input id="email" class="span6" type="email">
                     <button id="findByEmail" class="btn" type="button">Go!</button>
                 </div>
                 <div class="span1"><h4>Uid:</h4></div>
