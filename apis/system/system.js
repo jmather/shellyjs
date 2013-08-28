@@ -43,7 +43,7 @@ system.rawGet = function (req, res, cb) {
   shlog.debug("system", "system.rawGet");
 
   global.db.get(req.body.key, _w(cb, function (err, data) {
-    if (err) {
+    if (err || data === null) {
       res.add(sh.error("object-get", "unable to get object", data));
       return cb(1);
     }

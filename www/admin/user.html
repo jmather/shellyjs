@@ -9,16 +9,14 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <script src="/static/js/common.js"></script>
     <style>
-        pre {
-            margin: 0px;
-        }
-        .lookupUserDiv {
-            width: 450px;
-        }
         .emailInput,
         .tokenInput,
         .uidInput {
-            width: 245px;
+            width: 90%;
+            margin-top: 5px;
+        }
+        .find-td {
+            padding-top: 0px;
         }
         .btn-div {
             width: 450px;
@@ -27,14 +25,15 @@
         .display-user-btn {
             float: right;
         }
+        .value-edit {
+            width: 100%;
+        }
         #errorMsg {
             border: 1px solid;
             padding:15px 10px 15px 50px;
             background-repeat: no-repeat;
             background-position: 10px center;
             display: none;
-            margin: 10px auto;
-            width: 400px;
             color: #D8000C;
             background-color: #FFBABA;
             background-image: url("/static/images/toolbar/error.png");
@@ -61,7 +60,7 @@
                 $newKv.css("display", "block");
                 $newKv.find("#key").text(key);
                 if (key !== "oid" && key !== "email" && key !== "created" && key !== "modified") {
-                    $newKv.find("#value").addClass("value-edit-span");
+                    $newKv.find("#value").addClass("value-edit");
                     $newKv.find("#value").attr("editId", key);
                 }
                 $newKv.find("#value").text(userValue(key));
@@ -72,12 +71,12 @@
         }
 
         function editCurrent() {
-            $(".value-edit-span").replaceWith(function () {
+            $(".value-edit").replaceWith(function () {
                 var editId = $(this).attr("editId");
                 if (typeof(editId) === "undefined") return;
                 $input = $("<input/>");
                 $input.attr("editId", editId);
-                $input.addClass("value-edit-span");
+                $input.addClass("value-edit");
                 $input.val($(this).text());
                 return $input;
             });
@@ -87,7 +86,7 @@
 
         function resetCurrent(saved) {
             var saveData = {};
-            $(".value-edit-span").replaceWith(function () {
+            $(".value-edit").replaceWith(function () {
                 var editId = $(this).attr("editId");
                 if (typeof(editId) === "undefined") return;
                 var value = $(this).val();
@@ -108,7 +107,7 @@
                 }
                 $span = $("<span/>");
                 $span.attr("editId", editId);
-                $span.addClass("value-edit-span");
+                $span.addClass("value-edit");
                 if (saved) {
                     Env.user[editId] = value;
                     $span.text(value);
@@ -137,11 +136,10 @@
             $(".user-key-value-div").remove();
             $(".edit-user-btn").css("display", "none");
             $(".display-user-btn").css("display", "none");
-            console.log(res)
             if (err) {
                 showError(true, res[0].message);
             } else {
-                if(res.event == "error") {
+                if(res[0].event == "error") {
                     showError(true, res[0].message);
                 } else {
                     showUser(res[0].data);
@@ -174,7 +172,9 @@
             $("#saveUserBtn").click(function() {
                 var saveData = resetCurrent(true);
                 var res = shCall({cmd: "user.aset", uid: Env.user.oid, user: saveData}, function (error, data) {
-                    console.log(error, data);
+                    if (data[0].event === "error") {
+                        showError(true, data[0].message);
+                    }
                 });
             });
             $("#cancelUserBtn").click(function() {
@@ -186,27 +186,59 @@
 </head>
 <body>
 {{> header}}
-{{> adminNav}}
 
-<div class="gameBoxDiv lookupUserDiv">
-    <div class="gameBoxHeaderDiv">Lookup User</div>
-    <div class="gameBoxInnerDiv">
-        <table>
-            <tr><td>By Email:</td><td><input id="email" class="emailInput" type="text"></input></td><td><button id="findByEmail">find</button></td></tr>
-            <tr><td>By Uid:</td><td><input id="uid" class="uidInput" type="text" value=""></input></td><td><button id="findByUid">find</button></td></tr>
-            <tr><td>By Token:</td><td><input id="token" class="tokenInput" type="text" value=""></input></td><td><button id="findByToken">find</button></td></tr>
-        </table>
+<div class="container">
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv lookupUserDiv span7 offset2">
+            <div class="gameBoxHeaderDiv">Lookup User</div>
+            <div class="gameBoxInnerDiv">
+                <table style="width: 100%;">
+                    <tr>
+                        <td>By Email:</td>
+                        <td><input id="email" class="emailInput" type="text"/></td>
+                        <td class="find-td">
+                            <button id="findByEmail" class="find-btn">find</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>By Uid:</td>
+                        <td><input id="uid" class="uidInput" type="text" value=""/></td>
+                        <td class="find-td">
+                            <button id="findByUid" class="find-btn">find</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>By Token:</td>
+                        <td><input id="token" class="tokenInput" type="text" value=""/></td>
+                        <td class="find-td">
+                            <button id="findByToken" class="find-btn">find</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
-<div style="clear:both;"></div>
-<div id="errorMsg"></div>
-<div id="userEditor">
-    <div id="keyValueTpl" style="display:none"><span id="key">key</span> = <span id="value">value</span></div>
-</div>
-<div class="btn-div">
-    <button id="editUserBtn" class="display-user-btn">Edit</button>
-    <button id="saveUserBtn" class="edit-user-btn">Save</button>
-    <button id="cancelUserBtn" class="edit-user-btn">Cancel</button>
+
+    <div class="row">
+        <div id="errorMsg" class="span6 offset2"></div>
+    </div>
+
+    <div class="row">
+        <div id="userEditor" class="span10 offset1">
+            <div id="keyValueTpl" class="row" style="display:none">
+                <div class="span2"><span id="key">key</span>=</div>
+                <div class="span9"><span id="value">value</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="btn-div span10 offset1">
+            <button id="editUserBtn" class="display-user-btn">Edit</button>
+            <button id="saveUserBtn" class="edit-user-btn">Save</button>
+            <button id="cancelUserBtn" class="edit-user-btn">Cancel</button>
+        </div>
+    </div>
 </div>
 
 {{> footer}}

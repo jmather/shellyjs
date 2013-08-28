@@ -21,7 +21,6 @@
             $("#shSubTitle").text("System Info");
 
             shCall({cmd: "system.config"}, function (err, res) {
-                $("#baseDir").text(res[0].data.gBaseDir);
                 $("#config").text(JSON.stringify(res[0].data.CONFIG, undefined, 2))
                 $("#package").text(JSON.stringify(res[0].data.PACKAGE, undefined, 2))
             })
@@ -31,11 +30,7 @@
 </head>
 <body>
 {{> header}}
-{{> adminNav}}
 
-<div>
-    gBaseDir = <span id="baseDir"></span>
-</div>
 <div>
     CONFIG = <pre id="config"></pre>
 </div>
