@@ -14,31 +14,14 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
 <style>
-    .matchAddDiv {
-        width: 460px;
-    }
-
-    .suggestedUsersDiv {
-        width: 460px;
-    }
     #suggestedUserList {
         height: 358px;
     }
-    .FilterListDiv {
-        font-size: 10px;
-    }
-    .FilterSelect {
-        font-size: 10px;
-    }
+
     .userPictImg {
         width: 30px;
         height: 30px;
     }
-
-    .challengeEmailDiv {
-        width: 460px;
-    }
-
 
     .user-avatar {
         position: relative;
@@ -224,83 +207,53 @@ function init() {
 {{> header}}
 {{> errorBox }}
 
-<div style="float:left">
-<div class="matchAddDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Find me a game with:</div>
-    <div class="gameBoxInnerDiv" readonly style="text-align: center;">
-        <div style="height: 35px">
-            <div id="matchSubmit" style="display: none; padding-top: 7px;">
-                <button id="matchAdd" >Next Available Opponent</button>
+<div class="container">
+    <div class="row">
+        <div class="matchAddDiv gameBoxDiv span6 offset3">
+            <div class="gameBoxHeaderDiv">Find me a game with:</div>
+            <div class="gameBoxInnerDiv" readonly style="text-align: center;">
+                <div style="height: 40px">
+                    <div id="matchSubmit" style="display: none; padding-top: 8px;">
+                        <button id="matchAdd">Next Available Opponent</button>
+                    </div>
+                    <div id="matchLooking" style="display: none;">
+                        <div>Currently looking for an opponent for you.</div>
+                        <div>Challenge some friends below while you wait.</div>
+                    </div>
+                </div>
             </div>
-            <div id="matchLooking" style="display: none;">
-                <div>Currently looking for an opponent for you.</div>
-                <div>Challenge some friends below while you wait.</div>
+        </div>
+
+        <div class="challengeEmailDiv gameBoxDiv span6 offset3">
+            <div class="gameBoxHeaderDiv">Challenge by email</div>
+            <div class="gameBoxInnerDiv" readonly>
+                <input id="emailInput" type="text" style="width:390px; margin: 5px 5px;"></input>
+                <button id="sendEmail" style="float: right; margin-top: 2px">send</button>
+            </div>
+        </div>
+
+        <div class="suggestedUsersDiv gameBoxDiv span6 offset3">
+            <div class="gameBoxHeaderDiv">
+                <div>Challenge someone</div>
+            </div>
+            <div id="suggestedUserList" class="gameBoxInnerDiv">
+                <div id="userTemplate" style="display:none;">
+                    <div class="user-avatar" style="float:left; margin: 3px;">
+                        <img id="userPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
+
+                        <div id="onlineStatus" style="display:none;">
+                            <img id="userOnlineDot" class="status" src="/static/images/green-dot.gif"/>
+                        </div>
+                    </div>
+                    <span id="userName"></span>
+                    <span id="userGender"></span>
+                    <span id="userAge"></span>
+                    <button id="userChallenge" style="float:right; margin-top: 7px;">challenge</button>
+                    <div style="clear:both"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="challengeEmailDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Challenge by email</div>
-    <div class="gameBoxInnerDiv" readonly>
-        <input id="emailInput" type="text" style="width:400px;"></input>
-        <button id="sendEmail" style="float:right;">send</button>
-        <div style="clear:both"></div>
-    </div>
-</div>
-
-<div class="suggestedUsersDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">
-        <div>Challenge someone</div>
-        <!--
-                <div class="FilterListDiv">
-                    Level:
-                    <select class="FilterSelect">
-                        <option value="any">Any</option>
-                        <option value="beginner">beginner</option>
-                        <option value="intermediate">intermediate</option>
-                        <option value="advanced">advanced</option>
-                        <option value="pro">pro</option>
-                    </select>
-                    Gender:
-                    <select class="FilterSelect">
-                        <option value="any">Any</option>
-                        <option value="male">M</option>
-                        <option value="female">F</option>
-                    </select>
-                    Age:
-                    <select class="FilterSelect">
-                        <option value="any">Any</option>
-                        <option value="10s">10s</option>
-                        <option value="20s">20s</option>
-                        <option value="30s">30s</option>
-                        <option value="40s">40s</option>
-                        <option value="50s">50s</option>
-                        <option value="60s">60s</option>
-                        <option value="70s">70s</option>
-                        <option value="80s">80s</option>
-                        <option value="90s">90s</option>
-                        <option value="100s">100s</option>
-                    </select>
-                </div>
-        -->
-    </div>
-    <div id="suggestedUserList" class="gameBoxInnerDiv">
-        <div id="userTemplate" style="display:none;">
-            <div class="user-avatar">
-                <img id="userPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
-                <div id="onlineStatus" style="display:none;">
-                    <img id="userOnlineDot" class="status" src="/static/images/green-dot.gif"/>
-                </div>
-            </div>
-            <span id="userName"></span>
-            <span id="userGender"></span>
-            <span id="userAge"></span>
-            <button id="userChallenge" style="float:right">challenge</button>
-            <div style="clear:both"></div>
-        </div>
-    </div>
-</div>
 </div>
 
 <div style="clear:both"></div>

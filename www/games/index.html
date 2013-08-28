@@ -17,19 +17,22 @@
     <script language="javascript">
 var Env = {{{EnvJson}}};
 
+function playGame() {
+    var gameName =$(this).attr("gn");
+    var url = "/lobby.html?gn=" + gameName;
+    window.location.href = url;
+}
 
 function addGame(gameName, gameInfo) {
     console.log(gameName);
     var $newGame= $("#gameTemplate").clone();
     $newGame.find("#gameName").text(gameName);
     $newGame.find("#gamePlayBtn").attr("gn", gameName);
+    $newGame.find("#gamePlayImg").attr("gn", gameName);
     $newGame.find("#gamePlayImg").attr("src", gameName + "/" + gameName + ".png");
 
-    $newGame.find("#gamePlayBtn").click(function () {
-        var gameName =$(this).attr("gn");
-        var url = "/lobby.html?gn=" + gameName;
-        window.location.href = url;
-    });
+    $newGame.find("#gamePlayBtn").click(playGame);
+    $newGame.find("#gamePlayImg").click(playGame);
 
     $newGame.css("display", "block");
     $("#gameList").append($newGame);

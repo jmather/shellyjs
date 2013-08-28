@@ -44,47 +44,65 @@
     #gameDoneList {
         height: 100px;
     }
+
+    /* challenges divs */
+
+    #challengeList {
+        height: 361px;
+    }
+
+    .userPictImg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .userAttr {
+        margin-left: 5px;
+    }
+
 </style>
 
 <script language="javascript">
 var Env = {{{EnvJson}}};
 
-function setMatchInfo(matchList) {
-    $(".activeMatch").remove();
-    for (gameName in matchList) {
-        var $newGame = $("#matchTemplate").clone();
-        $newGame.find("#matchName").text(gameName);
-        $newGame.find("#matchTime").text(prettyDate(matchList[gameName].lastCreated));
-        $newGame.attr("gameName", gameName);
-        $newGame.addClass("activeMatch");
-        $newGame.css("display", "block");
-
-        $("#matchList").append($newGame);
-    }
-}
-
-function removeUser(uid) {
-    $(".userId" + uid).remove();
-}
-
-function addUser(profile) {
-    if ($(".userId" + profile.uid).size() > 0) {
+function addChallenge(chId, challenge) {
+    if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
         return;
     }
-    var $newGame = $("#userTemplate").clone();
-    $newGame.find("#userName").text(profile.name);
-    $newGame.find("#userName").addClass("playerName" + profile.uid);
-    $newGame.addClass("userId" + profile.uid);
-    $newGame.addClass("activeUser");
-    $newGame.attr("uid", profile.uid);
-    $newGame.css("display", "block");
+    var $newChallenge = $("#challengeTemplate").clone();
+    $newChallenge.find("#challengerName").text(challenge.name);
+    $newChallenge.find("#challengerAge").text(challenge.age);
+    $newChallenge.find("#challengerGender").text(challenge.gender);
+    $newChallenge.find("#challengeGame").text(challenge.game);
+    $newChallenge.find("#challengerPict").attr("src", challenge.pict);
+    $newChallenge.addClass("activeChallenge");
+    $newChallenge.attr("id", chId);
+    $newChallenge.css("display", "block");
 
-    $newGame.find("#userOffer").click(function () {
-        alert("not implemented");
-//                var gameId = $(this).parent().attr("gameId");
+    $newChallenge.find("#challengeAccept").attr("chId", chId);
+    $newChallenge.find("#challengeDecline").attr("chId", chId);
+
+    $newChallenge.find("#challengeAccept").click(function () {
+        var chId =$(this).attr("chId");
+        console.log("accept", chId);
+        sendCmd("challenge.accept", {chId: chId});
+        $("#" + chId.replace(":", "\\:")).remove();
+    });
+    $newChallenge.find("#challengeDecline").click(function () {
+        var chId =$(this).attr("chId");
+        console.log("decline", chId);
+        sendCmd("challenge.decline", {chId: chId});
+        $("#" + chId.replace(":", "\\:")).remove();
     });
 
-    $("#userList").append($newGame);
+    $("#challengeList").append($newChallenge);
+}
+
+function setChallengeInfo(challengeList) {
+    $(".activeChallenge").remove();
+    for (chId in challengeList) {
+        addChallenge(chId, challengeList[chId]);
+    }
 }
 
 function processEvent(res, from) {
@@ -100,6 +118,8 @@ function processEvent(res, from) {
     if (res.event == "heartbeat") {
         return;
     }
+
+    /* game events */
     if (res.event == "game.playing") {
         setLobbyGames(res.data);
         return;
@@ -108,27 +128,7 @@ function processEvent(res, from) {
         setLobbyTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }
-    if (res.event == "channel.user") {
-        if (res.data.status === "on") {
-            addUser(res.data);
-        } else {
-            removeUser(res.data.uid);
-        }
-        return;
-    }
-    if (res.event == "channel.message") {
-        for (var i=0; i<res.data.bank.length; i++) {
-            addMessage(res.data.channel, res.data.bank[i]);
-        }
-        return;
-    }
-    if (res.event == "channel.send") {
-        return;
-    }
-    if (res.event == "match.stats") {
-        setMatchInfo(res.data);
-        return;
-    }
+    /* match events */
     if (res.event == "match.made" ||
             res.event == "challenge.start") {
         gameInit(res.data);
@@ -138,8 +138,17 @@ function processEvent(res, from) {
         $("#dialog").dialog();
         return;
     }
-    if (res.event == "system.connInfo") {
-        console.log("wid:", res.data.wid);
+    /* challenge events */
+    if (res.event == "challenge.list") {
+        setChallengeInfo(res.data);
+        return;
+    }
+    if (res.event == "challenge.send") {
+        addChallenge(res.data.chId, res.data.challenge);
+        return;
+    }
+    if (res.event == "challenge.start") {
+        gameInit(res.data);
         return;
     }
     log(from, "unknown-event", JSON.stringify(res));
@@ -147,8 +156,8 @@ function processEvent(res, from) {
 
 function shellyInit() {
     sendRaw({session: Env.session,
-        batch: [{cmd: "system.connInfo"},
-            {cmd: "game.playing"}
+        batch: [{cmd: "game.playing"},
+            {cmd: "challenge.list"}
         ]});
 }
 
@@ -207,12 +216,33 @@ function init() {
                 </div>
             </div>
         </div>
-        <div class="span5">
-            <div class="challengesDiv gameBoxDiv" style="height: 100%;">
-                <div class="gameBoxHeaderDiv">Challenges</div>
-                <div id="challengesList" class="gameBoxInnerDiv">
+        <div class="span4">
+
+            <div class="challengesDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv">Challengers</div>
+                <div id="challengeList" class="gameBoxInnerDiv">
+                    <div id="challengeTemplate" style="display:none;">
+                        <div style="width: 30px; float:left">
+                            <img id="challengerPict" class="userPictImg" src="/static/images/dflt-avatar.png"/>
+                        </div>
+                        <div style="width:260px; float:left">
+                            <div>
+                                <span id="challengerName" class="userAttr" style="float:left">player</span>
+                                <button id="challengeAccept" class="UserBtn" style="float:right">accept</button>
+                                <button id="challengeDecline" class="UserBtn" style="float:right">decline</button>
+                            </div>
+                            <div style="clear:both"></div>
+                            <div>
+                                <span id="challengerGender" class="userAttr" style="float:left">U</span>
+                                <span id="challengerAge" class="userAttr" style="float:left">0</span>
+                                <span id="challengeGame" class="userAttr" style="float:right">unknown</span>
+                            </div>
+                        </div>
+                        <div style="clear:both"></div>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
