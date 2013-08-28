@@ -92,7 +92,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "email") {
     reg.findUserByEmail(req.loader, req.body.value, _w(cb, function (err, data) {
       if (err) {
-        res.add(sh.error("user-find-email", "unable to file user with this email", data));
+        res.add(sh.error("user-find-email", "unable to find user with email: '" + req.body.value + "'", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -103,7 +103,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "uid") {
     req.loader.exists("kUser", req.body.value, _w(cb, function (err, data) {
       if (err) {
-        res.add(sh.error("user-find-uid", "unable to find user with uid", data));
+        res.add(sh.error("user-find-uid", "unable to find user with uid: '" + req.body.value + "'", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));
@@ -114,7 +114,7 @@ user.find = function (req, res, cb) {
   if (req.body.by === "token") {
     reg.findUserByToken(req.loader, req.body.value, _w(cb, function (err, data) {
       if (err) {
-        res.add(sh.error("user-find-token", "unable to find user with uid", data));
+        res.add(sh.error("user-find-token", "unable to find user with token: '" + req.body.value + "'", data));
         return cb(1);
       }
       res.add(sh.event("user.find", data.getData()));

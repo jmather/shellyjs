@@ -9,24 +9,12 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <script src="/static/js/common.js"></script>
     <style>
-        .emailInput,
-        .tokenInput,
-        .uidInput {
-            width: 90%;
-            margin-top: 5px;
-        }
-        .find-td {
-            padding-top: 0px;
-        }
-        .btn-div {
-            width: 450px;
+        .value-edit {
+            width: 100%;
         }
         .edit-user-btn,
         .display-user-btn {
             float: right;
-        }
-        .value-edit {
-            width: 100%;
         }
         #errorMsg {
             border: 1px solid;
@@ -136,14 +124,11 @@
             $(".user-key-value-div").remove();
             $(".edit-user-btn").css("display", "none");
             $(".display-user-btn").css("display", "none");
-            if (err) {
+            if (err || res[0].event == "error") {
+                console.log("error:", res);
                 showError(true, res[0].message);
             } else {
-                if(res[0].event == "error") {
-                    showError(true, res[0].message);
-                } else {
-                    showUser(res[0].data);
-                }
+                showUser(res[0].data);
             }
         }
 
@@ -151,18 +136,28 @@
         function init() {
             $("#shSubTitle").text("User Manager");
 
+
+            $("#findBy").text("email");
+            console.log(Env.user.email);
+            $("#findKey").text(Env.user.email);
             showUser(Env.user);
 
             $("#findByEmail").click(function() {
                 var email = $("#email").val();
+                $("#findBy").text("email");
+                $("#findKey").text(email);
                 shCall({cmd: "user.find", by: "email", value: email}, processFind);
             });
             $("#findByUid").click(function() {
                 var uid = $("#uid").val();
+                $("#findBy").text("uid");
+                $("#findKey").text(uid);
                 shCall({cmd: "user.find", by: "uid", value: uid}, processFind);
             });
             $("#findByToken").click(function() {
                 var token = $("#token").val();
+                $("#findBy").text("token");
+                $("#findKey").text(token);
                 shCall({cmd: "user.find", by: "token", value: token}, processFind);
             });
 
@@ -173,6 +168,7 @@
                 var saveData = resetCurrent(true);
                 var res = shCall({cmd: "user.aset", uid: Env.user.oid, user: saveData}, function (error, data) {
                     if (data[0].event === "error") {
+                        console.log("error:", data);
                         showError(true, data[0].message);
                     }
                 });
@@ -189,51 +185,47 @@
 
 <div class="container">
     <div class="row" style="margin-bottom: 10px;">
-        <div class="gameBoxDiv lookupUserDiv span7 offset2">
+        <div class="gameBoxDiv lookupUserDiv span8 offset2">
             <div class="gameBoxHeaderDiv">Lookup User</div>
             <div class="gameBoxInnerDiv">
-                <table style="width: 100%;">
-                    <tr>
-                        <td>By Email:</td>
-                        <td><input id="email" class="emailInput" type="text"/></td>
-                        <td class="find-td">
-                            <button id="findByEmail" class="find-btn">find</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>By Uid:</td>
-                        <td><input id="uid" class="uidInput" type="text" value=""/></td>
-                        <td class="find-td">
-                            <button id="findByUid" class="find-btn">find</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>By Token:</td>
-                        <td><input id="token" class="tokenInput" type="text" value=""/></td>
-                        <td class="find-td">
-                            <button id="findByToken" class="find-btn">find</button>
-                        </td>
-                    </tr>
-                </table>
+                <div class="span1"><h4>Email:</h4></div>
+                <div class="input-append" style="margin-top: 7px;">
+                    <input id="email" class="span6" type="text">
+                    <button id="findByEmail" class="btn" type="button">Go!</button>
+                </div>
+                <div class="span1"><h4>Uid:</h4></div>
+                <div class="input-append" style="margin-top: 7px;">
+                    <input id="uid" class="span6" type="text">
+                    <button id="findByUid" class="btn" type="button">Go!</button>
+                </div>
+                <div class="span1"><h4>Token:</h4></div>
+                <div class="input-append" style="margin-top: 7px;">
+                    <input id="token" class="span6" type="text">
+                    <button id="findByToken" class="btn" type="button">Go!</button>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div id="errorMsg" class="span6 offset2"></div>
+        <div id="errorMsg" class="span7 offset2"></div>
+    </div>
+
+    <div class="row">
+        <div class="found-key-div span10 offset1"><h4><span id="findBy"></span> = <span id="findKey"></span></h4></div>
     </div>
 
     <div class="row">
         <div id="userEditor" class="span10 offset1">
             <div id="keyValueTpl" class="row" style="display:none">
-                <div class="span2"><span id="key">key</span>=</div>
-                <div class="span9"><span id="value">value</span></div>
+                <div class="span2"><b><span id="key">key</span>=</b></div>
+                <div class="span8"><span id="value">value</span></div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="btn-div span10 offset1">
+        <div class="btn-div span2 offset9">
             <button id="editUserBtn" class="display-user-btn">Edit</button>
             <button id="saveUserBtn" class="edit-user-btn">Save</button>
             <button id="cancelUserBtn" class="edit-user-btn">Cancel</button>

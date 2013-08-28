@@ -175,15 +175,11 @@
         <div class="gameBoxDiv lookupObjDiv span8 offset2">
             <div class="gameBoxHeaderDiv">Lookup Object</div>
             <div class="gameBoxInnerDiv">
-                <table style="width: 100%;">
-                    <tr>
-                        <td>Key:</td>
-                        <td><input id="findKey" class="keyInput" type="text"/></td>
-                        <td>
-                            <button id="findByKey">find</button>
-                        </td>
-                    </tr>
-                </table>
+                <div class="span1"><h4>key:</h4></div>
+                <div class="input-append" style="margin-top: 7px;">
+                    <input id="findKey" class="span6" type="text">
+                    <button id="findByKey" class="btn" type="button">Go!</button>
+                </div>
             </div>
         </div>
     </div>
@@ -193,13 +189,13 @@
     </div>
 
     <div class="row">
-        <div class="found-key-div span11 offset1">key = <span id="foundKey"></span></div>
+        <div class="found-key-div span11 offset1"><h4>key = <span id="foundKey"></span></h4></div>
     </div>
 
     <div class="row">
         <div id="objEditor" class="span11 offset1">
             <div id="keyValueTpl" class="row" style="display:none">
-                <div class="span2"><span id="key">key</span>=</div>
+                <div class="span2"><b><span id="key">key</span>=</b></div>
                 <div class="span9"><span id="value">value</span></div>
             </div>
         </div>
