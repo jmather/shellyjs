@@ -48,6 +48,8 @@ function getEditFields() {
                 errors.push(editId);
                 showError("bad value for:" + editId);
             }
+        } else if (typeof(Env.user[editId]) === "number") {
+            saveData[editId] = parseInt(value);
         } else {
             saveData[editId] = value;
         }
@@ -193,11 +195,6 @@ function init() {
 {{> header}}
 
 <div class="container">
-    <div class="row">
-        <div class="span6 offset3">
-        {{> errorBox}}
-        </div>
-    </div>
 
     <div class="row">
         <div class="gameBoxDiv anonymousDiv span6 offset3">
@@ -274,6 +271,13 @@ function init() {
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="span6 offset3">
+            {{> errorBox}}
+        </div>
+    </div>
+
 </div>
 
 {{> footer}}

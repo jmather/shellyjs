@@ -56,7 +56,6 @@ function log(api, type, msg) {
 }
 
 function showError(msg) {
-  console.log("here");
   $("#errorMessage").css("display", "block");
   $("#errorText").text("Oops: " + msg);
 }
@@ -176,6 +175,37 @@ function setMyTurns(gameList) {
   }
 }
 
+function updateGameCount(data, uid) {
+  var count = 0;
+  for (chid in data) {
+    if (data[chid].whoTurn === uid) {
+      count += 1;
+    }
+    console.log(chid);
+  }
+  $("#myGamesCount").attr("gameCount", count);
+  var total = parseInt($("#myGamesCount").attr("challengeCount")) + count;
+  $("#myGamesCount").text(total);
+}
+
+function changeGameCount(amount) {
+  var count = parseInt($("#myGamesCount").attr("gameCount")) + amount;
+  $("#myGamesCount").attr("gameCount", count);
+  var total = parseInt($("#myGamesCount").attr("challengeCount")) + amount;
+  $("#myGamesCount").text(total);
+}
+
+function updateChallengeCount(data) {
+  var count = 0;
+  for (chid in data) {
+    count += 1;
+  }
+  $("#myGamesCount").attr("challengeCount", count);
+  var total = parseInt($("#myGamesCount").attr("gameCount")) + count;
+  console.log("challenge", count, total);
+  $("#myGamesCount").text(total);
+}
+
 var ws = new ReconnectingWebSocket();
 //ws.debug = true;
 ws.onopen = function (evt) {
@@ -195,6 +225,18 @@ ws.onmessage = function (evt) {
   if (msg.event == "user.get") {
     Env.user = msg.data;
     $("#shUserName").text(Env.user.name);
+  }
+  // SWD replace all this with server side counters
+  if (msg.event === "game.playing") {
+    updateGameCount(msg.data, Env.user.oid);
+  }
+  if (msg.event === "game.turn.next") {
+    if (msg.data.whoTurn === Env.user.oid) {
+      changeGameCount(1);
+    }
+  }
+  if (msg.event === "challenge.list") {
+    updateChallengeCount(msg.data);
   }
   if (typeof processEvent === "function") {
     processEvent(msg, "socket");
