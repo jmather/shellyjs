@@ -4,10 +4,15 @@
 	<title>Shelly Login</title>
     <meta charset="UTF-8">
     <script src="/common/jquery-1.9.1.js"></script>
+
     <script src="/common/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
 
+    <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src="/static/js/common.js"></script>
+
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
     <script type="text/javascript" src="login.js"></script>
 
@@ -17,8 +22,17 @@ var Env = {{{EnvJson}}};
 
 $(init);
 function init() {
-    $("#shHeaderUserInfo").css("display", "none");
-    $("#shSubTitle").text("Login");
+    $(".header-user-info").css("display", "none");
+    $(".main-menu-items").css("display", "none");
+    hideAllMessages();
+
+    Env.shToken = $.cookie("shToken");
+    if (typeof (Env.shToken) === "undefined") {
+        debug.info("main", "info", "shToken undefined - using/setting nextUuid: " + Env.nextUuid);
+        Env.shToken = Env.nextUuid;
+        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: "/" });
+    }
+    debug.info("main", "info", "shToken using: " + Env.shToken);
 
     $("#loginBtn").click(function(e) {
         doLogin();
@@ -28,7 +42,11 @@ function init() {
 
     $(".CredsInput").on('keyup', function(e) {
         if (e.which == 13) {
-            doLogin();
+            if ($(".loginConfig").css("display") === "block") {
+                doLogin();
+            } else {
+                doRegister();
+            }
             e.preventDefault();
         }
     });
@@ -36,70 +54,57 @@ function init() {
 
 </script>
 
-<style>
+        <style type="text/css">
 
-button {
-    width: 130px;
-}
-.loginDiv {
-    float: none;
-}
-.info, .success, .warning, .error, .validation {
-    border: 1px solid;
-    padding:15px 10px 15px 50px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    display: none;
-    margin: 10px auto;
-    width: 400px;
-}
-.info {
-    color: #00529B;
-    background-color: #BDE5F8;
-    background-image: url("/static/images/toolbar/info.png");
-}
-.success {
-    color: #4F8A10;
-    background-color: #DFF2BF;
-    background-image:url("/static/images/toolbar/success.png");
-}
-.warning {
-    color: #9F6000;
-    background-color: #FEEFB3;
-    background-image: url("/static/images/toolbar/warning.png");
-}
-.error {
-    color: #D8000C;
-    background-color: #FFBABA;
-    background-image: url("/static/images/toolbar/error.png");
-}
+            .form-signin {
+                max-width: 300px;
+                padding: 19px 29px 29px;
+                margin: 0 auto 20px;
+                background-color: #fff;
+                border: 1px solid #e5e5e5;
+                -webkit-border-radius: 5px;
+                -moz-border-radius: 5px;
+                border-radius: 5px;
+                -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            }
+            .form-signin .checkbox {
+                margin-bottom: 10px;
+            }
+            .form-signin input[type="text"],
+            .form-signin input[type="password"] {
+                font-size: 16px;
+                height: auto;
+                margin-bottom: 15px;
+                padding: 7px 9px;
+            }
 </style>
 
 </head>
 <body>
 {{> header }}
 
-<div id="loginPage">
+<div class="container">
 
-    <div id="messageDiv">
-        <div id="signInInfo" class="info">Info message</div>
-        <div id="signInError" class="error">Error message</div>
+    <div class="row" style="margin-top: 80px;">
+        <form class="form-signin" autocomplete="off">
+            <div class="loginConfig"><h4>Sign In</h4></div>
+            <input type="text" id="email" class="input-block-level CredsInput" placeholder="Email address">
+            <input type="password" id="pass" class="input-block-level CredsInput" placeholder="Password">
+            <label class="checkbox">
+                <input type="checkbox" value="remember-me"> Remember me
+            </label>
+            <button id="loginBtn" class="btn btn-primary login-inline" type="submit">Sign in</button>
+        </form>
     </div>
 
-	<div class="gameBoxDiv loginDiv" style="width: 300px; align: center; margin: 0 auto; padding-top: 100px;">
-        <div class="gameBoxHeaderDiv" style="">Login</div>
-		<div id="signInForm" class="gameBoxInnerDiv" style="text-align: center">
-            <table>
-                <tr><td>User:</td><td><input type="email" id="email" name="email" class="CredsInput"/></td></tr>
-                <tr><td>Password:</td><td><input type="password" id="pass" name="email" class="CredsInput"/></td></tr>
-            </table>
-            <div class="loginConfig">
-                <button id="loginBtn">Login</button><br/>
-            </div>
-
-            <div id="signInLoading" style="display: none"><img src="/static/jsm/images/ajax-loader.gif" alt="working.." /></div>
-		</div>
-	</div>
+    <div id="messageDiv" class="row">
+        <div id="signInError" class="alert alert-error span5 offset3">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <div id="signInErrorMsg">Error message</div>
+        </div>
+    </div>
 
 </div>
 

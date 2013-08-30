@@ -41,22 +41,11 @@ function doLogin() {
 
 function hideAllMessages()
 {
-  $("#messageDiv").css("display", "none");
-  $("#signInInfo").css("display", "none");
 	$("#signInError").css("display", "none");
-  $("#signInLoading").css("display","none");
-}
-
-function info(txt)
-{
-  $("#messageDiv").css("display", "block");
-  $("#signInInfo").css("display", "block");
-	if(txt) $("#signInInfo").html(txt);
 }
 
 function error(txt)
 {
-  $("#messageDiv").css("display", "block");
   $("#signInError").css("display", "block");
-	if(txt) $("#signInError").html(txt);
+	if(txt) $("#signInErrorMsg").html(txt);
 }
