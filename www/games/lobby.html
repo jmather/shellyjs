@@ -213,8 +213,8 @@ function init() {
             <div class="gameBoxHeaderDiv">Find me a game with:</div>
             <div class="gameBoxInnerDiv" readonly style="text-align: center;">
                 <div style="height: 40px">
-                    <div id="matchSubmit" style="display: none; padding-top: 8px;">
-                        <button id="matchAdd">Next Available Opponent</button>
+                    <div id="matchSubmit" style="display: none; padding-top: 5px;">
+                        <button id="matchAdd" class="btn">Next Available Opponent</button>
                     </div>
                     <div id="matchLooking" style="display: none;">
                         <div>Currently looking for an opponent for you.</div>
@@ -227,8 +227,8 @@ function init() {
         <div class="challengeEmailDiv gameBoxDiv span6 offset3">
             <div class="gameBoxHeaderDiv">Challenge by email</div>
             <div class="gameBoxInnerDiv" readonly>
-                <input id="emailInput" type="text" style="width:390px; margin: 5px 5px;"></input>
-                <button id="sendEmail" style="float: right; margin-top: 2px">send</button>
+                <input id="emailInput" type="email" style="width:380px; margin: 7px 7px;"></input>
+                <button id="sendEmail" class="btn" style="float: right; margin-top: 2px; margin-bottom: 2px">send</button>
             </div>
         </div>
 
@@ -239,7 +239,7 @@ function init() {
             <div id="suggestedUserList" class="gameBoxInnerDiv">
                 <div id="userTemplate" style="display:none;">
                     <div class="user-avatar" style="float:left; margin: 3px;">
-                        <img id="userPict" class="userPictImg img-circle" src="/static/images/dflt-avatar.png"/>
+                        <img id="userPict" class="userPictImg img-rounded" src="/static/images/dflt-avatar.png"/>
 
                         <div id="onlineStatus" style="display:none;">
                             <img id="userOnlineDot" class="status" src="/static/images/green-dot.gif"/>
@@ -248,7 +248,7 @@ function init() {
                     <span id="userName"></span>
                     <span id="userGender"></span>
                     <span id="userAge"></span>
-                    <button id="userChallenge" style="float:right; margin-top: 7px;">challenge</button>
+                    <button id="userChallenge" class="btn" style="float:right; margin-top: 3px;">challenge</button>
                     <div style="clear:both"></div>
                 </div>
             </div>

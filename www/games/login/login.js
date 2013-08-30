@@ -117,7 +117,9 @@ function registerMode()
   $("#shSubTitle").text("Register");
 	hideAllMessages();
   $(".loginConfig").css("display", "none");
+  $(".login-inline").css("display", "none");
   $(".registerConfig").css("display", "block");
+  $(".register-inline").css("display", "inline");
   $(".registerRow").css("display", "");
 }
 
@@ -127,7 +129,9 @@ function loginMode()
 
 	hideAllMessages();
   $(".loginConfig").css("display", "block");
+  $(".login-inline").css("display", "inline");
   $(".registerConfig").css("display", "none");
+  $(".register-inline").css("display", "none");
   $(".registerRow").css("display", "none");
 }
 

@@ -67,6 +67,39 @@ function init() {
 
 </script>
 
+        <style type="text/css">
+            body {
+                padding-top: 40px;
+                padding-bottom: 40px;
+                background-color: #f5f5f5;
+            }
+
+            .form-signin {
+                max-width: 300px;
+                padding: 19px 29px 29px;
+                margin: 0 auto 20px;
+                background-color: #fff;
+                border: 1px solid #e5e5e5;
+                -webkit-border-radius: 5px;
+                -moz-border-radius: 5px;
+                border-radius: 5px;
+                -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            }
+            .form-signin .form-signin-heading,
+            .form-signin .checkbox {
+                margin-bottom: 10px;
+            }
+            .form-signin input[type="text"],
+            .form-signin input[type="password"] {
+                font-size: 16px;
+                height: auto;
+                margin-bottom: 15px;
+                padding: 7px 9px;
+            }
+
+        </style>
 <style>
 
 button {
@@ -116,8 +149,8 @@ button {
 <div id="loginPage">
 
 	<div style="text-align:center; font-size: 20px; margin: 30px 0px 30px 0px">
-		<div class="loginConfig">New user? <a href="javascript:registerMode();">click to register</a>.</div>
-		<div class="registerConfig">Existing user? <a href="javascript:loginMode();">click to login</a>.</div>
+        <div class="loginConfig">New user? <a href="javascript:registerMode();">click to register</a>.</div>
+        <div class="registerConfig">Existing user? <a href="javascript:loginMode();">click to login</a>.</div>
 	</div>
 	
 	<div id="messageDiv">
@@ -154,6 +187,24 @@ button {
             <div id="signInLoading" style="display: none"><img src="/static/jsm/images/ajax-loader.gif" alt="working.." /></div>
 		</div>
 	</div>
+
+    <div class="container">
+
+        <form class="form-signin">
+            <div class="loginConfig"><h4>Sign In or <a href="javascript:registerMode();">click to register</a>.</h4></div>
+            <div class="registerConfig"><h4>Register or <a href="javascript:loginMode();">click to login</a>.</h4></div>
+            <input type="text" class="input-block-level" placeholder="Email address">
+            <input type="password" class="input-block-level" placeholder="Password">
+            <input type="password" class="input-block-level registerConfig" placeholder="Verify Password">
+            <label class="checkbox">
+                <input type="checkbox" value="remember-me"> Remember me
+            </label>
+            <button class="btn btn-primary register-inline" type="submit">Register</button>
+            <button class="btn btn-primary login-inline" type="submit">Sign in</button>
+            <button class="btn btn-info" type="submit">Just Play</button>
+        </form>
+
+    </div> <!-- /container -->
 
 </div>
 

@@ -183,8 +183,8 @@ function init() {
                     <div id="gameTemplate" style="display:none;">
                         <span id="gameName">game-0</span>
                         <span id="gameTurn"></span>
-                        <button style="float:right;" id="myGameRemove">remove</button>
-                        <button style="float:right;" id="myGameJoin">play</button>
+                        <button class="btn" style="float:right;" id="myGameRemove">remove</button>
+                        <button class="btn" style="float:right;" id="myGameJoin">play</button>
                         <div style="clear:both"></div>
                     </div>
                 </div>
@@ -209,13 +209,13 @@ function init() {
                 <div id="challengeList" class="gameBoxInnerDiv">
                     <div id="challengeTemplate" style="display:none;">
                         <div style="width: 30px; float:left">
-                            <img id="challengerPict" class="userPictImg img-circle" src="/static/images/dflt-avatar.png"/>
+                            <img id="challengerPict" class="userPictImg img-rounded" src="/static/images/dflt-avatar.png"/>
                         </div>
                         <div style="width:260px; float:left">
                             <div>
                                 <span id="challengerName" class="userAttr" style="float:left">player</span>
-                                <button id="challengeAccept" class="UserBtn" style="float:right">accept</button>
-                                <button id="challengeDecline" class="UserBtn" style="float:right">decline</button>
+                                <button id="challengeAccept" class="btn UserBtn" style="float:right">accept</button>
+                                <button id="challengeDecline" class="btn UserBtn" style="float:right">decline</button>
                             </div>
                             <div style="clear:both"></div>
                             <div>
