@@ -56,8 +56,7 @@ function setPlayers(playerList, whoTurn) {
 
 function setState(game) {
     $.cookie("shLastGame" + Env.user.oid, game.oid, { expires: 3650, path: "/" });
-    hideError();
-    hideInfo();
+    hideAllMessages();
     $(".gameOverDiv").css("display", "none");
 
     var gameBoard = game.state.gameBoard;

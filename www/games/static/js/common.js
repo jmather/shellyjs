@@ -56,6 +56,7 @@ function log(api, type, msg) {
 }
 
 function showError(msg) {
+  console.log("here");
   $("#errorMessage").css("display", "block");
   $("#errorText").text("Oops: " + msg);
 }
@@ -71,6 +72,11 @@ function showInfo(msg) {
 
 function hideInfo() {
   $("#infoMessage").css("display", "none");
+}
+
+function hideAllMessages() {
+  hideError();
+  hideInfo();
 }
 
 function gameInit(startInfo) {
