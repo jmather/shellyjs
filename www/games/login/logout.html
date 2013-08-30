@@ -20,7 +20,9 @@ skLogout();
 
 $(init);
 function init() {
-    $("#shHeaderUserInfo").css("display", "none");
+    $(".header-user-info").css("display", "none");
+    $(".main-menu-items").css("display", "none");
+
     $("#shSubTitle").text("Logout");
 
     $.removeCookie("shSession", {path: "/", expires: 365});

@@ -14,7 +14,6 @@ function doLogin() {
   }
   console.log(data);
 
-  $("#signInLoading").css("display","block");
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -23,7 +22,6 @@ function doLogin() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      $("#signInLoading").css("display","none");
       debug.info(res);
       if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
@@ -52,7 +50,6 @@ function doRegister() {
     password: $("#pass").val()
   }
 
-  $("#signInLoading").css("display","block");
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -61,7 +58,6 @@ function doRegister() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      $("#signInLoading").css("display","none");
       debug.info(res);
       if (res[0].event === "reg.create") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
@@ -84,7 +80,6 @@ function doAnonymous() {
   }
   console.log(data);
 
-  $("#signInLoading").css("display","block");
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -93,13 +88,12 @@ function doAnonymous() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      $("#signInLoading").css("display","none");
       debug.info(res);
       if (res[0].event === "reg.anonymous") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/index.html";
       } else {
-        if (res[0].code === "user_upgraded") {
+        if (res[0].code === "user-upgraded") {
           $("#upgradeDiv").css("display", "block");
         } else {
           error(res[0].message);
@@ -126,7 +120,6 @@ function registerMode()
 function loginMode()
 {
   $("#shSubTitle").text("Login");
-
 	hideAllMessages();
   $(".loginConfig").css("display", "block");
   $(".login-inline").css("display", "inline");
@@ -137,23 +130,12 @@ function loginMode()
 
 function hideAllMessages()
 {
-  $("#messageDiv").css("display", "none");
-  $("#signInInfo").css("display", "none");
-	$("#signInError").css("display", "none");
+  $("#signInError").css("display", "none");
   $("#upgradeDiv").css("display", "none");
-  $("#signInLoading").css("display","none");
-}
-
-function info(txt)
-{
-  $("#messageDiv").css("display", "block");
-  $("#signInInfo").css("display", "block");
-	if(txt) $("#signInInfo").html(txt);
 }
 
 function error(txt)
 {
-  $("#messageDiv").css("display", "block");
   $("#signInError").css("display", "block");
-	if(txt) $("#signInError").html(txt);
+	if(txt) $("#signInErrorMsg").html(txt);
 }

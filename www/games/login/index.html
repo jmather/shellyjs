@@ -4,8 +4,12 @@
 	<title>Shelly Login</title>
     <meta charset="UTF-8">
     <script src="/common/jquery-1.9.1.js"></script>
+
     <script src="/common/jquery.cookie.js"></script>
     <script src="/static/js/ba-debug.js"></script>
+
+    <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src="/static/js/common.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
@@ -18,7 +22,8 @@ var Env = {{{EnvJson}}};
 
 $(init);
 function init() {
-    $("#shHeaderUserInfo").css("display", "none");
+    $(".header-user-info").css("display", "none");
+    $(".main-menu-items").css("display", "none");
 
     Env.shToken = $.cookie("shToken");
     if (typeof (Env.shToken) === "undefined") {
@@ -28,7 +33,7 @@ function init() {
     }
     debug.info("main", "info", "shToken using: " + Env.shToken);
 
-    $(".shHeaderDiv .userInfo").css("display", "none");
+    commInit();
 	loginMode();
 
     $("#loginBtn").click(function(e) {
@@ -68,11 +73,6 @@ function init() {
 </script>
 
         <style type="text/css">
-            body {
-                padding-top: 40px;
-                padding-bottom: 40px;
-                background-color: #f5f5f5;
-            }
 
             .form-signin {
                 max-width: 300px;
@@ -87,7 +87,6 @@ function init() {
                 -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                 box-shadow: 0 1px 2px rgba(0,0,0,.05);
             }
-            .form-signin .form-signin-heading,
             .form-signin .checkbox {
                 margin-bottom: 10px;
             }
@@ -99,112 +98,51 @@ function init() {
                 padding: 7px 9px;
             }
 
-        </style>
-<style>
-
-button {
-    width: 130px;
-}
-
-.info, .success, .warning, .error, .validation {
-    border: 1px solid;
-    padding:15px 10px 15px 50px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    display: none;
-    margin: 10px auto;
-    width: 400px;
-}
-.info {
-    color: #00529B;
-    background-color: #BDE5F8;
-    background-image: url("/static/images/toolbar/info.png");
-}
-
-.registerConfig {
-    display: none;
-}
-
-.success {
-    color: #4F8A10;
-    background-color: #DFF2BF;
-    background-image:url("/static/images/toolbar/success.png");
-}
-.warning {
-    color: #9F6000;
-    background-color: #FEEFB3;
-    background-image: url("/static/images/toolbar/warning.png");
-}
-.error {
-    color: #D8000C;
-    background-color: #FFBABA;
-    background-image: url("/static/images/toolbar/error.png");
-}
+            .registerConfig {
+                display: none;
+            }
 </style>
 
 </head>
 <body>
 {{> header }}
 
-<div id="loginPage">
+<div class="container">
 
-	<div style="text-align:center; font-size: 20px; margin: 30px 0px 30px 0px">
-        <div class="loginConfig">New user? <a href="javascript:registerMode();">click to register</a>.</div>
-        <div class="registerConfig">Existing user? <a href="javascript:loginMode();">click to login</a>.</div>
-	</div>
-	
-	<div id="messageDiv">
-		<div id="signInInfo" class="info">Info message</div>
-		<div id="signInError" class="error">Error message</div>
-	</div>
-
-    <div id="upgradeDiv" class="info">
-        <div>
-        The anonymous account on this machine has been upgraded.  Please login or create a
-        new anonymous account.
-        </div>
-        <div style="text-align: center; margin-top: 10px; position: relative; left: -20px">
-            <button id="newAnonymousBtn">New Anonymous</button>
-        </div>
-    </div>
-	
-	<div class="gameBoxDiv" style="width: 300px; align: center; margin: 0 auto;">
-        <div class="gameBoxHeaderDiv" style="">Login</div>
-		<div id="signInForm" class="gameBoxInnerDiv" style="text-align: center">
-            <table>
-                <tr><td>User:</td><td><input type="email" id="email" name="email" class="CredsInput"/></td></tr>
-                <tr><td>Password:</td><td><input type="password" id="pass" name="email" class="CredsInput"/></td></tr>
-                <tr class="registerRow">
-                    <td>Password Verify:</td><td><input type="password" id="passVerify" name="passVerify" class="CredsInput"/></td>
-                </tr>
-            </table>
-            <div class="loginConfig">
-                <button id="loginBtn">Login</button><br/>
-                <button id="anonymousBtn">Anonymous</button>
-            </div>
-            <div class="registerConfig"><button id="registerBtn" class="regiserConfig">Register</button></div>
-
-            <div id="signInLoading" style="display: none"><img src="/static/jsm/images/ajax-loader.gif" alt="working.." /></div>
-		</div>
-	</div>
-
-    <div class="container">
-
+    <div class="row" style="margin-top: 80px;">
         <form class="form-signin">
             <div class="loginConfig"><h4>Sign In or <a href="javascript:registerMode();">click to register</a>.</h4></div>
             <div class="registerConfig"><h4>Register or <a href="javascript:loginMode();">click to login</a>.</h4></div>
-            <input type="text" class="input-block-level" placeholder="Email address">
-            <input type="password" class="input-block-level" placeholder="Password">
-            <input type="password" class="input-block-level registerConfig" placeholder="Verify Password">
+            <input type="text" id="email" class="input-block-level CredsInput" placeholder="Email address">
+            <input type="password" id="pass" class="input-block-level CredsInput" placeholder="Password">
+            <input type="password" id="passVerify" class="input-block-level CredsInput registerConfig" placeholder="Verify Password">
             <label class="checkbox">
                 <input type="checkbox" value="remember-me"> Remember me
             </label>
-            <button class="btn btn-primary register-inline" type="submit">Register</button>
-            <button class="btn btn-primary login-inline" type="submit">Sign in</button>
-            <button class="btn btn-info" type="submit">Just Play</button>
+            <button id="registerBtn" class="btn btn-primary register-inline" type="submit">Register</button>
+            <button id="loginBtn" class="btn btn-primary login-inline" type="submit">Sign in</button>
+            <button id="anonymousBtn" class="btn btn-info" type="submit">Just Play</button>
         </form>
+    </div>
 
-    </div> <!-- /container -->
+    <div id="messageDiv" class="row">
+        <div id="signInError" class="alert alert-error span5 offset3">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <div id="signInErrorMsg">Error message</div>
+        </div>
+    </div>
+
+    <div id="upgradeDiv" class="row">
+        <div class="alert alert-info span5 offset3">
+        <div>
+            The anonymous account on this machine has been upgraded.  Please login or create a
+            new anonymous account.
+        </div>
+        <div style="text-align: center; margin-top: 10px; position: relative; left: -20px">
+            <button id="newAnonymousBtn" class="btn">New Anonymous</button>
+        </div>
+        </div>
+    </div>
 
 </div>
 
