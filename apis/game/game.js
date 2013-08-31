@@ -6,6 +6,7 @@ var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
 var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
+var counter = require(global.C.BASEDIR + "/apis/counter/counter.js");
 var module = require(global.C.BASEDIR + "/apis/api/api.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
@@ -145,6 +146,9 @@ Game.notifyTurn = function (req, res) {
     name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
     pic: ""});
 
+  // increment the turns counter
+  counter.incr(gameData.whoTurn, "turns");
+
   // notify anyone that is onine
   dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // exclude me
   // noitify me - rest support
@@ -201,7 +205,7 @@ Game.create = function (req, res, cb) {
     addGamePlayingMulti(req.loader, req.body.players, game, _w(cb, function (error, data) {
       // SWD ignore any errors for now
       if (error) {
-        shlog.error("game", "add_players", "unable to add a player", data);
+        shlog.error("add-players", "unable to add a player", data);
       }
       // copy profile info
       sh.extendProfiles(req.loader, game.get("players"), _w(cb, function (error, data) {
@@ -317,6 +321,9 @@ Game.turn = function (req, res, cb) {
   gameData.turnsPlayed += 1;
   gameData.status = "playing";  // turn looks valid, game module sets "over"
 
+  // update the turn counter
+  counter.decr(req.session.uid, "turns");
+
   if (!_.isFunction(req.env.gameModule.turn)) {
     res.add(sh.event("game.turn", gameData));
     return cb(0);
@@ -351,8 +358,8 @@ Game.reset = function (req, res, cb) {
 
   gameData.rounds += 1;
   gameData.turns = 0;
-  gameData.whoTurn = req.session.uid;
   gameData.status = "playing";
+  // don't change the whoTurn so we don't have to adjust the counters or notifyTurn
 
   if (_.isUndefined(req.env.gameModule)) {
     res.add(sh.error("game-reset-undefined", "this game has no reset"));
@@ -361,7 +368,6 @@ Game.reset = function (req, res, cb) {
 
   if (!_.isFunction(req.env.gameModule.reset)) {
     Game.notify(req, res, sh.event("game.reset", req.env.game.getData()));
-    Game.notifyTurn(req, res);
     return cb(0);
   }
   req.env.gameModule.reset(req, res, _w(cb, function (error, data) {
@@ -373,7 +379,6 @@ Game.reset = function (req, res, cb) {
       data = req.env.game.getData();
     }
     Game.notify(req, res, sh.event("game.reset", data));
-    Game.notifyTurn(req, res);
     return cb(0);
   }));
 };
@@ -464,6 +469,16 @@ Game.playing = function (req, res, cb) {
         res.add(sh.error("playing-fillgames", "unable to fill games in playing list", data));
         return cb(1);
       }
+
+      // take the chance to reset the turn counters
+      var turnCount = 0;
+      _.each(data, function (obj, key) {
+        if (obj.whoTurn === uid) {
+          turnCount += 1;
+        }
+      });
+      counter.set(uid, "turns", turnCount);
+
       res.add(sh.event("game.playing", data));
       return cb(0);
     }));

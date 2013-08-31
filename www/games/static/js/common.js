@@ -175,38 +175,21 @@ function setMyTurns(gameList) {
   }
 }
 
-function updateGameCount(data, uid) {
-  var count = 0;
-  for (chid in data) {
-    if (data[chid].whoTurn === uid) {
-      count += 1;
-    }
-    console.log(chid);
+function updateCount(data) {
+  var total = 0;
+  if (data.name === "turns") {
+    $("#myGamesCount").attr("turnCount", data.count);
+    total = parseInt($("#myGamesCount").attr("challengeCount")) + data.count;
   }
-  $("#myGamesCount").attr("gameCount", count);
-  var total = parseInt($("#myGamesCount").attr("challengeCount")) + count;
-  $("#myGamesCount").text(total);
-}
-
-function changeGameCount(amount) {
-  var count = parseInt($("#myGamesCount").attr("gameCount")) + amount;
-  $("#myGamesCount").attr("gameCount", count);
-  var total = parseInt($("#myGamesCount").attr("challengeCount")) + amount;
-  $("#myGamesCount").text(total);
-}
-
-function updateChallengeCount(data) {
-  var count = 0;
-  for (chid in data) {
-    count += 1;
+  if (data.name === "challenges") {
+    $("#myGamesCount").attr("challengeCount", data.count);
+    total = parseInt($("#myGamesCount").attr("turnCount")) + data.count;
   }
-  $("#myGamesCount").attr("challengeCount", count);
-  var total = parseInt($("#myGamesCount").attr("gameCount")) + count;
-  console.log("challenge", count, total);
-  $("#myGamesCount").text(total);
+  $("#myGamesCount").text(total===0?"":total);
 }
 
 var ws = new ReconnectingWebSocket();
+
 //ws.debug = true;
 ws.onopen = function (evt) {
   console.log("serverUrl:", Env.socketUrl);
@@ -215,7 +198,7 @@ ws.onopen = function (evt) {
     shellyInit();
   }
   try {
-    $("#serverConnectDlg").dialog("close");
+    $("#serverDisconnectDlg").modal("hide");
   } catch (e) {}
 }
 ws.onmessage = function (evt) {
@@ -226,17 +209,8 @@ ws.onmessage = function (evt) {
     Env.user = msg.data;
     $("#shUserName").text(Env.user.name);
   }
-  // SWD replace all this with server side counters
-  if (msg.event === "game.playing") {
-    updateGameCount(msg.data, Env.user.oid);
-  }
-  if (msg.event === "game.turn.next") {
-    if (msg.data.whoTurn === Env.user.oid) {
-      changeGameCount(1);
-    }
-  }
-  if (msg.event === "challenge.list") {
-    updateChallengeCount(msg.data);
+  if (msg.event === "counter.update" || msg.event === "counter.get") {
+    updateCount(msg.data);
   }
   if (typeof processEvent === "function") {
     processEvent(msg, "socket");
@@ -247,7 +221,7 @@ ws.onclose = function (evt) {
 }
 ws.onerror = function (evt) {
   log("socket", "error", JSON.stringify(evt));
-  $("#serverConnectDlg").dialog({modal: true, height: 110});
+  $("#serverDisconnectDlg").modal({keyboard: false});
 }
 
 // assumes global ws object
