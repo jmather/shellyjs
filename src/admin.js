@@ -107,7 +107,7 @@ app.get("*.html", function (req, res) {
   var env = createEnv(req);
 
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
+    partials: {header: "header", footer: "footer"}});
 });
 
 app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
@@ -127,7 +127,7 @@ app.use(function (err, req, res, next) {
 
   res.status(500);
   res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", adminNav: "adminnav"}});
+    partials: {header: "header", footer: "footer"}});
 
   return 0;
 });
