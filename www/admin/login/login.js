@@ -1,7 +1,6 @@
 
 function setToken(token) {
   Env.shToken = token;
-  debug.info("reseting shToken", Env.shToken);
   $.cookie("shToken", Env.shToken, { expires: 3650, path: "/" });
 }
 
@@ -25,7 +24,6 @@ function doLogin() {
     data: JSON.stringify(data),
     success: function (res, status) {
       $("#signInLoading").css("display","none");
-      debug.info(res);
       if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/index.html";

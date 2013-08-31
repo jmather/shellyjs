@@ -1,7 +1,6 @@
 
 function setToken(token) {
   Env.shToken = token;
-  debug.info("reseting shToken", Env.shToken);
   $.cookie("shToken", Env.shToken, { expires: 3650, path: "/" });
 }
 
@@ -22,7 +21,6 @@ function doLogin() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      debug.info(res);
       if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         console.log("all good", res[0].data.session);
@@ -58,7 +56,6 @@ function doRegister() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      debug.info(res);
       if (res[0].event === "reg.create") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/index.html";
@@ -88,7 +85,6 @@ function doAnonymous() {
     dataType: "json",
     data: JSON.stringify(data),
     success: function (res, status) {
-      debug.info(res);
       if (res[0].event === "reg.anonymous") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
         window.location.href = "/index.html";

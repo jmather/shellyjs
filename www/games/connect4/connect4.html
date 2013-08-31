@@ -2,16 +2,11 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <link rel="stylesheet" href="/common/jquery-ui-1.10.2/css/smoothness/jquery-ui.css" />
     <script src="/common/jquery-1.9.1.js"></script>
-    <script src="/common/jquery-ui-1.10.2/js/jquery-ui.js"></script>
-    <script src="/common/jquery.cookie.js"></script>
-    <script src="/static/js/ba-debug.js"></script>
     <script src="/static/js/reconnecting-websocket.js"></script>
-
-	<script type="text/javascript" src="crafty-min.js"></script>
     <script src="/static/js/common.js"></script>
-	<script type="text/javascript" src="game.js"></script>
+    <script src="crafty-min.js"></script>
+	<script src="game.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
@@ -280,52 +275,52 @@
 
 <div class="container">
 
-<div class="row">
-<div id="cr-stage" class="span6"></div>
+    <div class="row">
+        <div id="cr-stage" class="span6"></div>
 
-<div class="span3">
-<div class="gameInfoDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv" style="">Game Info</div>
-    <div class="gameBoxInnerDiv">
-        <div>your color: <span id="playerColor">unknown</span></div>
-        <div>whose turn: <span id="whoTurn"></span></div>
-        <div>winner: <span id="gameWinner">none</span></div>
-        <button id="gameReset" class="btn" style="float:right">reset</button>
-    </div>
-</div>
+        <div class="span3">
+            <div class="gameInfoDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv" style="">Game Info</div>
+                <div class="gameBoxInnerDiv">
+                    <div>your color: <span id="playerColor">unknown</span></div>
+                    <div>whose turn: <span id="whoTurn"></span></div>
+                    <div>winner: <span id="gameWinner">none</span></div>
+                    <button id="gameReset" class="btn" style="float:right">reset</button>
+                </div>
+            </div>
 
-<div class="gameInfoDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv" style="">Players</div>
-    <div class="gameBoxInnerDiv" id="playerList">
-        <div id="playerTemplate" style="display:none">
-            <span id="playerName">name</span><span id="playerStatus" style="float:right">off</span>
+            <div class="gameInfoDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv" style="">Players</div>
+                <div class="gameBoxInnerDiv" id="playerList">
+                    <div id="playerTemplate" style="display:none">
+                        <span id="playerName">name</span><span id="playerStatus" style="float:right">off</span>
+                    </div>
+                </div>
+            </div>
+            <div class="messageLogDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv">Messages</div>
+                <div class="gameBoxInnerDiv" readonly>
+                    <div id="messageLog" style="overflow: auto;" readonly></div>
+                    <div class="gameBoxFooterDiv">
+                        <input id="chatInput" type="text" style="width: 70%;"></input/>
+                        <button id="sendChat" class="btn btn-small" style="float:right;">send</button>
+                    </div>
+                </div>
+            </div>
+            <div class="otherTurnsDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv">Other Turns</div>
+                <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
+                    <div id="gameTemplate" style="display:none;">
+                        <span id="gameName">game-0</span>
+                        <span id="gameTurn"></span>
+                        <button class="btn" style="float:right;" id="myGameRemove">remove</button>
+                        <button class="btn" style="float:right;" id="myGameJoin">play</button>
+                        <div style="clear:both"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<div class="messageLogDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Messages</div>
-    <div class="gameBoxInnerDiv" readonly>
-        <div id="messageLog" style="overflow: auto;" readonly></div>
-        <div class="gameBoxFooterDiv">
-            <input id="chatInput" type="text" style="width: 70%;"></input/>
-            <button id="sendChat" class="btn btn-small" style="float:right;">send</button>
-        </div>
-    </div>
-</div>
-<div class="otherTurnsDiv gameBoxDiv">
-    <div class="gameBoxHeaderDiv">Other Turns</div>
-    <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
-        <div id="gameTemplate" style="display:none;">
-            <span id="gameName">game-0</span>
-            <span id="gameTurn"></span>
-            <button class="btn" style="float:right;" id="myGameRemove">remove</button>
-            <button class="btn" style="float:right;" id="myGameJoin">play</button>
-            <div style="clear:both"></div>
-        </div>
-    </div>
-</div>
-</div>
-</div>
 </div>
 
 {{> footer}}
