@@ -356,10 +356,14 @@ Game.get = function (req, res, cb) {
 Game.reset = function (req, res, cb) {
   var gameData = req.env.game.getData();
 
+  var newTurn = false;
   gameData.rounds += 1;
   gameData.turns = 0;
+  if (gameData.status === "over") {
+    gameData.whoTurn = req.session.uid;
+    newTurn = true;
+  }
   gameData.status = "playing";
-  // don't change the whoTurn so we don't have to adjust the counters or notifyTurn
 
   if (_.isUndefined(req.env.gameModule)) {
     res.add(sh.error("game-reset-undefined", "this game has no reset"));
@@ -379,6 +383,9 @@ Game.reset = function (req, res, cb) {
       data = req.env.game.getData();
     }
     Game.notify(req, res, sh.event("game.reset", data));
+    if (newTurn) {
+      Game.notifyTurn(req, res);
+    }
     return cb(0);
   }));
 };
