@@ -7,6 +7,7 @@ var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 var shcall = require(global.C.BASEDIR + "/lib/shcall.js");
 var session = require(global.C.BASEDIR + "/lib/shsession.js");
 var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
+var counter = require(global.C.BASEDIR + "/apis/counter/counter.js");
 var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
@@ -86,6 +87,10 @@ Challenge.make = function (req, res, cb) {
         _w(cb, function (err, data) {
           // don't care
         }));
+
+      // adjust the challenges counter
+      counter.incr(req.body.toUid, "challenges");
+
       res.add(sh.event("challenge.make", {chId: sendId, sent: sendData}));
       return cb(0);
     }));
@@ -166,6 +171,9 @@ Challenge.accept = function (req, res, cb) {
         res.add(event);
         dispatch.sendUsers(req.body.players, event, req.session.uid);
 
+        // adjust the challenges counter
+        counter.decr(req.session.uid, "challenges");
+
         req.body.toUid = fromUid;  // send the notif back to creating user
         sendAccept(req, res, cb);
       }));
@@ -182,6 +190,10 @@ Challenge.decline = function (req, res, cb) {
       res.add(sh.error("challenge-remove", "unable to remove challenge"), data);
       return cb(err);
     }
+
+    // adjust the challenges counter
+    counter.decr(req.session.uid, "challenges");
+
     res.add(sh.event("challenge.decline", {chId: req.body.chId}));
     return cb(0);
   }));
@@ -196,6 +208,10 @@ Challenge.withdraw = function (req, res, cb) {
       res.add(sh.error("challenge-remove", "unable to remove challenge"), data);
       return cb(err);
     }
+
+    // adjust the challenges counter
+    counter.decr(toUid, "challenges");
+
     res.add(sh.event("challenge.withdraw", {chId: req.body.chId}));
     return cb(0);
   }));
@@ -208,6 +224,10 @@ Challenge.list = function (req, res, cb) {
       res.add(sh.error("challenges-getall", "unable to load challenge list", {error: err, data: data}));
       return cb(err);
     }
+
+    // reset the challenges counter
+    counter.set(req.session.uid, "challenges", Object.keys(data).length);
+
     res.add(sh.event("challenge.list", data));
     return cb(0);
   }));
