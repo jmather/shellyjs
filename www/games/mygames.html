@@ -1,7 +1,9 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
-<title>Lobby</title>
+<title>My Games</title>
     <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/jquery.cookie.js"></script>
+
     <script src="/static/js/fastclick.js"></script>
     <script src="/static/js/reconnecting-websocket.js"></script>
     <script src="/static/js/common.js"></script>
@@ -46,6 +48,7 @@
 
 <script language="javascript">
 var Env = {{{EnvJson}}};
+setSession();
 
 function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select

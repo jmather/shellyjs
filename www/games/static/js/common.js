@@ -15,10 +15,11 @@ function getURLParameter(name, dflt) {
 
 function setSession() {
   var psession = getURLParameter("s");
-  if (psession !== null) {
+  if (psession !== null && psession !== Env.session) {
     console.log("session set", psession);
     Env.session = psession;
     $.cookie("shSession", psession, {path: "/", expires: 365});
+    window.location.reload();
   }
 }
 
