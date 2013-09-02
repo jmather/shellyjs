@@ -69,7 +69,8 @@ global.CDEF("SESSION_PRIVATE_KEY", "session-key-here");
 
 
 // email settings
-global.CDEF("EMAIL_NOSEND", true);
+global.CDEF("EMAIL_NOSEND", false);
+global.CDEF("EMAIL_SENDTO", "");
 global.CDEF("EMAIL_QUEUE", true);
 global.CDEF("EMAIL_DEFAULT_FROM", "Game Shelly <shelly@gameshelly.com>");
 global.CDEF("EMAIL_TRANSPORT", "SMTP");

@@ -81,14 +81,14 @@ Challenge.make = function (req, res, cb) {
         res.add(sh.error("challenges-recvset", "unable to save challenge recv", {error: err, data: data}));
         return cb(err);
       }
-      res.chRecievedId = recvId;  // used by sendEmail - don't really need here
+      res.chRecievedId = recvId;  // used by sendChallenge when called from challenge.email
       dispatch.sendUser(req.body.toUid,
         sh.event("challenge.send", {chId: recvId, challenge: recvData}),
         _w(cb, function (err, data) {
           // don't care
         }));
 
-      // adjust the challenges counter
+      // adjust  the challenges counter
       counter.incr(req.body.toUid, "challenges");
 
       res.add(sh.event("challenge.make", {chId: sendId, sent: sendData}));
@@ -258,6 +258,11 @@ Challenge.alist = function (req, res, cb) {
 };
 
 function sendChallenge(req, res, cb) {
+  if (_.isUndefined(res.chRecievedId)) {
+    res.add(sh.error("missing-info", "unknown challenge id for email template", challengeUser));
+    return cb(1);
+  }
+
   req.loader.exists("kUser", req.body.toUid, _w(cb, function (err, challengeUser) {
     if (err) {
       res.add(sh.error("user-bad", "unable to load challenge user", challengeUser));
@@ -270,7 +275,7 @@ function sendChallenge(req, res, cb) {
       playUrl: global.C.GAMES_URL + "/lobby.html?" + querystring.stringify(
         {"s": session.create(challengeUser.get("oid")), "gn": req.body.game}
       ),
-      challengeUrl: global.C.GAMES_URL + "/challenges.html?" + querystring.stringify(
+      challengeUrl: global.C.GAMES_URL + "/mygames.html?" + querystring.stringify(
         {"s": session.create(challengeUser.get("oid")), "chId": res.chRecievedId}
       ),
       template: "challenge"};
