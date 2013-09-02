@@ -12,7 +12,12 @@ shelly.start({}, function (err, data) {
 
 ## Installation
 
-    $ npm install shelly
+    $ npm install shelly (NOTE: version 0.1 has not been pushed to npmjs.org)
+    
+ or if you want the tip
+
+    $ npm install git+ssh://git@github.com:skool51/shelly.git
+  
 
 ## Quick Start
 
@@ -21,10 +26,6 @@ shelly.start({}, function (err, data) {
  Install Shelly:
 
     $ npm install shelly
-
- or if you want the tip
-
-    npm install git+ssh://git@github.com:skool51/shelly.git
 
  Start the server:
 
