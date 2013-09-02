@@ -22,6 +22,10 @@ shelly.start({}, function (err, data) {
 
     $ npm install shelly
 
+ or if you want the tip
+
+    npm install git+ssh://git@github.com:skool51/shelly.git
+
  Start the server:
 
     $ node node_modules/shelly/example/app.js
