@@ -326,7 +326,7 @@ function addMessage(channel, data) {
     color = "black";
   }
 
-  var disp = "<div class='messageObject' style='height:13px;font-size:10px;white-space:nowrap;'>";
+  var disp = "<div class='messageObject' style='height:13px;font-size:12px;white-space:nowrap;'>";
   disp += "<div class='WordWrap'>";
   disp += "<span style='color:" + color + ";'>" + name + ": </span>";
   disp += "<span id='mText' style='color:" + bodyColor + ";'></span>";
