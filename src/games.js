@@ -32,12 +32,18 @@ app.use(function (req, res, next) {
   }
 
   shlog.info("games", "session check", req.path);
+  var s = req.param("s");
+  if (_.isString(s)) {
+    shlog.info("games", "session passed in as param: s");
+    req.cookies.shSession = s;
+    res.cookie("shSession", s);
+  }
   if (_.isUndefined(req.cookies.shSession)) {
     shlog.info("games", "redirect - no session");
     res.redirect("/login/index.html");
     return 0;
   }
-  shlog.info("games", "found cookie shSession: ", req.cookies.shSession);
+  shlog.info("games", "found shSession: ", req.cookies.shSession);
 
   // there is no dump and these page do not modify objects
   req.loader = new ShLoader();

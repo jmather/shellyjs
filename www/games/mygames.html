@@ -48,7 +48,6 @@
 
 <script language="javascript">
 var Env = {{{EnvJson}}};
-setSession();
 
 function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select

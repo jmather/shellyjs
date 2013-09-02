@@ -13,16 +13,6 @@ function getURLParameter(name, dflt) {
   return p;
 }
 
-function setSession() {
-  var psession = getURLParameter("s");
-  if (psession !== null && psession !== Env.session) {
-    console.log("session set", psession);
-    Env.session = psession;
-    $.cookie("shSession", psession, {path: "/", expires: 365});
-    window.location.reload();
-  }
-}
-
 function log(api, type, msg) {
   var $mlog = $("#commLog");
   gLogCount++;
