@@ -62,7 +62,7 @@ example.echo = function (req, res, cb) {
 
 1. APIs are defined by files placed in the "apis" directory and in a subdirectory with the same name "apis/example/example.js".
 
-2. They are called via a json post or websocket send:
+2. They are called via json post or websocket send:
 
 ```json
 {
@@ -120,3 +120,4 @@ By default the api files are reloaded each call.  This option should be turned o
   * cluster.js - cluster information and control
   * system.js - system information
   * user.js - user control
+  * counter.js - user counter access and notification
