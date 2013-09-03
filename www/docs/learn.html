@@ -75,48 +75,76 @@
           <li><a href="#overview"><i class="icon-chevron-right"></i> Overview</a></li>
           <li><a href="#createApi"><i class="icon-chevron-right"></i> Create an API</a></li>
           <li><a href="#testApi"><i class="icon-chevron-right"></i> Test an API</a></li>
+          <li><a href="#addFunction"><i class="icon-chevron-right"></i> Add a function</a></li>
           <li><a href="#runCluster"><i class="icon-chevron-right"></i> Run a two server cluster</a></li>
+          <li><a href="#samples"><i class="icon-chevron-right"></i> Samples</a></li>
         </ul>
       </div>
       <div class="span9">
 
 
-        <!-- Overview
-        ================================================== -->
-        <section id="overview">
-          <div class="page-header">
-            <h1>Shelly Overview</h1>
-          </div>
+          <!-- Overview
+          ================================================== -->
+          <section id="overview">
+              <div class="page-header">
+                  <h1>Shelly Overview</h1>
+              </div>
 
-          <h3>foo or foo</h3>
-          <p>test <strong>strong</strong></p>
-
-          <pre class="prettyprint linenums">$('body').off('.data-api')</pre>
-
+              <h3>API Functionality</h3>
+              <p>APIs are defined as modules with specific members and functions.</p>
+              <p>Functions may be accessed via HTTP or Websocket.</p>
+              <p>On each call paramters are verified along with ensuring the correct security access.</p>
 <pre class="prettyprint linenums">
-$("#myModal").modal()                       // initialized with defaults
-$("#myModal").modal({ keyboard: false })   // initialized with no keyboard
-$("#myModal").modal('show')                // initializes and invokes show immediately</p>
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+
+var example = exports;
+
+example.desc = "example api";
+example.functions = {
+  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []}
+};
+
+example.echo = function (req, res, cb) {
+  res.add(sh.event("example.echo", req.body.param1));
+  return cb(0);
+};
 </pre>
-          <p>Each plugin also exposes its raw constructor on a `Constructor` property: <code>$.fn.popover.Constructor</code>. If you'd like to get a particular plugin instance, retrieve it directly from an element: <code>$('[rel=popover]').data('popover')</code>.</p>
 
-          <h3>No Conflict</h3>
-          <p>Sometimes it is necessary to use Bootstrap plugins with other UI frameworks. In these circumstances,  namespace collisions can occasionally occur. If this happens, you may call <code>.noConflict</code> on the plugin you wish to revert the value of.</p>
+              <h3>API Structure</h3>
 
+              <p>There are two classes of APIs - Core and App.  The API definitions and capabilities are identical.  The
+                 purpose of the segmentation mostly to facilitate code seperation for upgrades.
+              </p>
+              <h4>Core APIs</h4>
+              <p>These contain basic functionality such as registration, counters, basic game play, and others.  They
+                  ship with the Shelly module and are located in:<p>
+              <div class="alert alert-info">
+                  ~/node_modules/shelly/apis/
+              </div>
+              <p>They can be viewed in the admin via the "Core APIs" menu:
+                  <a href="http://localhost:5100/core.html">http://localhost:5100/core.html</a>
+              </p>
+              <h4>App APIs</h4>
+              <p>These are the developer defined APIs and are located in the <strong>APP_API_DIR</strong> config setting<p>
 <pre class="prettyprint linenums">
-var bootstrapButton = $.fn.button.noConflict() // return $.fn.button to previously assigned value
-$.fn.bootstrapBtn = bootstrapButton            // give $().bootstrapBtn the bootstrap functionality
+shelly.start({
+  APP_API_DIR: __dirname + "/apis",
+});
 </pre>
+              <p>They can be viewed in the admin via the "App APIs" menu:
+                  <a href="http://localhost:5100/core.html?api=api.app">http://localhost:5100/core.html?api=api.app</a>
+              </p>
+              <div class="alert alert-info">
+                  NOTE: <strong>APP_API_DIR</strong> defaults to the ~/node_modules/shelly/example/apis directory.
+              </div>
 
-          <h3>Events</h3>
-          <p>Bootstrap provides custom events for most plugin's unique actions. Generally, these come in an infinitive and past participle form - where the infinitive (ex. <code>show</code>) is triggered at the start of an event, and its past participle form (ex. <code>shown</code>) is trigger on the completion of an action.</p>
-          <p>All infinitive events provide preventDefault functionality. This provides the ability to stop the execution of an action before it starts.</p>
-<pre class="prettyprint linenums">
-$('#myModal').on('show', function (e) {
-    if (!data) return e.preventDefault() // stops modal from being shown
-})
-</pre>
-        </section>
+              <h4>App Definitions</h4>
+              Shelly looks for any files in the APP_API_DIR with the flowing format:
+              <div class="alert alert-info">
+                  ~/apis/&ltAPI name&gt/&ltAPI name&gt.js
+              </div>
+
+          </section>
 
 
 
@@ -124,39 +152,56 @@ $('#myModal').on('show', function (e) {
         ================================================== -->
         <section id="createApi">
             <div class="page-header">
-                <h1>Create an API <small>bootstrap-transition.js</small></h1>
+                <h1>Create an API <small></small></h1>
             </div>
-            <h3>About transitions</h3>
-            <p>For simple transition effects, include <strong>bootstrap-transition.js</strong> once alongside the other JS files. If you're using the compiled (or minified) <strong>bootstrap.js</strong>, there is no need to include this&mdash;it's already there.</p>
-            <h3>Use cases</h3>
-            <p>A few examples of the transition plugin:</p>
-            <ul>
-                <li>Sliding or fading in modals</li>
-                <li>Fading out tabs</li>
-                <li>Fading out alerts</li>
-                <li>Sliding carousel panes</li>
-            </ul>
+            <h3>App Setup</h3>
+            <h4>Follow the quick start to make sure Shelly is installed property</h4>
+            <div class="alert alert-info">
+                NOTE: By default Shelly will use a developer data store (sqlite).  This is intended for ease of setup and
+                should be changed for any production environment.
+            </div>
+            <h4>Create your own Shelly App:</h4>
+            <pre class="prettyprint lang-bash">$ cp ~/node_modules/shelly/example/* .</pre>
+            <p>This will create the flowing</p>
+            <pre>
+                ./app.js - mail application file
+                ./apis - directory where to place your APIs
+                ./apis/example/example.js - example api to be used as a template
+                ./games - directoy used by the Games Core API</pre>
+            <h4>Run your own app:</h4>
+            <pre class="prettyprint lang-bash">$ node app.js</pre>
 
         </section>
 
         <!-- Test API
         ================================================== -->
-        <section id="testApi">
-            <div class="page-header">
-                <h1>Test the API</h1>
-            </div>
-            <h3>About transitions</h3>
-            <p>For simple transition effects, include <strong>bootstrap-transition.js</strong> once alongside the other JS files. If you're using the compiled (or minified) <strong>bootstrap.js</strong>, there is no need to include this&mdash;it's already there.</p>
-            <h3>Use cases</h3>
-            <p>A few examples of the transition plugin:</p>
-            <ul>
-                <li>Sliding or fading in modals</li>
-                <li>Fading out tabs</li>
-                <li>Fading out alerts</li>
-                <li>Sliding carousel panes</li>
-            </ul>
+          <section id="testApi">
+              <div class="page-header">
+                  <h1>Test the API</h1>
+              </div>
+              <h4>Test your setup:</h4>
+              <ol>
+                  <li>
+                      Lauch the admin test page: <a href="http://localhost:5100/core.html?api=api.app">http://localhost:5100/core.html?api=api.app</a>
+                  </li>
+                  <li>
+                      Click the "example" API in the accordian to the left, then click the "hello" function below it.
+                  </li>
+                  <li>
+                      To invoke the function click the "call function" button.
+                  </li>
+                  <li>
+                      Try the "echo" function and alert the calling JSON by filling in the "param1" data member.
+                  </li>
+              </ol>
+          </section>
 
-        </section>
+          <section id="addFunction">
+              <div class="page-header">
+                  <h1>Add a function</h1>
+              </div>
+              <h4>Test your setup:</h4>
+          </section>
 
 
 
@@ -171,18 +216,54 @@ $('#myModal').on('show', function (e) {
           <h2>Examples</h2>
           <p>Modals are streamlined, but flexible, dialog prompts with the minimum required functionality and smart defaults.</p>
 
-          <div class="alert alert-info">
-              <strong>Heads up!</strong>
-              You must manage the position of a pinned element and the behavior of its immediate parent. Position is controlled by <code>affix</code>, <code>affix-top</code>, and <code>affix-bottom</code>. Remember to check for a potentially collapsed parent when the affix kicks in as it's removing content from the normal flow of the page.
-          </div>
+            <div class="alert alert-info">
+                <strong>Heads up!</strong>
+                You must manage the position of a pinned element and the behavior of its immediate parent. Position is controlled by <code>affix</code>, <code>affix-top</code>, and <code>affix-bottom</code>. Remember to check for a potentially collapsed parent when the affix kicks in as it's removing content from the normal flow of the page.
+            </div>
 
         </section>
+
+          <!-- Overview
+          ================================================== -->
+          <section id="samples">
+              <div class="page-header">
+                  <h1>Shelly Sample Docs</h1>
+              </div>
+
+              <h3>foo or foo</h3>
+              <p>test <strong>strong</strong></p>
+
+              <pre class="prettyprint linenums">$('body').off('.data-api')</pre>
+
+<pre class="prettyprint linenums">
+$("#myModal").modal()                       // initialized with defaults
+$("#myModal").modal({ keyboard: false })   // initialized with no keyboard
+$("#myModal").modal('show')                // initializes and invokes show immediately</p>
+</pre>
+              <p>Each plugin also exposes its raw constructor on a `Constructor` property: <code>$.fn.popover.Constructor</code>. If you'd like to get a particular plugin instance, retrieve it directly from an element: <code>$('[rel=popover]').data('popover')</code>.</p>
+
+              <h3>No Conflict</h3>
+              <p>Sometimes it is necessary to use Bootstrap plugins with other UI frameworks. In these circumstances,  namespace collisions can occasionally occur. If this happens, you may call <code>.noConflict</code> on the plugin you wish to revert the value of.</p>
+
+<pre class="prettyprint linenums">
+var bootstrapButton = $.fn.button.noConflict() // return $.fn.button to previously assigned value
+$.fn.bootstrapBtn = bootstrapButton            // give $().bootstrapBtn the bootstrap functionality
+</pre>
+
+              <h3>Events</h3>
+              <p>Bootstrap provides custom events for most plugin's unique actions. Generally, these come in an infinitive and past participle form - where the infinitive (ex. <code>show</code>) is triggered at the start of an event, and its past participle form (ex. <code>shown</code>) is trigger on the completion of an action.</p>
+              <p>All infinitive events provide preventDefault functionality. This provides the ability to stop the execution of an action before it starts.</p>
+<pre class="prettyprint linenums">
+$('#myModal').on('show', function (e) {
+    if (!data) return e.preventDefault() // stops modal from being shown
+})
+</pre>
+          </section>
 
       </div>
     </div>
 
   </div>
-
 
 
     <!-- Footer
