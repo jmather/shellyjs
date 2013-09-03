@@ -11,7 +11,7 @@
     <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
     <link href="bootstrap/css/docs.css" rel="stylesheet">
-    <link href="bootstrap/js/google-code-prettify/prettify.css" rel="stylesheet">
+    <link href="/common/google-code-prettify/prettify.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -91,9 +91,10 @@
               </div>
 
               <h3>API Functionality</h3>
-              <p>APIs are defined as modules with specific members and functions.</p>
+              <p>APIs are defined in modules with specific members and functions.</p>
               <p>Functions may be accessed via HTTP or Websocket.</p>
               <p>On each call paramters are verified along with ensuring the correct security access.</p>
+              <p>The following is a very simple example of an API module:</p>
 <pre class="prettyprint linenums">
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 
@@ -156,6 +157,7 @@ shelly.start({
             </div>
             <h3>App Setup</h3>
             <h4>Follow the quick start to make sure Shelly is installed property</h4>
+            <p><a href="/docs/index.html">Quick Start</a></p>
             <div class="alert alert-info">
                 NOTE: By default Shelly will use a developer data store (sqlite).  This is intended for ease of setup and
                 should be changed for any production environment.
@@ -200,7 +202,68 @@ shelly.start({
               <div class="page-header">
                   <h1>Add a function</h1>
               </div>
-              <h4>Test your setup:</h4>
+              <h4>Add a function description:</h4>
+              <p>To allow for parameter, security and easy testing each API function has a description member in the
+                  &ltmodule&gt.functions object</p>
+              <p>Edit the file ~/apis/example/example.js</p>
+<pre class="prettyprint linenums">
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+
+var example = exports;
+
+example.desc = "example api";
+example.functions = {
+  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []},
+  hello: {desc: "my first api function", params: {param1: {dtype: "string"}}, security: []}
+};
+
+example.echo = function (req, res, cb) {
+  res.add(sh.event("example.echo", req.body.param1));
+  return cb(0);
+};
+</pre>
+              <p>In the above code sample line 8 has been added to define the "hello" function in the "example" api</p>
+
+              <h4>Add a function definition:</h4>
+              <p>Now just create the function to be called with the fixed signature of function(req, res, cb)</p>
+              <p>Edit the file ~/apis/example/example.js</p>
+<pre class="prettyprint linenums">
+var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+
+var example = exports;
+
+example.desc = "example api";
+example.functions = {
+  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []},
+  hello: {desc: "my first api function", params: {myName: {dtype: "string"}}, security: []}
+};
+
+example.echo = function (req, res, cb) {
+  res.add(sh.event("example.echo", req.body.param1));
+  return cb(0);
+};
+
+example.hello = function (req, res, cb) {
+  res.add(sh.event("example.hello", "hello " + req.body.myName + "!"));
+  return cb(0);
+};
+</pre>
+              <p>In the above code sample lines 16-19 define the new function "hello" in the "example" API</p>
+              <p>This function is now callable from both the HTTP and Websocket intergace.</p>
+              <p>The <strong>req</strong> and <strong>res</strong> objects are similar to the express <strong>req</strong>
+                 and <strong>res</strong> objects, but work for Websockets also.</p>
+              <p>You can add multiple response objects.  More over you can call <strong>res.add()</strong> multiple times in a single
+              call.  The HTTP interface returns an array objects, while the Websocket interface just returns each object.</p>
+              <p>The <strong>sh.event</strong> function on line 12 and line 17 is just a convenience function that creates a standard
+              envelope around each response.  It creates an object like:</p>
+<pre class="prettyprint linenums">
+{
+  "event": "example.echo",
+  "ts": 1378189438607,
+  "data": "foo"
+}
+</pre>
+
           </section>
 
 
@@ -212,15 +275,86 @@ shelly.start({
             <h1>Run a two server cluster</h1>
           </div>
 
+          <h3>Cluster configuration</h3>
+            <h4>Per Server Workers</h4>
+            <p>Each server in a cluster and run multiple workers for the HTTP, Websocket, Admin, Game, Mailer, and Matcher workers.
+                These are configured per server in with the <strong>CLUSTER_NUM_*</strong>settings</p>
+<pre class="prettyprint linenums">
+global.CDEF("CLUSTER_NUM_SOCKET", 2);
+global.CDEF("CLUSTER_NUM_REST", 1);
+global.CDEF("CLUSTER_NUM_ADMIN", 1);
+global.CDEF("CLUSTER_NUM_GAMES", 1);
+global.CDEF("CLUSTER_NUM_MATCHER", 1);
+global.CDEF("CLUSTER_NUM_MAILER", 1);
+</pre>
+            <p>In the above example the server will spawn one process for the HTTP(REST), Admin, Games, Matcher, and Mailer
+            worker types and 2 for the Websocket worker type.</p>
+            <h4>Multi-server</h4>
+            <p>To launch a second server on the same machine you must create a different config file so the listening ports
+            do not conflict.</p>
+            <p>The following example can be found in the ~/node_modules/config2 directory:</p>
+<pre class="prettyprint linenums">
+global.CDEF("ADMIN_PORT", 6100);
+global.CDEF("REST_PORT", 6101);
+global.CDEF("GAMES_PORT", 6102);
+global.CDEF("SOCKET_PORT", 6110);
 
-          <h2>Examples</h2>
-          <p>Modals are streamlined, but flexible, dialog prompts with the minimum required functionality and smart defaults.</p>
+global.CDEF("CLUSTER_URL", "tcp://localhost:6151");
+// don't run a mail queue processor on this server
+global.CDEF("CLUSTER_NUM_MAILERS", 0);
 
+// pick up all the other default configs
+require(__dirname + "/../config/main.js");
+</pre>
             <div class="alert alert-info">
-                <strong>Heads up!</strong>
-                You must manage the position of a pinned element and the behavior of its immediate parent. Position is controlled by <code>affix</code>, <code>affix-top</code>, and <code>affix-bottom</code>. Remember to check for a potentially collapsed parent when the affix kicks in as it's removing content from the normal flow of the page.
+                <strong>NOTE:</strong>
+                To run a cluster on seperate machines the Redis data store wrapper must be used by setting the
+                <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the config.  For this example you can
+                run both using Sqlite, but they must be on the same machine and have the correct access to the Sqlite
+                db file.
             </div>
+          <h3>Start the first server</h3>
+<pre class="prettyprint linenums">
+$ node app.js
+</pre>
+            <h3>Start the second server</h3>
+            <p>The default first argument is a valid config directory with a main.js in it.</p>
+<pre class="prettyprint linenums lang-bash">
+$ node app.js "~/node_modules/shelly/config2/"
+</pre>
 
+            <h3>Check the servers</h3>
+            <ol>
+                <li>Login to the first server: http://localhost:5102/</li>
+                <li>Login to the second server: http://localhost:6102/</li>
+                <li>Go to the admin http://localhost:5100</li>
+                <li>In the admin go to the "Core APIs" and click on the "cluster" API and the "servers" function</li>
+                <li>Click the "call function button" and you should see two servers listed.</li>
+            </ol>
+<pre class="prettyprint linenums lang-bash">
+[
+  {
+    "event": "cluster.servers",
+    "ts": 1378193108072,
+    "data": {
+      "5c3817f0-d7a2-11e2-964f-d147e3ee063a": {
+        "clusterUrl": "tcp://localhost:6151",
+        "socketUrl": "ws://localhost:6110",
+        "oid": "5c3817f0-d7a2-11e2-964f-d147e3ee063a",
+        "created": 1378193106281,
+        "modified": 1378193106282
+      },
+      "a81f9560-dac9-11e2-8aa4-7b114762795c": {
+        "clusterUrl": "tcp://localhost:5151",
+        "socketUrl": "ws://localhost:5110",
+        "oid": "a81f9560-dac9-11e2-8aa4-7b114762795c",
+        "created": 1378109876920,
+        "modified": 1378109876921
+      }
+    }
+  }
+]
+</pre>
         </section>
 
           <!-- Overview
@@ -288,9 +422,10 @@ $('#myModal').on('show', function (e) {
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
-    <script src="bootstrap/js/jquery.js"></script>
-    <script src="bootstrap/js/bootstrap.js"></script>
+<!--    <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script> -->
+   <script src="/common/google-code-prettify/prettify.js"></script>
+   <script src="bootstrap/js/jquery.js"></script>
+   <script src="bootstrap/js/bootstrap.js"></script>
 
     <!--
     <script src="bootstrap/js/holder/holder.js"></script>
@@ -301,6 +436,7 @@ $('#myModal').on('show', function (e) {
     $(function(){
     var $window = $(window)
     console.log("here");
+        prettyPrint();
 
     // side bar
     setTimeout(function () {

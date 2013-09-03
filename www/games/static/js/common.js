@@ -211,7 +211,8 @@ ws.onclose = function (evt) {
   log("socket", "onclose", JSON.stringify(evt));
 }
 ws.onerror = function (evt) {
-  log("socket", "error", JSON.stringify(evt));
+  log("socket", "onerror", JSON.stringify(evt));
+  console.log("socket", "onerror", JSON.stringify(evt));
   $("#serverDisconnectDlg").modal({keyboard: false});
 }
 
