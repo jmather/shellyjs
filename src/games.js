@@ -97,11 +97,7 @@ app.get("*.html", function (req, res) {
   renderPage(req, res, env);
 });
 
-// SWD must be a better way to do this without next
-app.use("/", function (req, res, next) {
-  if (req.url  !== "/") {
-    return next();
-  }
+app.get("/", function (req, res, next) {
   shlog.info("games", "default handler - goto lobby");
   res.redirect("/index.html");
   return 0;
