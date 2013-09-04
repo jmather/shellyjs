@@ -397,30 +397,8 @@ Game.reset = function (req, res, cb) {
 Game.list = function (req, res, cb) {
   shlog.info("game", "game.list");
 
-  var games = {};
-  fs.readdir(global.C.GAMES_API_DIR, function (err, files) {
-    if (err) {
-      res.add(sh.error("game-dir-failed", "unable to read game directory", err));
-      return cb(1);
-    }
-    async.each(files, function (entry, lcb) {
-      var fn = global.C.GAMES_API_DIR + "/" + entry;
-      fs.stat(fn, function (err, stat) {
-        if (stat.isDirectory()) {
-          var gameFn = fn + "/" + entry + ".js";
-          module.getInfo(gameFn, function (err, m) {
-            games[m.name] = m;
-            return lcb(0);
-          });
-        } else {
-          return lcb(0);
-        }
-      });
-    }, function (error) {
-      res.add(sh.event("game.list", games));
-      cb(0);
-    });
-  });
+  res.add(sh.event("game.list", global.games));
+  return cb(0);
 };
 
 Game.call = function (req, res, cb) {
