@@ -97,13 +97,17 @@ app.get("*.html", function (req, res) {
   renderPage(req, res, env);
 });
 
-app.use("/", express.static(gamesBase));  // catch all for any example js files
-
-app.use("/", function (req, res) {
+// SWD must be a better way to do this without next
+app.use("/", function (req, res, next) {
+  if (req.url  !== "/") {
+    return next();
+  }
   shlog.info("games", "default handler - goto lobby");
   res.redirect("/index.html");
   return 0;
 });
+
+app.use("/", express.static(gamesBase));  // catch all for any example js files
 
 //********** error handling
 
