@@ -47,6 +47,10 @@ function gameInit(dir, cb) {
           if (module) {
             shlog.info("game", "game found", entry, module.url);
             global.games[entry] = {};
+            global.games[entry].enabled = true;
+            if (_.isBoolean(module.enabled)) {
+              global.games[entry].enabled = module.enabled;
+            }
             if (_.isString(module.url)) {
               global.games[entry].url = module.url;
             }

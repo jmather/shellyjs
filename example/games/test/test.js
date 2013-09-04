@@ -5,6 +5,7 @@ var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 var test = exports;
 
 test.url = "/test/test.html";
+test.enabled = false;
 
 test.create = function (req, cb) {
   req.env.game.state = {number: _.random(10)};

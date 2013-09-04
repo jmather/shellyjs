@@ -36,7 +36,9 @@ function addGame(gameName, gameInfo) {
 
 function showGames() {
     for (var gameName in Env.games) {
-        addGame(gameName, Env.games[gameName]);
+        if (Env.games[gameName].enabled) {
+            addGame(gameName, Env.games[gameName]);
+        }
     }
 }
 
