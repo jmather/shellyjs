@@ -112,13 +112,13 @@ app.get("*.html", function (req, res) {
     partials: {header: "header", footer: "footer"}});
 });
 
-app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
-
-app.use("/", function (req, res) {
+app.get("/", function (req, res) {
   shlog.info("admin", "default handler - default page");
   res.redirect("/index.html");
   return 0;
 });
+
+app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
 
 //********** error handling
 
