@@ -25,7 +25,11 @@ shelly.start({}, function (err, data) {
 
  Install Shelly:
 
-    $ npm install shelly
+    $ npm install shelly-js
+
+ NOTE: for now direct access is via the private repo:
+
+    $ npm install git+ssh://git@github.com:skool51/shelly.git
 
  Start the server:
 
