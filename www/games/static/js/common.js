@@ -184,7 +184,6 @@ var ws = new ReconnectingWebSocket();
 //ws.debug = true;
 ws.onopen = function (evt) {
   if (!$("#serverDisconnectDlg").data("modal")) {
-    console.log("init modal");
     $("#serverDisconnectDlg").modal({keyboard: false, show: false});
   }
   console.log("serverUrl:", Env.socketUrl);
@@ -216,8 +215,7 @@ ws.onclose = function (evt) {
 }
 ws.onerror = function (evt) {
   log("socket", "onerror", JSON.stringify(evt));
-  console.log("socket", "onerror", JSON.stringify(evt));
-  $("#serverDisconnectDlg").modal({keyboard: false});
+  $("#serverDisconnectDlg").modal("show");
 }
 
 // assumes global ws object
