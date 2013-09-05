@@ -39,9 +39,14 @@ global.CDEF("CLUSTER", {
 });
 global.CDEF("CLUSTER_AUTO_GAME_MATCHER", true); // auto adds matcher processes per game
 
-// logs
+// logs: level = system, error, info, debug
+global.CDEF("LOG_CONSOLE", true);
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
-//global.CDEF("LOG_CONSOLE_OPTS", { level: "debug", colorize: true, timestamp: false });
+global.CDEF("LOG_FILE", false);
+global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, filename: global.C.BASEDIR + "/logs/shelly.log" });
+//global.logHook = function (winston) {
+//  console.log("add to winston");
+//};
 
 // registration
 global.CDEF("REG_ALLOW_ANONYMOUS", true);
