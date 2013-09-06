@@ -91,7 +91,9 @@ Challenge.make = function (req, res, cb) {
       // adjust  the challenges counter
       counter.incr(req.body.toUid, "challenges");
 
-      res.add(sh.event("challenge.make", {chId: sendId, sent: sendData}));
+      var resData = {};
+      resData[sendId] = sendData;
+      res.add(sh.event("challenge.make", resData));
       return cb(0);
     }));
   }));

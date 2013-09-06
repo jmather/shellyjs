@@ -99,6 +99,14 @@ function setUserInfo(listName, profiles) {
     }
 }
 
+function setChallenges(chList) {
+    for (chid in chList) {
+        var toUid = chList[chid].toUid;
+        $("#userIdsuggestedUserList" + toUid).find("#userChallenge").css("display", "none");
+        $("#userIdsuggestedUserList" + toUid).find("#challengeMade").css("display", "block");
+    }
+}
+
 function processEvent(res, from) {
     if (typeof(res.event) == "undefined") {
         log(from, "error", "old message: " + JSON.stringify(res));
@@ -140,6 +148,14 @@ function processEvent(res, from) {
         gameInit(res.data);
         return;
     }
+    if (res.event == "challenge.make") {
+        setChallenges(res.data);
+        return;
+    }
+    if (res.event == "challenge.listSent") {
+        setChallenges(res.data);
+        return;
+    }
     if (res.event == "system.connInfo") {
         console.log("wid:", res.data.wid);
         return;
@@ -153,6 +169,7 @@ function shellyInit() {
             {cmd: "match.check", name: Env.gameName},
             {cmd: "suggest.add"},
             {cmd: "suggest.list", limit: 10},
+            {cmd: "challenge.listSent", limit: 10},
             {cmd: "channel.add", channel: Env.channel}
         ]});
     messageInit();
@@ -245,6 +262,7 @@ function init() {
                     <span id="userGender"></span>
                     <span id="userAge"></span>
                     <button id="userChallenge" class="btn" style="float:right; margin-top: 3px;">challenge</button>
+                    <span id="challengeMade" style="display: none; float:right; margin: 7px;">Challenge Made</span>
                     <div style="clear:both"></div>
                 </div>
             </div>
