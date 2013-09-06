@@ -206,23 +206,26 @@ function init() {
                 <div class="gameBoxHeaderDiv">Challengers</div>
                 <div id="challengeList" class="gameBoxInnerDiv">
                     <div id="challengeTemplate" style="display:none;">
-                        <div style="width: 30px; float:left">
-                            <img id="challengerPict" class="userPictImg img-rounded" src="/static/images/dflt-avatar.png"/>
-                        </div>
-                        <div style="width: 260px; float:left">
-                            <div>
-                                <span id="challengerName" class="userAttr" style="float:left">player</span>
-                                <button id="challengeAccept" class="btn UserBtn" style="float:right">accept</button>
-                                <button id="challengeDecline" class="btn UserBtn" style="float:right">decline</button>
-                            </div>
-                            <div style="clear:both"></div>
-                            <div>
-                                <span id="challengerGender" class="userAttr" style="float:left">U</span>
-                                <span id="challengerAge" class="userAttr" style="float:left">0</span>
-                                <span id="challengeGame" class="userAttr" style="float:right">unknown</span>
-                            </div>
-                        </div>
-                        <div style="clear:both"></div>
+                        <table style="width: 100%">
+                            <tr>
+                                <td rowspan="2" style="width: 40px;">
+                                    <img id="challengerPict" class="userPictImg img-rounded" src="/static/images/dflt-avatar.png"/>
+                                </td>
+                                <td>
+                                    <span id="challengerName" class="userAttr" style="">player</span>
+                                    <button id="challengeAccept" class="btn UserBtn" style="float:right">accept</button>
+                                    <button id="challengeDecline" class="btn UserBtn" style="float:right">decline</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span id="challengerGender" class="userAttr" style="float:left">U</span>
+                                    <span id="challengerAge" class="userAttr" style="float:left">0</span>
+                                    <span id="challengeGame" class="userAttr" style="float:right">unknown</span>
+
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
