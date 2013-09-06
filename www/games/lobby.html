@@ -107,6 +107,18 @@ function setChallenges(chList) {
     }
 }
 
+function hideEmailSent() {
+    $("#emailSentInfo").css("display", "none");
+    $("#emailSender").css("display", "block");
+}
+
+function showEmailSent(data) {
+    $("#emailSentInfo").css("display", "block");
+    $("#emailSender").css("display", "none");
+    $("#emailSentTo").text(data.email);
+    setTimeout(hideEmailSent, 5000);
+}
+
 function processEvent(res, from) {
     if (typeof(res.event) == "undefined") {
         log(from, "error", "old message: " + JSON.stringify(res));
@@ -150,6 +162,10 @@ function processEvent(res, from) {
     }
     if (res.event == "challenge.make") {
         setChallenges(res.data);
+        return;
+    }
+    if (res.event == "challenge.email") {
+        showEmailSent(res.data);
         return;
     }
     if (res.event == "challenge.listSent") {
@@ -240,8 +256,14 @@ function init() {
         <div class="challengeEmailDiv gameBoxDiv span6 offset3">
             <div class="gameBoxHeaderDiv">Challenge by email</div>
             <div class="gameBoxInnerDiv" readonly>
-                <input id="emailInput" type="email" style="width:380px; margin: 7px 7px;"></input>
-                <button id="sendEmail" class="btn" style="float: right; margin-top: 2px; margin-bottom: 2px">send</button>
+                <div id="emailSender" style="display: block;">
+                    <input id="emailInput" type="email" style="width:380px; margin: 7px 7px;"></input>
+                    <button id="sendEmail" class="btn" style="float: right; margin-top: 2px; margin-bottom: 2px">send</button>
+                </div>
+                <div id="emailSentInfo" class="alert alert-info" style="margin-bottom: 0px; display:none;">
+                    <button type="button" class="close" onclick="javascript:hideEmailSent();">&times;</button>
+                    <div>Email sent: <span id="emailSentTo"></span></div>
+                </div>
             </div>
         </div>
 

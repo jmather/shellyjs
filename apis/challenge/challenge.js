@@ -107,7 +107,7 @@ function sendEmail(emailInfo, req, res, cb) {
         res.add(sh.error("email-queue", "error queueing email", data));
         return cb(err);
       }
-      res.add(sh.event(req.body.cmd, {status: "queued"}));
+      res.add(sh.event(req.body.cmd, {status: "queued", email: emailInfo.email}));
       return cb(0);
     }));
   } else {
@@ -117,7 +117,7 @@ function sendEmail(emailInfo, req, res, cb) {
         res.add(sh.error("email-send", "error sending challenge email", data));
         return cb(err);
       }
-      res.add(sh.event(req.body.cmd, {status: "sent", info: data}));
+      res.add(sh.event(req.body.cmd, {status: "sent", email: emailInfo.email, info: data}));
       return cb(0);
     }));
   }
