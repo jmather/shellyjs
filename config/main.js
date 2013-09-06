@@ -71,6 +71,7 @@ global.CDEF("DEFAULT_ADMIN_PASSWORD", "shelly");
 
 // session config
 global.CDEF("SESSION_PRIVATE_KEY", "session-key-here");
+global.CDEF("SESSION_TIMEOUT", 0);                              // seconds for session timeout: 0 = infinity
 global.CDEF("FAKE_SESSION_ON", false);                          // TESTING ONLY: allows impersonation of any user
 global.CDEF("FAKE_SESSION_HASH", "XXXX");                       // fake hash that is valid for any user
 
