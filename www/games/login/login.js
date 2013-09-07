@@ -102,6 +102,38 @@ function doAnonymous() {
   })
 }
 
+function doReset() {
+  hideAllMessages();
+
+  var data = {cmd: "reg.reset",
+    email: $("#email").val()
+  };
+  console.log("reset", data);
+  if (data.email.length === 0) {
+    error("Please enter eamil for account to be reset.");
+    return;
+  }
+  info("Password reset email sent to: " + data.email);
+
+  $.ajax ({
+    type: "POST",
+    url: Env.restUrl,
+    async: false,
+    contentType: "application/json",
+    dataType: "json",
+    data: JSON.stringify(data),
+    success: function (res, status) {
+      console.log(res);
+      if (res[0].event === "reg.reset") {
+      } else {
+      }
+    },
+    error: function (xhr, status, err) {
+      error(err);
+    }
+  })
+}
+
 function registerMode()
 {
   $("#shSubTitle").text("Register");
@@ -127,11 +159,18 @@ function loginMode()
 function hideAllMessages()
 {
   $("#signInError").css("display", "none");
+  $("#signInInfo").css("display", "none");
   $("#upgradeDiv").css("display", "none");
 }
 
 function error(txt)
 {
   $("#signInError").css("display", "block");
-	if(txt) $("#signInErrorMsg").html(txt);
+  if(txt) $("#signInErrorMsg").html(txt);
+}
+
+function info(txt)
+{
+  $("#signInInfo").css("display", "block");
+  if(txt) $("#signInInfoMsg").html(txt);
 }
