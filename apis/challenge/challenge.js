@@ -259,7 +259,7 @@ function sendChallenge(req, res, cb) {
       template: "challenge"};
     shlog.info("challenge", emailInfo);
 
-    sendEmail(emailInfo, req, res, cb);
+    mailer.send(emailInfo, req, res, cb);
   }));
 }
 
