@@ -1,12 +1,15 @@
 var util = require("util");
 var crypto = require("crypto");
+var querystring = require("querystring");
 var _ = require("lodash");
 var check = require("validator").check;
 var sanitize = require("validator").sanitize;
 
+
 var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
 var sh = require(global.C.BASEDIR + "/lib/shutil.js");
 var session = require(global.C.BASEDIR + "/lib/shsession.js");
+var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
 var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
@@ -26,6 +29,7 @@ exports.functions = {
     email: {dtype: "string"},
     password: {dtype: "string"}
   }, security: []},
+  reset: {desc: "reset the password on this account", params: {email: {dtype: "string"}}, security: [], noSession: true},
 
   remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: ["admin"]},
   downgrade: {desc: "testing only - remove email from user object", params: {uid: {dtype: "string"}}, security: ["admin"]}
@@ -316,6 +320,34 @@ exports.create = function (req, res, cb) {
         return cb(0, user);
       }), {lock: true});
     }));
+  }));
+};
+
+exports.reset = function (req, res, cb) {
+  var email = sanitize(req.body.email).trim();
+  try {
+    check(email, "invalid email address").isEmail();
+  } catch (e) {
+    res.add(sh.error("param-bad", e.message, {info: e.message}));
+    return cb(1);
+  }
+
+  req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
+    if (error) {
+      res.add(sh.error("email-bad", "this email is not registered", {email: email}));
+      return cb(1);
+    }
+
+//    var emailInfo = {email: req.body.email, toProfile: req.session.user.profile(),
+    var emailInfo = {email: req.body.email,
+      subject: "password reset for " + req.body.email,
+      resetUrl: global.C.GAMES_URL + "/reseter.html?" + querystring.stringify(
+        {"s": session.create(em.get("uid")), "rid": "reset-id"}
+      ),
+      template: "reset"};
+    shlog.info("reg", emailInfo);
+
+    return mailer.send(emailInfo, req, res, cb);
   }));
 };
 

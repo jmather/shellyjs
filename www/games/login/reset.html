@@ -6,6 +6,9 @@
     <script src="/common/jquery-1.9.1.js"></script>
     <script src="/common/jquery.cookie.js"></script>
 
+    <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src="/static/js/common.js"></script>
+
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
@@ -19,29 +22,20 @@ $(init);
 function init() {
     $(".header-user-info").css("display", "none");
     $(".main-menu-items").css("display", "none");
-    $("#shSubTitle").text("Login");
+    $("#shSubTitle").text("Password Reset");
 
     hideAllMessages();
+    commInit();
 
-    Env.shToken = $.cookie("shToken");
-    if (typeof (Env.shToken) === "undefined") {
-        Env.shToken = Env.nextUuid;
-        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: "/" });
-    }
-
-    $("#loginBtn").click(function(e) {
-        doLogin();
+    $("#resetBtn").click(function(e) {
+        doReset();
         e.preventDefault();
         return false;
     });
 
     $(".CredsInput").on('keyup', function(e) {
         if (e.which == 13) {
-            if ($(".loginConfig").css("display") === "block") {
-                doLogin();
-            } else {
-                doRegister();
-            }
+            doReset();
             e.preventDefault();
         }
     });
@@ -52,7 +46,7 @@ function init() {
         <style type="text/css">
 
             .form-signin {
-                max-width: 300px;
+                max-width: 350px;
                 padding: 19px 29px 29px;
                 margin: 0 auto 20px;
                 background-color: #fff;
@@ -64,16 +58,13 @@ function init() {
                 -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                 box-shadow: 0 1px 2px rgba(0,0,0,.05);
             }
-            .form-signin .checkbox {
-                margin-bottom: 10px;
-            }
-            .form-signin input[type="text"],
-            .form-signin input[type="password"] {
+            .form-signin input[type="text"] {
                 font-size: 16px;
                 height: auto;
                 margin-bottom: 15px;
                 padding: 7px 9px;
             }
+
 </style>
 
 </head>
@@ -84,13 +75,9 @@ function init() {
 
     <div class="row" style="margin-top: 80px;">
         <form class="form-signin" autocomplete="off">
-            <div class="loginConfig"><h4>Sign In</h4></div>
+            <div><h4>Enter email address for your account.</h4></div>
             <input type="text" id="email" class="input-block-level CredsInput" placeholder="Email address">
-            <input type="password" id="pass" class="input-block-level CredsInput" placeholder="Password">
-            <label class="checkbox">
-                <input type="checkbox" value="remember-me"> Remember me
-            </label>
-            <button id="loginBtn" class="btn btn-primary login-inline" type="submit">Sign in</button>
+            <button id="resetBtn" class="btn btn-primary login-inline" type="submit">Reset</button>
         </form>
     </div>
 
@@ -98,6 +85,10 @@ function init() {
         <div id="signInError" class="alert alert-error span5 offset3">
             <button type="button" class="close" onclick="javascript:hideAllMessages();">&times;</button>
             <div id="signInErrorMsg">Error message</div>
+        </div>
+        <div id="signInInfo" class="alert alert-info span5 offset3">
+            <button type="button" class="close" onclick="javascript:hideAllMessages();">&times;</button>
+            <div id="signInInfoMsg">Error message</div>
         </div>
     </div>
 

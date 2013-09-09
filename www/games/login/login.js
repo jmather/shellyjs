@@ -113,7 +113,6 @@ function doReset() {
     error("Please enter eamil for account to be reset.");
     return;
   }
-  info("Password reset email sent to: " + data.email);
 
   $.ajax ({
     type: "POST",
@@ -125,7 +124,9 @@ function doReset() {
     success: function (res, status) {
       console.log(res);
       if (res[0].event === "reg.reset") {
+        info("Password reset email sent to: " + data.email + "<br>Please follow directions in the email.");
       } else {
+        error("Unable to reset password: " + res[0].message);
       }
     },
     error: function (xhr, status, err) {
