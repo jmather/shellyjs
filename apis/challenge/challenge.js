@@ -99,30 +99,6 @@ Challenge.make = function (req, res, cb) {
   }));
 };
 
-function sendEmail(emailInfo, req, res, cb) {
-  if (global.C.EMAIL_QUEUE) {
-    // queue the email for the consumer worker to process it
-    mailer.queueEmail(emailInfo, _w(cb, function (err, data) {
-      if (err) {
-        res.add(sh.error("email-queue", "error queueing email", data));
-        return cb(err);
-      }
-      res.add(sh.event(req.body.cmd, {status: "queued", email: emailInfo.email}));
-      return cb(0);
-    }));
-  } else {
-    // send the email directly
-    mailer.sendEmail(emailInfo, _w(cb, function (err, data) {
-      if (err) {
-        res.add(sh.error("email-send", "error sending challenge email", data));
-        return cb(err);
-      }
-      res.add(sh.event(req.body.cmd, {status: "sent", email: emailInfo.email, info: data}));
-      return cb(0);
-    }));
-  }
-}
-
 function sendAccept(req, res, cb) {
   req.loader.exists("kUser", req.body.toUid, _w(cb, function (err, challengeUser) {
     if (err) {
@@ -140,7 +116,7 @@ function sendAccept(req, res, cb) {
       template: "accepted"};
     shlog.info("challenge", emailInfo);
 
-    sendEmail(emailInfo, req, res, cb);
+    mailer.send(emailInfo, req, res, cb);
   }));
 }
 
