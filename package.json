@@ -13,7 +13,7 @@
     "sqlite3": "2.1.7",
     "redis": "0.8.3",
     "async": "0.2.5",
-    "consolidate": "git://github.com/manuelbieh/consolidate.js.git#master",
+    "consolidate": "git://github.com/skool51/consolidate.js.git#master",
     "express": "3.2.5",
     "hogan.js": "2.0.0",
     "lodash": "1.2.1",
