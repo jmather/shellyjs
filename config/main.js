@@ -82,7 +82,7 @@ global.CDEF("EMAIL_SENDTO", "");
 global.CDEF("EMAIL_QUEUE", true);
 global.CDEF("EMAIL_DEFAULT_FROM", "Game Shelly <shelly@gameshelly.com>");
 global.CDEF("EMAIL_TRANSPORT", "SMTP");
-global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "XXXX", pass: "XXXX"}});
+global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "shelly8804@gmail.com", pass: "foofoofoo"}});
 //global.CDEF("EMAIL_TRANSPORT", "SES");
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {AWSAccessKeyID: "XXXX", AWSSecretKey: "XXXX"});
 //global.CDEF("EMAIL_TRANSPORT", "SMTP");
