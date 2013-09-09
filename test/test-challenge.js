@@ -71,10 +71,9 @@ describe("challenge module", function () {
       gConn1.call("challenge.make", {game: gGameName, toUid: gConn2.uid()},
         function (err, res) {
           res[0].should.have.property("event", "challenge.make");
-          res[0].data.should.have.property("chId");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.have.property("toUid", gConn2.uid());
-          gSChId = res[0].data.chId;
+          gSChId = gConn2.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
           done();
         });
     });
@@ -149,10 +148,9 @@ describe("challenge module", function () {
       gConn1.call("challenge.make", {game: gGameName, toUid: gConn2.uid()},
         function (err, res) {
           res[0].should.have.property("event", "challenge.make");
-          res[0].data.should.have.property("chId");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.have.property("toUid", gConn2.uid());
-          gSChId = res[0].data.chId;
+          var gSChId = gConn2.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
           done();
         });
     });
@@ -208,10 +206,9 @@ describe("challenge module", function () {
       gConn1.call("challenge.make", {game: gGameName, toUid: gConn2.uid()},
         function (err, res) {
           res[0].should.have.property("event", "challenge.make");
-          res[0].data.should.have.property("chId");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.have.property("toUid", gConn2.uid());
-          gSChId = res[0].data.chId;
+          gSChId = gConn2.uid() + ":" + gGameName;
+          res[0].data.should.have.property(gSChId);
+          res[0].data[gSChId].should.have.property("toUid", gConn2.uid());
           done();
         });
     });
@@ -267,10 +264,11 @@ describe("challenge module", function () {
       gConn1.call("challenge.email", {game: gGameName, email: gEmail2},
         function (err, res) {
           res[0].should.have.property("event", "challenge.make");
-          res[0].data.should.have.property("chId");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.have.property("toUid"); // toUid is new user
-          gSChId = res[0].data.chId;
+          var chIds = Object.keys(res[0].data);
+          chIds.should.have.length(1);
+          gSChId = chIds[0];
+          res[0].data[gSChId].should.have.property("game", gGameName);
+          res[0].data[gSChId].should.have.property("toUid"); // toUid is existing
           done();
         });
     });
@@ -343,10 +341,11 @@ describe("challenge module", function () {
       gConn1.call("challenge.email", {game: gGameName, email: gEmail3},
         function (err, res) {
           res[0].should.have.property("event", "challenge.make");
-          res[0].data.should.have.property("chId");
-          res[0].data.should.have.property("sent");
-          res[0].data.sent.should.have.property("toUid"); // toUid is new user
-          gSChId = res[0].data.chId;
+          var chIds = Object.keys(res[0].data);
+          chIds.should.have.length(1);
+          gSChId = chIds[0];
+          res[0].data[gSChId].should.have.property("game", gGameName);
+          res[0].data[gSChId].should.have.property("toUid"); // toUid is new
           done();
         });
     });
