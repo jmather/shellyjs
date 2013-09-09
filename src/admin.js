@@ -98,7 +98,7 @@ function createEnv(req) {
   map.socketUrl = global.C.SOCKET_URL;
   map.session = req.cookies.shSession;
   map.token = req.cookies.shToken;
-  if (_.isObject(req.session)) {
+  if (_.isObject(req.session) && _.isObject(req.session.user)) {
     map.user = req.session.user.getData();
   }
   return map;

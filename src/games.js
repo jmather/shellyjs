@@ -82,7 +82,9 @@ function createEnv(req) {
   map.session = req.cookies.shSession;
   map.token = req.cookies.shToken;
   map.games = global.games;
-  map.user = req.session.user.getData();
+  if (_.isObject(req.session) && _.isObject(req.session.user)) {
+    map.user = req.session.user.getData();
+  }
   return map;
 }
 
