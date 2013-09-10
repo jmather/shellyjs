@@ -78,11 +78,11 @@ function setLobbyTurn(gameId, whoTurn, profile) {
   $turnSpan = $gamePlaying.find("#gameTurn");
   $turnSpan.removeClass("playerName" + whoTurn);
   if (whoTurn === "") {
-    $turnSpan.text("");
+    $turnSpan.text($gamePlaying.attr("players"));
     $gamePlaying.detach();
     $gamePlaying.prependTo("#gameDoneList");
   } else if (whoTurn === Env.user.oid) {
-    $turnSpan.text("");
+    $turnSpan.text($gamePlaying.attr("players"));
     $gamePlaying.detach();
     $gamePlaying.prependTo("#gameMyTurnList");
   } else {
@@ -97,6 +97,20 @@ function setLobbyTurn(gameId, whoTurn, profile) {
   }
 }
 
+function getPlayers(players) {
+  var names = "";
+  for (uid in players) {
+    if (uid === Env.user.oid) {
+      continue;
+    }
+    if (names.length) {
+      names += ", ";
+    }
+    names += players[uid].name;
+  }
+  return names;
+}
+
 function setLobbyGames(gameList) {
   $(".activeGame").remove();
   for (gameId in gameList) {
@@ -109,6 +123,8 @@ function setLobbyGames(gameList) {
     $newGame.attr("gameName", gameList[gameId].name);
     $newGame.attr("gameUrl", gameList[gameId].gameUrl);
     $newGame.css("display", "block");
+    var players = getPlayers(gameList[gameId].players);
+    $newGame.attr("players", players);
 
     $newGame.find("#myGameJoin").click(function () {
       var gameUrl = $(this).parent().attr("gameUrl");
