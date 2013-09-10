@@ -80,6 +80,7 @@ global.CDEF("FAKE_SESSION_HASH", "XXXX");                       // fake hash tha
 global.CDEF("EMAIL_NOSEND", false);
 global.CDEF("EMAIL_SENDTO", "");
 global.CDEF("EMAIL_QUEUE", true);
+global.CDEF("EMAIL_QUEUE_RETRIES", 2);
 global.CDEF("EMAIL_DEFAULT_FROM", "Game Shelly <shelly@gameshelly.com>");
 global.CDEF("EMAIL_TRANSPORT", "SMTP");
 global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "shelly8804@gmail.com", pass: "foofoofoo"}});
