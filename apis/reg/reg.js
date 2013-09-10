@@ -348,7 +348,6 @@ exports.reset = function (req, res, cb) {
           res.add(sh.error("reset-id-missing", "there is now reset request for this user"));
           return cb(1);
         }
-        console.log(resetInfo);
         if (req.body.rid !== resetInfo.get("rid")) {
           res.add(sh.error("reset-id-bad", "the reset id is not valid"));
           return cb(1);
