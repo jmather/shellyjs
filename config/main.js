@@ -49,6 +49,7 @@ global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, file
 //};
 
 // registration
+global.CDEF("LOGIN_PRIVATE_KEY", "login-key-here");
 global.CDEF("REG_ALLOW_ANONYMOUS", true);
 
 // db

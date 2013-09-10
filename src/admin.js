@@ -84,7 +84,7 @@ app.get("/login/*.html", function (req, res) {
   env.restUrl = global.C.REST_URL;
   env.socketUrl = global.C.SOCKET_URL;
   env.nextUuid = sh.uuid();
-  res.render(req.url.substring(1), {Env: env, EnvJson: JSON.stringify(env),
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
     partials: {header: "header", footer: "footer"}});
 
   return 0;

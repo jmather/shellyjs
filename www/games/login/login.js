@@ -23,7 +23,6 @@ function doLogin() {
     success: function (res, status) {
       if (res[0].event === "reg.login") {
         $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
-        console.log("all good", res[0].data.session);
         window.location.href = "/index.html";
       } else {
         error(res[0].message);
@@ -102,13 +101,13 @@ function doAnonymous() {
   })
 }
 
-function doReset() {
+function doRequest() {
   hideAllMessages();
 
-  var data = {cmd: "reg.reset",
+  var data = {cmd: "reg.requestReset",
     email: $("#email").val()
   };
-  console.log("reset", data);
+  console.log("requestReset", data);
   if (data.email.length === 0) {
     error("Please enter eamil for account to be reset.");
     return;
@@ -123,8 +122,46 @@ function doReset() {
     data: JSON.stringify(data),
     success: function (res, status) {
       console.log(res);
-      if (res[0].event === "reg.reset") {
+      if (res[0].event === "reg.requestReset") {
         info("Password reset email sent to: " + data.email + "<br>Please follow directions in the email.");
+      } else {
+        error("Unable to reset password: " + res[0].message);
+      }
+    },
+    error: function (xhr, status, err) {
+      error(err);
+    }
+  })
+}
+
+function doReset(uid, rid) {
+  hideAllMessages();
+
+  if ($("#pass").val() !== $("#passVerify").val()) {
+    error("password do not match");
+    return;
+  }
+
+  var data = {cmd: "reg.reset",
+    uid: uid,
+    rid: rid,
+    password: $("#pass").val()
+  };
+  console.log("reset", data);
+
+  $.ajax ({
+    type: "POST",
+    url: Env.restUrl,
+    async: false,
+    contentType: "application/json",
+    dataType: "json",
+    data: JSON.stringify(data),
+    success: function (res, status) {
+      console.log(res);
+      if (res[0].event === "reg.reset") {
+        info("Password has been reset.");
+        $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
+        window.location.href = "/index.html";
       } else {
         error("Unable to reset password: " + res[0].message);
       }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<title>Shelly Reset</title>
+	<title>Shelly Request</title>
     <meta charset="UTF-8">
     <script src="/common/jquery-1.9.1.js"></script>
     <script src="/common/jquery.cookie.js"></script>
@@ -17,28 +17,25 @@
 <script>
 
 var Env = {{{EnvJson}}};
-Env.rid = getURLParameter("rid", "");
-Env.uid = getURLParameter("uid", "");
-console.log(Env.rid, Env.uid);
 
 $(init);
 function init() {
     $(".header-user-info").css("display", "none");
     $(".main-menu-items").css("display", "none");
-    $("#shSubTitle").text("Password Reset");
+    $("#shSubTitle").text("Request Password Reset");
 
     hideAllMessages();
     commInit();
 
     $("#resetBtn").click(function(e) {
-        doReset(Env.uid, Env.rid);
+        doRequest();
         e.preventDefault();
         return false;
     });
 
     $(".CredsInput").on('keyup', function(e) {
         if (e.which == 13) {
-            doReset(Env.uid, Env.rid);
+            doRequest();
             e.preventDefault();
         }
     });
@@ -78,9 +75,8 @@ function init() {
 
     <div class="row" style="margin-top: 80px;">
         <form class="form-signin" autocomplete="off">
-            <div><h4>Enter new password for your account.</h4></div>
-            <input type="password" id="pass" class="input-block-level CredsInput" placeholder="Password">
-            <input type="password" id="passVerify" class="input-block-level CredsInput registerConfig" placeholder="Verify Password">
+            <div><h4>Enter email address for your account.</h4></div>
+            <input type="text" id="email" class="input-block-level CredsInput" placeholder="Email address">
             <button id="resetBtn" class="btn btn-primary login-inline" type="submit">Reset</button>
         </form>
     </div>

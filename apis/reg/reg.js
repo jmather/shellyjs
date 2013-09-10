@@ -12,7 +12,6 @@ var session = require(global.C.BASEDIR + "/lib/shsession.js");
 var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
 var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
 
-var passwordSecret = "94d634f9-c273-4d59-9b28-bc26185d656f";
 var passwordVersion = 1;
 
 exports.desc = "handles user login and new user registration";
@@ -29,14 +28,16 @@ exports.functions = {
     email: {dtype: "string"},
     password: {dtype: "string"}
   }, security: []},
-  reset: {desc: "reset the password on this account", params: {email: {dtype: "string"}}, security: [], noSession: true},
+  requestReset: {desc: "start the password reset process", params: {email: {dtype: "string"}}, security: [], noSession: true},
+  reset: {desc: "reset the password on this account", params: {uid: {dtype: "string"}, rid: {dtype: "string"},
+    password: {dtype: "string"}}, security: [], noSession: true},
 
   remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: ["admin"]},
   downgrade: {desc: "testing only - remove email from user object", params: {uid: {dtype: "string"}}, security: ["admin"]}
 };
 
 function hashPassword(uid, password) {
-  var secStr = util.format("uid=%s;pw=%s;secret=%s", uid, password, passwordSecret);
+  var secStr = util.format("uid=%s;pw=%s;secret=%s", uid, password, global.C.LOGIN_PRIVATE_KEY);
   return passwordVersion + ":" + crypto.createHash("md5").update(secStr).digest("hex");
 }
 
@@ -324,6 +325,49 @@ exports.create = function (req, res, cb) {
 };
 
 exports.reset = function (req, res, cb) {
+  var password = sanitize(req.body.password).trim();
+  try {
+    check(password, "password too short").len(6);
+  } catch (e) {
+    res.add(sh.error("param-bad", e.message, {info: e.message}));
+    return cb(1);
+  }
+
+  req.loader.exists("kUser", req.body.uid, _w(cb, function (error, user) {
+    if (error) {
+      res.add(sh.error("user-bad", "this user is not valid", {uid: req.body.uid}));
+      return cb(1);
+    }
+    req.loader.exists("kEmailMap", user.get("email"), _w(cb, function (error, em) {
+      if (error) {
+        res.add(sh.error("email-bad", "this email is not registered", {email: email}));
+        return cb(1);
+      }
+      req.loader.get("kReset", em.get("uid"), _w(cb, function (err, resetInfo) {
+        if (err) {
+          res.add(sh.error("reset-id-missing", "there is now reset request for this user"));
+          return cb(1);
+        }
+        console.log(resetInfo);
+        if (req.body.rid !== resetInfo.get("rid")) {
+          res.add(sh.error("reset-id-bad", "the reset id is not valid"));
+          return cb(1);
+        }
+        em.set("password", hashPassword(em.get("uid"), password));
+
+        // cleanup the reset object, so it can't be re-used
+        req.loader.delete("kReset", em.get("uid"), _w(cb, function (err, data) {
+          var out = {};
+          out.session = session.create(em.get("uid"));
+          res.add(sh.event("reg.reset", out));
+          return cb(0);
+        }));
+      }));
+    }));
+  }));
+};
+
+exports.requestReset = function (req, res, cb) {
   var email = sanitize(req.body.email).trim();
   try {
     check(email, "invalid email address").isEmail();
@@ -337,17 +381,26 @@ exports.reset = function (req, res, cb) {
       res.add(sh.error("email-bad", "this email is not registered", {email: email}));
       return cb(1);
     }
+    req.loader.get("kReset", em.get("uid"), _w(cb, function (err, resetInfo) {
+      if (err) {
+        res.add(sh.error("reset-object", "unable to create or get the reset object", resetInfo));
+        return cb(1);
+      }
+      if (resetInfo.get("rid").length === 0) {
+        resetInfo.set("rid", sh.uuid());
+      }
+      resetInfo.set("uid", em.get("uid"));
 
-//    var emailInfo = {email: req.body.email, toProfile: req.session.user.profile(),
-    var emailInfo = {email: req.body.email,
-      subject: "password reset for " + req.body.email,
-      resetUrl: global.C.GAMES_URL + "/reseter.html?" + querystring.stringify(
-        {"s": session.create(em.get("uid")), "rid": "reset-id"}
-      ),
-      template: "reset"};
-    shlog.info("reg", emailInfo);
+      var emailInfo = {email: req.body.email,
+        subject: "password reset for " + req.body.email,
+        resetUrl: global.C.GAMES_URL + "/reset.html?" + querystring.stringify(
+          {"uid": em.get("uid"), "rid": resetInfo.get("secret")}
+        ),
+        template: "reset"};
+      shlog.info("reg", emailInfo);
 
-    return mailer.send(emailInfo, req, res, cb);
+      return mailer.send(emailInfo, req, res, cb);
+    }));
   }));
 };
 
