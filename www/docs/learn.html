@@ -274,7 +274,7 @@ example.hello = function (req, res, cb) {
 
           <h3>Cluster configuration</h3>
             <h4>Per Server Workers</h4>
-            <p>Each server in a cluster and run multiple workers for the HTTP, Websocket, Admin, Game, Mailer, and Matcher workers.
+            <p>Each server in a cluster can run multiple workers for the HTTP, Websocket, Admin, Game, Mailer, and Matcher processes.
                 These are configured per server in with the <strong>CLUSTER_NUM_*</strong>settings</p>
 <pre class="prettyprint linenums">
 global.CDEF("CLUSTER_NUM_SOCKET", 2);
@@ -284,11 +284,13 @@ global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 </pre>
-            <p>In the above example the server will spawn one process for the HTTP(REST), Admin, Games, Matcher, and Mailer
-            worker types and 2 for the Websocket worker type.</p>
-            <h4>Multi-server</h4>
-            <p>To launch a second server on the same machine you must create a different config file so the listening ports
-            do not conflict.</p>
+            <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP(REST), Admin,
+                Games, Matcher, and Mailer worker types.</p>
+            <h4>Multi-server - developer</h4>
+            <p>Servers in a cluster register themselves on startup and can be added and removed dynamically.</p>
+            <p>To demonstrate clustering in the development environment (sqlite) you can launch a second server
+                on the same machine by creating a different config file so the listening ports do not conflict.</p>
+            <p>Both servers must have access to he same sqlite database file.</p>
             <p>The following example can be found in the ~/node_modules/config2 directory:</p>
 <pre class="prettyprint linenums">
 global.CDEF("ADMIN_PORT", 6100);
@@ -303,13 +305,6 @@ global.CDEF("CLUSTER_NUM_MAILERS", 0);
 // pick up all the other default configs
 require(__dirname + "/../config/main.js");
 </pre>
-            <div class="alert alert-info">
-                <strong>NOTE:</strong>
-                To run a cluster on seperate machines the Redis data store wrapper must be used by setting the
-                <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the config.  For this example you can
-                run both using Sqlite, but they must be on the same machine and have the correct access to the Sqlite
-                db file.
-            </div>
           <h3>Start the first server</h3>
 <pre class="prettyprint linenums">
 $ node app.js
@@ -352,6 +347,21 @@ $ node app.js "./node_modules/shelly/config2/"
   }
 ]
 </pre>
+
+            <h4>Multi-server - two machines</h4>
+            <p>
+                To run a cluster on seperate machines the Redis data store wrapper must be used by setting the
+                <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the "config/main.js".
+            </p>
+<pre class="prettyprint linenums lang-bash">
+global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
+global.CDEF("DB_OPTIONS", {});
+</pre>
+            <p>Then just install and start a server on each machine.</p>
+<pre class="prettyprint linenums">
+$ node app.js
+</pre>
+
         </section>
 
           <!-- Overview
