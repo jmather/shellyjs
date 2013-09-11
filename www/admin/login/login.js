@@ -4,17 +4,7 @@ function setToken(token) {
   $.cookie("shToken", Env.shToken, { expires: 3650, path: "/" });
 }
 
-function doLogin() {
-  hideAllMessages();
-
-  var data = {cmd: "reg.login",
-    email: $("#email").val(),
-    password: $("#pass").val(),
-    role: "admin"
-  }
-  console.log(data);
-
-  $("#signInLoading").css("display","block");
+function loginCall(data, cb) {
   $.ajax ({
     type: "POST",
     url: Env.restUrl,
@@ -22,19 +12,30 @@ function doLogin() {
     contentType: "application/json",
     dataType: "json",
     data: JSON.stringify(data),
-    success: function (res, status) {
-      $("#signInLoading").css("display","none");
-      if (res[0].event === "reg.login") {
-        $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
-        window.location.href = "/index.html";
-      } else {
-        error(res[0].message);
-      }
-    },
+    success: cb,
     error: function (xhr, status, err) {
       error(err);
     }
-  })
+  });
+}
+
+function doLogin() {
+  hideAllMessages();
+
+  var data = {cmd: "reg.login",
+    email: $("#email").val(),
+    password: $("#pass").val(),
+    role: "admin"
+  };
+
+  loginCall(data, function (res, status) {
+    if (res[0].event === "reg.login") {
+      $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
+      window.location.href = "/index.html";
+    } else {
+      error(res[0].message);
+    }
+  });
 }
 
 function hideAllMessages()
