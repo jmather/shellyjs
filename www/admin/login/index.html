@@ -7,13 +7,34 @@
     <script src="/common/jquery.cookie.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
-    <script type="text/javascript" src="login.js"></script>
+    <script type="text/javascript" src="/common/shellyh.js"></script>
 
 <script>
 
 var Env = {{{EnvJson}}};
+
+function hideAllMessages()
+{
+    $("#signInError").css("display", "none");
+}
+
+function error(txt)
+{
+    $("#signInError").css("display", "block");
+    if(txt) $("#signInErrorMsg").html(txt);
+}
+
+function doLogin() {
+    hideAllMessages();
+    shelly.login($("#email").val(), $("#pass").val(), "admin", function (res, stats) {
+        if (res[0].event === "reg.login") {
+            window.location.href = "/index.html";
+        } else {
+            error(res[0].message);
+        }
+    });
+}
 
 $(init);
 function init() {
@@ -23,11 +44,7 @@ function init() {
 
     hideAllMessages();
 
-    Env.shToken = $.cookie("shToken");
-    if (typeof (Env.shToken) === "undefined") {
-        Env.shToken = Env.nextUuid;
-        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: "/" });
-    }
+    shelly.checkToken(Env.nextUuid);
 
     $("#loginBtn").click(function(e) {
         doLogin();
@@ -37,11 +54,7 @@ function init() {
 
     $(".CredsInput").on('keyup', function(e) {
         if (e.which == 13) {
-            if ($(".loginConfig").css("display") === "block") {
-                doLogin();
-            } else {
-                doRegister();
-            }
+            doLogin();
             e.preventDefault();
         }
     });
