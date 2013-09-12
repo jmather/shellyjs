@@ -3,9 +3,9 @@
 <title>My Games</title>
     <script src="/common/jquery-1.9.1.js"></script>
     <script src="/common/jquery.cookie.js"></script>
+    <script src="/common/shellys.js"></script>
 
     <script src="/static/js/fastclick.js"></script>
-    <script src="/static/js/reconnecting-websocket.js"></script>
     <script src="/static/js/common.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
@@ -89,7 +89,10 @@ function setChallengeInfo(challengeList) {
     }
 }
 
-function processEvent(res, from) {
+function onmessage(res) {
+    uiOnMessage(res);
+
+    var from = "socket"
     if (typeof(res.event) == "undefined") {
         log(from, "error", "old message: " + JSON.stringify(res));
         return;
@@ -138,8 +141,8 @@ function processEvent(res, from) {
     log(from, "unknown-event", JSON.stringify(res));
 }
 
-function shellyInit() {
-    sendRaw({session: Env.session,
+function onopen() {
+    shellys.call({session: Env.session,
         batch: [{cmd: "game.playing"},
             {cmd: "challenge.list"}
         ]});
@@ -164,7 +167,9 @@ function init() {
 
     commInit();
 
-    ws.connect(Env.socketUrl);
+    shellys.onopen = onopen;
+    shellys.onmessage = onmessage;
+    shellys.connect(Env.socketUrl);
 }
 </script>
 </head>

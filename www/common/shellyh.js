@@ -2,6 +2,9 @@
 function Shelly(restUrl) {
   this.restUrl = restUrl;
   this.token = "";
+  this.errorFunc = function (err) {
+    console.log(err);
+  };
 }
 
 Shelly.prototype.checkToken = function (newToken) {
@@ -41,7 +44,7 @@ Shelly.prototype.call = function (data, cb) {
     data: JSON.stringify(data),
     success: cb,
     error: function (xhr, status, err) {
-      error(err);
+      this.errorFunc(err);
     }
   });
 };

@@ -3,8 +3,8 @@
 <head>
 <title>Lobby</title>
     <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/shellys.js"></script>
     <script src="/static/js/fastclick.js"></script>
-    <script src="/static/js/reconnecting-websocket.js"></script>
     <script src="/static/js/common.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
@@ -42,11 +42,15 @@ function showGames() {
     }
 }
 
-function shellyInit() {
-    sendRaw({session: Env.session,
+function onopen() {
+    shellys.call({session: Env.session,
         batch: [{cmd: "game.playing"},
             {cmd: "challenge.list"}
         ]});
+}
+
+function onmessage(data) {
+    uiOnMessage(data);
 }
 
 $(init);
@@ -55,14 +59,15 @@ function init() {
     $("#shSubTitle").text("Play");
 
     showGames();
-
     commInit();
 
     window.addEventListener("load", function () {
         new FastClick(document.body);
     }, false);
 
-    ws.connect(Env.socketUrl);
+    shellys.onopen = onopen;
+    shellys.onmessage = onmessage;
+    shellys.connect(Env.socketUrl);
 }
 </script>
     <style>

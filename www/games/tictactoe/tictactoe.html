@@ -2,8 +2,8 @@
 <head>
 <title>Tic Tac Toe</title>
 <script src="/common/jquery-1.9.1.js"></script>
+<script src="/common/shellys.js"></script>
 <script src="/static/js/fastclick.js"></script>
-<script src="/static/js/reconnecting-websocket.js"></script>
 <script src="/static/js/common.js"></script>
 
 <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
@@ -113,9 +113,9 @@ function showGameOver(msg) {
     $(".gameOverDiv p").text(msg);
 }
 
-function shellyInit() {
+function onopen() {
     if (Env.gameId !== "0") {
-        sendRaw({session: Env.session,
+        shellys.call({session: Env.session,
             batch: [ {cmd: "game.enter", gameId: Env.gameId},
                 {cmd: "game.playing"},
                 {cmd: "channel.add", channel: "game:" + Env.gameId, _pt: "foo"}
@@ -123,7 +123,10 @@ function shellyInit() {
     }
 }
 
-function processEvent(res, from) {
+function onmessage(res) {
+    uiOnMessage(res);
+    var from = "socket";
+
     if (typeof(res.event) == "undefined") {
         log(from, "error", "odd message: " + JSON.stringify(res));
         return;
@@ -191,7 +194,9 @@ function init() {
     });
 
     commInit();
-    ws.connect(Env.socketUrl);
+    shellys.onopen = onopen;
+    shellys.onmessage = onmessage;
+    shellys.connect(Env.socketUrl);
 }
 </script>
 </head>

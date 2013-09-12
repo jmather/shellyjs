@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <script src="/common/jquery-1.9.1.js"></script>
-    <script src="/static/js/reconnecting-websocket.js"></script>
+    <script src="/common/shellys.js"></script>
+
     <script src="/static/js/common.js"></script>
     <script src="crafty-min.js"></script>
 	<script src="game.js"></script>
@@ -47,19 +48,6 @@
         }
         Env.channel = "game:" + Env.gameId;
         Env.userStatus = {};
-
-        function shellyInit() {
-            console.log("shellyInit");
-            messageReset();
-
-            sendRaw({session: Env.session,
-                batch: [{cmd: "system.connInfo"},
-                    {cmd: "user.get"},
-                    {cmd: "game.enter", gameId: Env.gameId},
-                    {cmd: "game.playing"},
-                    {cmd: "channel.add", channel: Env.channel}
-                ]});
-        }
 
         function fillBoard(board) {
             for (var i=0; i<7; i++) {
@@ -184,7 +172,9 @@
             }
         }
 
-        function processEvent(msg) {
+        function onmessage(msg) {
+            uiOnMessage(msg);
+
             if (msg.event === "error") {
                 showError(msg.message);
                 return;
@@ -240,6 +230,19 @@
             }
         }
 
+        function onopen() {
+            messageReset();
+
+            shellys.call({session: Env.session,
+                batch: [{cmd: "system.connInfo"},
+                    {cmd: "user.get"},
+                    {cmd: "game.enter", gameId: Env.gameId},
+                    {cmd: "game.playing"},
+                    {cmd: "channel.add", channel: Env.channel}
+                ]});
+        }
+
+
         function addPiece(color, column) {
             var newPiece = Crafty.e("2D, Canvas, Gravity, stopper, " + color).attr({x: column * 64, y: 0});
             newPiece.gravity("stopper");
@@ -265,7 +268,9 @@
             Crafty.scene("game");
             Crafty.canvas.context.font = "40px Arial";
 
-            ws.connect(Env.socketUrl);
+            shellys.onopen = onopen;
+            shellys.onmessage = onmessage;
+            shellys.connect(Env.socketUrl);
         }
     </script>
 </head>

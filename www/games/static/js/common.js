@@ -135,7 +135,7 @@ function setLobbyGames(gameList) {
       var data = clone(Env.baseParams);
       data.cmd = "game.leave";
       data.gameId = $(this).parent().attr("gameId");
-      sendWs(data);
+      shellys.call(data);
     });
 
     // start it in the game list and let setWhoTurn sort it
@@ -169,7 +169,7 @@ function updateMyTurns(gameId, game) {
     var data = clone(Env.baseParams);
     data.cmd = "game.leave";
     data.gameId = $(this).parent().attr("gameId");
-    sendWs(data);
+    shellys.call(data);
   });
 
   $("#gameMyTurnList").append($newGame);
@@ -195,26 +195,7 @@ function updateCount(data) {
   $("#myGamesCount").text(total===0?"":total);
 }
 
-var ws = new ReconnectingWebSocket();
-
-//ws.debug = true;
-ws.onopen = function (evt) {
-  if (!$("#serverDisconnectDlg").data("modal")) {
-    $("#serverDisconnectDlg").modal({keyboard: false, show: false});
-  }
-  console.log("serverUrl:", Env.socketUrl);
-  log("socket", "onopen", Env.socketUrl);
-  if (typeof shellyInit === "function"){
-    shellyInit();
-  }
-  try {
-    $("#serverDisconnectDlg").modal("hide");
-  } catch (e) {}
-}
-ws.onmessage = function (evt) {
-  var received_msg = evt.data;
-  log("socket", "onmessage", evt.data);
-  var msg = JSON.parse(evt.data);
+function uiOnMessage(msg) {
   if (msg.event == "user.get") {
     Env.user = msg.data;
     $("#shUserName").text(Env.user.name);
@@ -222,23 +203,6 @@ ws.onmessage = function (evt) {
   if (msg.event === "counter.update" || msg.event === "counter.get") {
     updateCount(msg.data);
   }
-  if (typeof processEvent === "function") {
-    processEvent(msg, "socket");
-  }
-}
-ws.onclose = function (evt) {
-  log("socket", "onclose", JSON.stringify(evt));
-}
-ws.onerror = function (evt) {
-  log("socket", "onerror", JSON.stringify(evt));
-  $("#serverDisconnectDlg").modal("show");
-}
-
-// assumes global ws object
-function sendWs(data) {
-  var msg = JSON.stringify(data);
-  log("socket", "send", msg);
-  ws.send(msg);
 }
 
 function sendCmd(cmd, data) {
@@ -249,17 +213,7 @@ function sendCmd(cmd, data) {
   }
   data.cmd = cmd;
   try {
-    sendWs(data);
-  } catch(e) {
-    log("socket", "error", e.toString())
-  }
-}
-
-function sendRaw(data) {
-  var msg = JSON.stringify(data);
-  try {
-    log("socket", "send-batch", msg);
-    ws.send(msg);
+    shellys.call(data);
   } catch(e) {
     log("socket", "error", e.toString())
   }
