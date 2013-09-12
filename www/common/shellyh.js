@@ -7,9 +7,13 @@ function Shelly(restUrl) {
 Shelly.prototype.checkToken = function (newToken) {
   this.token = $.cookie("shToken");
   if (typeof (this.token) === "undefined") {
-    this.token = newToken;
-    $.cookie("shToken", this.token, { expires: 3650, path: "/" });
+    this.setToken(newToken);
   }
+};
+
+Shelly.prototype.setToken = function (newToken) {
+  this.token = newToken;
+  $.cookie("shToken", this.token, { expires: 3650, path: "/" });
 };
 
 Shelly.prototype.login = function (email, password, role, cb) {

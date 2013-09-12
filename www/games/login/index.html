@@ -12,7 +12,8 @@
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
 
-    <script type="text/javascript" src="login.js"></script>
+    <script type="text/javascript" src="/common/shellyh.js"></script>
+    <script type="text/javascript" src="/static/js/login-ui.js"></script>
 
 <script>
 
@@ -23,11 +24,7 @@ function init() {
     $(".header-user-info").css("display", "none");
     $(".main-menu-items").css("display", "none");
 
-    Env.shToken = $.cookie("shToken");
-    if (typeof (Env.shToken) === "undefined") {
-        Env.shToken = Env.nextUuid;
-        $.cookie("shToken", Env.nextUuid, { expires: 3650, path: "/" });
-    }
+    shelly.checkToken(Env.nextUuid);
 
     commInit();
 	loginMode();
@@ -43,12 +40,12 @@ function init() {
         return false;
     });
     $("#anonymousBtn").click(function(e) {
-        doAnonymous();
+        doAnonymous(shelly.token);
         e.preventDefault();
         return false;
     });
     $("#newAnonymousBtn").click(function(e) {
-        setToken(Env.nextUuid);
+        shelly.setToken(Env.nextUuid);
         doAnonymous();
         e.preventDefault();
         return false;
