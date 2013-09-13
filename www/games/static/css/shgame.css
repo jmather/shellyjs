@@ -38,7 +38,7 @@ body {
     height: 25px;
 }
 
-.commLogDiv .gameBoxHeaderDiv {
+.gameBoxHeaderDiv {
     height: 25px;
 }
 
@@ -52,7 +52,7 @@ body {
 
 /**************** socket/rest logger layout */
 #commLog {
-    height: 0px;
+    height: 200px;
 }
 #showHideLog {
     font-size: 10px;
