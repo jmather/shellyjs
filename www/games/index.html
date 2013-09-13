@@ -65,6 +65,7 @@ function init() {
         new FastClick(document.body);
     }, false);
 
+    shellys.log = log;
     shellys.onopen = onopen;
     shellys.onmessage = onmessage;
     shellys.connect(Env.socketUrl);

@@ -232,6 +232,7 @@ function init() {
 
 
     commInit();
+    shellys.log = log;
     shellys.onopen = onopen;
     shellys.onmessage = onmessage;
     shellys.connect(Env.socketUrl);

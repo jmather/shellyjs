@@ -11,24 +11,28 @@ ShellyS.prototype.connect = function (wsUrl) {
   this.ws = new WebSocket(this.wsUrl);
   var self = this;
   this.ws.onopen = function (evt) {
-    log("socket", "onopen", evt.srcElement.url);
+    self.log("socket", "onopen", evt.srcElement.url);
     $("#serverDisconnectDlg").modal("hide");
     self.onopen(evt);
   };
   this.ws.onmessage = function (evt) {
-    log("socket", "onmessage", evt.data);
-    var msg = JSON.parse(evt.data);
-    self.onmessage(msg);
+    self.log("socket", "onmessage", evt.data);
+    try {
+      var msg = JSON.parse(evt.data);
+      self.onmessage(msg);
+    } catch (e) {
+      self.log("socket", "error", e.toString());
+    }
   };
   this.ws.onclose = function (evt) {
-    log("socket", "onclose", evt);
+    self.log("socket", "onclose", evt);
     self.onclose(evt);
     if (!self.closing) {
       self.reconnect();
     }
   };
   this.ws.onerror = function (evt) {
-    log("socket", "onerror", evt);
+    self.log("socket", "onerror", evt);
     $("#serverDisconnectDlg").modal("show");
     self.onerror(evt);
     self.reconnect();
@@ -41,7 +45,7 @@ ShellyS.prototype.close = function () {
 }
 
 ShellyS.prototype.reconnect = function () {
-  console.log("reconnect:", this.wsUrl);
+  this.log("socket", "reconnect:", this.wsUrl);
   var self = this;
   setTimeout(function () {
     self.connect(self.wsUrl);
@@ -51,10 +55,10 @@ ShellyS.prototype.reconnect = function () {
 ShellyS.prototype.call = function (data) {
   try {
     var msg = JSON.stringify(data);
-    log("socket", "send-batch", msg);
+    this.log("socket", "send-batch", msg);
     this.ws.send(msg);
   } catch(e) {
-    log("socket", "error", e.toString())
+    this.log("socket", "error", e.toString())
   }
 };
 
@@ -66,6 +70,9 @@ ShellyS.prototype.onmessage = function (evt) {
 ShellyS.prototype.onclose = function (evt) {
 }
 ShellyS.prototype.onerror = function (evt) {
+}
+
+ShellyS.prototype.log = function () {
 }
 
 var shellys = new ShellyS();
