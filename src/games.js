@@ -68,7 +68,7 @@ app.get("/login/*.html", function (req, res) {
   env.socketUrl = global.C.SOCKET_URL;
   env.nextUuid = sh.uuid();
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer"}});
+    partials: {head: "head", header: "header", footer: "footer", errorBox: "errorbox"}});
 
   return 0;
 });
@@ -90,7 +90,7 @@ function createEnv(req) {
 
 function renderPage(req, res, env) {
   res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", errorBox: "errorbox"}});
+    partials: {head: "head", header: "header", footer: "footer", errorBox: "errorbox"}});
 }
 
 app.get("*.html", function (req, res) {
@@ -116,7 +116,7 @@ app.use(function (err, req, res, next) {
 
   res.status(500);
   res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
-    partials: {header: "header", footer: "footer", errorBox: "errorbox"}});
+    partials: {head: "head", header: "header", footer: "footer", errorBox: "errorbox"}});
 });
 
 
