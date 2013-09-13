@@ -44,7 +44,7 @@ Shelly.prototype.call = function (data, cb) {
     data: JSON.stringify(data),
     success: cb,
     error: function (xhr, status, err) {
-      this.errorFunc(err);
+      cb(1, err);
     }
   });
 };

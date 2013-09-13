@@ -195,6 +195,11 @@ function updateCount(data) {
   $("#myGamesCount").text(total===0?"":total);
 }
 
+
+
+/***********************
+ * API helper functions
+ ***********************/
 function uiOnMessage(msg) {
   if (msg.event == "user.get") {
     Env.user = msg.data;
@@ -212,11 +217,7 @@ function sendCmd(cmd, data) {
     data = {};
   }
   data.cmd = cmd;
-  try {
-    shellys.call(data);
-  } catch(e) {
-    log("socket", "error", e.toString())
-  }
+  shellys.call(data);
 }
 
 function sendRestCmd(cmd, data, cb) {
@@ -226,31 +227,13 @@ function sendRestCmd(cmd, data, cb) {
   obj.session = Env.session;
   obj.cmd = cmd;
   var obj = $.extend(obj, data);
-  log("rest", "send", obj);
-  $.ajax
-    ({
-      type: "POST",
-      url: Env.restUrl,
-      async: true,
-      contentType: "application/json",
-      dataType: "json",
-      data: JSON.stringify(obj),
-      success: function (res, status) {
-        log("rest", "recv", res);
-        // SWD just take first message for now
-        cb(0, res[0]);
-      },
-      error: function (xhr, textStatus, errorThrown) {
-        log("rest", "error", xhr.responseText);
-        cb(1, textStatus);
-      }
-    })
+  shellys.post(obj, cb);
 }
 
 
 /***********************
  * Message bank functions
-***********************/
+ ***********************/
 var gMessageCount = 0;
 
 function messageInit()

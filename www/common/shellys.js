@@ -1,6 +1,7 @@
 
 function ShellyS() {
   this.wsUrl = "";
+  this.restUrl = "";
   this.closing = false;
 }
 
@@ -62,17 +63,37 @@ ShellyS.prototype.call = function (data) {
   }
 };
 
+ShellyS.prototype.log = function () {
+};
+
 // default internal message handlers;
 ShellyS.prototype.onopen = function (evt) {
-}
+};
 ShellyS.prototype.onmessage = function (evt) {
-}
+};
 ShellyS.prototype.onclose = function (evt) {
-}
+};
 ShellyS.prototype.onerror = function (evt) {
-}
+};
 
-ShellyS.prototype.log = function () {
-}
+ShellyS.prototype.post = function (data, cb) {
+  var self = this;
+  $.ajax ({
+    type: "POST",
+    url: self.restUrl,
+    async: false,
+    contentType: "application/json",
+    dataType: "json",
+    data: JSON.stringify(data),
+    success: function (data) {
+      self.log("rest", "response", data);
+      cb(0, data);
+    },
+    error: function (xhr, status, err) {
+      self.log("rest", status, err);
+      cb(1, err);
+    }
+  });
+};
 
 var shellys = new ShellyS();

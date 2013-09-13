@@ -3,8 +3,10 @@
 <head>
 <title>Lobby</title>
     <script src="/common/jquery-1.9.1.js"></script>
+    <script src="/common/shellys.js"></script>
+
     <script src="/static/js/fastclick.js"></script>
-    <script src="/static/js/common.js"></script>
+    <script src="/static/js/common-ui.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <link rel="stylesheet" type="text/css" href="/static/css/shgame.css">
@@ -76,15 +78,19 @@ function updateProfile(user) {
     $("#shUserName").text(Env.user.name);
 }
 
-function refreshProfile() {
+function refreshProfile(user) {
     resetProfileSpans();
-    sendRestCmd("user.get", {}, function (error, data) {
-        console.log(data);
-        if (!error && data.event != "error") {
-            Env.user = data.data;
-            updateProfile();
-        }
-    });
+    if (typeof user === "object") {
+        Env.user = user;
+        updateProfile();
+    } else {
+        sendRestCmd("user.get", {}, function (error, data) {
+            if (!error && data[0].event !== "error") {
+                Env.user = data[0].data;
+                updateProfile();
+            }
+        });
+    }
 }
 
 function doRegister() {
@@ -116,6 +122,8 @@ function init() {
     $("#shSubTitle").text("Profile");
 
     commInit();
+    shellys.log = log;
+    shellys.restUrl = Env.restUrl;
 
     window.addEventListener("load", function () {
         new FastClick(document.body);
@@ -153,12 +161,13 @@ function init() {
         var res = sendRestCmd("user.set", {user: saveData}, function (error, data) {
             if(!error) {
                 console.log("ret", data);
-                refreshProfile();
                 if (data.event === "error") {
+                    refreshProfile();
                     showError(data.message + " - " + data.data.toString());
                     return;
                 }
-                $("#shUserName").text(data.data.name);
+                refreshProfile(data[0].data);
+                $("#shUserName").text(data[0].data.name);
             }
         });
     });
