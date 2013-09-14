@@ -22,16 +22,21 @@ global.CDEF("SOCKET_PORT", 5110);
 global.CDEF("SOCKET_URL", "ws://" + global.C.DNS_NAME + ":" + global.C.SOCKET_PORT);
 global.CDEF("HEART_BEAT", 30 * 1000);
 
+// tcp options
+global.CDEF("TCP_PORT", 5111);
+
 // cluster options
 global.CDEF("CLUSTER_URL", "tcp://localhost:5151");
 global.CDEF("CLUSTER_NUM_SOCKET", 2);
+global.CDEF("CLUSTER_NUM_TCP", 1);
 global.CDEF("CLUSTER_NUM_REST", 1);
 global.CDEF("CLUSTER_NUM_ADMIN", 1);
 global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 global.CDEF("CLUSTER", {
-  "socket": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: null},
+  "socket": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: ["websocket"]},
+  "tcp": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_TCP, args: ["tcp"]},
   "rest": {src: "/src/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
   "admin": {src: "/src/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
   "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},

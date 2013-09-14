@@ -1,3 +1,4 @@
+var net = require("net");
 var WebSocketServer = require("ws").Server;
 var util = require("util");
 var async = require("async");
@@ -145,6 +146,23 @@ function onMessage(data) {
   }
 }
 
+// Used in TCP only version as framer
+function onData(data) {
+  shlog.debug("tcp", "onData", this.id, data.length, data.toString("utf8"));
+  var chunk = data.toString("utf8");
+  var endMsg = chunk.indexOf('\n');
+  if (endMsg === -1) {
+    this.msg += chunk;  // end not found
+    shlog.info("tcp", "onData-buffer", this.id, this.msg);
+    return;
+  }
+
+  this.msg += chunk.substr(0, endMsg);
+  shlog.info("tcp", "onData-process", this.id, this.msg);
+  onMessage.call(this, this.msg);
+  this.msg = "";  // reset the buffer
+}
+
 function onCloseError(err, data) {
   sh.error("close-error", err, data);
 }
@@ -194,15 +212,29 @@ function handleConnect(ws) {
   };
   ws.hbTimer = setInterval(heartBeat, global.C.HEART_BEAT);
 
-  ws.on("message", onMessage);
+  if (gServerType === "tcp") {
+    ws.msg = "";
+    ws.send = function (data) { this.write(data + "\n"); };
+    ws.on("data", onData);
+  } else {
+    ws.on("message", onMessage);
+  }
   ws.on("error", onError);
   ws.on("close", onClose);
 }
 
-Socket.start = function () {
-  wss = new WebSocketServer({port: global.C.SOCKET_PORT}, function () {
-    shlog.system("socket", "server listening: " + global.C.SOCKET_URL);
-  });
+Socket.start = function (stype) {
+  gServerType = stype;
+  if (gServerType === "tcp") {
+    wss = net.createServer(function (socket) {
+    }).listen(global.C.TCP_PORT, function () {
+      shlog.system("tcp", "server listening: " + global.C.TCP_PORT);
+    });
+  } else {
+    wss = new WebSocketServer({port: global.C.SOCKET_PORT}, function () {
+      shlog.system("socket", "server listening: " + global.C.SOCKET_URL);
+    });
+  }
   var connCount = 1;
 
   wss.on("connection", function (ws) {
