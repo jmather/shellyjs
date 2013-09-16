@@ -1,7 +1,7 @@
 Shelly
 ======
 
-  API server via HTTP and Websockets
+  API server via HTTP, Websockets, and TCP
 
 ```js
 var shelly = require('shelly');
@@ -101,18 +101,18 @@ By default the api files are reloaded each call.  This option should be turned o
 
 ## Features
 
-  * Drop in API support
-  * APIs supported over HTTP (REST-ish) and Websockets
-  * Several built-in APIs
+  * Drop in support for API functions
+  * Functions run over HTTP, Websockets, and TCP
+  * Multi-server clustering
+  * Ready built APIs (registration, users, storage...)
   * Web based API testing
   * User online/offline detection
   * Push events
   * Parameter validation
-  * Role bases per function API security
-  * Per server and multi-server clustering
-  * Async job queues (email)
+  * Role based per function API security
+  * Async job queues (email, push notifications)
   * Object presistence, caching, and locking
-  * Plugable data storage (Production: Redis, Developement: sqlite)
+  * Plugable data storage
   * Server side statistics
   * Logging
 
