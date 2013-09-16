@@ -111,13 +111,13 @@ example.echo = function (req, res, cb) {
               <h3>API Structure</h3>
 
               <p>There are two classes of APIs - Core and App.  The API definitions and capabilities are identical.  The
-                 purpose of the segmentation is mostly to facilitate code seperation for upgrades.
+                 purpose of the segmentation is mostly to facilitate code separation for upgrades.
               </p>
               <h4>Core APIs</h4>
               <p>These contain basic functionality such as registration, counters, basic game play, and others.  They
                   ship with Shelly and are located in:<p>
               <div class="alert alert-info">
-                  ~/node_modules/shelly-js/apis/
+                  ~/node_modules/shellyjs/apis/
               </div>
               <p>They can be viewed in the admin via the "Core APIs" menu:
                   <a href="http://localhost:5100/core.html">http://localhost:5100/core.html</a>
@@ -133,7 +133,7 @@ shelly.start({
                   <a href="http://localhost:5100/core.html?api=api.app">http://localhost:5100/core.html?api=api.app</a>
               </p>
               <div class="alert alert-info">
-                  NOTE: <strong>APP_API_DIR</strong> defaults to the ~/node_modules/shelly-js/example/apis directory.
+                  NOTE: <strong>APP_API_DIR</strong> defaults to the ~/node_modules/shellyjs/example/apis directory.
               </div>
 
               <h4>App Definitions</h4>
@@ -160,7 +160,7 @@ shelly.start({
                 should be changed for any production environment.
             </div>
             <h4>Create your own Shelly App:</h4>
-            <pre class="prettyprint lang-bash">$ cp ~/node_modules/shelly-js/example/* .</pre>
+            <pre class="prettyprint lang-bash">$ cp ~/node_modules/shellyjs/example/* .</pre>
             <p>This will create the flowing</p>
             <pre>
                 ./app.js - mail application file
@@ -312,7 +312,7 @@ $ node app.js
             <h3>Start the second server</h3>
             <p>The default first argument is a valid config directory with a main.js in it.</p>
 <pre class="prettyprint linenums lang-bash">
-$ node app.js "./node_modules/shelly-js/config2/"
+$ node app.js "./node_modules/shellyjs/config2/"
 </pre>
 
             <h3>Check the servers</h3>
@@ -350,7 +350,7 @@ $ node app.js "./node_modules/shelly-js/config2/"
 
             <h4>Multi-server - two machines</h4>
             <p>
-                To run a cluster on seperate machines the Redis data store wrapper must be used by setting the
+                To run a cluster on separate machines the Redis data store wrapper must be used by setting the
                 <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the "config/main.js".
             </p>
 <pre class="prettyprint linenums lang-bash">

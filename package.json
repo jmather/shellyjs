@@ -1,5 +1,5 @@
 {
-  "name": "shelly-js",
+  "name": "shellyjs",
   "version": "0.0.1",
   "private": true,
   "description": "Synchonus and Asynchronus API server over HTTP, Websockets, and TCP",
@@ -7,11 +7,11 @@
   "main": "./src/shelly.js",
   "repository" : {
     "type" : "git",
-    "url" : "https://github.com/skool51/shelly-js.git"
+    "url" : "https://github.com/skool51/shellyjs.git"
   },
   "keywords": [
     "shelly",
-    "shelly-js",
+    "shellyjs",
     "framework",
     "app",
     "api",
@@ -54,6 +54,6 @@
   "readme": "",
   "readmeFilename": "Readme.md",
   "bugs": {
-    "url": "https://github.com/skool51/shelly-js/issues"
+    "url": "https://github.com/skool51/shellyjs/issues"
   }
 }

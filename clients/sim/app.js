@@ -2,7 +2,7 @@ var request = require("superagent");
 var _ = require("lodash");
 var async = require("async");
 
-var st = require("/Users/scott/git/shelly-js/test/shtest.js");
+var st = require("/Users/scott/git/shellyjs/test/shtest.js");
 
 var host = "http://localhost:5101";
 

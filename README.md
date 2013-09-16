@@ -16,7 +16,7 @@ shelly.start({}, function (err, data) {
     
  or if you want the tip
 
-    $ npm install git+ssh://git@github.com:skool51/shelly-js.git
+    $ npm install git+ssh://git@github.com:skool51/shellyjs.git
   
 
 ## Quick Start
@@ -25,15 +25,15 @@ shelly.start({}, function (err, data) {
 
  Install Shelly:
 
-    $ npm install shelly-js
+    $ npm install shellyjs
 
  NOTE: for now direct access is via the private repo:
 
-    $ npm install git+ssh://git@github.com:skool51/shelly-js.git
+    $ npm install git+ssh://git@github.com:skool51/shellyjs.git
 
  Start the server:
 
-    $ node node_modules/shelly-js/example/app.js
+    $ node node_modules/shellyjs/example/app.js
     
  Explore:
  
@@ -46,7 +46,7 @@ shelly.start({}, function (err, data) {
  
  Create an API:
  
-    $ cp -r node_modules/shelly-js/example/* .
+    $ cp -r node_modules/shellyjs/example/* .
     $ node app.js
     
  Modify the API:
