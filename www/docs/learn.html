@@ -24,6 +24,12 @@
       <link rel="apple-touch-icon-precomposed" sizes="72x72" href="bootstrap/ico/apple-touch-icon-72-precomposed.png">
                     <link rel="apple-touch-icon-precomposed" href="bootstrap/ico/apple-touch-icon-57-precomposed.png">
                                    <link rel="shortcut icon" href="bootstrap/ico/favicon.png">
+
+      <style>
+          pre {
+              font-size: 10px;
+          }
+      </style>
   </head>
 
   <body data-spy="scroll" data-target=".bs-docs-sidebar">
@@ -274,17 +280,18 @@ example.hello = function (req, res, cb) {
 
           <h3>Cluster configuration</h3>
             <h4>Per Server Workers</h4>
-            <p>Each server in a cluster can run multiple workers for the HTTP, Websocket, Admin, Game, Mailer, and Matcher processes.
+            <p>Each server in a cluster can run multiple workers for the HTTP, Websocket, TCP, Admin, Game, Mailer, and Matcher processes.
                 These are configured per server in with the <strong>CLUSTER_NUM_*</strong>settings</p>
 <pre class="prettyprint linenums">
 global.CDEF("CLUSTER_NUM_SOCKET", 2);
+global.CDEF("CLUSTER_NUM_TCP", 1);
 global.CDEF("CLUSTER_NUM_REST", 1);
 global.CDEF("CLUSTER_NUM_ADMIN", 1);
 global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 </pre>
-            <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP(REST), Admin,
+            <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP(REST), TCP, Admin,
                 Games, Matcher, and Mailer worker types.</p>
             <h4>Multi-server - developer</h4>
             <p>Servers in a cluster register themselves on startup and can be added and removed dynamically.</p>
