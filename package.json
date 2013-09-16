@@ -51,7 +51,7 @@
   },
   "engine": "node >= 0.10.9",
   "readme": "",
-  "readmeFilename": "Readme.md",
+  "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/skool51/shellyjs/issues"
   }
