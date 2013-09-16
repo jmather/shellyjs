@@ -5,6 +5,8 @@ var Ai = require(__dirname + "/ai.js");
 var gAi = null;
 
 var ws = new WebSocket('ws://localhost:5110');
+var gUser = "joe51@skool51.com";
+var gPassword = "foofoo";
 var gWaitInt = 0;
 var gTurnSleep = 1000;
 
@@ -36,7 +38,12 @@ function waitForGame() {
   sendCmd("match.count", {name: "tictactoe"});
 }
 
-ws.on('open', function () {
+function makeMove(game) {
+  var move = gAi.calculateMove(game.state.gameBoard);
+  sendCmd("game.turn", {gameId: game.oid, move: {x: move[1], y: move[0]}});
+}
+
+function startPlaying() {
   sendCmd("channel.add", {channel: "lobby:tictactoe:0"});
   sendCmd("game.playing");  // joins all current games
   if (gSubmitNext) {
@@ -46,6 +53,10 @@ ws.on('open', function () {
     // wait for someone else to enter before add
     gWaitInt = setInterval(waitForGame, 5000);
   }
+}
+
+ws.on('open', function () {
+  sendCmd("reg.login", {email: gUser, password: gPassword});
 });
 
 ws.on('close', function () {
@@ -57,11 +68,6 @@ ws.on('error', function (error) {
   console.log(error);
 });
 
-function makeMove(game) {
-  var move = gAi.calculateMove(game.state.gameBoard);
-  sendCmd("game.turn", {gameId: game.oid, move: {x: move[1], y: move[0]}});
-}
-
 ws.on('message', function (message) {
   console.log('received: %s', message);
   var msg = null;
@@ -71,7 +77,14 @@ ws.on('message', function (message) {
     console.error("unabel to parse message", e.toString());
     return;
   }
-  if (msg.event === "match.count") {
+  if (msg.event === "error" && msg.code === "email-bad") {
+    sendCmd("reg.create", {email: gUser, password: gPassword});
+  } else if (msg.event === "reg.create" || msg.event === "reg.login") {
+    gUid = msg.data.uid;
+    gSession = msg.data.session;
+    console.log("user created:", gUser, gUid, gSession);
+    startPlaying();
+  } else if (msg.event === "match.count") {
     if (msg.data.waiting > 0) {
       sendCmd("match.add", {name: "tictactoe"});
     }

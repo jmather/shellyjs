@@ -162,6 +162,7 @@ exports.login = function (req, res, cb) {
       shlog.info("reg", "login success:", email);
       var out = {};
       out.email = email;
+      out.uid = em.get("uid");
       out.session = session.create(em.get("uid"));
       res.add(sh.event("reg.login", out));
       return cb(0);
