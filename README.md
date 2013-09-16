@@ -4,7 +4,7 @@ Shelly
   API server via HTTP, Websockets, and TCP
 
 ```js
-var shelly = require('shelly');
+var shelly = require('shellyjs');
 
 shelly.start({}, function (err, data) {
 });
@@ -12,7 +12,7 @@ shelly.start({}, function (err, data) {
 
 ## Installation
 
-    $ npm install shelly (NOTE: version 0.1 has not been pushed to npmjs.org)
+    $ npm install shellyjs (NOTE: version 0.1 has not been pushed to npmjs.org)
     
  or if you want the tip
 
