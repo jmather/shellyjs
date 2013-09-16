@@ -1,5 +1,5 @@
 try {
-  var shelly = require("shelly");
+  var shelly = require("shelly-js");
 } catch (e) {}
 if (!shelly) { // handle direct run from module location
   shelly = require(__dirname + "/../src/shelly.js");

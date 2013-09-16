@@ -16,7 +16,7 @@ shelly.start({}, function (err, data) {
     
  or if you want the tip
 
-    $ npm install git+ssh://git@github.com:skool51/shelly.git
+    $ npm install git+ssh://git@github.com:skool51/shelly-js.git
   
 
 ## Quick Start
@@ -29,11 +29,11 @@ shelly.start({}, function (err, data) {
 
  NOTE: for now direct access is via the private repo:
 
-    $ npm install git+ssh://git@github.com:skool51/shelly.git
+    $ npm install git+ssh://git@github.com:skool51/shelly-js.git
 
  Start the server:
 
-    $ node node_modules/shelly/example/app.js
+    $ node node_modules/shelly-js/example/app.js
     
  Explore:
  
@@ -46,7 +46,7 @@ shelly.start({}, function (err, data) {
  
  Create an API:
  
-    $ cp -r node_modules/shelly/example/* .
+    $ cp -r node_modules/shelly-js/example/* .
     $ node app.js
     
  Modify the API:
@@ -135,7 +135,7 @@ By default the api files are reloaded each call.  This option should be turned o
 # License
 The MIT License (MIT)
 
-Copyright (c) 2013 Scott Dale
+Copyright (c) 2013 Scott Dale <scott@skool51.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

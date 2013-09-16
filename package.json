@@ -1,14 +1,30 @@
 {
-  "name": "shelly",
-  "version": "0.0.0000",
+  "name": "shelly-js",
+  "version": "0.1",
   "private": true,
-  "description": "a game server",
+  "description": "Synchonus and Asynchronus API server over HTTP, Websockets, and TCP",
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
   "repository" : {
     "type" : "git",
-    "url" : "https://github.com/sdale511/shelly.git"
+    "url" : "https://github.com/skool51/shelly-js.git"
   },
+  "keywords": [
+    "shelly",
+    "framework",
+    "app",
+    "api",
+    "game",
+    "game server",
+    "rest",
+    "restful",
+    "router",
+    "websocket",
+    "TCP",
+    "socket",
+    "networking",
+    "push"
+  ],
   "dependencies": {
     "sqlite3": "2.1.7",
     "redis": "0.8.3",
@@ -33,5 +49,11 @@
     "superagent": "0.14.6",
     "supertest": "0.6.0"
   },
-  "engine": "node >= 0.10.9"
+  "engine": "node >= 0.10.9",
+  "readme": "",
+  "readmeFilename": "Readme.md",
+  "bugs": {
+    "url": "https://github.com/skool51/shelly-js/issues"
+  },
+
 }
