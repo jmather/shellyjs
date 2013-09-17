@@ -100,3 +100,6 @@ global.CDEF("EXT_API_DIR", "");
 
 // location of server uuid that identifies server in cluster
 global.CDEF("SERVER_TAG_FN", global.C.CONFIGDIR + "/server.json");
+
+// matcher options
+global.CDEF("MATCHER_INTERVAL", 3000);
