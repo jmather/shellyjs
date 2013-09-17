@@ -47,7 +47,7 @@ app.use(function (req, res, next) {
 
   shlog.info("admin", "session check", req.path);
 
-  // SWD little clunky to deal with express vs restify diffs
+  // SWD: set cmd as fill session looks at it
   req.body = {};
   req.body.cmd = "admin.page";
   if (_.isUndefined(req.cookies.shSession)) {

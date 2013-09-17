@@ -1,0 +1,94 @@
+var express = require("express");
+var os = require("os");
+var fs = require("fs");
+var path = require("path");
+var url = require("url");
+var engines = require("consolidate");
+var _ = require("lodash");
+
+global.CDEF = function (name, value) {
+  if (_.isUndefined(global.C[name])) {
+    global.C[name] = value;
+  }
+};
+
+global.C = {};
+global.CDEF("BASEDIR", path.dirname(__dirname));
+global.CDEF("DOCS_PORT", 8080);
+
+global.CDEF("LOG_CONSOLE", true);
+global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
+global.CDEF("LOG_MODULES", { "docs" : {} });
+
+var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+shlog.init(global.C.LOG_MODULES);
+
+var commonStatic = global.C.BASEDIR + "/www/common";
+var docsBase = global.C.BASEDIR + "/www/docs";
+var docsStatic = docsBase + "/static";
+
+shlog.system("docs", "docs directory: " + docsBase);
+
+var app = express();
+app.use(express.favicon(docsStatic + "/images/favicon.ico"));
+//app.enable("view cache");  // disable this for dev
+app.set("views", docsBase);
+app.engine("html", engines.ejs);
+app.use("/common", express.static(commonStatic));
+app.use("/static", express.static(docsStatic));
+app.use("/docs", express.static(docsBase));
+app.use(express.cookieParser());
+
+function createEnv(req) {
+  var map = {};
+  return map;
+}
+
+app.get("*.html", function (req, res) {
+  shlog.info("docs", "%s %s", req.method, req.url);
+  var env = createEnv(req);
+
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env)});
+});
+
+app.get("/", function (req, res) {
+  shlog.info("docs", "default handler - default page");
+  res.redirect("/index.html");
+  return 0;
+});
+
+//********** error handling
+
+app.use(function (err, req, res, next) {
+  shlog.error("docs", "docs error", err, err.stack);
+  var env = createEnv(req);
+  env.error = {message: err.message, stack: err.stack};
+
+  res.status(500);
+  res.render("error.html", {Env: env, EnvJson: JSON.stringify(env)});
+
+  return 0;
+});
+
+
+//********** server init and handlers
+
+var docsServer = null;
+exports.start = function () {
+  var docsServer = app.listen(global.C.DOCS_PORT, function () {
+    shlog.system("docs", "server listening: %s", global.C.DOCS_PORT);
+  });
+
+  docsServer.on("error", function (err) {
+    shlog.error("docs", err);
+  });
+};
+
+exports.shutdown = function (cb) {
+  if (docsServer && docsServer.address()) {
+    docsServer.close();
+  }
+  cb();
+};
+
+exports.start();
