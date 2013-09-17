@@ -64,7 +64,7 @@
 <header class="jumbotron subhead">
   <div class="container">
     <h1>Shelly</h1>
-    <p class="lead">API server over HTTP and Websockets.</p>
+    <p class="lead">API server over HTTP, Websockets, and TCP.</p>
   </div>
 </header>
 
@@ -95,7 +95,7 @@
 
               <h3>API Functionality</h3>
               <p>APIs are defined in modules with specific members and functions.</p>
-              <p>Functions may be accessed via HTTP or Websocket.</p>
+              <p>Functions may be accessed via HTTP, Websocket, or TCP.</p>
               <p>On each call paramters are verified along with ensuring the correct security access.</p>
               <p>The following is a very simple example of an API module:</p>
 <pre class="prettyprint linenums">
@@ -252,11 +252,11 @@ example.hello = function (req, res, cb) {
 };
 </pre>
               <p>In the above code sample lines 16-19 define the new function "hello" in the "example" API</p>
-              <p>This function is now callable from both the HTTP and Websocket intergace.</p>
+              <p>This function is now callable from the HTTP, Websocket, and TCP interface.</p>
               <p>The <strong>req</strong> and <strong>res</strong> objects are similar to the express <strong>req</strong>
-                 and <strong>res</strong> objects, but work for Websockets also.</p>
-              <p>You can add multiple response objects.  More over you can call <strong>res.add()</strong> multiple times in a single
-              call.  The HTTP interface returns an array objects, while the Websocket interface just returns each object.</p>
+                 and <strong>res</strong> objects, but work for Websockets and TCP also.</p>
+              <p>You can add multiple response objects.  Moreover you can call <strong>res.add()</strong> multiple times in a single
+              call.  The HTTP interface returns an array objects, while the Websocket and TCP interface return each individual object.</p>
               <p>The <strong>sh.event</strong> function on line 12 and line 17 is just a convenience function that creates a standard
               envelope around each response.  It creates an object like:</p>
 <pre class="prettyprint linenums">
@@ -291,7 +291,7 @@ global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 </pre>
-              <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP(REST), TCP, Admin,
+              <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP, TCP, Admin,
                   Games, Matcher, and Mailer worker types.</p>
               <h4>Multi-server - developer</h4>
               <p>Servers in a cluster register themselves on startup and can be added and removed dynamically.</p>
