@@ -15,11 +15,13 @@ ShellyS.prototype.connect = function (wsUrl) {
     self.log("socket", "onopen", evt.srcElement.url);
     $("#serverDisconnectDlg").modal("hide");
     self.onopen(evt);
+    self.call({cmd: "system.connInfo"})
   };
   this.ws.onmessage = function (evt) {
     self.log("socket", "onmessage", evt.data);
     try {
       var msg = JSON.parse(evt.data);
+      self.preOnMessage(msg);
       self.onmessage(msg);
     } catch (e) {
       self.log("socket", "error", e.toString());
@@ -94,6 +96,12 @@ ShellyS.prototype.post = function (data, cb) {
       cb(1, err);
     }
   });
+};
+
+ShellyS.prototype.preOnMessage = function (evt) {
+  if (evt.event === "system.connInfo") {
+    console.log("server:", evt.data.serverId, "wid:", evt.data.wid, "wsid:", evt.data.wsid);
+  }
 };
 
 var shellys = new ShellyS();

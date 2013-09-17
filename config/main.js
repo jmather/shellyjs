@@ -96,4 +96,7 @@ global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "shelly88
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Postmark", auth: {user: "XXXX", pass: "XXXX"}});
 
 // extended directories
-//global.CDEF("EXT_API_DIR", "");
+global.CDEF("EXT_API_DIR", "");
+
+// location of server uuid that identifies server in cluster
+global.CDEF("SERVER_TAG_FN", global.C.CONFIGDIR + "/server.json");

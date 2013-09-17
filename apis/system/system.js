@@ -12,7 +12,7 @@ system.functions = {
   config: {desc: "get all server settings", params: {}, security: ["admin"]},
   rawGet: {desc: "get an object given any key", params: {key: {dtype: "string"}}, security: ["admin"]},
   rawSet: {desc: "set an object given any key", params: {key: {dtype: "string"}, value: {dtype: "object"}}, security: ["admin"]},
-  connInfo: {desc: "return info about connection", params: {}, security: []}
+  connInfo: {desc: "return info about connection", params: {}, security: [], noSession: true}
 };
 
 system.connInfo = function (req, res, cb) {

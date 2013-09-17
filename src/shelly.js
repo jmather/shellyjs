@@ -24,19 +24,9 @@ global.CDEF = function (name, value) {
   }
 };
 
-/*jslint stupid: true */
-// OK as this is only called once during startup
-function serverInfo() {
-  var serverInfoFn = global.C.CONFIGDIR + "/server.json";
-  var serverData = {};
-  if (fs.existsSync(serverInfoFn)) {
-    serverData = require(serverInfoFn);
-  } else {
-    serverData.serverId = sh.uuid();
-    fs.writeFileSync(serverInfoFn, JSON.stringify(serverData));
-  }
-  return serverData;
-}
+global.CFDEF = function (name, value) {
+  global.C[name] = value;
+};
 
 // used to pass config to each worker in "shelly.start" message
 var gConfig = {};
@@ -50,7 +40,7 @@ function initConfig(config) {
   // setup the dir to load all other configs from
   // check the command line - SWD: process these better
   if (_.isString(process.argv[2])) {
-    global.CDEF("CONFIGDIR", process.argv[2]);
+    global.CFDEF("CONFIGDIR", process.argv[2]);
   }
   global.CDEF("CONFIGDIR", global.C.BASEDIR + "/config");
 
@@ -71,6 +61,20 @@ function initConfig(config) {
 
   // load the package info
   global.PACKAGE = require(global.C.BASEDIR + "/package.json");
+}
+
+/*jslint stupid: true */
+// OK as this is only called once during startup
+function serverInfo() {
+  var serverInfoFn = global.C.SERVER_TAG_FN;
+  var serverData = {};
+  if (fs.existsSync(serverInfoFn)) {
+    serverData = require(serverInfoFn);
+  } else {
+    serverData.serverId = sh.uuid();
+    fs.writeFileSync(serverInfoFn, JSON.stringify(serverData));
+  }
+  return serverData;
 }
 
 // master received message from worker

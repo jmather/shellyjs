@@ -15,4 +15,4 @@ global.CDEF("CLUSTER_NUM_MAILERS", 0);
 
 
 // pick up all the other default configs
-require(__dirname + "/../config/main.js");
+require(global.C.BASEDIR + "/config/main.js");
