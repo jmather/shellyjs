@@ -34,13 +34,18 @@ var gConfig = {};
 function initConfig(config) {
   gConfig = config;
 
-  // set any configs passed in
+  // set any configs passed into constructor
   _.assign(global.C, config);
 
-  // setup the dir to load all other configs from
-  // check the command line - SWD: process these better
-  if (_.isString(process.argv[2])) {
-    global.CFDEF("CONFIGDIR", process.argv[2]);
+  // set any configs passed in on command line, force set with CFDEF
+  var i = 0;
+  for (i = 2; i < process.argv.length; i += 1) {
+    var argParts = process.argv[i].split("=");
+    if (argParts.length !== 2) { continue; }
+    if (argParts[0].indexOf("DIR") !== -1) {
+      argParts[1] = path.resolve(argParts[1]);
+    }
+    global.CFDEF(argParts[0], argParts[1]);
   }
   global.CDEF("CONFIGDIR", global.C.BASEDIR + "/config");
 
