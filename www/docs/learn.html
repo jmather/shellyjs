@@ -75,11 +75,12 @@
     <div class="row">
       <div class="span3 bs-docs-sidebar">
         <ul class="nav nav-list bs-docs-sidenav">
-          <li><a href="#overview"><i class="icon-chevron-right"></i> Overview</a></li>
-          <li><a href="#createApi"><i class="icon-chevron-right"></i> Create an API</a></li>
-          <li><a href="#testApi"><i class="icon-chevron-right"></i> Test an API</a></li>
-          <li><a href="#addFunction"><i class="icon-chevron-right"></i> Add a function</a></li>
-          <li><a href="#runCluster"><i class="icon-chevron-right"></i> Run a two server cluster</a></li>
+          <li><a href="#overview"><i class="icon-chevron-right"></i>Overview</a></li>
+          <li><a href="#createApi"><i class="icon-chevron-right"></i>Create an API</a></li>
+          <li><a href="#testApi"><i class="icon-chevron-right"></i>Test an API</a></li>
+          <li><a href="#addFunction"><i class="icon-chevron-right"></i>Add a function</a></li>
+          <li><a href="#runCluster"><i class="icon-chevron-right"></i>Run a two server cluster</a></li>
+          <li><a href="#useRedis"><i class="icon-chevron-right"></i>Use Redis Datastore</a></li>
         </ul>
       </div>
       <div class="span9">
@@ -270,17 +271,17 @@ example.hello = function (req, res, cb) {
 
 
 
-        <!-- Run Cluster
-        ================================================== -->
-        <section id="runCluster">
-          <div class="page-header">
-            <h1>Run a two server cluster</h1>
-          </div>
+          <!-- Run Cluster
+          ================================================== -->
+          <section id="runCluster">
+              <div class="page-header">
+                  <h1>Run a two server cluster</h1>
+              </div>
 
-          <h3>Cluster configuration</h3>
-            <h4>Per Server Workers</h4>
-            <p>Each server in a cluster can run multiple workers for the HTTP, Websocket, TCP, Admin, Game, Mailer, and Matcher processes.
-                These are configured per server in with the <strong>CLUSTER_NUM_*</strong>settings</p>
+              <h3>Cluster configuration</h3>
+              <h4>Per Server Workers</h4>
+              <p>Each server in a cluster can run multiple workers for the HTTP, Websocket, TCP, Admin, Game, Mailer, and Matcher processes.
+                  These are configured per server in with the <strong>CLUSTER_NUM_*</strong>settings</p>
 <pre class="prettyprint linenums">
 global.CDEF("CLUSTER_NUM_SOCKET", 2);
 global.CDEF("CLUSTER_NUM_TCP", 1);
@@ -290,14 +291,14 @@ global.CDEF("CLUSTER_NUM_GAMES", 1);
 global.CDEF("CLUSTER_NUM_MATCHER", 1);
 global.CDEF("CLUSTER_NUM_MAILER", 1);
 </pre>
-            <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP(REST), TCP, Admin,
-                Games, Matcher, and Mailer worker types.</p>
-            <h4>Multi-server - developer</h4>
-            <p>Servers in a cluster register themselves on startup and can be added and removed dynamically.</p>
-            <p>To demonstrate clustering in the development environment (sqlite) you can launch a second server
-                on the same machine by creating a different config file so the listening ports do not conflict.</p>
-            <p>Both servers must have access to he same sqlite database file.</p>
-            <p>The following example can be found in the ~/node_modules/config2 directory:</p>
+              <p>In the above example the server will spawn 2 Websocket workers and one each for the HTTP(REST), TCP, Admin,
+                  Games, Matcher, and Mailer worker types.</p>
+              <h4>Multi-server - developer</h4>
+              <p>Servers in a cluster register themselves on startup and can be added and removed dynamically.</p>
+              <p>To demonstrate clustering in the development environment (sqlite) you can launch a second server
+                  on the same machine by creating a different config file so the listening ports do not conflict.</p>
+              <p>Both servers must have access to he same sqlite database file.</p>
+              <p>The following example can be found in the ~/node_modules/shelly/examples/config2 directory:</p>
 <pre class="prettyprint linenums lang-js">
 global.CDEF("ADMIN_PORT", 6100);
 global.CDEF("REST_PORT", 6101);
@@ -312,25 +313,25 @@ global.CDEF("CLUSTER_NUM_MAILERS", 0);
 // pick up all the other default configs
 require(global.C.BASEDIR + "/config/main.js");
 </pre>
-          <h3>Start the first server</h3>
-          <p>This assumes you have already copied the examples directory as done in the <a href="#createApi">Create API</a> section</p>
+              <h3>Start the first server</h3>
+              <p>This assumes you have already copied the examples directory as done in the <a href="#createApi">Create API</a> section</p>
 <pre class="prettyprint linenums lang-bash">
 $ node app.js
 </pre>
-            <h3>Start the second server</h3>
-            <p>The default first argument is a valid config directory with a main.js in it.</p>
+              <h3>Start the second server</h3>
+              <p>The default first argument is a valid config directory with a main.js in it.</p>
 <pre class="prettyprint linenums lang-bash">
 $ node app.js CONFIGDIR=./config2
 </pre>
 
-            <h3>Check the servers</h3>
-            <ol>
-                <li>Login to the first server: http://localhost:5102/</li>
-                <li>Login to the second server: http://localhost:6102/</li>
-                <li>Go to the admin http://localhost:5100</li>
-                <li>In the admin go to the "Core APIs" and click on the "cluster" API and the "servers" function</li>
-                <li>Click the "call function button" and you should see two servers listed.</li>
-            </ol>
+              <h3>Check the servers</h3>
+              <ol>
+                  <li>Login to the first server: http://localhost:5102/</li>
+                  <li>Login to the second server: http://localhost:6102/</li>
+                  <li>Go to the admin http://localhost:5100</li>
+                  <li>In the admin go to the "Core APIs" and click on the "cluster" API and the "servers" function</li>
+                  <li>Click the "call function button" and you should see two servers listed.</li>
+              </ol>
 <pre class="prettyprint linenums lang-bash">
 [
   {
@@ -356,21 +357,62 @@ $ node app.js CONFIGDIR=./config2
 ]
 </pre>
 
-            <h4>Multi-server - two machines</h4>
-            <p>
-                To run a cluster on separate machines the Redis data store wrapper must be used by setting the
-                <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the "config/main.js".
-            </p>
-<pre class="prettyprint linenums lang-bash">
+              <h4>Multi-server - two machines</h4>
+              <p>
+                  To run a cluster on separate machines the Redis data store wrapper must be used by setting the
+                  <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the "example/config/main.js".  For more details
+                  see <a href="#useRedis">Use Redis</a>
+              </p>
+<pre class="prettyprint linenums lang-js">
 global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
-global.CDEF("DB_OPTIONS", {});
+global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1"});
 </pre>
-            <p>Then just install and start a server on each machine.</p>
+              <p>Then just install and start a server on each machine.</p>
 <pre class="prettyprint linenums">
 $ node app.js
 </pre>
 
-        </section>
+          </section>
+
+
+          <!-- Run Cluster
+          ================================================== -->
+          <section id="useRedis">
+              <div class="page-header">
+                  <h1>Use Redis Datastore</h1>
+              </div>
+
+              <h4>Install Redis</h4>
+              <p>Use the setup for your platform at Redis.io <a href="http://redis.io">Redis Install</a></p>
+              <h4>Change Configuration</h4>
+              <p>Add the following settings to the application configuration file in example/config/main.js</p>
+<pre class="prettyprint linenums lang-js">
+global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
+global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1"});
+</pre>
+              <p>By default Redis installs with no password required.  Use the <strong>DB_OPTIONS</strong> to pass in any
+              Redis specific settings.  Shelly uses the Redis client.  Details for this client can be found at the
+              <a href="https://github.com/mranney/node_redis">Redis client GitHub repo</a>.</p>
+
+              <div class="alert alert-info">
+                  NOTE: If <strong>host</strong> and <strong>port</strong> are set in the <strong>DB_OPTIONS</strong> configuration,
+                  the values are passed as the first and second parameters to redis.createClient(host, port. options).  Also redis.auth is called
+                  if a <strong>password</strong> member is set.
+              </div>
+
+              <p>If your Redis server has a password required your configuration will look something like:</p>
+<pre class="prettyprint linenums lang-js">
+global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
+global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1", password:"foo"});
+</pre>
+
+              <h4>Check the access</h4>
+              <ol>
+                  <li>Go to the admin http://localhost:5100</li>
+                  <li>In the admin go to the "System" page</li>
+                  <li>Verify the DB_WRAPPER and DB_OPTIONS are set correctly</li>
+              </ol>
+          </section>
 
       </div>
     </div>
