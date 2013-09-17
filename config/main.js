@@ -62,7 +62,7 @@ global.CDEF("DB_SCOPE", "dev:");
 global.CDEF("DB_LOCK_RETRIES", 5);
 global.CDEF("DB_LOCK_SLEEP", 1000);
 //global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
-//global.CDEF("DB_OPTIONS", {});
+//global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1"});
 global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shsqlite.js");
 global.CDEF("DB_OPTIONS", {filename: global.C.BASEDIR + "/db/sqlite3.db"});
 
