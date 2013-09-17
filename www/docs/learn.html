@@ -80,7 +80,6 @@
           <li><a href="#testApi"><i class="icon-chevron-right"></i> Test an API</a></li>
           <li><a href="#addFunction"><i class="icon-chevron-right"></i> Add a function</a></li>
           <li><a href="#runCluster"><i class="icon-chevron-right"></i> Run a two server cluster</a></li>
-          <li><a href="#samples"><i class="icon-chevron-right"></i> Samples</a></li>
         </ul>
       </div>
       <div class="span9">
@@ -299,27 +298,29 @@ global.CDEF("CLUSTER_NUM_MAILER", 1);
                 on the same machine by creating a different config file so the listening ports do not conflict.</p>
             <p>Both servers must have access to he same sqlite database file.</p>
             <p>The following example can be found in the ~/node_modules/config2 directory:</p>
-<pre class="prettyprint linenums">
+<pre class="prettyprint linenums lang-js">
 global.CDEF("ADMIN_PORT", 6100);
 global.CDEF("REST_PORT", 6101);
 global.CDEF("GAMES_PORT", 6102);
 global.CDEF("SOCKET_PORT", 6110);
+global.CDEF("TCP_PORT", 6111);
 
 global.CDEF("CLUSTER_URL", "tcp://localhost:6151");
 // don't run a mail queue processor on this server
 global.CDEF("CLUSTER_NUM_MAILERS", 0);
 
 // pick up all the other default configs
-require(__dirname + "/../config/main.js");
+require(global.C.BASEDIR + "/config/main.js");
 </pre>
           <h3>Start the first server</h3>
-<pre class="prettyprint linenums">
+          <p>This assumes you have already copied the examples directory as done in the <a href="#createApi">Create API</a> section</p>
+<pre class="prettyprint linenums lang-bash">
 $ node app.js
 </pre>
             <h3>Start the second server</h3>
             <p>The default first argument is a valid config directory with a main.js in it.</p>
 <pre class="prettyprint linenums lang-bash">
-$ node app.js "./node_modules/shellyjs/config2/"
+$ node app.js CONFIGDIR=./config2
 </pre>
 
             <h3>Check the servers</h3>
@@ -370,43 +371,6 @@ $ node app.js
 </pre>
 
         </section>
-
-          <!-- Overview
-          ================================================== -->
-          <section id="samples">
-              <div class="page-header">
-                  <h1>Shelly Sample Docs</h1>
-              </div>
-
-              <h3>foo or foo</h3>
-              <p>test <strong>strong</strong></p>
-
-              <pre class="prettyprint linenums">$('body').off('.data-api')</pre>
-
-<pre class="prettyprint linenums">
-$("#myModal").modal()                       // initialized with defaults
-$("#myModal").modal({ keyboard: false })   // initialized with no keyboard
-$("#myModal").modal('show')                // initializes and invokes show immediately</p>
-</pre>
-              <p>Each plugin also exposes its raw constructor on a `Constructor` property: <code>$.fn.popover.Constructor</code>. If you'd like to get a particular plugin instance, retrieve it directly from an element: <code>$('[rel=popover]').data('popover')</code>.</p>
-
-              <h3>No Conflict</h3>
-              <p>Sometimes it is necessary to use Bootstrap plugins with other UI frameworks. In these circumstances,  namespace collisions can occasionally occur. If this happens, you may call <code>.noConflict</code> on the plugin you wish to revert the value of.</p>
-
-<pre class="prettyprint linenums">
-var bootstrapButton = $.fn.button.noConflict() // return $.fn.button to previously assigned value
-$.fn.bootstrapBtn = bootstrapButton            // give $().bootstrapBtn the bootstrap functionality
-</pre>
-
-              <h3>Events</h3>
-              <p>Bootstrap provides custom events for most plugin's unique actions. Generally, these come in an infinitive and past participle form - where the infinitive (ex. <code>show</code>) is triggered at the start of an event, and its past participle form (ex. <code>shown</code>) is trigger on the completion of an action.</p>
-              <p>All infinitive events provide preventDefault functionality. This provides the ability to stop the execution of an action before it starts.</p>
-<pre class="prettyprint linenums">
-$('#myModal').on('show', function (e) {
-    if (!data) return e.preventDefault() // stops modal from being shown
-})
-</pre>
-          </section>
 
       </div>
     </div>
