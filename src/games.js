@@ -22,7 +22,7 @@ var app = express();
 app.use(express.favicon(gamesStatic + "/images/favicon.ico"));
 //app.enable("view cache");  // disable this for dev
 app.set("views", gamesBase);
-app.engine("html", engines.hogan);
+app.engine("html", engines.ejs);
 app.use("/common", express.static(commonStatic));
 app.use("/static", express.static(gamesStatic));
 app.use(express.cookieParser());
@@ -67,8 +67,7 @@ app.get("/login/*.html", function (req, res) {
   env.restUrl = global.C.REST_URL;
   env.socketUrl = global.C.SOCKET_URL;
   env.nextUuid = sh.uuid();
-  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {head: "head", header: "header", footer: "footer", errorBox: "errorbox"}});
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env)});
 
   return 0;
 });
@@ -89,8 +88,7 @@ function createEnv(req) {
 }
 
 function renderPage(req, res, env) {
-  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env),
-    partials: {head: "head", header: "header", footer: "footer", errorBox: "errorbox"}});
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env)});
 }
 
 app.get("*.html", function (req, res) {
@@ -115,8 +113,7 @@ app.use(function (err, req, res, next) {
   env.error = {message: err.message, stack: err.stack};
 
   res.status(500);
-  res.render("error.html", {Env: env, EnvJson: JSON.stringify(env),
-    partials: {head: "head", header: "header", footer: "footer", errorBox: "errorbox"}});
+  res.render("error.html", {Env: env, EnvJson: JSON.stringify(env)});
 });
 
 

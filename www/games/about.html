@@ -2,10 +2,10 @@
       xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>About</title>
-{{> head}}
+<%- include head.html %>
 
 <script language="javascript">
-var Env = {{{EnvJson}}};
+var Env = <%- EnvJson %>;
 
 $(init);
 function init() {
@@ -20,10 +20,8 @@ function init() {
 </head>
 
 <body>
-{{> header}}
-
+<%- include header.html %>
 <pre id="about"></pre>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

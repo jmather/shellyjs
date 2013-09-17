@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>My Games</title>
-{{> head}}
+<%- include head.html %>
 
 <style>
     .gameTurnsGroup {  /* container div for turns/done lists */
@@ -39,7 +39,7 @@
 </style>
 
 <script language="javascript">
-var Env = {{{EnvJson}}};
+var Env = <%- EnvJson %>;
 
 function addChallenge(chId, challenge) {
     if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
@@ -167,8 +167,8 @@ function init() {
 </script>
 </head>
 <body>
-{{> header}}
-{{> errorBox }}
+<%- include header.html %>
+<%- include errorbox.html %>
 
 <div class="container">
     <div class="row">
@@ -232,6 +232,5 @@ function init() {
     </div>
 </div>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

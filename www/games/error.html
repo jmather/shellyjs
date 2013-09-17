@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <title>Shelly System</title>
-{{> head}}
+<%- include head.html %>
     <style>
         .ErrorPre {
             word-wrap: break-word;
         }
     </style>
     <script>
-        var Env = {{{EnvJson}}};
+        var Env = <%- EnvJson %>;
 
         $(init);
         function init() {
@@ -23,11 +23,10 @@
 
 </head>
 <body>
-{{> header}}
+<%- include header.html %>
 
 <div>Error: <pre id="pageErrorMessage"></pre></div>
 <div>Stack: <pre id="pageErrorStack" class="ErrorPre"></pre></div>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

@@ -37,7 +37,7 @@
 
     </style>
     <script>
-        var Env = {{{EnvJson}}};
+        var Env = <%- EnvJson %>;
         var gKey = null;
         var gObject = null;
 
@@ -167,8 +167,7 @@
 
 </head>
 <body>
-{{> header}}
-
+<%- include header.html %>
 <div class="container">
     <div class="row" style="margin-bottom: 10px;">
         <div class="gameBoxDiv lookupObjDiv span8 offset2">
@@ -219,6 +218,5 @@
     <button id="cancelObjBtn" class="edit-obj-btn" style="display:none">Cancel</button>
 </div>
 -->
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

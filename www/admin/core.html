@@ -42,7 +42,8 @@
         }
     </style>
     <script>
-        var Env = {{{EnvJson}}};
+        var Env = <%- EnvJson  %>;
+
 
         var gInputEdit = null;
         var gOutputEdit = null;
@@ -179,7 +180,7 @@
 
 </head>
 <body>
-{{> header}}
+<%- include header.html %>
 
 <div class="container">
 <div id="apiNone" class="row" style="width: 100%; text-align: center; margin-top: 100px;">
@@ -217,6 +218,5 @@
 </div>
 </div>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

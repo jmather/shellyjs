@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-{{> head}}
+<%- include ../head.html %>
     <script src="crafty-min.js"></script>
 	<script src="game.js"></script>
 
@@ -41,7 +41,7 @@
 
 	<title>Connect 4</title>
     <script language="javascript">
-        var Env = {{{EnvJson}}};
+        var Env = <%- EnvJson %>;
 
         Env.gameId = "0";
         var pgameId = getURLParameter("gameId");
@@ -226,18 +226,13 @@
                 }
                 return;
             }
-            if (msg.event == "system.connInfo") {
-                console.log("wid:", msg.data.wid);
-                return;
-            }
         }
 
         function onopen() {
             messageReset();
 
             shellys.call({session: Env.session,
-                batch: [{cmd: "system.connInfo"},
-                    {cmd: "user.get"},
+                batch: [{cmd: "user.get"},
                     {cmd: "game.enter", gameId: Env.gameId},
                     {cmd: "game.playing"},
                     {cmd: "channel.add", channel: Env.channel}
@@ -278,8 +273,8 @@
     </script>
 </head>
 <body>
-{{> header}}
-{{> errorBox}}
+<%- include ../header.html %>
+<%- include ../errorbox.html %>
 
 <div class="container">
 
@@ -331,6 +326,5 @@
     </div>
 </div>
 
-{{> footer}}
-</body>
+<%- include ../footer.html %></body>
 </html>

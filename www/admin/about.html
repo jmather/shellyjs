@@ -6,7 +6,7 @@
     <script src="/common/jquery-1.9.1.js"></script>
 
     <script language="javascript">
-var Env = {{{EnvJson}}};
+var Env = <%- EnvJson %>;
 
 $(init);
 function init() {
@@ -18,10 +18,8 @@ function init() {
     </script>
 </head>
 <body>
-{{> header}}
-
+<%- include header.html %>
 <pre id="about"></pre>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

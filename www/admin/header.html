@@ -41,7 +41,7 @@
     <div class="container" style="height: 30px;">
         <p class="">Shelly Admin - <span id="shSubTitle"></span>
         <span class="header-user-info pull-right">
-            <span id="shUserName">{{Env.user.name}}</span> - <a href="/login/logout.html">logout</a>
+            <span id="shUserName"><% if (Env.user) { %><%= Env.user.name %><% } %></span> - <a href="/login/logout.html">logout</a>
         </span>
         </p>
     </div>

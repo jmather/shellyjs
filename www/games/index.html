@@ -2,10 +2,10 @@
       xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 <head>
 <title>Lobby</title>
-{{> head}}
+<%- include head.html %>
 
     <script language="javascript">
-var Env = {{{EnvJson}}};
+var Env = <%- EnvJson %>;
 
 function playGame() {
     var gameName =$(this).attr("gn");
@@ -69,8 +69,7 @@ function init() {
     </style>
 </head>
 <body>
-{{> header}}
-{{> errorBox}}
+<%- include header.html %><%- include errorbox.html %>
 
 <div class="container">
 
@@ -84,6 +83,5 @@ function init() {
 
 </div>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

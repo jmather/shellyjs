@@ -31,7 +31,7 @@
     "async": "0.2.5",
     "consolidate": "git://github.com/skool51/consolidate.js.git#master",
     "express": "3.2.5",
-    "hogan.js": "2.0.0",
+    "ejs": "0.8.4",
     "lodash": "1.2.1",
     "sha1": "1.0.1",
     "stack-trace": "0.0.6",

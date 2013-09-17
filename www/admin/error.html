@@ -6,7 +6,7 @@
     <script src="/common/jquery-1.9.1.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
     <script>
-        var Env = {{{EnvJson}}};
+        var Env = <%- EnvJson %>;
 
         $(init);
         function init() {
@@ -20,11 +20,9 @@
 
 </head>
 <body>
-{{> header}}
-
+<%- include header.html %>
 <div>Error: <pre id="errorMessage"></pre></div>
 <div>Stack: <pre id="errorStack"></pre></div>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>

@@ -15,7 +15,7 @@
 
 <script>
 
-var Env = {{{EnvJson}}};
+var Env = <%- EnvJson %>;
 Env.rid = getURLParameter("rid", "");
 Env.uid = getURLParameter("uid", "");
 console.log(Env.rid, Env.uid);
@@ -71,7 +71,7 @@ function init() {
 
 </head>
 <body>
-{{> header }}
+<%- include header.html %>
 
 <div class="container">
 
@@ -97,6 +97,6 @@ function init() {
 
 </div>
 
-{{> footer }}
+<%- include footer.html %>
 </body>
 </html>

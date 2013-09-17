@@ -27,7 +27,7 @@
 
     </style>
     <script>
-        var Env = {{{EnvJson}}};
+        var Env = <%- EnvJson %>;
 
         function userValue(key) {
             if(typeof(Env.user[key]) === "object") {
@@ -181,8 +181,7 @@
 
 </head>
 <body>
-{{> header}}
-
+<%- include header.html %>
 <div class="container">
     <div class="row" style="margin-bottom: 10px;">
         <div class="gameBoxDiv lookupUserDiv span8 offset2">
@@ -233,6 +232,5 @@
     </div>
 </div>
 
-{{> footer}}
-</body>
+<%- include footer.html %></body>
 </html>
