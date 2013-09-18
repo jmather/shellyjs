@@ -27,7 +27,7 @@ app.use("/common", express.static(commonStatic));
 app.use("/static", express.static(gamesStatic));
 app.use(express.cookieParser());
 app.use(function (req, res, next) {
-  if (req.path.substring(0, 7) === "/login/") {
+  if (req.path.substring(0, 5) === "/reg/") {
     return next();
   }
 
@@ -40,7 +40,7 @@ app.use(function (req, res, next) {
   }
   if (_.isUndefined(req.cookies.shSession)) {
     shlog.info("games", "redirect - no session");
-    res.redirect("/login/index.html");
+    res.redirect("/reg/login.html");
     return 0;
   }
   shlog.info("games", "found shSession: ", req.cookies.shSession);
@@ -50,7 +50,7 @@ app.use(function (req, res, next) {
   shcall.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
     if (error) {
       shlog.info("games", "redirect - bad session");
-      res.redirect("/login/index.html");
+      res.redirect("/reg/login.html");
       return 0;
     }
     req.loader.dump(next);
@@ -59,8 +59,8 @@ app.use(function (req, res, next) {
   return 0;
 });
 
-app.get("/login/*.html", function (req, res) {
-  shlog.info("games", "in login", req.url);
+app.get("/reg/*.html", function (req, res) {
+  shlog.info("games", "in reg", req.url);
   var env = {};
   env.version = global.PACKAGE.version;
   env.token = req.cookies.shToken;
@@ -87,19 +87,15 @@ function createEnv(req) {
   return map;
 }
 
-function renderPage(req, res, env) {
-  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env)});
-}
-
 app.get("*.html", function (req, res) {
   shlog.info("games", "%s %s", req.method, req.url);
   var env = createEnv(req);
-  renderPage(req, res, env);
+  res.render(url.parse(req.url).pathname.substring(1), {Env: env, EnvJson: JSON.stringify(env)});
 });
 
 app.get("/", function (req, res, next) {
   shlog.info("games", "default handler - goto lobby");
-  res.redirect("/index.html");
+  res.redirect("/reg/login.html");
   return 0;
 });
 
