@@ -103,3 +103,6 @@ global.CDEF("SERVER_TAG_FN", global.C.CONFIGDIR + "/server.json");
 
 // matcher options
 global.CDEF("MATCHER_INTERVAL", 3000);
+
+// reg options
+global.CDEF("REG_RESET_URL", global.C.GAMES_URL + "/reg/reset.html");

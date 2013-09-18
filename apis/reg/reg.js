@@ -393,7 +393,7 @@ exports.requestReset = function (req, res, cb) {
 
       var emailInfo = {email: req.body.email,
         subject: "password reset for " + req.body.email,
-        resetUrl: global.C.GAMES_URL + "/login/reset.html?" + querystring.stringify(
+        resetUrl: global.C.REG_RESET_URL + "?" + querystring.stringify(
           {"uid": em.get("uid"), "rid": resetInfo.get("rid")}
         ),
         template: "reset"};

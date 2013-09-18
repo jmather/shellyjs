@@ -40,7 +40,7 @@ app.use("/docs", express.static(global.C.BASEDIR + "/www/docs"));
 app.use(express.cookieParser());
 
 app.use(function (req, res, next) {
-  if (req.path.substring(0, 7) === "/login/"
+  if (req.path.substring(0, 5) === "/reg/"
       || req.path.substring(0, 8) === "/static/") {
     return next();
   }
@@ -52,7 +52,7 @@ app.use(function (req, res, next) {
   req.body.cmd = "admin.page";
   if (_.isUndefined(req.cookies.shSession)) {
     shlog.info("admin", "redirect - no session");
-    res.redirect("/login/index.html");
+    res.redirect("/reg/login.html");
     return 0;
   }
   shlog.info("admin", "found cookie shSession: ", req.cookies.shSession);
@@ -61,13 +61,13 @@ app.use(function (req, res, next) {
   shcall.fillSession(req.cookies.shSession, req, res, _w(next, function (error, data) {
     if (error) {
       shlog.info("admin", "redirect - bad session");
-      res.redirect("/login/index.html");
+      res.redirect("/reg/login.html");
       return 0;
     }
     // double check the role
     if (!_.contains(req.session.user.get("roles"), "admin")) {
       shlog.info("admin", "redirect - user does not have admin role", req.session.user.get("roles"));
-      res.redirect("/login/index.html");
+      res.redirect("/reg/login.html");
       return 0;
     }
     req.loader.dump(next);
@@ -76,8 +76,8 @@ app.use(function (req, res, next) {
   return 0;
 });
 
-app.get("/login/*.html", function (req, res) {
-  shlog.info("admin", "in login", req.url);
+app.get("/reg/*.html", function (req, res) {
+  shlog.info("admin", "in reg", req.url);
   var env = {};
   env.version = global.PACKAGE.version;
   env.token = req.cookies.shToken;
@@ -116,7 +116,7 @@ app.get("/", function (req, res) {
   return 0;
 });
 
-app.use("/login", express.static(adminLogin));  // catch all for logout.html and script.js
+app.use("/reg", express.static(adminLogin));  // catch all for logout.html and script.js
 
 //********** error handling
 
