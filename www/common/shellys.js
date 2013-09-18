@@ -31,7 +31,7 @@ ShellyS.prototype.connect = function (wsUrl) {
     self.log("socket", "onclose", evt);
     self.onclose(evt);
     if (!self.closing) {
-      self.reconnect();
+      self.ws.onerror(evt);
     }
   };
   this.ws.onerror = function (evt) {
