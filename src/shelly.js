@@ -112,6 +112,7 @@ shelly.start = function (config, cb) {
   // all configs loaded - ok to load sh* modules
   require(global.C.BASEDIR + "/lib/shcb.js").leanStacks(true);
   shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+  shlog.init(global.C.LOG_MODULES, global.C.LOG_HOOK);
   sh = require(global.C.BASEDIR + "/lib/shutil.js");
   shCluster = require(global.C.BASEDIR + "/lib/shcluster.js");
 

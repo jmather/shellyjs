@@ -45,13 +45,13 @@ global.CDEF("CLUSTER", {
 global.CDEF("CLUSTER_AUTO_GAME_MATCHER", true); // auto adds matcher processes per game
 
 // logs: level = system, error, info, debug
-global.CDEF("LOG_CONSOLE", true);
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
-global.CDEF("LOG_FILE", false);
 global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, filename: global.C.BASEDIR + "/logs/shelly.log" });
-//global.logHook = function (winston) {
-//  console.log("add to winston");
-//};
+global.CDEF("LOG_MODULES", {"shelly" : 1});
+global.CDEF("LOG_HOOK", function (winston) {
+  winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);
+//    winston.add(winston.transports.File, global.C.LOG_FILE_OPTS);
+});
 
 // registration
 global.CDEF("LOGIN_PRIVATE_KEY", "login-key-here");
