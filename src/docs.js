@@ -17,6 +17,7 @@ global.CDEF("BASE_DIR", path.dirname(__dirname));
 global.CDEF("DOCS_PORT", 8080);
 
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
+global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, filename: global.C.BASE_DIR + "/logs/shelly.log" });
 global.CDEF("LOG_MODULES", { "docs" : {} });
 global.CDEF("LOG_HOOK", function (winston) {
   winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);

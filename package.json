@@ -5,6 +5,9 @@
   "description": "Synchonous and Asynchronous API server over HTTP, Websockets, and TCP",
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
+  "bin": {
+    "shutil" : "./bin/shutil.js"
+  },
   "repository" : {
     "type" : "git",
     "url" : "https://github.com/skool51/shellyjs.git"

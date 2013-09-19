@@ -1,0 +1,4 @@
+/logs/*.log
+/db/*.db
+/.idea/
+

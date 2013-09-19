@@ -147,6 +147,7 @@ shelly.start = function (config, cb) {
         }
       });
     } else {
+      process.title = "shelly - " + process.env.WTYPE;
       shlog.info("shelly", "starting:", process.env.WTYPE);
       var workerInfo = global.C.CLUSTER[process.env.WTYPE];
       gWorkerModule = require(global.C.BASE_DIR + workerInfo.src);
