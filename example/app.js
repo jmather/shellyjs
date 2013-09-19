@@ -6,7 +6,7 @@ if (!shelly) { // handle direct run from module location
 }
 
 shelly.start({
-  CONFIGDIR: __dirname + "/config",
+  CONFIG_DIR: __dirname + "/config",
   APP_API_DIR: __dirname + "/apis",
   GAMES_API_DIR: __dirname + "/games"
 });

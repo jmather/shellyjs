@@ -2,12 +2,12 @@ var express = require("express");
 var async = require("async");
 var _ = require("lodash");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var stats = require(global.C.BASEDIR + "/lib/shstats.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var shcall = require(global.C.BASEDIR + "/lib/shcall.js");
-var ShLoader = require(global.C.BASEDIR + "/lib/shloader.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var stats = require(global.C.BASE_DIR + "/lib/shstats.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var shcall = require(global.C.BASE_DIR + "/lib/shcall.js");
+var ShLoader = require(global.C.BASE_DIR + "/lib/shloader.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
 var rest = express();
 

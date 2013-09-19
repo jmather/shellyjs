@@ -13,7 +13,7 @@ global.CDEF = function (name, value) {
 };
 
 global.C = {};
-global.CDEF("BASEDIR", path.dirname(__dirname));
+global.CDEF("BASE_DIR", path.dirname(__dirname));
 global.CDEF("DOCS_PORT", 8080);
 
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
@@ -23,11 +23,11 @@ global.CDEF("LOG_HOOK", function (winston) {
 //    winston.add(winston.transports.File, global.C.LOG_FILE_OPTS);
 });
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
 shlog.init(global.C.LOG_MODULES, global.C.LOG_HOOK);
 
-var commonStatic = global.C.BASEDIR + "/www/common";
-var docsBase = global.C.BASEDIR + "/www/docs";
+var commonStatic = global.C.BASE_DIR + "/www/common";
+var docsBase = global.C.BASE_DIR + "/www/docs";
 var docsStatic = docsBase + "/static";
 
 shlog.system("docs", "docs directory: " + docsBase);

@@ -3,8 +3,8 @@ var path = require("path");
 var async = require("async");
 var _ = require("lodash");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 
 exports.desc = "utility functions for shelly apis";
 exports.functions = {
@@ -54,7 +54,7 @@ exports.getInfo = function (fn, cb) {
 exports.info = function (req, res, cb) {
   shlog.info("api", "api.info name=" + req.body.name);
   // SWD centralize this path construction
-  var funcDir = global.C.BASEDIR + "/apis";
+  var funcDir = global.C.BASE_DIR + "/apis";
   var apiFn = funcDir + "/" + req.body.name + "/" + req.body.name + ".js";
   var m = exports.getInfo(apiFn, function (err, m) {
     // error still returns info object
@@ -89,7 +89,7 @@ function apiInfoByDir(dir, cb) {
 }
 
 exports.core = function (req, res, cb) {
-  var apiDir = global.C.BASEDIR + "/apis";
+  var apiDir = global.C.BASE_DIR + "/apis";
 
   apiInfoByDir(apiDir, function (err, apis) {
     if (err) {

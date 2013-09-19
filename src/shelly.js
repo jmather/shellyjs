@@ -11,7 +11,7 @@ var gKillCount = 0;
 global.shutdown = false;
 
 global.C = {};
-global.C.BASEDIR = path.dirname(__dirname);
+global.C.BASE_DIR = path.dirname(__dirname);
 
 var shlog = null;
 var sh = null;
@@ -47,25 +47,25 @@ function initConfig(config) {
     }
     global.CFDEF(argParts[0], argParts[1]);
   }
-  global.CDEF("CONFIGDIR", global.C.BASEDIR + "/config");
+  global.CDEF("CONFIG_DIR", global.C.BASE_DIR + "/config");
 
   // load configs with private keys
   /*jslint stupid: true */
-  var keyConfigFn = global.C.CONFIGDIR + "/keys.js";
+  var keyConfigFn = global.C.CONFIG_DIR + "/keys.js";
   if (fs.existsSync(keyConfigFn)) {
     require(keyConfigFn);
   }
   // load configs with per machine overrides
-  var machineConfigFn = global.C.CONFIGDIR + "/" + os.hostname() + ".js";
+  var machineConfigFn = global.C.CONFIG_DIR + "/" + os.hostname() + ".js";
   /*jslint stupid: true */
   if (fs.existsSync(machineConfigFn)) {
     require(machineConfigFn);
   }
   // load the main config
-  require(global.C.CONFIGDIR + "/main.js");
+  require(global.C.CONFIG_DIR + "/main.js");
 
   // load the package info
-  global.PACKAGE = require(global.C.BASEDIR + "/package.json");
+  global.PACKAGE = require(global.C.BASE_DIR + "/package.json");
 }
 
 /*jslint stupid: true */
@@ -101,7 +101,7 @@ function onWorkerMessage(msg) {
 
 if (cluster.isMaster) {
   cluster.setupMaster({
-    exec : global.C.BASEDIR + "/src/shelly.js"
+    exec : global.C.BASE_DIR + "/src/shelly.js"
   });
 }
 
@@ -110,14 +110,14 @@ shelly.start = function (config, cb) {
   initConfig(config);
 
   // all configs loaded - ok to load sh* modules
-  require(global.C.BASEDIR + "/lib/shcb.js").leanStacks(true);
-  shlog = require(global.C.BASEDIR + "/lib/shlog.js");
+  require(global.C.BASE_DIR + "/lib/shcb.js").leanStacks(true);
+  shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
   shlog.init(global.C.LOG_MODULES, global.C.LOG_HOOK);
-  sh = require(global.C.BASEDIR + "/lib/shutil.js");
-  shCluster = require(global.C.BASEDIR + "/lib/shcluster.js");
+  sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+  shCluster = require(global.C.BASE_DIR + "/lib/shcluster.js");
 
   //  used in cluster bus to forward commands in process.on - message
-  global.socket = require(global.C.BASEDIR + "/src/socket.js");
+  global.socket = require(global.C.BASE_DIR + "/src/socket.js");
 
   // server info for cluster
   global.server = serverInfo();
@@ -137,7 +137,7 @@ shelly.start = function (config, cb) {
     if (cluster.isMaster) {
       shlog.system("shelly", "loaded:", new Date());
       shlog.system("shelly", "server:", global.server);
-      shlog.system("shelly", "configBase:", global.C.CONFIGDIR);
+      shlog.system("shelly", "configBase:", global.C.CONFIG_DIR);
       shlog.info("shelly", "config:", sh.secure(global.C));
       _.each(global.C.CLUSTER, function (info, name) {
         var i = 0;
@@ -149,7 +149,7 @@ shelly.start = function (config, cb) {
     } else {
       shlog.info("shelly", "starting:", process.env.WTYPE);
       var workerInfo = global.C.CLUSTER[process.env.WTYPE];
-      gWorkerModule = require(global.C.BASEDIR + workerInfo.src);
+      gWorkerModule = require(global.C.BASE_DIR + workerInfo.src);
       gWorkerModule.start.apply(gWorkerModule, workerInfo.args);
     }
   });

@@ -2,10 +2,10 @@ var events = require("events");
 var async = require("async");
 var _ = require("lodash");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var dispatch = require(global.C.BASE_DIR + "/lib/shdispatch.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
 var match = exports;
 

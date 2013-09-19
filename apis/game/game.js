@@ -2,13 +2,13 @@ var fs = require("fs");
 var _ = require("lodash");
 var async = require("async");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
-var channel = require(global.C.BASEDIR + "/apis/channel/channel.js");
-var counter = require(global.C.BASEDIR + "/apis/counter/counter.js");
-var module = require(global.C.BASEDIR + "/apis/api/api.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var dispatch = require(global.C.BASE_DIR + "/lib/shdispatch.js");
+var channel = require(global.C.BASE_DIR + "/apis/channel/channel.js");
+var counter = require(global.C.BASE_DIR + "/apis/counter/counter.js");
+var module = require(global.C.BASE_DIR + "/apis/api/api.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
 var Game = exports;
 

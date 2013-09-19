@@ -12,10 +12,10 @@ global.CDEF("GAMES_PORT", 5102);
 global.CDEF("GAMES_URL", "http://" + global.C.DNS_NAME + ":" + global.C.GAMES_PORT);
 
 // directory for any external module added to system
-global.CDEF("APP_API_DIR", global.C.BASEDIR + "/example/apis");
+global.CDEF("APP_API_DIR", global.C.BASE_DIR + "/example/apis");
 
 // directory used by apis/game.js to load specfic game mechanics
-global.CDEF("GAMES_API_DIR", global.C.BASEDIR + "/example/games");
+global.CDEF("GAMES_API_DIR", global.C.BASE_DIR + "/example/games");
 
 // socket options
 global.CDEF("SOCKET_PORT", 5110);
@@ -46,7 +46,7 @@ global.CDEF("CLUSTER_AUTO_GAME_MATCHER", true); // auto adds matcher processes p
 
 // logs: level = system, error, info, debug
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
-global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, filename: global.C.BASEDIR + "/logs/shelly.log" });
+global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, filename: global.C.BASE_DIR + "/logs/shelly.log" });
 global.CDEF("LOG_MODULES", {"shelly" : 1});
 global.CDEF("LOG_HOOK", function (winston) {
   winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);
@@ -61,15 +61,15 @@ global.CDEF("REG_ALLOW_ANONYMOUS", true);
 global.CDEF("DB_SCOPE", "dev:");
 global.CDEF("DB_LOCK_RETRIES", 5);
 global.CDEF("DB_LOCK_SLEEP", 1000);
-//global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shredis.js");
+//global.CDEF("DB_WRAPPER", global.C.BASE_DIR + "/lib/db/shredis.js");
 //global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1"});
-global.CDEF("DB_WRAPPER", global.C.BASEDIR + "/lib/db/shsqlite.js");
-global.CDEF("DB_OPTIONS", {filename: global.C.BASEDIR + "/db/sqlite3.db"});
+global.CDEF("DB_WRAPPER", global.C.BASE_DIR + "/lib/db/shsqlite.js");
+global.CDEF("DB_OPTIONS", {filename: global.C.BASE_DIR + "/db/sqlite3.db"});
 
 // stats
 // if undefined stats share global.db defined above
-//global.CDEF("STATS_WRAPPER", global.C.BASEDIR + "/lib/db/shsqlite.js");
-//global.CDEF("STATS_OPTIONS", {filename: global.C.BASEDIR + "/db/stats.db"});
+//global.CDEF("STATS_WRAPPER", global.C.BASE_DIR + "/lib/db/shsqlite.js");
+//global.CDEF("STATS_OPTIONS", {filename: global.C.BASE_DIR + "/db/stats.db"});
 
 // default admin
 global.CDEF("DEFAULT_ADMIN_NAME", "shelly");
@@ -99,7 +99,7 @@ global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "shelly88
 global.CDEF("EXT_API_DIR", "");
 
 // location of server uuid that identifies server in cluster
-global.CDEF("SERVER_TAG_FN", global.C.CONFIGDIR + "/server.json");
+global.CDEF("SERVER_TAG_FN", global.C.CONFIG_DIR + "/server.json");
 
 // matcher options
 global.CDEF("MATCHER_INTERVAL", 3000);

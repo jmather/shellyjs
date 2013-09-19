@@ -6,21 +6,21 @@ var url = require("url");
 var engines = require("consolidate");
 var _ = require("lodash");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var shcall = require(global.C.BASEDIR + "/lib/shcall.js");
-var ShLoader = require(global.C.BASEDIR + "/lib/shloader.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var shcall = require(global.C.BASE_DIR + "/lib/shcall.js");
+var ShLoader = require(global.C.BASE_DIR + "/lib/shloader.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
-var commonStatic = global.C.BASEDIR + "/www/common";
-var adminBase = global.C.BASEDIR + "/www/admin";
+var commonStatic = global.C.BASE_DIR + "/www/common";
+var adminBase = global.C.BASE_DIR + "/www/admin";
 var adminStatic = adminBase + "/static";
 var adminLogin = adminBase + "/login";
 
 shlog.info("admin", "admin directory: " + adminBase);
 
 // ensure admin user
-var reg = require(global.C.BASEDIR + "/apis/reg/reg.js");
+var reg = require(global.C.BASE_DIR + "/apis/reg/reg.js");
 var loader = new ShLoader();
 reg.verifyUser(loader, global.C.DEFAULT_ADMIN_NAME, global.C.DEFAULT_ADMIN_PASSWORD, function (error, data) {
   if (error) {
@@ -36,7 +36,7 @@ app.set("views", adminBase);
 app.engine("html", engines.ejs);
 app.use("/common", express.static(commonStatic));
 app.use("/static", express.static(adminStatic));
-app.use("/docs", express.static(global.C.BASEDIR + "/www/docs"));
+app.use("/docs", express.static(global.C.BASE_DIR + "/www/docs"));
 app.use(express.cookieParser());
 
 app.use(function (req, res, next) {

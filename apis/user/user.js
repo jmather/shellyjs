@@ -1,10 +1,10 @@
 var _ = require("lodash");
 var async = require("async");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var reg = require(global.C.BASEDIR + "/apis/reg/reg.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var reg = require(global.C.BASE_DIR + "/apis/reg/reg.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
 var user = exports;
 

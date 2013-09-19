@@ -2,16 +2,16 @@ var querystring = require("querystring");
 var async = require("async");
 var _ = require("lodash");
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var shcall = require(global.C.BASEDIR + "/lib/shcall.js");
-var session = require(global.C.BASEDIR + "/lib/shsession.js");
-var dispatch = require(global.C.BASEDIR + "/lib/shdispatch.js");
-var counter = require(global.C.BASEDIR + "/apis/counter/counter.js");
-var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var shcall = require(global.C.BASE_DIR + "/lib/shcall.js");
+var session = require(global.C.BASE_DIR + "/lib/shsession.js");
+var dispatch = require(global.C.BASE_DIR + "/lib/shdispatch.js");
+var counter = require(global.C.BASE_DIR + "/apis/counter/counter.js");
+var mailer = require(global.C.BASE_DIR + "/lib/shmailer.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
-var ShHash = require(global.C.BASEDIR + "/lib/shhash.js");
+var ShHash = require(global.C.BASE_DIR + "/lib/shhash.js");
 
 var Challenge = exports;
 

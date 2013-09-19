@@ -6,11 +6,11 @@ var check = require("validator").check;
 var sanitize = require("validator").sanitize;
 
 
-var shlog = require(global.C.BASEDIR + "/lib/shlog.js");
-var sh = require(global.C.BASEDIR + "/lib/shutil.js");
-var session = require(global.C.BASEDIR + "/lib/shsession.js");
-var mailer = require(global.C.BASEDIR + "/lib/shmailer.js");
-var _w = require(global.C.BASEDIR + "/lib/shcb.js")._w;
+var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
+var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
+var session = require(global.C.BASE_DIR + "/lib/shsession.js");
+var mailer = require(global.C.BASE_DIR + "/lib/shmailer.js");
+var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
 var passwordVersion = 1;
 
