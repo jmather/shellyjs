@@ -9,6 +9,10 @@
     <script>
         var Env = <%- EnvJson  %>;
 
+        function addConfig(tableId, key, config) {
+            $("#" + tableId).append("<tr><td><b>" + key + "</b></td><td>= " + JSON.stringify(config[key]) + "</td></tr>");
+        }
+
         $(init);
         function init() {
             $("#shSubTitle").text("System Info");
@@ -16,13 +20,207 @@
             shCall({cmd: "system.config"}, function (err, res) {
                 $("#config").text(JSON.stringify(res[0].data.CONFIG, undefined, 2))
                 $("#package").text(JSON.stringify(res[0].data.PACKAGE, undefined, 2))
+
+                var config = res[0].data.CONFIG;
+                var package = res[0].data.PACKAGE;
+
+
+                var stats = {};
+                stats.systemUptime = new Date().getTime();
+                stats.usersCreated = 101;
+                stats.usersOnline = 9400;
+                stats.emailsSent = 101;
+                stats.smsSent = 101;
+                stats.notifsSent = 101;
+                stats.webSockets = 4080;
+                stats.tcpSockets = 4081;
+                stats.load = 2.01;
+                stats.cpu = 30;
+                addConfig("GeneralServer", "version", package);
+                addConfig("GeneralServer", "systemUptime", stats);
+                addConfig("GeneralServer", "usersCreated", stats);
+                addConfig("GeneralServer", "usersOnline", stats);
+                addConfig("GeneralServer", "emailsSent", stats);
+                addConfig("GeneralServer", "smsSent", stats);
+                addConfig("GeneralServer", "notifsSent", stats);
+                addConfig("GeneralServer", "load", stats);
+                addConfig("GeneralServer", "cpu", stats);
+
+                addConfig("GeneralServer1", "DNS_NAME", config);
+                addConfig("GeneralServer1", "BASE_DIR", config);
+                addConfig("GeneralServer1", "CONFIG_DIR", config);
+                addConfig("GeneralServer1", "EXT_API_DIR", config);
+                addConfig("GeneralServer1", "SERVER_TAG_FN", config);
+
+                addConfig("WebsocketService", "SOCKET_URL", config);
+                addConfig("WebsocketService", "SOCKET_PORT", config);
+                addConfig("WebsocketService", "CLUSTER_NUM_SOCKET", config);
+                addConfig("WebsocketService", "HEART_BEAT", config);
+
+                addConfig("RestService", "REST_URL", config);
+                addConfig("RestService", "REST_PORT", config);
+                addConfig("RestService", "CLUSTER_NUM_REST", config);
+
+                addConfig("TcpService", "TCP_PORT", config);
+                addConfig("TcpService", "CLUSTER_NUM_GAMES", config);
+                addConfig("TcpService", "HEART_BEAT", config);
+
+                addConfig("GamesService", "GAMES_URL", config);
+                addConfig("GamesService", "GAMES_PORT", config);
+                addConfig("GamesService", "CLUSTER_NUM_GAMES", config);
+
+                addConfig("ClusterSettings", "CLUSTER_URL", config)
+                addConfig("ClusterSettings", "CLUSTER_AUTO_GAME_MATCHER", config)
+                for(key in config.CLUSTER) {
+                    addConfig("ClusterSettings", key, config.CLUSTER)
+                }
+
+                addConfig("EmailSettings", "EMAIL_NOSEND", config);
+                addConfig("EmailSettings", "EMAIL_SENDTO", config);
+
+                addConfig("DbSettings", "DB_SCOPE", config);
+                addConfig("DbSettings", "DB_LOCK_RETRIES", config);
+                addConfig("DbSettings", "DB_LOCK_SLEEP", config);
+                addConfig("DbSettings", "DB_WRAPPER", config);
+                addConfig("DbSettings", "DB_OPTIONS", config);
+
+
+                addConfig("EmailSettings", "EMAIL_QUEUE", config);
+                addConfig("EmailSettings", "EMAIL_QUEUE_RETRIES", config);
+                addConfig("EmailSettings", "EMAIL_DEFAULT_FROM", config);
+                addConfig("EmailSettings", "EMAIL_TRANSPORT", config);
+                addConfig("EmailSettings", "EMAIL_TRANSPORT_SERVICE", config);
+
+                addConfig("MatcherSettings", "MATCHER_INTERVAL", config);
+
+                addConfig("LogSettings", "LOG_CONSOLE_OPTS", config)
+                addConfig("LogSettings", "LOG_FILE_OPTS", config)
+                addConfig("LogSettings", "LOG_MODULES", config)
+                addConfig("LogSettings", "LOG_HOOK", config)
+
+                addConfig("StatsSettings", "STATS_WRAPPER", config);
+                addConfig("StatsSettings", "STATS_OPTIONS", config);
+
+                addConfig("SessionSettings", "LOGIN_PRIVATE_KEY", config);
+                addConfig("SessionSettings", "REG_ALLOW_ANNONYMOUS", config);
+                addConfig("SessionSettings", "DEFAULT_ADMIN_NAME", config);
+                addConfig("SessionSettings", "DEFAULT_ADMIN_PASSWORD", config);
+                addConfig("SessionSettings", "SESSION_PRIVATE_KEY", config);
+                addConfig("SessionSettings", "SESSION_TIMEOUT", config);
+                addConfig("SessionSettings", "FAKE_SESSION_ON", config);
+                addConfig("SessionSettings", "FAKE_SESSION_HASH", config);
+                addConfig("SessionSettings", "REG_RESET_URL", config);
             })
         }
     </script>
-
+<style>
+    table {
+        font-size: 12px;
+    }
+</style>
 </head>
 <body>
 <%- include header.html %>
+
+<div class="container">
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span3">
+            <div class="gameBoxHeaderDiv">General Server:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="GeneralServer" class="table-condensed">
+                </table>
+            </div>
+        </div>
+        <div class="gameBoxDiv span7">
+            <div class="gameBoxHeaderDiv">General Server:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="GeneralServer1" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span5">
+            <div class="gameBoxHeaderDiv">Websocket Service:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="WebsocketService" class="table-condensed">
+                </table>
+            </div>
+        </div>
+        <div class="gameBoxDiv span5">
+            <div class="gameBoxHeaderDiv">Rest Service:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="RestService" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span5">
+            <div class="gameBoxHeaderDiv">TCP Service:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="TcpService" class="table-condensed">
+                </table>
+            </div>
+        </div>
+        <div class="gameBoxDiv span5">
+            <div class="gameBoxHeaderDiv">Games Service:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="GamesService" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span12">
+            <div class="gameBoxHeaderDiv">Logging:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="LogSettings" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span12">
+            <div class="gameBoxHeaderDiv">Email:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="EmailSettings" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span3">
+            <div class="gameBoxHeaderDiv">Matcher:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="MatcherSettings" class="table-condensed">
+                </table>
+            </div>
+        </div>
+        <div class="gameBoxDiv span8">
+            <div class="gameBoxHeaderDiv">DB:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="DbSettings" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span6">
+            <div class="gameBoxHeaderDiv">Stats Settings:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="SessionSettings" class="table-condensed">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="errorMsg" class="span7 offset2"></div>
+    </div>
+</div>
 
 <div>
     CONFIG = <pre id="config"></pre>
