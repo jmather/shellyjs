@@ -9,6 +9,7 @@ var sanitize = require("validator").sanitize;
 var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
 var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 var session = require(global.C.BASE_DIR + "/lib/shsession.js");
+var stats = require(global.C.BASE_DIR + "/lib/shstats.js");
 var mailer = require(global.C.BASE_DIR + "/lib/shmailer.js");
 var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
@@ -319,6 +320,7 @@ exports.create = function (req, res, cb) {
         out.uid = em.get("uid");
         out.session = session.create(em.get("uid"));
         res.add(sh.event("reg.create", out));
+        stats.incr("reg", "email-create");
         return cb(0, user);
       }), {lock: true});
     }));

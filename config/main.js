@@ -24,6 +24,7 @@ global.CDEF("HEART_BEAT", 30 * 1000);
 
 // tcp options
 global.CDEF("TCP_PORT", 5111);
+global.CDEF("TCP_URL", "tcp://" + global.C.DNS_NAME + ":" + global.C.TCP_PORT);
 
 // cluster options
 global.CDEF("CLUSTER_URL", "tcp://localhost:5151");

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Shelly System</title>
+    <script src="/common/jquery-1.9.1.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/shadmin.css">
+    <script src="/static/js/common.js"></script>
+    <script>
+        var Env = <%- EnvJson  %>;
+
+        function addServer(tableId, serverId, serverInfo) {
+            console.log(serverInfo);
+            $tr = $("<tr></tr>");
+            $tr.append("<td><b>" + serverId + "</b></td>");
+//            $tr.append("<td>" + "hostname" + "</td>");
+//            $tr.append("<td>" + "cpu" + "</td>");
+//            $tr.append("<td>" + "load" + "</td>");
+//            $tr.append("<td>" + "freemem" + "</td>");
+            $tr.append("<td>" + serverInfo.clusterUrl + "</td>");
+            var extUrls = serverInfo.restUrl + "<br>" + serverInfo.socketUrl + "<br>" + serverInfo.tcpUrl;
+            $tr.append("<td>" + extUrls + "</td>");
+            $tr.append("<td>" + serverInfo.created + "</td>");
+            $("#" + tableId).append($tr);
+        }
+
+        $(init);
+        function init() {
+            $("#shSubTitle").text("Cluster Info");
+
+            shCall({cmd: "cluster.servers"}, function (err, res) {
+                var servers = res[0].data;
+                for (server in servers) {
+                    addServer("ClusterList", server, servers[server]);
+                }
+            })
+        }
+    </script>
+<style>
+    table {
+        font-size: 12px;
+    }
+</style>
+</head>
+<body>
+<%- include header.html %>
+
+<div class="container">
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="gameBoxDiv span12">
+            <div class="gameBoxHeaderDiv">Cluster Servers:</div>
+            <div class="gameBoxInnerDiv">
+                <table id="ClusterList" class="table table-condensed table-striped">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="errorMsg" class="span7 offset2"></div>
+    </div>
+</div>
+
+<%- include footer.html %>
+</body>
+</html>
