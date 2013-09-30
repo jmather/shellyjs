@@ -136,6 +136,7 @@ function onMessage(data) {
         res.ws.uid = req.session.uid;
         res.ws.name = req.session.user.get("name");
         shcluster.setLocate(req.session.user, res.ws.id, _w(onMessageError, function (err, data) {
+          shlog.info("locate", "setLocate", req.session.uid, res.ws.id);
           makeCalls(msgs, req, res);
         }));
       } else {
@@ -164,7 +165,7 @@ function onData(data) {
 }
 
 function onCloseError(err, data) {
-  sh.error("close-error", err, data);
+  shlog.error(sh.error("close-error", err, data));
 }
 
 function onClose() {
@@ -174,7 +175,9 @@ function onClose() {
 
   // clean up the global locator if there
   if (_.isString(this.uid)) {
+    var self = this;
     shcluster.removeLocate(this.uid, _w(onCloseError, function (err, data) {
+      shlog.info("locate", "removeLocate", self.uid);
       // ignore and don't wait
     }));
   }
