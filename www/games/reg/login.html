@@ -45,7 +45,7 @@ function init() {
     });
     $("#newAnonymousBtn").click(function(e) {
         shelly.setToken(Env.nextUuid);
-        doAnonymous();
+        doAnonymous(shelly.token);
         e.preventDefault();
         return false;
     });

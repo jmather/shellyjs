@@ -100,10 +100,10 @@ function doRegister() {
     var res = sendRestCmd("reg.upgrade", regData, function (error, data) {
         if (!error) {
             console.log(data);
-            if (data.event === "error") {
-                showError(data.message);
+            if (data[0].event === "error") {
+                showError(data[0].message);
             } else {
-                updateProfile(data.data);
+                updateProfile(data[0].data);
             }
         }
     });
@@ -224,6 +224,13 @@ function init() {
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="span6 offset3">
+            <%- include errorbox.html %>
+        </div>
+    </div>
+
     <div class="row">
         <div class="profileInfoDiv gameBoxDiv span6 offset3">
             <div class="gameBoxHeaderDiv">Profile Information</div>
@@ -266,12 +273,6 @@ function init() {
                 <button id="editProfile" class="btn" style="float:right">edit</button>
                 <button id="cancelProfile" class="btn" style="float:right">cancel</button>
             </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="span6 offset3">
-            <%- include errorbox.html %>
         </div>
     </div>
 
