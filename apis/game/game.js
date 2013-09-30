@@ -101,6 +101,10 @@ Game.pre = function (req, res, cb) {
   shlog.info("game", "game.pre: populating game info for " + req.body.gameId);
   req.loader.exists("kGame", req.body.gameId, _w(cb, function (error, game) {
     if (error) {
+      res.add(sh.errordb(game));
+      return cb(1);
+    }
+    if (game === null) {
       if (req.body.cmd === "game.leave") {  // always alow user to remove a bad game
         return cb(0);
       }

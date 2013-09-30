@@ -34,6 +34,10 @@ user.set = function (req, res, cb) {
 
   req.loader.exists("kUser", req.session.uid, _w(cb, function (err, user) {
     if (err) {
+      res.add(sh.errordb(user));
+      return cb(1);
+    }
+    if (user === null) {
       res.add(sh.error("user-bad", "unable to load user", user));
       return cb(1);
     }
@@ -53,7 +57,11 @@ user.aget = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, _w(cb, function (error, user) {
     if (error) {
-      res.add(sh.error("user-aget", "user does not exist", user));
+      res.add(sh.errordb(user));
+      return cb(1);
+    }
+    if (user === null) {
+      res.add(sh.error("user-aget", "user does not exist", uid));
       return cb(1);
     }
     res.add(sh.event("user.get", user.getData()));
@@ -67,8 +75,12 @@ user.aset = function (req, res, cb) {
 
   req.loader.exists("kUser", uid, _w(cb, function (error, user) {
     if (error) {
-      res.add(sh.error("user-aset", "user does not exist", user));
-      return;
+      res.add(sh.errordb(user));
+      return cb(1);
+    }
+    if (user === null) {
+      res.add(sh.error("user-aset", "user does not exist", uid));
+      return cb(1);
     }
     user.setData(newUser);
     res.add(sh.event("user.get", user.getData()));
@@ -103,6 +115,10 @@ user.find = function (req, res, cb) {
   if (req.body.by === "uid") {
     req.loader.exists("kUser", req.body.value, _w(cb, function (err, data) {
       if (err) {
+        res.add(sh.errordb(data));
+        return cb(1);
+      }
+      if (data === null) {
         res.add(sh.error("user-find-uid", "unable to find user with uid: '" + req.body.value + "'", data));
         return cb(1);
       }

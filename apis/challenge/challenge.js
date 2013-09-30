@@ -102,7 +102,11 @@ Challenge.make = function (req, res, cb) {
 function sendAccept(req, res, cb) {
   req.loader.exists("kUser", req.body.toUid, _w(cb, function (err, challengeUser) {
     if (err) {
-      res.add(sh.error("user-bad", "unable to load challenge user", challengeUser));
+      res.add(sh.errordb(challengeUser));
+      return cb(1);
+    }
+    if (challengeUser === null) {
+      res.add(sh.error("user-bad", "user does not exist", challengeUser));
       return cb(1);
     }
     var emailInfo = {email: challengeUser.get("email"), fromProfile: req.session.user.profile(),
@@ -243,7 +247,11 @@ function sendChallenge(req, res, cb) {
 
   req.loader.exists("kUser", req.body.toUid, _w(cb, function (err, challengeUser) {
     if (err) {
-      res.add(sh.error("user-bad", "unable to load challenge user", challengeUser));
+      res.add(sh.errordb(challengeUser));
+      return cb(1);
+    }
+    if (challengeUser === null) {
+      res.add(sh.error("user-bad", "user does not exist", challengeUser));
       return cb(1);
     }
     var emailInfo = {email: req.body.email, fromProfile: req.session.user.profile(),

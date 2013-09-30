@@ -46,6 +46,10 @@ object.delete = function (req, res, cb) {
 object.get = function (req, res, cb) {
   req.loader.exists("kObject", req.body.oid, _w(cb, function (err, obj) {
     if (err) {
+      res.add(sh.errordb(obj));
+      return cb(1);
+    }
+    if (obj === null) {
       res.add(sh.error("object-get", "unable to get object", obj));
       return cb(1);
     }
