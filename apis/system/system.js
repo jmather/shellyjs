@@ -19,7 +19,7 @@ system.functions = {
 
 system.config = function (req, res, cb) {
   shlog.debug("system", "system.config");
-  res.add(sh.event("system.config", {CONFIG: sh.secure(global.C), PACKAGE: global.PACKAGE}));
+  res.add(sh.event("system.config", {CONFIG: sh.secure(global.C), PACKAGE: global.PACKAGE, server: global.server}));
   return cb(0);
 };
 

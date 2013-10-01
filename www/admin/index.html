@@ -23,8 +23,10 @@
 
                 var config = res[0].data.CONFIG;
                 var package = res[0].data.PACKAGE;
+                var server = res[0].data.server;
 
                 addConfig("GeneralServer", "version", package);
+                addConfig("GeneralServer", "serverId", server);
                 addConfig("GeneralServer", "DNS_NAME", config);
                 addConfig("GeneralServer", "BASE_DIR", config);
                 addConfig("GeneralServer", "CONFIG_DIR", config);
