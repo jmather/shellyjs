@@ -11,7 +11,7 @@ var cluster = exports;
 cluster.desc = "cluster information, statistics, and settings";
 cluster.functions = {
   servers: {desc: "get all servers in cluster", params: {}, security: ["admin"]},
-  verify: {desc: "ping all servers and remove any fail to respond", params: {}, security: ["admin"]},
+  prune: {desc: "ping all servers and remove any fail to respond", params: {}, security: ["admin"]},
   locate: {desc: "locate a user in the cluster", params: {uid: {dtype: "string"}}, security: ["admin"]},
   sendUser: {desc: "send a message to any user", params: {uid: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]},
   home: {desc: "hash any string to get a home cluster server", params: {oid: {dtype: "string"}}, security: []}
@@ -30,13 +30,13 @@ cluster.servers = function (req, res, cb) {
   }));
 };
 
-cluster.verify = function (req, res, cb) {
-  shlog.info("cluster", "cluster.verify");
+cluster.prune = function (req, res, cb) {
+  shlog.info("cluster", "cluster.prune");
 
   var serverList = [];
   global.db.smembers("serverList", _w(cb, function (err, servers) {
     if (err) {
-      res.add(sh.error("cluster-verify", "unable to get cluster list"));
+      res.add(sh.error("cluster-prune", "unable to get cluster list"));
       return cb(1);
     }
     var data = {cmd: "ping"};
@@ -52,7 +52,7 @@ cluster.verify = function (req, res, cb) {
         }
       }));
     }), function (error) {
-      res.add(sh.event("cluster.verify", serverList));
+      res.add(sh.event("cluster.prune", serverList));
       return cb(0);
     });
   }));
