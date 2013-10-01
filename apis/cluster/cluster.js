@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var async = require("async");
 
 var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
 var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
@@ -10,6 +11,7 @@ var cluster = exports;
 cluster.desc = "cluster information, statistics, and settings";
 cluster.functions = {
   servers: {desc: "get all servers in cluster", params: {}, security: ["admin"]},
+  verify: {desc: "ping all servers and remove any fail to respond", params: {}, security: ["admin"]},
   locate: {desc: "locate a user in the cluster", params: {uid: {dtype: "string"}}, security: ["admin"]},
   sendUser: {desc: "send a message to any user", params: {uid: {dtype: "string"}, data: {dtype: "object"}}, security: ["admin"]},
   home: {desc: "hash any string to get a home cluster server", params: {oid: {dtype: "string"}}, security: []}
@@ -25,6 +27,34 @@ cluster.servers = function (req, res, cb) {
     }
     res.add(sh.event("cluster.servers", serverList));
     return cb(0);
+  }));
+};
+
+cluster.verify = function (req, res, cb) {
+  shlog.info("cluster", "cluster.verify");
+
+  var serverList = [];
+  global.db.smembers("serverList", _w(cb, function (err, servers) {
+    if (err) {
+      res.add(sh.error("cluster-verify", "unable to get cluster list"));
+      return cb(1);
+    }
+    var data = {cmd: "ping"};
+    async.each(servers, _w(cb, function (serverId, lcb) {
+      shcluster.sendServer(serverId, data, _w(lcb, function (err, data) {
+        if (!err && data === "ok") {
+          serverList.push(serverId);
+          return lcb();
+        } else {
+          global.db.srem("serverList", serverId, _w(lcb, function(err, data) {
+            return lcb();
+          }));
+        }
+      }));
+    }), function (error) {
+      res.add(sh.event("cluster.verify", serverList));
+      return cb(0);
+    });
   }));
 };
 
