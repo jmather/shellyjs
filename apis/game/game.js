@@ -426,6 +426,7 @@ function fillGames(loader, gameList, cb) {
         return lcb(game);
       }
       gameList[gameId].gameName = game.get("name");
+      gameList[gameId].status = game.get("status");
       gameList[gameId].whoTurn = game.get("whoTurn");
       gameList[gameId].players = game.get("players");
       gameList[gameId].gameUrl = sh.gameUrl(game.get("name"), {"gameId": game.get("oid")});

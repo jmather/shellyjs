@@ -26,6 +26,7 @@
                 var server = res[0].data.server;
 
                 addConfig("GeneralServer", "version", package);
+                addConfig("GeneralServer", "nodeVersion", server);
                 addConfig("GeneralServer", "serverId", server);
                 addConfig("GeneralServer", "DNS_NAME", config);
                 addConfig("GeneralServer", "BASE_DIR", config);
@@ -92,6 +93,10 @@
                 addConfig("SessionSettings", "FAKE_SESSION_HASH", config);
                 addConfig("SessionSettings", "REG_RESET_URL", config);
             })
+            shCall({cmd: "system.osInfo"}, function (err, res) {
+                var osInfo = res[0].data;
+                addConfig("GeneralServer", "nodeVersion", osInfo);
+            });
         }
     </script>
 <style>

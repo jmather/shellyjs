@@ -80,6 +80,7 @@ system.osInfo = function (req, res, cb) {
   data.freemem = os.freemem();
   data.cpus = os.cpus();
   data.networkInterfaces = os.networkInterfaces();
+  data.nodeVersion = process.version;
   res.add(sh.event("system.osInfo", data));
   return cb(0);
 }

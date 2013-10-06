@@ -1,3 +1,4 @@
+global.CDEF("MODULE_NO_CACHE", false);
 
 global.CDEF("DNS_NAME", "localhost");
 

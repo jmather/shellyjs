@@ -177,7 +177,7 @@ function onClose() {
   if (_.isString(this.uid)) {
     var self = this;
     shcluster.removeLocate(this.uid, _w(onCloseError, function (err, data) {
-      shlog.info("locate", "removeLocate", self.uid);
+      shlog.info("locate", "removeLocate", self.uid, self.id);
       // ignore and don't wait
     }));
   }
