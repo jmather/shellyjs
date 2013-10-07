@@ -5,11 +5,13 @@ var WebSocket = require('ws');
 var Ai = require(__dirname + "/../robo/ai.js");
 var gAi = null;
 
-var gMaxUsers = 15000;
-var gRoundsPerGame = 10;
+var gMaxUsers = 2;
+var gRoundsPerGame = 5;
 var gUserTemplate = "joe%d@skool51.com";
 var gPassword = "foofoo";
 var gTurnSleep = 0;
+
+var gStatResets = 0;
 
 function sendCmd(ws, cmd, params) {
   var baseCmd = {
@@ -34,8 +36,8 @@ function makeMove(ws, game) {
 
 function startPlaying(ws) {
 //  sendCmd(ws, "channel.add", {channel: "lobby:tictactoe:0"});
-//  sendCmd(ws, "game.playing");  // joins all current games
-  sendCmd(ws, "user.get");  // joins all current games
+  sendCmd(ws, "game.playing");  // joins all current games
+//  sendCmd(ws, "user.get");  // test call for just connect
 }
 
 function Player(id) {
@@ -109,14 +111,26 @@ function Player(id) {
         sendCmd(this, "game.get", {gameId: msg.data.gameId});  // trigger a move base on gameBoard
       }
     } else if (msg.event === "game.over") {
-      if (this.rounds < gRoundsPerGame) {
-        // play again
-        this.rounds += 1;
-        sendCmd(this, "game.reset", {gameId: msg.data.oid});
+      if (msg.data.ownerId !== this.uid) {
+        return;
+      }
+      if (this.rounds >= gRoundsPerGame) {
+        console.log("player:", this.email, "done with resets")
+        return;
+      }
+      console.log("player:", this.email, "resets")
+      // play again
+      this.rounds += 1;
+      sendCmd(this, "game.reset", {gameId: msg.data.oid});
+      gStatResets += 1;
+      if (gStatResets % 100 === 0) {
+        console.log("game.reset", gStatResets);
       }
     }
   });
 }
+
+//util.inherits(Player, WebSocket);
 
 function createUsers(userCount) {
   if (userCount === gMaxUsers) {
@@ -129,11 +143,4 @@ function createUsers(userCount) {
     createUsers(userCount + 1);
   }, 0)
 }
-
 createUsers(0);
-
-//process.on('uncaughtException', function globalErrorCatch(error, p){
-//  console.error(error);
-//  console.error(error.stack);
-//  process.exit();
-//});
