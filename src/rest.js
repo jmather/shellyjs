@@ -7,6 +7,7 @@ var stats = require(global.C.BASE_DIR + "/lib/shstats.js");
 var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 var shcall = require(global.C.BASE_DIR + "/lib/shcall.js");
 var ShLoader = require(global.C.BASE_DIR + "/lib/shloader.js");
+var dispatch = require(global.C.BASE_DIR + "/lib/shdispatch.js");
 var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
 var rest = express();
@@ -31,14 +32,30 @@ function add(data) {
   this.msgs.push(data);
 }
 
+// res.notify - queues the socket messages so we can make them after save
+function notify(uids, data, excludeIds) {
+  if (_.isUndefined(this.notifs)) {
+    this.notifs = [];
+  }
+  this.notifs.push({uids: uids, data: data, excludeIds: excludeIds});
+}
+
 // res.send - sends all events or errors
 function sendAll() {
   this.send(this.msgs);
   this.msgs = [];
+
+  _.each(this.notifs, function (obj) {
+    dispatch.sendUsers(obj.uids, obj.data, obj.excludeIds, function (err, data) {
+      // don't care
+    });
+  });
+  this.notifs = [];
 }
 
 function clear() {
   this.msgs = [];
+  this.notifs = [];
 }
 
 rest.use(function (req, res, next) {
@@ -46,6 +63,7 @@ rest.use(function (req, res, next) {
 
   req.loader = new ShLoader();
   res.add = add;
+  res.notify = notify;
   res.sendAll = sendAll;
   res.clear = clear;
 
@@ -78,7 +96,7 @@ function respond(req, res, next) {
       cb(0);
     }));
   }, function (err) {
-    // wait on dump to avoid any timing issues in fast test runs
+    // wait on dump to avoid any timing issues
     req.loader.dump(function (err) {
       res.sendAll();
     });

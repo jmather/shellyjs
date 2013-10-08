@@ -10,6 +10,7 @@ var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 var shcall = require(global.C.BASE_DIR + "/lib/shcall.js");
 var ShLoader = require(global.C.BASE_DIR + "/lib/shloader.js");
 var shcluster = require(global.C.BASE_DIR + "/lib/shcluster.js");
+var dispatch = require(global.C.BASE_DIR + "/lib/shdispatch.js");
 var channel = require(global.C.BASE_DIR + "/apis/channel/channel.js");
 var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
 
@@ -57,7 +58,15 @@ function add(data) {
   this.msgs.push(data);
 }
 
-// res.send - sends all events or errors
+// res.notify - queues the socket messages so we can make them after save
+function notify(uids, data, excludeIds) {
+  if (_.isUndefined(this.notifs)) {
+    this.notifs = [];
+  }
+  this.notifs.push({uids: uids, data: data, excludeIds: excludeIds});
+}
+
+// res.sendAll - sends all events or errors
 // currently we pass each message on socket, not the array
 // SWD: should test if sending all at once is better for socket layer
 function sendAll() {
@@ -66,10 +75,18 @@ function sendAll() {
     sh.sendWs(self.ws, data);
   });
   this.msgs = [];
+
+  _.each(this.notifs, function (obj) {
+    dispatch.sendUsers(obj.uids, obj.data, obj.excludeIds, function (err, data) {
+      // don't care
+    });
+  });
+  this.notifs = [];
 }
 
 function clear() {
   this.msgs = [];
+  this.notifs = [];
 }
 
 function callError(err, data) {
@@ -88,8 +105,10 @@ function makeCalls(msgs, req, res) {
         cb(0);
       }));
     }, function (err) {
-      req.loader.dump();  // don't wait on dump cb
-      res.sendAll();
+      // wait on dump to avoid any timing issues
+      req.loader.dump(function(err) {
+        res.sendAll();
+      });
     });
   } catch (err1) {
     res.add(sh.error("socket-calls", "message - " + err1.message, { message: err1.message, stack: err1.stack }));
@@ -114,7 +133,7 @@ function onMessage(data) {
   // setup req/res
   var loader = new ShLoader();
   var req = {session: {valid: false}, body: {}, loader: loader};
-  var res = {req: req, ws: this, add: add, sendAll: sendAll, clear: clear};
+  var res = {req: req, ws: this, add: add, sendAll: sendAll, clear: clear, notify: notify};
 
   // handle batch
   var msgs = null;

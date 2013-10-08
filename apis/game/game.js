@@ -158,7 +158,8 @@ Game.notifyTurn = function (req, res) {
   counter.incr(gameData.whoTurn, "turns");
 
   // notify anyone that is onine
-  dispatch.sendUsers(gameData.playerOrder, event, req.session.uid); // exclude me
+  res.notify(gameData.playerOrder, event, req.session.uid);  // exclude me
+
   // noitify me - rest support
   res.add(event);
 };
@@ -317,7 +318,7 @@ Game.turn = function (req, res, cb) {
     return cb(0);
   }
   if (gameData.whoTurn !== req.session.uid) {
-    res.add(sh.error("game-noturn", "not your turn", {whoTurn: gameData.whoTurn}));
+    res.add(sh.error("game-noturn", "not your turn", {whoTurn: gameData.whoTurn, gameData: gameData}));
     return cb(1);
   }
 

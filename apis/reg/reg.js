@@ -25,6 +25,7 @@ exports.functions = {
     password: {dtype: "string"},
     role: {dtype: "string", optional: true}
   }, security: [], noSession: true},
+  check: {desc: "check if an email is registered", params: {email: {dtype: "string"}}, security: [], noSession: true},
   upgrade: {desc: "upgrade a user id from anonymous to registered", params: {
     email: {dtype: "string"},
     password: {dtype: "string"}
@@ -231,6 +232,20 @@ exports.anonymous = function (req, res, cb) {
     }));
   }));
 };
+
+exports.check = function (req, res, cb) {
+  var email = sanitize(req.body.email).trim();
+
+  req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
+    if (error) {
+      res.add(sh.errordb(em));
+      return cb(1);
+    }
+    var status = (em !== null ? "used" : "available");
+    res.add(sh.event("reg.check", {status: status, email: email}));
+    return cb(1);
+  }));
+}
 
 exports.upgrade = function (req, res, cb) {
   var email = sanitize(req.body.email).trim();
