@@ -24,7 +24,6 @@ rest.use(function (req, res, next) {
   req.loader = new ShLoader();
 
   var extRes = new ShRes();
-  extRes.batch = true;
   extRes.req = req;
   _.extend(res, extRes);
 
