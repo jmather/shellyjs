@@ -1,7 +1,6 @@
 global.CDEF("MODULE_NO_CACHE", true);
 
-global.CDEF("CLUSTER_NUM_SOCKET", 8);
-//global.CDEF("CLUSTER_NUM_SOCKET", 1);
+global.CDEF("CLUSTER_NUM_SOCKET", 1);
 
 global.CDEF("EMAIL_NOSEND", false);
 global.CDEF("EMAIL_SENDTO", "scott@lgdales.com");

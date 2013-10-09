@@ -6,9 +6,11 @@ var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
 var stats = require(global.C.BASE_DIR + "/lib/shstats.js");
 var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 var shcall = require(global.C.BASE_DIR + "/lib/shcall.js");
-var ShLoader = require(global.C.BASE_DIR + "/lib/shloader.js");
 var dispatch = require(global.C.BASE_DIR + "/lib/shdispatch.js");
 var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
+
+var ShLoader = require(global.C.BASE_DIR + "/lib/shloader.js");
+var ShRes = require(global.C.BASE_DIR + "/lib/shres.js");
 
 var rest = express();
 
@@ -16,56 +18,15 @@ rest.use(sh.expressCrossDomain);
 rest.use(express.bodyParser());
 rest.use(express.cookieParser());
 
-// res.add - adds event or error to output stream
-function add(data) {
-  if (_.isUndefined(this.msgs)) {
-    this.msgs = [];
-  }
-  if (this.req.body._pt) {
-    data._pt = this.req.body._pt;
-  }
-  if (data.event === "error") {
-    data.inputs = this.req.body;
-    stats.incr("errors", "rest");
-    shlog.error("socket", "send %j", data);  // log all errors
-  }
-  this.msgs.push(data);
-}
-
-// res.notify - queues the socket messages so we can make them after save
-function notify(uids, data, excludeIds) {
-  if (_.isUndefined(this.notifs)) {
-    this.notifs = [];
-  }
-  this.notifs.push({uids: uids, data: data, excludeIds: excludeIds});
-}
-
-// res.send - sends all events or errors
-function sendAll() {
-  this.send(this.msgs);
-  this.msgs = [];
-
-  _.each(this.notifs, function (obj) {
-    dispatch.sendUsers(obj.uids, obj.data, obj.excludeIds, function (err, data) {
-      // don't care
-    });
-  });
-  this.notifs = [];
-}
-
-function clear() {
-  this.msgs = [];
-  this.notifs = [];
-}
-
 rest.use(function (req, res, next) {
   shlog.info("rest", "session check");
 
   req.loader = new ShLoader();
-  res.add = add;
-  res.notify = notify;
-  res.sendAll = sendAll;
-  res.clear = clear;
+
+  var extRes = new ShRes();
+  extRes.batch = true;
+  extRes.req = req;
+  _.extend(res, extRes);
 
   shcall.fillSession(req.body.session, req, res, _w(next, function (error, data) {
     // session.valid now used to control access to functions
@@ -99,6 +60,7 @@ function respond(req, res, next) {
     // wait on dump to avoid any timing issues
     req.loader.dump(function (err) {
       res.sendAll();
+      res.notifyAll();
     });
   });
 }

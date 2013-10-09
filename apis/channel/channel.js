@@ -36,7 +36,7 @@ Channel.list = function (req, res, cb) {
 Channel.add = function (req, res, cb) {
   shlog.info("channel", "channel.add: ", req.body.channel, req.session.uid);
 
-  if (_.isUndefined(res.ws)) {
+  if (res.ws === null) {
     res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
     return cb(1);
   }
@@ -97,7 +97,7 @@ Channel.removeInt = function (channel, uid, cb) {
 Channel.remove = function (req, res, cb) {
   shlog.info("channel", "channel.remove: ", req.body.channel, req.session.uid);
 
-  if (_.isUndefined(res.ws)) {
+  if (res.ws === null) {
     res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
     return cb(1);
   }
