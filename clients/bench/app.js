@@ -6,12 +6,13 @@ var WebSocket = require('ws');
 var Ai = require(__dirname + "/../robo/ai.js");
 var gAi = null;
 
-var gNumWorkers = 10;
-var gMaxUsers = 200;
-var gRoundsPerGame = 5;
+var gNumWorkers = 2;
+var gMaxUsers = 10;
+var gRoundsPerGame = 10;
 var gUserTemplate = "joe%d@skool51.com";
 var gPassword = "foofoo";
 var gTurnSleep = 0;
+var gPlayerDone = 0;
 
 var gStatResets = 0;
 
@@ -154,6 +155,11 @@ function Player(id) {
       }
       if (this.rounds >= gRoundsPerGame) {
         console.log("player:", this.email, "done with resets");
+        gPlayerDone += 1;
+        if (gPlayerDone >= gMaxUsers / 2) {
+          console.log("all users done:", gPlayerDone + " of " + gMaxUsers);
+          process.exit();
+        }
         return;
       }
       this.resetGame(msg.data.oid);

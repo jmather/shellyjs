@@ -62,8 +62,12 @@ function makeCalls(msgs, req, res) {
     }, function (err) {
       // wait on dump to avoid any timing issues
       req.loader.dump(function (err) {
-        res.sendAll();
-        res.notifyAll();
+        try {
+          res.sendAll();
+          res.notifyAll();
+        } catch (err1) {
+          res.add(sh.error("res-flush", "problem sending responses", { message: err1.message, stack: err1.stack }));
+        }
       });
     });
   } catch (err1) {
