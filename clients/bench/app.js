@@ -7,8 +7,8 @@ var Ai = require(__dirname + "/../robo/ai.js");
 var gAi = null;
 
 var gNumWorkers = 2;
-var gMaxUsers = 10;
-var gRoundsPerGame = 10;
+var gMaxUsers = 20;
+var gRoundsPerGame = 100;
 var gUserTemplate = "joe%d@skool51.com";
 var gPassword = "foofoo";
 var gTurnSleep = 0;

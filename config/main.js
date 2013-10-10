@@ -12,12 +12,6 @@ global.CDEF("REST_URL", "http://" + global.C.DNS_NAME + ":" + global.C.REST_PORT
 global.CDEF("GAMES_PORT", 5102);
 global.CDEF("GAMES_URL", "http://" + global.C.DNS_NAME + ":" + global.C.GAMES_PORT);
 
-// directory for any external module added to system
-global.CDEF("APP_API_DIR", global.C.BASE_DIR + "/example/apis");
-
-// directory used by apis/game.js to load specfic game mechanics
-global.CDEF("GAMES_API_DIR", global.C.BASE_DIR + "/example/games");
-
 // socket options
 global.CDEF("SOCKET_PORT", 5110);
 global.CDEF("SOCKET_URL", "ws://" + global.C.DNS_NAME + ":" + global.C.SOCKET_PORT);
@@ -52,7 +46,7 @@ global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, file
 global.CDEF("LOG_MODULES", {"shelly" : 1});
 global.CDEF("LOG_HOOK", function (winston) {
   winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);
-//    winston.add(winston.transports.File, global.C.LOG_FILE_OPTS);
+  winston.add(winston.transports.File, global.C.LOG_FILE_OPTS);
 });
 
 // registration
@@ -97,11 +91,14 @@ global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Gmail", auth: {user: "shelly88
 //global.CDEF("EMAIL_TRANSPORT", "SMTP");
 //global.CDEF("EMAIL_TRANSPORT_SERVICE", {service: "Postmark", auth: {user: "XXXX", pass: "XXXX"}});
 
-// extended directories
-global.CDEF("EXT_API_DIR", "");
-
 // location of server uuid that identifies server in cluster
 global.CDEF("SERVER_TAG_FN", global.C.CONFIG_DIR + "/server.json");
+
+// directory for any external module added to system
+global.CDEF("APP_API_DIR", global.C.BASE_DIR + "/example/apis");
+
+// directory used by apis/game.js to load specfic game mechanics
+global.CDEF("GAMES_API_DIR", global.C.BASE_DIR + "/example/games");
 
 // matcher options
 global.CDEF("MATCHER_INTERVAL", 3000);
