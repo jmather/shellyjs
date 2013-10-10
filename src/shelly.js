@@ -41,11 +41,12 @@ function initConfig(config) {
   var i = 0;
   for (i = 2; i < process.argv.length; i += 1) {
     var argParts = process.argv[i].split("=");
-    if (argParts.length !== 2) { continue; }
-    if (argParts[0].indexOf("DIR") !== -1) {
-      argParts[1] = path.resolve(argParts[1]);
+    if (argParts.length === 2) {
+      if (argParts[0].indexOf("DIR") !== -1) {
+        argParts[1] = path.resolve(argParts[1]);
+      }
+      global.CFDEF(argParts[0], argParts[1]);
     }
-    global.CFDEF(argParts[0], argParts[1]);
   }
   global.CDEF("CONFIG_DIR", global.C.BASE_DIR + "/config");
 

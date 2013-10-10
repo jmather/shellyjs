@@ -241,7 +241,7 @@ Challenge.alist = function (req, res, cb) {
 
 function sendChallenge(req, res, cb) {
   if (_.isUndefined(res.chRecievedId)) {
-    res.add(sh.error("missing-info", "unknown challenge id for email template", challengeUser));
+    res.add(sh.error("missing-info", "unknown challenge id for email template"));
     return cb(1);
   }
 

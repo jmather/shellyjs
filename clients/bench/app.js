@@ -24,7 +24,7 @@ function Player(id) {
   this.rounds = 0;
   this.joined = false;
 
-  this.sendCmd = function(cmd, params) {
+  this.sendCmd = function (cmd, params) {
     var baseCmd = {
       session: this.session,
       cmd: cmd
@@ -32,15 +32,15 @@ function Player(id) {
     var data = _.merge(baseCmd, params);
     //console.log("send:", this.email, cmd);
     this.send(JSON.stringify(data));
-  }
+  };
 
-  this.startPlaying = function() {
+  this.startPlaying = function () {
 //  sendCmd(ws, "channel.add", {channel: "lobby:tictactoe:0"});
     this.sendCmd("game.playing");  // joins all current games
 //  sendCmd(ws, "user.get");  // test call for just connect
-  }
+  };
 
-  this.makeMove = function(game) {
+  this.makeMove = function (game) {
     var side = "O";
     if (game.state.xes === this.uid) {
       side = "X";
@@ -49,16 +49,16 @@ function Player(id) {
     var move = ai.calculateMove(game.state.gameBoard);
     //console.log("make move:", this.email, move);
     this.sendCmd("game.turn", {gameId: game.oid, move: {x: move[1], y: move[0]}});
-  }
+  };
 
-  this.resetGame = function(gameId) {
+  this.resetGame = function (gameId) {
     this.rounds += 1;
     this.sendCmd("game.reset", {gameId: gameId});
     gStatResets += 1;
     if (gStatResets % 100 === 0) {
       console.log("game.reset", gStatResets);
     }
-  }
+  };
 
   this.on('open', function () {
     if (this.id % 500 === 0) {
@@ -130,11 +130,11 @@ function Player(id) {
         return;
       }
       //console.log("whoTurn:", msg.data.whoTurn, "me:", this.uid, "status:", msg.data.status);
-      var self = this;
+      var self1 = this;
       if (msg.data.whoTurn === this.uid  && msg.data.status !== "over") {
-//        setTimeout(function () {
-          self.makeMove(msg.data);
-//        }, gTurnSleep);
+        setTimeout(function () {
+          self1.makeMove(msg.data);
+        }, gTurnSleep);
       }
     } else if (msg.event === "game.turn.next") {
       if (!this.joined) {
@@ -153,7 +153,7 @@ function Player(id) {
         return;
       }
       if (this.rounds >= gRoundsPerGame) {
-        console.log("player:", this.email, "done with resets")
+        console.log("player:", this.email, "done with resets");
         return;
       }
       this.resetGame(msg.data.oid);
@@ -165,7 +165,7 @@ util.inherits(Player, WebSocket);
 
 function createUsers(start, userCount) {
   if (userCount === gMaxUsers) {
-    console.log("users create done:", start, start+gMaxUsers)
+    console.log("users create done:", start, start + gMaxUsers);
     return;
   }
 
@@ -174,14 +174,13 @@ function createUsers(start, userCount) {
 }
 
 if (cluster.isMaster) {
+  var i = 0;
   for (i = 0; i < gNumWorkers; i += 1) {
-    var p = cluster.fork({userStart: i*gMaxUsers});
+    var p = cluster.fork({userStart: i * gMaxUsers});
   }
 } else {
-  var userStart = parseInt(process.env.userStart);
+  var userStart = parseInt(process.env.userStart, 10);
   process.title = "shelly - bench " + userStart + "-" + (userStart + gMaxUsers);
   console.log("worker starting:", process.env.userStart, userStart + gMaxUsers);
-  createUsers(parseInt(process.env.userStart), 0);
+  createUsers(parseInt(process.env.userStart, 10), 0);
 }
-
-

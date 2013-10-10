@@ -245,7 +245,7 @@ exports.check = function (req, res, cb) {
     res.add(sh.event("reg.check", {status: status, email: email}));
     return cb(1);
   }));
-}
+};
 
 exports.upgrade = function (req, res, cb) {
   var email = sanitize(req.body.email).trim();
@@ -334,7 +334,7 @@ exports.create = function (req, res, cb) {
   req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
     if (error) {
       res.add(sh.errordb(em));
-      cb (1, em);
+      cb(1, em);
     }
     if (em !== null) {
       res.add(sh.error("email-used", "this email is already registered", {email: email}));
@@ -389,7 +389,7 @@ exports.reset = function (req, res, cb) {
         return cb(1);
       }
       if (em === null) {
-        res.add(sh.error("email-bad", "this email is not registered", {email: email}));
+        res.add(sh.error("email-bad", "this email is not registered", {email: user.get("email")}));
         return cb(1);
       }
       req.loader.exists("kReset", em.get("uid"), _w(cb, function (err, resetInfo) {

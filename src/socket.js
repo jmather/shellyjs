@@ -61,7 +61,7 @@ function makeCalls(msgs, req, res) {
       }));
     }, function (err) {
       // wait on dump to avoid any timing issues
-      req.loader.dump(function(err) {
+      req.loader.dump(function (err) {
         res.sendAll();
         res.notifyAll();
       });
@@ -186,14 +186,12 @@ function handleConnect(ws) {
   ws.games = [];
   ws.hbTimer = null;
 
-  var loader = new ShLoader();
-
   var heartBeat = function () {
     sh.sendWs(ws, sh.event("heartbeat", {interval: global.C.HEART_BEAT}));
   };
   ws.hbTimer = setInterval(heartBeat, global.C.HEART_BEAT);
 
-  if (gServerType === "tcp") {
+  if (wss.serverType === "tcp") {
     ws.msg = "";
     ws.send = function (data) { this.write(data + "\n"); };
     ws.on("data", onData);
@@ -205,10 +203,8 @@ function handleConnect(ws) {
 }
 
 Socket.start = function (stype) {
-  gServerType = stype;
-  if (gServerType === "tcp") {
-    wss = net.createServer(function (socket) {
-    }).listen(global.C.TCP_PORT, function () {
+  if (stype === "tcp") {
+    wss = net.createServer(function (socket) {}).listen(global.C.TCP_PORT, function () {
       shlog.system("tcp", "server listening: " + global.C.TCP_PORT);
     });
   } else {
@@ -216,6 +212,7 @@ Socket.start = function (stype) {
       shlog.system("socket", "server listening: " + global.C.SOCKET_URL);
     });
   }
+  wss.serverType = stype;
   var connCount = 1;
 
   wss.on("connection", function (ws) {

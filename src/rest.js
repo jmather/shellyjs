@@ -49,7 +49,7 @@ function respond(req, res, next) {
 
   async.eachSeries(msgs, function (item, cb) {
     req.body = item;
-    shcall.make(req, res, _w(next, function (err, data) {
+    shcall.make(req, res, _w(function (err, data) {next(data); }, function (err, data) {
       if (err === 100) { // unknown exception
         res.add(sh.error("call-error", "call failed", data));
       }
@@ -75,7 +75,6 @@ rest.use(function (err, req, res, next) {
     req.loader.dump();
   }
 
-  res.status(500);
   shlog.error("rest", "rest error %s %j", err, err.stack);
   res.send(sh.error("rest-error", err.message, { message: err.message, stack: err.stack }));
 });
