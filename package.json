@@ -1,17 +1,17 @@
 {
   "name": "shellyjs",
-  "version": "0.0.2",
-  "build" : "0000",
+  "version": "0.0.3",
+  "build": "0000",
   "private": false,
   "description": "Synchonous and Asynchronous API server over HTTP, WebSockets, and TCP",
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
   "bin": {
-    "shutil" : "./bin/shutil.js"
+    "shutil": "./bin/shutil.js"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/skool51/shellyjs.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skool51/shellyjs.git"
   },
   "keywords": [
     "shelly",
