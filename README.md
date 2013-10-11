@@ -12,7 +12,7 @@ shelly.start({}, function (err, data) {
 
 ## Installation
 
-    $ npm install shellyjs (NOTE: version 0.1 has not been pushed to npmjs.org)
+    $ npm install shellyjs
     
  or if you want the tip
 
