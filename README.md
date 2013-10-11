@@ -1,7 +1,7 @@
 Shelly
 ======
 
-  API server via HTTP, Websockets, and TCP
+  API server via HTTP, WebSockets, and TCP
 
 ```js
 var shelly = require('shellyjs');
@@ -71,11 +71,11 @@ example.echo = function (req, res, cb) {
 
 1. APIs are defined by files placed in the "apis" directory and in a subdirectory with the same name "apis/example/example.js".
 
-2. They are called via json post or websocket send:
+2. They are called via JSON post or websocket send:
 
 ```json
 {
-  "session": "<acquired from reg call>",
+  "session": "<acquired from reg.login call>",
   "cmd": "example.echo",
   "param1": "foo"
 }
@@ -103,7 +103,7 @@ files will be reload each call.  The example/app.js has this set to false alread
 ## Features
 
   * Drop in support for API functions
-  * Functions run over HTTP, Websockets, and TCP
+  * Functions run over HTTP, WebSockets, and TCP
   * Multi-server clustering
   * Ready built APIs (registration, users, storage...)
   * Web based API testing
