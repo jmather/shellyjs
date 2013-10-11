@@ -80,6 +80,7 @@ app.get("/reg/*.html", function (req, res) {
   shlog.info("admin", "in reg", req.url);
   var env = {};
   env.version = global.PACKAGE.version;
+  env.build = global.PACKAGE.build;
   env.token = req.cookies.shToken;
   env.restUrl = global.C.REST_URL;
   env.socketUrl = global.C.SOCKET_URL;
@@ -92,6 +93,7 @@ app.get("/reg/*.html", function (req, res) {
 function createEnv(req) {
   var map = {};
   map.version = global.PACKAGE.version;
+  map.build = global.PACKAGE.build;
   map.gamesUrl = global.C.GAMES_URL;
   map.restUrl = global.C.REST_URL;
   map.socketUrl = global.C.SOCKET_URL;
