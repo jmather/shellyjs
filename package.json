@@ -1,7 +1,7 @@
 {
   "name": "shellyjs",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "description": "Synchonous and Asynchronous API server over HTTP, Websockets, and TCP",
   "author": "Scott Dale <scott@skool51.com>",
   "main": "./src/shelly.js",
