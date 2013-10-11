@@ -98,7 +98,7 @@ If called via http the response is an array of JSON.stringified data, while the 
     http://localhost:5100/core.html?api=api.app
 
 By default the API files are loaded once on first use.  During development set MODULE_CACHE=false and the API
-files will be reload each call.
+files will be reload each call.  The example/app.js has this set to false already.
 
 ## Features
 
