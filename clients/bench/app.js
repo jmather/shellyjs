@@ -6,9 +6,9 @@ var WebSocket = require('ws');
 var Ai = require(__dirname + "/../robo/ai.js");
 var gAi = null;
 
-var gNumWorkers = 2;
-var gMaxUsers = 20;
-var gRoundsPerGame = 100;
+var gNumWorkers = 1;
+var gMaxUsers = 4;
+var gRoundsPerGame = 10;
 var gUserTemplate = "joe%d@skool51.com";
 var gPassword = "foofoo";
 var gTurnSleep = 0;
@@ -37,8 +37,8 @@ function Player(id) {
 
   this.startPlaying = function () {
 //  sendCmd(ws, "channel.add", {channel: "lobby:tictactoe:0"});
-    this.sendCmd("game.playing");  // joins all current games
 //  sendCmd(ws, "user.get");  // test call for just connect
+    this.sendCmd("game.playing");  // joins all current games
   };
 
   this.makeMove = function (game) {
