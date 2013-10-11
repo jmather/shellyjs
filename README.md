@@ -38,7 +38,7 @@ shelly.start({}, function (err, data) {
  Explore:
  
     Login/Game examples - http://localhost:5102
-    Admin - http://localhost:5100 (default admin user: "shelly", password: "shelly"
+    Admin - http://localhost:5100 (default admin user: "shelly", password: "shelly")
     
 ## Create an API
 
