@@ -23,15 +23,9 @@ shelly.start({}, function (err, data) {
 
  The quickest way to get started with Shelly is to run the example app that comes with it.
 
- Install Shelly:
+ Install Shelly: (see above)
 
-    $ npm install shellyjs
-
- NOTE: for direct access use:
-
-    $ npm install git+ssh://git@github.com:skool51/shellyjs.git
-
- Start the server:
+ Start the example server:
 
     $ node node_modules/shellyjs/example/app.js
     
