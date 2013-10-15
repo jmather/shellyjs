@@ -11,11 +11,15 @@ var gDefaultBoard = [
   ["", "", ""]
 ];
 
-tictactoe.url = "/tictactoe/tictactoe.html";
+
+tictactoe.config = {
+  enabled: true,
+  url: "/tictactoe/tictactoe.html",
+  minPlayers: 2,
+  maxPlayers: 2
+};
 
 tictactoe.create = function (req, res, cb) {
-  req.env.game.set("minPlayers", 2);
-  req.env.game.set("maxPlayers", 2);
 
   var state = {};
   state.gameBoard = gDefaultBoard.slice(0);

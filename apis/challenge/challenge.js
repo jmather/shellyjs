@@ -130,7 +130,7 @@ Challenge.accept = function (req, res, cb) {
   var gameName = chParts[1];
   chRemove(fromUid, req.session.uid, gameName, _w(cb, function (err, data) {
     if (err) {
-      res.add(sh.error("challenge-remove", "unable to remove challenge"), data);
+      res.add(sh.error("challenge-remove", "unable to remove challenge"), {err: err, data: data});
       return cb(err);
     }
     req.body.cmd = "game.create";     // change the command so we can forward

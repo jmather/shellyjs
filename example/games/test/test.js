@@ -7,6 +7,13 @@ var test = exports;
 test.url = "/test/test.html";
 test.enabled = false;
 
+test.config = {
+  enabled: false,
+  url: "/test/test.html",
+  minPlayers: 3,
+  maxPlayers: 4
+};
+
 test.create = function (req, cb) {
   req.env.game.state = {number: _.random(10)};
 

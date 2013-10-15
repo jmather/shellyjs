@@ -10,7 +10,12 @@ var EMPTY = -1;
 var YELLOW = 0;
 var RED = 1;
 
-connect4.url = "/connect4/connect4.html";
+connect4.config = {
+  enabled: true,
+  url: "/connect4/connect4.html",
+  minPlayers: 2,
+  maxPlayers: 2
+};
 
 connect4.create = function (req, res, cb) {
   var board = [];
@@ -29,8 +34,6 @@ connect4.create = function (req, res, cb) {
   state.winner = "";
   state.winnerSet = null;
 
-  req.env.game.set("minPlayers", 2);
-  req.env.game.set("maxPlayers", 2);
   req.env.game.set("state", state);
 
   return cb(0);

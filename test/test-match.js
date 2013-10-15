@@ -45,10 +45,7 @@ describe("module match", function () {
       st.userCall({cmd: "match.list", name: gGameName},
         function (err, res) {
           res.body.should.have.property("event", "match.list");
-          var me = _.find(res.body.data, function (uid) {
-            return uid === st.uid("user");
-          });
-          should.exist(me);
+          res.body.data.should.include(st.uid("user"));
           done();
         });
     });
@@ -75,9 +72,7 @@ describe("module match", function () {
       st.userCall({cmd: "match.list", name: "tictactoe"},
         function (err, res) {
           res.body.should.have.property("event", "match.list");
-          _.each(res.body.data, function (user) {
-            user.should.not.have.property("uid", st.uid("user"));
-          });
+          res.body.data.should.not.include(st.uid("user"));
           done();
         });
     });

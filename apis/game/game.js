@@ -46,13 +46,14 @@ function gameInit(dir, cb) {
           } catch (e) {}
           if (module) {
             shlog.info("game", "game found", entry, module.url);
-            global.games[entry] = {};
-            global.games[entry].enabled = true;
-            if (_.isBoolean(module.enabled)) {
-              global.games[entry].enabled = module.enabled;
-            }
-            if (_.isString(module.url)) {
-              global.games[entry].url = module.url;
+            global.games[entry] = {
+              enabled: true,
+              url : "",
+              minPlayers: 2,
+              maxPlayers: 2
+            };
+            if (_.isObject(module.config)) {
+              _.assign(global.games[entry], module.config)
             }
           }
           return lcb(0);
@@ -309,8 +310,9 @@ Game.leave = function (req, res, cb) {
 Game.turn = function (req, res, cb) {
   var gameData = req.env.game.getData();
 
-  if (Object.keys(gameData.players).length < gameData.minPlayers) {
-    res.add(sh.error("players-missing", "not enough players in game", {required: gameData.minPlayers, playerCount: Object.keys(gameData.players).length}));
+  var minPlayers = req.env.gameModule.config.minPlayers;
+  if (Object.keys(gameData.players).length < minPlayers) {
+    res.add(sh.error("players-missing", "not enough players in game", {required: minPlayers, playerCount: Object.keys(gameData.players).length}));
     return cb(1);
   }
   if (gameData.status === "over") {
