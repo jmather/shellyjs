@@ -302,6 +302,9 @@ Game.leave = function (req, res, cb) {
     if (req.body.game) {
       channel.sendInt("game:" + game.get("oid"), sh.event("game.user.leave", {gameId: req.body.gameId, uid: uid}));
     }
+    if (game.get("whoTurn") === uid) {
+      counter.decr(uid, "turns");
+    }
     res.add(sh.event("game.leave", req.body.gameId));
     return cb(0);
   }), {lock: true});
