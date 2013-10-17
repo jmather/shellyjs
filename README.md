@@ -65,7 +65,7 @@ example.echo = function (req, res, cb) {
 
 1. APIs are defined by files placed in the "apis" directory and in a subdirectory with the same name "apis/example/example.js".
 
-2. They are called via JSON post or websocket send:
+2. They are called via JSON post, WebSocket or TCP send:
 
 ```json
 {
@@ -85,7 +85,7 @@ example.echo = function (req, res, cb) {
 }
 ```
 
-If called via http the response is an array of JSON.stringified data, while the websocket sends each data object via an onmessage event.
+If called via http the response is an array of JSON.stringified data, while the WebSocket and TCP send each data object via an onmessage event.
     
  Test in admin:
  
