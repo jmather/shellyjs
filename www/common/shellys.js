@@ -12,7 +12,7 @@ ShellyS.prototype.connect = function (wsUrl) {
   this.ws = new WebSocket(this.wsUrl);
   var self = this;
   this.ws.onopen = function (evt) {
-    self.log("socket", "onopen", evt.srcElement.url);
+    self.log("socket", "onopen", self.wsUrl);
     $("#serverDisconnectDlg").modal("hide");
     self.onopen(evt);
     self.call({cmd: "system.connInfo"})
@@ -35,6 +35,7 @@ ShellyS.prototype.connect = function (wsUrl) {
     }
   };
   this.ws.onerror = function (evt) {
+    if (evt.code === 1001) { return; }  // browser close
     self.log("socket", "onerror", evt);
     $("#serverDisconnectDlg").modal("show");
     self.onerror(evt);
