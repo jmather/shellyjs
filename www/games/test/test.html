@@ -1,0 +1,239 @@
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+<title>Test</title>
+<%- include ../head.html %>
+<link rel="stylesheet" type="text/css" href="test.css">
+
+<script language="javascript">
+var Env = <%- EnvJson %>;
+
+Env.players = {};
+Env.gameId = "0";
+
+var pgameId = getURLParameter("gameId");
+if (pgameId !== null) {
+    Env.gameId = pgameId.toString();
+}
+
+function setPlayers(playerList, whoTurn) {
+    $(".activePlayer").remove();
+    for (playerId in playerList) {
+        var $newPlayer = $("#playerTemplate").clone();
+        if (playerId === Env.user.oid) {
+            $newPlayer.find("#playerName").text("me");
+            $newPlayer.find("#playerKick").remove();
+            $newPlayer.find("#playerStatus").remove();
+        } else {
+            $newPlayer.find("#playerName").addClass("playerName" + playerId);
+            $newPlayer.find("#playerName").text(playerList[playerId].name);
+        }
+        $newPlayer.addClass("playerId" + playerId);
+        $newPlayer.addClass("activePlayer");
+        $newPlayer.css("display", "block");
+
+        if (typeof (Env.players[playerId]) != "undefined") {
+            $newPlayer.find("#playerStatus").text(Env.players[playerId].status);
+        }
+
+        $newPlayer.find("#playerKick").click(function () {
+            var playerId = $(this).parent().attr("playerId");
+        });
+
+        $("#playerList").append($newPlayer);
+    }
+    $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
+}
+
+function setTurns(whoTurn) {
+    $(".activePlayer").find("#playerTurn").text("");
+    $(".playerId" + whoTurn).find("#playerTurn").text(" - turn");
+}
+
+function setState(game) {
+    hideAllMessages();
+    $(".gameOverDiv").css("display", "none");
+
+    $("#gameStatus").text(game.status);
+    if (game.whoTurn == Env.user.oid) {
+        $("#whoTurn").text("yours");
+        turnDipl = "yours";
+    } else if (game.whoTurn == 0) {
+        $("#whoTurn").text("no ones");
+    } else {
+        $("#whoTurn").text(game.players[game.whoTurn].name);
+    }
+
+    if (game.status == "over") {
+        showInfo("game over");
+        if (game.state.winner) {
+            var winnerName = game.players[game.state.lastId].name;
+            var winnerText = "You Lost to " + winnerName + " with " + game.state.guess;
+            if (game.state.lastId === Env.user.oid) {
+                winnerText = "You Won with " + game.state.number;
+            }
+            showGameOver(winnerText);
+            $("#gameWinner").text(winnerName);
+        }
+    } else {
+        $("#gameWinner").text("");
+    }
+
+    $("#gameId").text(game.oid.substr(0, 6) + "..");
+    Env.gameId = game.oid;
+
+    setPlayers(game.players, game.whoTurn);
+}
+
+function showGameOver(msg) {
+    $(".gameOverDiv").css("display", "block");
+    $(".gameOverDiv p").text(msg);
+}
+
+function onopen() {
+    if (Env.gameId !== "0") {
+        shellys.call({session: Env.session,
+            batch: [ {cmd: "game.enter", gameId: Env.gameId},
+                {cmd: "game.playing"},
+                {cmd: "channel.add", channel: "game:" + Env.gameId, _pt: "foo"}
+            ]});
+    }
+}
+
+function onmessage(res) {
+    uiOnMessage(res);
+    var from = "socket";
+
+    if (typeof(res.event) == "undefined") {
+        log(from, "error", "odd message: " + JSON.stringify(res));
+        return;
+    }
+    if (res.event == "heartbeat") {
+        return;
+    }
+    if (res.event == "error") {
+        showError(res.message);
+        log(from, "error", JSON.stringify(res));
+        return;
+    }
+    if (typeof(res._pt) !== "undefined") {
+        // just show the pass through data as example
+        //console.log("handler:", res.event, res._pt);
+    }
+    if (res.event == "game.enter") {
+        setState(res.data);
+        return;
+    }
+    if (res.event == "channel.user") {
+        Env.players[res.data.uid] = res.data;
+        var $playerStatus = $(".playerId" + res.data.uid).find("#playerStatus");
+        if ($playerStatus.size) {
+            $playerStatus.text(res.data.status);
+        }
+        return;
+    }
+    if (res.event === "game.turn.next") {
+        setTurns(res.data.whoTurn);
+        if (res.data.gameId != Env.gameId && res.data.whoTurn === Env.user.oid) {
+            updateMyTurns(res.data.gameId, res.data);
+        }
+    }
+    if (res.event === "game.turn") {
+        hideAllMessages();
+        var playerName = "you";
+        if (res.data.lastId !== Env.user.oid) {
+            playerName = Env.players[res.data.lastId].name;
+        }
+        showInfo(playerName + " guessed " + res.data.guess);
+        return;
+    }
+    if (res.event == "game.over"
+            || res.event == "game.reset") {
+        setState(res.data);
+        return;
+    }
+    if (res.event == "game.playing") {
+        setMyTurns(res.data);
+        return;
+    }
+    log(from, "unknown-event", JSON.stringify(res));
+}
+
+$(init);
+function init() {
+    $("#shSystem").text("Example");
+    $("#shSubTitle").text("Test");
+
+    window.addEventListener("load", function () {
+        new FastClick(document.body);
+    }, false);
+
+    $("#gameReset").click(function () {
+        sendCmd("game.reset", {gameId: Env.gameId});
+    });
+
+    $("#gameGuessBtn").click(function () {
+        var guess = $("#gameGuess").val();
+        sendCmd("game.turn", {gameId: Env.gameId, guess: guess});
+    });
+
+    commInit();
+    shellys.log = log;
+    shellys.onopen = onopen;
+    shellys.onmessage = onmessage;
+    shellys.connect(Env.socketUrl);
+}
+</script>
+</head>
+<body>
+<%- include ../header.html %>
+<div class="container">
+
+    <div class="row">
+        <div class="gameBoardDiv gameBoxDiv span4 offset2" style="width: 293px;">
+            <div class="gameOverDiv"><p>You XXXX</p></div>
+            <div class="gameBoxHeaderDiv">Game Board</div>
+            <input id="gameGuess" type="text"/>
+            <button id="gameGuessBtn">guess</button>
+        </div>
+        <div class="gamePlayersDiv gameBoxDiv span4">
+            <div class="gameBoxHeaderDiv" style="">Game Players</div>
+            <div id="playerList" class="gameBoxInnerDiv" style="margin-bottom: 10px;">
+                <div id="playerTemplate" style="display:none;">
+                    <span id="playerName">player-0</span> <span id="playerStatus">offline</span> </span> <span
+                        id="playerTurn"></span>
+                </div>
+            </div>
+            <%- include ../errorbox.html %>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="gameInfoDiv gameBoxDiv span4 offset2" style="width: 293px;">
+            <div class="gameBoxHeaderDiv" style="">Game Info</div>
+            <div id="gameInfoData" class="gameBoxInnerDiv">
+                <div>game id: <span id="gameId"></span></div>
+                <div>status: <span id="gameStatus"></span></div>
+                <div>whose turn: <span id="whoTurn"></span></div>
+                <div>winner: <span id="gameWinner"></span></div>
+                <div>playing: <span id="gamePlaying"></span></div>
+                <button id="gameReset" class="btn" style="float:right">reset</button>
+            </div>
+        </div>
+        <div class="otherTurnsDiv gameBoxDiv span4">
+            <div class="gameBoxHeaderDiv">Other Turns</div>
+            <div id="gameMyTurnList" class="gameBoxInnerDiv" style="overflow: auto" readonly>
+                <div id="gameTemplate" style="display:none;">
+                    <span id="gameName">game-0</span>
+                    <span id="gameTurn"></span>
+                    <button class="btn" style="float:right;" id="myGameRemove">remove</button>
+                    <button class="btn" style="float:right;" id="myGameJoin">play</button>
+                    <div style="clear:both"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<%- include ../footer.html %></body>
+</html>

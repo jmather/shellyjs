@@ -1,0 +1,51 @@
+button {
+    font-size: 8pt;
+}
+
+.gamePlayersDiv,
+.gameInfoDiv {
+    width: 200px;
+}
+
+.otherTurnsDiv {
+    width: 291px;
+}
+
+#gameMyTurnList {
+    overflow: auto;
+    height: 150px;
+}
+
+#gameInfoData {
+    overflow: auto;
+    height: 150px;
+}
+
+.gameOverDiv
+{
+    position: absolute;
+    height:50px;
+    width: 220px;
+    margin:75px 30px;
+    background-color:#ffffff;
+    border:1px solid black;
+    opacity:0.6;
+    filter:alpha(opacity=60); /* For IE8 and earlier */
+    display: none;
+    line-height: 50px;
+    text-align: center;
+}
+
+.gameOverDiv p
+{
+    font-weight:bold;
+    color:#000000;
+}
+
+#gameGuess {
+    margin: 10px;
+    width: 40px;
+    height: 26px;
+    font-size: 18px;
+    line-height:26px;
+}
