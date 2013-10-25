@@ -28,32 +28,7 @@
   </head>
 
   <body data-spy="scroll" data-target=".bs-docs-sidebar">
-
-  <!-- Navbar
-  ================================================== -->
-  <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-          <div class="container">
-              <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-              <a class="brand" href="./index.html">Shelly</a>
-              <div class="nav-collapse collapse">
-                  <ul class="nav">
-                      <li class="">
-                          <a href="./index.html">Home</a>
-                      </li>
-                      <li class="">
-                          <a href="./learn.html">Tutorials</a>
-                      </li>
-                  </ul>
-              </div>
-          </div>
-      </div>
-  </div>
-
+  <%- include nav.html %>
 
   <!-- Subhead
   ================================================== -->
@@ -73,13 +48,14 @@
               <p>Install shelly:
                 <pre class="prettyprint lang-bash">$ npm install shellyjs</pre>
               </p>
-              <p>NOTE: For now the repo is private, use:
+              <p>Or Install Tip from Git:
                 <pre class="prettyprint lang-bash" style="font-size: 8px">$ npm install git+ssh://git@github.com:skool51/shellyjs.git</pre>
               </p>
               <p><a href="https://github.com/skool51/shellyjs">GitHub Repo</a></p>
           </div>
             <div class="span4">
                 <h2>Quick Start</h2>
+                <p>Install Steps.</p>
                 <p>Run the example app:
                   <pre class="prettyprint lang-bash" style="font-size: 10px">$ node node_modules/shellyjs/example/app.js</pre>
                 </p>

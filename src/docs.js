@@ -14,7 +14,7 @@ global.CDEF = function (name, value) {
 
 global.C = {};
 global.CDEF("BASE_DIR", path.dirname(__dirname));
-global.CDEF("DOCS_PORT", 8080);
+global.CDEF("DOCS_PORT", 80);
 
 global.CDEF("LOG_CONSOLE_OPTS", { level: "info", colorize: true, timestamp: false });
 global.CDEF("LOG_FILE_OPTS", { level: "info", json: false, timestamp: true, filename: global.C.BASE_DIR + "/logs/shelly.log" });
