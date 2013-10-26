@@ -85,8 +85,10 @@ shelly.start({
               <ol>
                   <li>Passed on the command line via "key"="value"</li>
                   <li>Passed as key:values in the first object parameter the shellyjs.start function </li>
-                  <li>Set using global.CDEF function in a configuration file (keys.js, os.hostname() + ".js", main.js</li>
+                  <li>Set using global.CDEF() or global.CFDEF() functions in a configuration file (keys.js, os.hostname() + ".js", main.js</li>
               </ol>
+              <p><b>global.CDEF("KEY", &ltVALUE&gt)</b>: Define if not yet defined.  Value can be any valid variable type.</p>
+              <p><b>global.CFDEF("KEY", &ltVALUE&gt)</b>: Force the define even if defined already.</p>
 
               <p>To keep things segmented well you can chain your "main.js" configuration file to the default one like:</p>
 
@@ -106,22 +108,31 @@ require(global.C.BASE_DIR + "/config/main.js");
                   </thead>
                   <tbody>
 
-                  <tr><td>ADMIN_PORT</td><td>5100</td><td></td>
-                  <tr><td>ADMIN_URL</td><td>http:// + DNS_NAME + : + ADMIN_PORT</td><td></td>
-                  <tr><td>APP_API_DIR</td><td>BASE_DIR + /example/apis</td><td></td>
+                  <tr><td>ADMIN_PORT</td><td>5100</td><td>port used by admin web server</td>
+                  <tr><td>ADMIN_URL</td><td>http:// + DNS_NAME + : + ADMIN_PORT</td><td>URL for clients to access admin pages</td>
+                  <tr><td>APP_API_DIR</td><td>BASE_DIR + /example/apis</td><td>directory where developer API modules are located.</td>
                   <tr><td>BASE_DIR</td><td>~/shellyjs</td><td>value is always install directory and cannot be changed</td>
-                  <tr><td>CLUSTER</td><td>{
-                      "socket": {src: "&ltprocess file&gt", num: &ltnumber to start&gt, args: [&ltarray of args to start with&gt],
-                      ...
-                      }</td><td>workers created at startup (socket, reset, mailer, ...)</td>
+                  <tr><td>CLUSTER</td><td colspan="2">
+<pre class="prettyprint">
+{
+    "socket": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_SOCKET, args: ["websocket"]},
+    "tcp": {src: "/src/socket.js", num: global.C.CLUSTER_NUM_TCP, args: ["tcp"]},
+    "rest": {src: "/src/rest.js", num: global.C.CLUSTER_NUM_REST, args: null},
+    "admin": {src: "/src/admin.js", num: global.C.CLUSTER_NUM_ADMIN, args: null},
+    "games": {src: "/src/games.js", num: global.C.CLUSTER_NUM_GAMES, args: null},
+    "mailer": {src: "/lib/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
+}
+</pre>
+Info:  These are the workers started and maintained by the master worker.
+                      </td></tr>
                   <tr><td>CLUSTER_AUTO_GAME_MATCHER</td><td>true</td><td>automatically create a matcher process for any game</td>
                   <tr><td>CLUSTER_NUM_ADMIN</td><td>1</td><td>number of admin web workers</td>
                   <tr><td>CLUSTER_NUM_GAMES</td><td>1</td><td>number of example game web workers</td>
                   <tr><td>CLUSTER_NUM_MAILER</td><td>1</td><td>number of send mailer workers</td>
                   <tr><td>CLUSTER_NUM_MATCHER</td><td>1</td><td>number of player matcher workers per game</td>
-                  <tr><td>CLUSTER_NUM_REST</td><td>1</td><td>number of API rest workers</td>
-                  <tr><td>CLUSTER_NUM_SOCKET</td><td>1</td><td>number of API websocket workers</td>
-                  <tr><td>CLUSTER_NUM_TCP</td><td>1</td><td>number of API TCP workers</td>
+                  <tr><td>CLUSTER_NUM_REST</td><td>1</td><td>number of REST API workers</td>
+                  <tr><td>CLUSTER_NUM_SOCKET</td><td>1</td><td>number of WebSocket API workers</td>
+                  <tr><td>CLUSTER_NUM_TCP</td><td>1</td><td>number of TCP API workers</td>
                   <tr><td>CLUSTER_URL</td><td>tcp://localhost:5151</td><td>Internal server access URL for cluster communication</td>
                   <tr><td>CONFIG_DIR</td><td>BASE_DIR + /config</td><td>location of config files</td>
                   <tr><td>DB_LOCK_RETRIES</td><td>5</td><td>number of retries if a lock fails</td>
@@ -145,14 +156,18 @@ require(global.C.BASE_DIR + "/config/main.js");
                   <tr><td>GAMES_PORT</td><td>5102</td><td>port for the example game web server</td>
                   <tr><td>GAMES_URL</td><td>http:// + DNS_NAME + : + GAMES_PORT</td><td>url for clients to access example games</td>
                   <tr><td>HEART_BEAT</td><td>30000</td><td>keep alive message interval for WebSocket and TCP interfaces</td>
-                  <tr><td>LOGIN_PRIVATE_KEY</td><td>&ltuuid string&gt</td><td>uuid for login password hash</td>
+                  <tr><td>LOGIN_PRIVATE_KEY</td><td>"&ltuuid string&gt"</td><td>uuid for login password hash</td>
                   <tr><td>LOG_CONSOLE_OPTS</td><td>{}</td><td>winston options for console logging</td>
                   <tr><td>LOG_FILE_OPTS</td><td>{}</td><td>winston optinos for file logging</td>
-                  <tr><td>LOG_HOOK</td><td>function (winston) {
-                      winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);
-                      winston.add(winston.transports.File, global.C.LOG_FILE_OPTS);
-                      }</td><td>hook called after winston init to set any options</td>
-                  <tr><td>LOG_MODULES</td><td>{"&lttype&gt":1}</td><td>types of messages to log (1 on, 0 off) - first param of shlog.info("&lttype&gr",...)</td>
+                  <tr><td>LOG_HOOK</td><td colspan="2">
+<pre class="prettyprint">
+function (winston) {
+  winston.add(winston.transports.Console, global.C.LOG_CONSOLE_OPTS);
+  winston.add(winston.transports.File, global.C.LOG_FILE_OPTS);
+}
+</pre>
+Info: hook called after winston init to set any options</td></tr>
+                  <tr><td>LOG_MODULES</td><td>{"&lttype&gt":1, ...}</td><td>types of messages to log (1 on, 0 off) - first param of shlog.info("&lttype&gt",...)</td>
                   <tr><td>MATCHER_INTERVAL</td><td>3000</td><td>milliseconds between match queue checks</td>
                   <tr><td>MODULE_CACHE</td><td>false</td><td>true if API modules are cached, false if they are reloaded each call (used for dev)</td>
                   <tr><td>REG_ALLOW_ANONYMOUS</td><td>true</td><td>should reg.anonymous be enabled or not</td>
@@ -160,7 +175,7 @@ require(global.C.BASE_DIR + "/config/main.js");
                   <tr><td>REST_PORT</td><td>5101</td><td>port for rest server</td>
                   <tr><td>REST_URL</td><td>http:// + DNS_NAME + : + REST_PORT + /api</td><td>url for clients to access rest server</td>
                   <tr><td>SERVER_TAG_FN</td><td>~/shellyjs/example/config/server.json</td><td>location of servers uuid - created on first run</td>
-                  <tr><td>SESSION_PRIVATE_KEY</td><td>&ltuuid string&gt</td><td>uuid for users session hash</td>
+                  <tr><td>SESSION_PRIVATE_KEY</td><td>"&ltuuid string&gt"</td><td>uuid for users session hash</td>
                   <tr><td>SESSION_TIMEOUT</td><td>0</td><td>seconds session should be valid - 0 is infinit</td>
                   <tr><td>SOCKET_PORT</td><td>5110</td><td>port used for WebSocket server</td>
                   <tr><td>SOCKET_URL</td><td>ws:// + DNS_NAME + : + SOCKET_PORT</td><td>url for clients to access WebSocket server</td>
