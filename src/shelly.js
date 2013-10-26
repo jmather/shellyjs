@@ -34,9 +34,6 @@ var gConfig = {};
 function initConfig(config) {
   gConfig = config;
 
-  // set any configs passed into constructor
-  _.assign(global.C, config);
-
   // set any configs passed in on command line, force set with CFDEF
   var i = 0;
   for (i = 2; i < process.argv.length; i += 1) {
@@ -48,6 +45,10 @@ function initConfig(config) {
       global.CFDEF(argParts[0], argParts[1]);
     }
   }
+
+  // set any configs passed into constructor
+  _.assign(global.C, config);
+
   global.CDEF("CONFIG_DIR", global.C.BASE_DIR + "/config");
 
   // load configs with private keys
@@ -140,6 +141,7 @@ shelly.start = function (config, cb) {
       shlog.system("shelly", "server:", global.server);
       shlog.system("shelly", "configBase:", global.C.CONFIG_DIR);
       shlog.info("shelly", "config:", sh.secure(global.C));
+      sh.configDoc(global.C);
       _.each(global.C.CLUSTER, function (info, name) {
         var i = 0;
         for (i = 0; i < info.num; i += 1) {
