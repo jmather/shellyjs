@@ -1,5 +1,5 @@
-Shelly
-======
+ShellyJS
+========
 
   API server via HTTP, WebSockets, and TCP
 
