@@ -113,34 +113,9 @@
                 </ul>
             </div>
         </div>
-
-        <footer>
-            <p>Skool51 2013</p>
-        </footer>
-
     </div> <!-- /container -->
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/common/google-code-prettify/prettify.js"></script>
-    <script src="/common/bootstrap/js/jquery.js"></script>
-    <script src="/common/bootstrap/js/bootstrap.js"></script>
-<script>
-    $(function(){
-    var $window = $(window)
-
-    // side bar
-    setTimeout(function () {
-    $('.bs-docs-sidenav').affix({
-    offset: {
-    top: function () { return $window.width() <= 980 ? 290 : 210 }
-    , bottom: 270
-    }
-    })
-    }, 100)
-    });
-</script>
+  <%- include footer.html %>
 
   </body>
 </html>

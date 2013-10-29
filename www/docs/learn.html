@@ -395,65 +395,23 @@ global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1", password:"foo"});
 
   </div>
 
+  <%- include footer.html %>
+  <script>
+      $(function(){
+          var $window = $(window)
+          prettyPrint();
 
-    <!-- Footer
-    ================================================== -->
-    <footer class="footer">
-      <div class="container">
-        <p>Designed and built with all the love in the world by <a href="http://twitter.com/mdo" target="_blank">@mdo</a> and <a href="http://twitter.com/fat" target="_blank">@fat</a>.</p>
-        <p>Code licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License v2.0</a>, documentation under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
-        <p><a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
-        <ul class="footer-links">
-          <li><a href="http://blog.getbootstrap.com">Blog</a></li>
-          <li class="muted">&middot;</li>
-          <li><a href="https://github.com/twbs/bootstrap/issues?state=open">Issues</a></li>
-          <li class="muted">&middot;</li>
-          <li><a href="https://github.com/twbs/bootstrap/releases">Changelog</a></li>
-        </ul>
-      </div>
-    </footer>
-
-
-
-  <!-- Le javascript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <script src="/common/google-code-prettify/prettify.js"></script>
-  <script src="/common/bootstrap/js/jquery.js"></script>
-  <script src="/common/bootstrap/js/bootstrap.js"></script>
-
-<script>
-    $(function(){
-    var $window = $(window)
-    prettyPrint();
-
-    // side bar
-    setTimeout(function () {
-    $('.bs-docs-sidenav').affix({
-    offset: {
-    top: function () { return $window.width() <= 980 ? 290 : 210 }
-    , bottom: 270
-    }
-    })
-    }, 100)
-    });
-</script>
-
-    <!-- Analytics
-    ================================================== -->
-    <script>
-      var _gauges = _gauges || [];
-      (function() {
-        var t   = document.createElement('script');
-        t.type  = 'text/javascript';
-        t.async = true;
-        t.id    = 'gauges-tracker';
-        t.setAttribute('data-site-id', '4f0dc9fef5a1f55508000013');
-        t.src = '//secure.gaug.es/track.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(t, s);
-      })();
-    </script>
+          // side bar
+          setTimeout(function () {
+              $('.bs-docs-sidenav').affix({
+                  offset: {
+                      top: function () { return $window.width() <= 980 ? 290 : 210 }
+                      , bottom: 270
+                  }
+              })
+          }, 100)
+      });
+  </script>
 
   </body>
 </html>

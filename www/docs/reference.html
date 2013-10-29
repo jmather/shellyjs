@@ -29,11 +29,15 @@
           pre {
               font-size: 10px;
           }
+          .modName {
+              color: grey;
+              font-size: 12px;
+          }
       </style>
   </head>
 
-  <body data-spy="scroll" data-target=".bs-docs-sidebar">
-  <%- include nav.html %>
+<body data-spy="scroll" data-target=".bs-docs-sidebar">
+<%- include nav.html %>
 
 <!-- Subhead
 ================================================== -->
@@ -51,12 +55,12 @@
     <div class="row">
       <div class="span3 bs-docs-sidebar">
         <ul class="nav nav-list bs-docs-sidenav">
-          <li><a href="#overview"><i class="icon-chevron-right"></i>Configuration</a></li>
-          <li><a href="#createApi"><i class="icon-chevron-right"></i>API Format</a></li>
-          <li><a href="#testApi"><i class="icon-chevron-right"></i>Request</a></li>
-          <li><a href="#addFunction"><i class="icon-chevron-right"></i>Response</a></li>
-          <li><a href="#runCluster"><i class="icon-chevron-right"></i>ShDispatch</a></li>
-          <li><a href="#useRedis"><i class="icon-chevron-right"></i>ShLoader</a></li>
+          <li><a href="#configuration"><i class="icon-chevron-right"></i>Configuration</a></li>
+          <li><a href="#apiModuleFormat"><i class="icon-chevron-right"></i>API Module Format</a></li>
+          <li><a href="#requestObject"><i class="icon-chevron-right"></i>Request</a></li>
+          <li><a href="#responseObject"><i class="icon-chevron-right"></i>Response</a></li>
+          <li><a href="#shDispatchModule"><i class="icon-chevron-right"></i>ShDispatch</a></li>
+          <li><a href="#shLoaderModule"><i class="icon-chevron-right"></i>ShLoader</a></li>
         </ul>
       </div>
       <div class="span9">
@@ -64,7 +68,7 @@
 
           <!-- Overview
           ================================================== -->
-          <section id="overview">
+          <section id="configuration">
               <div class="page-header">
                   <h1>Configuration</h1>
               </div>
@@ -87,8 +91,10 @@ shelly.start({
                   <li>Passed as key:values in the first object parameter the shellyjs.start function </li>
                   <li>Set using global.CDEF() or global.CFDEF() functions in a configuration file (keys.js, os.hostname() + ".js", main.js</li>
               </ol>
-              <p><b>global.CDEF("KEY", &ltVALUE&gt)</b>: Define if not yet defined.  Value can be any valid variable type.</p>
-              <p><b>global.CFDEF("KEY", &ltVALUE&gt)</b>: Force the define even if defined already.</p>
+              <div style="margin-left: 100px;">
+                  <p><b>global.CDEF("KEY", &ltVALUE&gt)</b>: Define if not yet defined.  Value can be any valid variable type.</p>
+                  <p><b>global.CFDEF("KEY", &ltVALUE&gt)</b>: Force the define even if defined already.</p>
+              </div>
 
               <p>To keep things segmented well you can chain your "main.js" configuration file to the default one like:</p>
 
@@ -123,7 +129,7 @@ require(global.C.BASE_DIR + "/config/main.js");
     "mailer": {src: "/lib/shmailer.js", num: global.C.CLUSTER_NUM_MAILER, args: null}
 }
 </pre>
-Info:  These are the workers started and maintained by the master worker.
+Info:  These are the workers started and maintained by the master.
                       </td></tr>
                   <tr><td>CLUSTER_AUTO_GAME_MATCHER</td><td>true</td><td>automatically create a matcher process for any game</td>
                   <tr><td>CLUSTER_NUM_ADMIN</td><td>1</td><td>number of admin web workers</td>
@@ -185,99 +191,41 @@ Info: hook called after winston init to set any options</td></tr>
                   </tbody>
               </table>
 
-              <p>There are two classes of APIs - Core and App.  The API definitions and capabilities are identical.  The
-                 purpose of the segmentation is mostly to facilitate code separation for upgrades.
-              </p>
-              <h4>Core APIs</h4>
-              <p>These contain basic functionality such as registration, counters, basic game play, and others.  They
-                  ship with Shelly and are located in:<p>
-              <div class="alert alert-info">
-                  ~/node_modules/shellyjs/apis/
-              </div>
-              <p>They can be viewed in the admin via the "Core APIs" menu:
-                  <a href="http://localhost:5100/core.html">http://localhost:5100/core.html</a>
-              </p>
-              <h4>App APIs</h4>
-              <p>These are the developer defined APIs and are located in the <strong>APP_API_DIR</strong> config setting<p>
-<pre class="prettyprint linenums">
-shelly.start({
-  APP_API_DIR: __dirname + "/apis",
-});
-</pre>
-              <p>They can be viewed in the admin via the "App APIs" menu:
-                  <a href="http://localhost:5100/core.html?api=api.app">http://localhost:5100/core.html?api=api.app</a>
-              </p>
-              <div class="alert alert-info">
-                  NOTE: <strong>APP_API_DIR</strong> defaults to the ~/node_modules/shellyjs/example/apis directory.
-              </div>
-
-              <h4>App Definitions</h4>
-              Shelly looks for any files in the APP_API_DIR with the flowing format:
-              <div class="alert alert-info">
-                  ~/apis/&ltAPI name&gt/&ltAPI name&gt.js
-              </div>
-
           </section>
 
 
 
-        <!-- Create API
+        <!-- API Module Format
         ================================================== -->
-        <section id="createApi">
+        <section id="apiModuleFormat">
             <div class="page-header">
-                <h1>Create an API <small></small></h1>
+                <h1>API Module Format</h1>
             </div>
-            <h3>App Setup</h3>
-            <h4>Follow the quick start to make sure Shelly is installed property</h4>
-            <p><a href="/docs/index.html">Quick Start</a></p>
-            <div class="alert alert-info">
-                NOTE: By default Shelly will use a developer data store (sqlite).  This is intended for ease of setup and
-                should be changed for any production environment.
+            <h3>Overview</h3>
+            <h4>Location</h4>
+            <p>The API modules are created in directories under APP_API_DIR directory set in the configuration.  The directory and file
+                names are important as they are used to define the calling signature of the api.</p>
+            <p>If you wanted to call a function "example.hello" you would create the file "~/apis/example/example.js".
+            Assuming the APP_API_DIR is set to "~/apis".  This API will then show up under the "App APIs" tab in the admin
+            and be available via REST, WebSocket, and TCP interfaces.</p>
+            <h4>Module Structure</h4>
+            <p><b><span class="modName">&ltAPI_MODULE&gt</span></span>.desc:</b> type: string, simple description of what API does (displayed in admin)</p>
+            <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions:</b> type: object, list of commands that the API supports</p>
+            <div style="margin-left: 24px;">
+                <p>Each function is a defined as a member of the object with the value being an object with the list of options.</p>
+                <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions.<span class="modName">&ltCOMMAND&gt</span>.desc:</b> type: string, short discription of what this command does</p>
+                <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions.<span class="modName">&ltCOMMAND&gt</span>.params:</b> type: object, members are the parameters required by the command</p>
+                <div style="margin-left: 50px;">
+                    <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions.<span class="modName">&ltCOMMAND&gt</span>.params.<span class="modName">&ltPARAM_NAME&gt</span>:</b> type: object, member name is the name of parameter</p>
+                    <div style="margin-left: 75px;">
+                        <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions.<span class="modName">&ltCOMMAND&gt</span>.params.<span class="modName">&ltPARAM_NAME&gt</span>.dtype:</b> type: sting, javascript type for parameter
+                            (string, object, array, number, boolean)</p>
+                    </div>
+                </div>
+                <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions.<span class="modName">&ltCOMMAND&gt</span>.security:</b> type: array, list of strings that are the roles required to access this command</p>
+                <p><b><span class="modName">&ltAPI_MODULE&gt</span>.functions.<span class="modName">&ltCOMMAND&gt</span>.noSession:</b> type: boolean, true if no session is required to access this command (defaults  to false)</p>
             </div>
-            <h4>Create your own Shelly App:</h4>
-            <pre class="prettyprint lang-bash">$ cp ~/node_modules/shellyjs/example/* .</pre>
-            <p>This will create the flowing</p>
-            <pre>
-                ./app.js - mail application file
-                ./apis - directory where to place your APIs
-                ./apis/example/example.js - example api to be used as a template
-                ./games - directoy used by the Games Core API</pre>
-            <h4>Run your own app:</h4>
-            <pre class="prettyprint lang-bash">$ node app.js</pre>
-
-        </section>
-
-        <!-- Test API
-        ================================================== -->
-          <section id="testApi">
-              <div class="page-header">
-                  <h1>Test the API</h1>
-              </div>
-              <h4>Test your setup:</h4>
-              <ol>
-                  <li>
-                      Lauch the admin test page: <a href="http://localhost:5100/core.html?api=api.app">http://localhost:5100/core.html?api=api.app</a>
-                  </li>
-                  <li>
-                      Click the "example" API in the accordian to the left, then click the "hello" function below it.
-                  </li>
-                  <li>
-                      To invoke the function click the "call function" button.
-                  </li>
-                  <li>
-                      Try the "echo" function and alert the calling JSON by filling in the "param1" data member.
-                  </li>
-              </ol>
-          </section>
-
-          <section id="addFunction">
-              <div class="page-header">
-                  <h1>Add a function</h1>
-              </div>
-              <h4>Add a function description:</h4>
-              <p>To allow for parameter, security and easy testing each API function has a description member in the
-                  &ltmodule&gt.functions object</p>
-              <p>Edit the file ~/apis/example/example.js</p>
+            <h3>Example</h3>
 <pre class="prettyprint linenums">
 var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 
@@ -285,202 +233,55 @@ var example = exports;
 
 example.desc = "example api";
 example.functions = {
-  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []},
-  hello: {desc: "my first api function", params: {param1: {dtype: "string"}}, security: []}
-};
-
-example.echo = function (req, res, cb) {
-  res.add(sh.event("example.echo", req.body.param1));
-  return cb(0);
-};
-</pre>
-              <p>In the above code sample line 8 has been added to define the "hello" function in the "example" api</p>
-
-              <h4>Add a function definition:</h4>
-              <p>Now just create the function to be called with the fixed signature of function(req, res, cb)</p>
-              <p>Edit the file ~/apis/example/example.js</p>
-<pre class="prettyprint linenums">
-var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
-
-var example = exports;
-
-example.desc = "example api";
-example.functions = {
-  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []},
-  hello: {desc: "my first api function", params: {myName: {dtype: "string"}}, security: []}
-};
-
-example.echo = function (req, res, cb) {
-  res.add(sh.event("example.echo", req.body.param1));
-  return cb(0);
+  hello: {desc: "simple hello world api example", params: {}, security: []},
+  echo: {desc: "one parameter api example", params: {param1: {dtype: "string"}}, security: []}
 };
 
 example.hello = function (req, res, cb) {
-  res.add(sh.event("example.hello", "hello " + req.body.myName + "!"));
+  res.add(sh.event("example.hello", "world"));
+  return cb(0);
+};
+
+example.echo = function (req, res, cb) {
+  res.add(sh.event("example.echo", req.body.param1));
   return cb(0);
 };
 </pre>
-              <p>In the above code sample lines 16-19 define the new function "hello" in the "example" API</p>
-              <p>This function is now callable from the HTTP, WebSocket, and TCP interface.</p>
-              <p>The <strong>req</strong> and <strong>res</strong> objects are similar to the express <strong>req</strong>
-                 and <strong>res</strong> objects, but work for WebSockets and TCP also.</p>
-              <p>You can add multiple response objects.  Moreover you can call <strong>res.add()</strong> multiple times in a single
-              call.  The HTTP interface returns an array objects, while the WebSocket and TCP interface return each individual object.</p>
-              <p>The <strong>sh.event</strong> function on line 12 and line 17 is just a convenience function that creates a standard
-              envelope around each response.  It creates an object like:</p>
-<pre class="prettyprint linenums">
-{
-  "event": "example.echo",
-  "ts": 1378189438607,
-  "data": "foo"
-}
-</pre>
+            <h4>Line By Line:</h4>
+            <p>Line 1: Not required but has helper functions like sh.event and sh.error provide a consistent envelope for responses.</p>
+            <p>Line 3: All members of "example" are exported.</p>
+            <p>Line 5: Set the general descriptions for the module.</p>
+            <p>Line 6-9: Function definitions that are to be used in the API as commands</p>
+            <p>Line 7: Simple "hello" command that takes no parameters</p>
+            <p>line 8: "echo" command that takes one parameter "param1" that must be a string</p>
+            <p>Line 11: Implementation of the "hello" function that is passed the request (req), response (res), and callback (cb) arguments</p>
+            <p>Line 12: Add an message to the response stream by calling "res.add()".  Any object can be added and will be sent via JSON.stringify.
+            These examples use the "sh.event()" function to provide a consistent envelope.</p>
+            <p>Line 13: Make the callback with "0" for no errors</p>
+            <p>Line 16-19: Implementation of the "echo" function</p>
+            <p>Line 17: Adds to the message to the response object by accessing the "param1" from the "request.body"</p>
 
-          </section>
+        </section>
 
-
-
-          <!-- Run Cluster
-          ================================================== -->
-          <section id="runCluster">
+          <section id="requestObject">
               <div class="page-header">
-                  <h1>Run a two server cluster</h1>
+                  <h1>Request Object</h1>
               </div>
-
-              <h3>Cluster configuration</h3>
-              <h4>Per Server Workers</h4>
-              <p>Each server in a cluster can run multiple workers for the HTTP, WebSocket, TCP, Admin, Game, Mailer, and Matcher processes.
-                  These are configured per server in with the <strong>CLUSTER_NUM_*</strong>settings</p>
-<pre class="prettyprint linenums">
-global.CDEF("CLUSTER_NUM_SOCKET", 2);
-global.CDEF("CLUSTER_NUM_TCP", 1);
-global.CDEF("CLUSTER_NUM_REST", 1);
-global.CDEF("CLUSTER_NUM_ADMIN", 1);
-global.CDEF("CLUSTER_NUM_GAMES", 1);
-global.CDEF("CLUSTER_NUM_MATCHER", 1);
-global.CDEF("CLUSTER_NUM_MAILER", 1);
-</pre>
-              <p>In the above example the server will spawn 2 WebSocket workers and one each for the HTTP, TCP, Admin,
-                  Games, Matcher, and Mailer worker types.</p>
-              <h4>Multi-server - developer</h4>
-              <p>Servers in a cluster register themselves on startup and can be added and removed dynamically.</p>
-              <p>To demonstrate clustering in the development environment (sqlite) you can launch a second server
-                  on the same machine by creating a different config file so the listening ports do not conflict.</p>
-              <p>Both servers must have access to he same sqlite database file.</p>
-              <p>The following example can be found in the ~/node_modules/shelly/examples/config2 directory:</p>
-<pre class="prettyprint linenums lang-js">
-global.CDEF("ADMIN_PORT", 6100);
-global.CDEF("REST_PORT", 6101);
-global.CDEF("GAMES_PORT", 6102);
-global.CDEF("SOCKET_PORT", 6110);
-global.CDEF("TCP_PORT", 6111);
-
-global.CDEF("CLUSTER_URL", "tcp://localhost:6151");
-// don't run a mail queue processor on this server
-global.CDEF("CLUSTER_NUM_MAILERS", 0);
-
-// pick up all the other default configs
-require(global.C.BASE_DIR + "/config/main.js");
-</pre>
-              <h3>Start the first server</h3>
-              <p>This assumes you have already copied the examples directory as done in the <a href="#createApi">Create API</a> section</p>
-<pre class="prettyprint linenums lang-bash">
-$ node app.js
-</pre>
-              <h3>Start the second server</h3>
-              <p>The default first argument is a valid config directory with a main.js in it.</p>
-<pre class="prettyprint linenums lang-bash">
-$ node app.js CONFIG_DIR=./config2
-</pre>
-
-              <h3>Check the servers</h3>
-              <ol>
-                  <li>Login to the first server: http://localhost:5102/</li>
-                  <li>Login to the second server: http://localhost:6102/</li>
-                  <li>Go to the admin http://localhost:5100</li>
-                  <li>In the admin go to the "Core APIs" and click on the "cluster" API and the "servers" function</li>
-                  <li>Click the "call function button" and you should see two servers listed.</li>
-              </ol>
-<pre class="prettyprint linenums lang-bash">
-[
-  {
-    "event": "cluster.servers",
-    "ts": 1378193108072,
-    "data": {
-      "5c3817f0-d7a2-11e2-964f-d147e3ee063a": {
-        "clusterUrl": "tcp://localhost:6151",
-        "socketUrl": "ws://localhost:6110",
-        "oid": "5c3817f0-d7a2-11e2-964f-d147e3ee063a",
-        "created": 1378193106281,
-        "modified": 1378193106282
-      },
-      "a81f9560-dac9-11e2-8aa4-7b114762795c": {
-        "clusterUrl": "tcp://localhost:5151",
-        "socketUrl": "ws://localhost:5110",
-        "oid": "a81f9560-dac9-11e2-8aa4-7b114762795c",
-        "created": 1378109876920,
-        "modified": 1378109876921
-      }
-    }
-  }
-]
-</pre>
-
-              <h4>Multi-server - two machines</h4>
-              <p>
-                  To run a cluster on separate machines the Redis data store wrapper must be used by setting the
-                  <strong>DB_WRAPPER</strong> and <strong>DB_OPTIONS</strong> in the "example/config/main.js".  For more details
-                  see <a href="#useRedis">Use Redis</a>
-              </p>
-<pre class="prettyprint linenums lang-js">
-global.CDEF("DB_WRAPPER", global.C.BASE_DIR + "/lib/db/shredis.js");
-global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1"});
-</pre>
-              <p>Then just install and start a server on each machine.</p>
-<pre class="prettyprint linenums">
-$ node app.js
-</pre>
-
           </section>
-
-
-          <!-- Run Cluster
-          ================================================== -->
-          <section id="useRedis">
+          <section id="responseObject">
               <div class="page-header">
-                  <h1>Use Redis Datastore</h1>
+                  <h1>Response Object</h1>
               </div>
-
-              <h4>Install Redis</h4>
-              <p>Use the setup for your platform at Redis.io <a href="http://redis.io">Redis Install</a></p>
-              <h4>Change Configuration</h4>
-              <p>Add the following settings to the application configuration file in example/config/main.js</p>
-<pre class="prettyprint linenums lang-js">
-global.CDEF("DB_WRAPPER", global.C.BASE_DIR + "/lib/db/shredis.js");
-global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1"});
-</pre>
-              <p>By default Redis installs with no password required.  Use the <strong>DB_OPTIONS</strong> to pass in any
-              Redis specific settings.  Shelly uses the Redis client.  Details for this client can be found at the
-              <a href="https://github.com/mranney/node_redis">Redis client GitHub repo</a>.</p>
-
-              <div class="alert alert-info">
-                  NOTE: If <strong>host</strong> and <strong>port</strong> are set in the <strong>DB_OPTIONS</strong> configuration,
-                  the values are passed as the first and second parameters to redis.createClient(host, port. options).  Also redis.auth is called
-                  if a <strong>password</strong> member is set.
+          </section>
+          <section id="shDispatchModule">
+              <div class="page-header">
+                  <h1>ShDispatch Module</h1>
               </div>
-
-              <p>If your Redis server has a password required your configuration will look something like:</p>
-<pre class="prettyprint linenums lang-js">
-global.CDEF("DB_WRAPPER", global.C.BASE_DIR + "/lib/db/shredis.js");
-global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1", password:"foo"});
-</pre>
-
-              <h4>Check the access</h4>
-              <ol>
-                  <li>Go to the admin http://localhost:5100</li>
-                  <li>In the admin go to the "System" page</li>
-                  <li>Verify the DB_WRAPPER and DB_OPTIONS are set correctly</li>
-              </ol>
+          </section>
+          <section id="shLoaderModule">
+              <div class="page-header">
+                  <h1>ShLoader Module</h1>
+              </div>
           </section>
 
       </div>
@@ -488,65 +289,23 @@ global.CDEF("DB_OPTIONS", {port: 6379, host: "127.0.0.1", password:"foo"});
 
   </div>
 
-
-    <!-- Footer
-    ================================================== -->
-    <footer class="footer">
-      <div class="container">
-        <p>Designed and built with all the love in the world by <a href="http://twitter.com/mdo" target="_blank">@mdo</a> and <a href="http://twitter.com/fat" target="_blank">@fat</a>.</p>
-        <p>Code licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License v2.0</a>, documentation under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
-        <p><a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
-        <ul class="footer-links">
-          <li><a href="http://blog.getbootstrap.com">Blog</a></li>
-          <li class="muted">&middot;</li>
-          <li><a href="https://github.com/twbs/bootstrap/issues?state=open">Issues</a></li>
-          <li class="muted">&middot;</li>
-          <li><a href="https://github.com/twbs/bootstrap/releases">Changelog</a></li>
-        </ul>
-      </div>
-    </footer>
-
-
-
-  <!-- Le javascript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <script src="/common/google-code-prettify/prettify.js"></script>
-  <script src="/common/bootstrap/js/jquery.js"></script>
-  <script src="/common/bootstrap/js/bootstrap.js"></script>
-
+<%- include footer.html %>
 <script>
     $(function(){
-    var $window = $(window)
-    prettyPrint();
+        var $window = $(window)
+        prettyPrint();
 
-    // side bar
-    setTimeout(function () {
-    $('.bs-docs-sidenav').affix({
-    offset: {
-    top: function () { return $window.width() <= 980 ? 290 : 210 }
-    , bottom: 270
-    }
-    })
-    }, 100)
+        // side bar
+        setTimeout(function () {
+            $('.bs-docs-sidenav').affix({
+                offset: {
+                    top: function () { return $window.width() <= 980 ? 290 : 210 }
+                    , bottom: 270
+                }
+            })
+        }, 100)
     });
 </script>
-
-    <!-- Analytics
-    ================================================== -->
-    <script>
-      var _gauges = _gauges || [];
-      (function() {
-        var t   = document.createElement('script');
-        t.type  = 'text/javascript';
-        t.async = true;
-        t.id    = 'gauges-tracker';
-        t.setAttribute('data-site-id', '4f0dc9fef5a1f55508000013');
-        t.src = '//secure.gaug.es/track.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(t, s);
-      })();
-    </script>
 
   </body>
 </html>
