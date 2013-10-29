@@ -10,7 +10,7 @@ shelly.start({}, function (err, data) {
 });
 ```
 
-Fore more documentation see [shellyjs.com](http://shellyjs.com/)
+For more documentation see [shellyjs.com](http://shellyjs.com/).
 
 ## Installation
 
