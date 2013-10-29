@@ -57,10 +57,8 @@
         <ul class="nav nav-list bs-docs-sidenav">
           <li><a href="#configuration"><i class="icon-chevron-right"></i>Configuration</a></li>
           <li><a href="#apiModuleFormat"><i class="icon-chevron-right"></i>API Module Format</a></li>
-          <li><a href="#requestObject"><i class="icon-chevron-right"></i>Request</a></li>
-          <li><a href="#responseObject"><i class="icon-chevron-right"></i>Response</a></li>
-          <li><a href="#shDispatchModule"><i class="icon-chevron-right"></i>ShDispatch</a></li>
-          <li><a href="#shLoaderModule"><i class="icon-chevron-right"></i>ShLoader</a></li>
+          <li><a href="#apiFunction"><i class="icon-chevron-right"></i>API Function(req, res, cb)</a></li>
+          <li><a href="#shLoaderModule"><i class="icon-chevron-right"></i>shloader</a></li>
         </ul>
       </div>
       <div class="span9">
@@ -263,24 +261,72 @@ example.echo = function (req, res, cb) {
 
         </section>
 
-          <section id="requestObject">
+          <section id="apiFunction">
               <div class="page-header">
-                  <h1>Request Object</h1>
+                  <h1>API Function(req, res, cb)</h1>
+
+<pre class="prettyprint linenums">
+example.hello = function (req, res, cb) {
+  res.add(sh.event("example.hello", "world"));
+  return cb(0);
+};
+
+example.echo = function (req, res, cb) {
+  res.add(sh.event("example.echo", req.body.param1));
+  return cb(0);
+};
+</pre>
+
+                  <p>For anyone familiar with Express, this function signature should be familiar.  When a command is sent from the client
+                      it gets processed and ends up with a call to the API command handler function declared in the module file.  This function is passed a
+                      Request (req) object, a Response (res) object, and a callback (cb) function.</p>
+                  <p>Given the API commands work against REST, WebSocket, and TCP interfaces only the following members should be used
+                  without checking the API type (apiType).  The req and res objects under the REST interface have a super set of the member below
+                  and those found in Express.  The WebSocket and TCP objects are similar.</p>
+                  <h3>Request (req) Object</h3>
+                  <p>This object holds all the information about the API command called from the client.</p>
+                  <p><b>req.apiType</b> (string): API the client command was issued against ("rest", "socket", "tcp")</p>
+                  <p><b>req.session</b> (object): Session object if valid.</p>
+                  <p><b>req.session.user</b> (object): Full user object for the current command. (See shuser.js)</p>
+                  <p><b>req.session.uid</b> (string): Short cut for user id req.session.user.get("oid")</p>
+                  <p><b>req.session.valid</b> (boolean): Is there a valid session for this request.</p>
+                  <p><b>req.session.error</b> (object): Error object with failure information if the session is not valid.</p>
+                  <p><b>req.loader</b> (object): Object that provides CRUD, locking, and caching for any ShObject subclass (see shobject.js)</p>
+                  <p><b>req.body</b> (object): Object that contains the parameters passed with the command.</p>
+                  <p><b>req.env</b> (object): Object for modules to use to pass information between pre, command, and post API module functions.</p>
+
+                  <h3>Response (res) Object</h3>
+                  <p>This object is used to return information to the caller.</p>
+                  <p><b>res.add(data (object))</b>: </p>
+                  <p><b>res.flush()</b>: </p>
+                  <p><b>res.notifyAdd(uids (array), data (object), uids (string|array))</b>:</p>
+                  <p><b>res.notifyFlush()</b>: </p>
+                  <p><b>res.clear()</b>: </p>
+                  <h3>Callback (cb) Function</h3>
+
+                  <p>The following is a slightly more complicated example from the Object API:</p>
+<pre class="prettyprint linenums">
+object.get = function (req, res, cb) {
+  req.loader.exists("kObject", req.body.oid, _w(cb, function (err, obj) {
+    if (err) {
+      res.add(sh.errordb(obj));
+      return cb(1);
+    }
+    if (obj === null) {
+      res.add(sh.error("object-get", "unable to get object", obj));
+      return cb(1);
+    }
+    res.add(sh.event("object.get", obj.getData()));
+    return cb(0);
+  }));
+};
+</pre>
               </div>
           </section>
-          <section id="responseObject">
-              <div class="page-header">
-                  <h1>Response Object</h1>
-              </div>
-          </section>
-          <section id="shDispatchModule">
-              <div class="page-header">
-                  <h1>ShDispatch Module</h1>
-              </div>
-          </section>
+
           <section id="shLoaderModule">
               <div class="page-header">
-                  <h1>ShLoader Module</h1>
+                  <h1>shloader Module (comming soon)</h1>
               </div>
           </section>
 

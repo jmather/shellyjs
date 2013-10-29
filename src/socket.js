@@ -63,8 +63,8 @@ function makeCalls(msgs, req, res) {
       // wait on dump to avoid any timing issues
       req.loader.dump(function (err) {
         try {
-          res.sendAll();
-          res.notifyAll();
+          res.flush();
+          res.notifyFlush();
         } catch (err1) {
           res.add(sh.error("res-flush", "problem sending responses", { message: err1.message, stack: err1.stack }));
         }
@@ -92,7 +92,7 @@ function onMessage(data) {
 
   // setup req/res
   var loader = new ShLoader();
-  var req = {session: {valid: false}, body: {}, loader: loader};
+  var req = {session: {valid: false}, body: {}, loader: loader, apiType: this.serverType};
 
   var res = new ShRes();
   res.req = req;
@@ -206,8 +206,8 @@ function handleConnect(ws) {
   ws.on("close", onClose);
 }
 
-Socket.start = function (stype) {
-  if (stype === "tcp") {
+Socket.start = function (serverType) {
+  if (serverType === "tcp") {
     wss = net.createServer(function (socket) {}).listen(global.C.TCP_PORT, function () {
       shlog.system("tcp", "server listening: " + global.C.TCP_PORT);
     });
@@ -216,10 +216,11 @@ Socket.start = function (stype) {
       shlog.system("socket", "server listening: " + global.C.SOCKET_URL);
     });
   }
-  wss.serverType = stype;
+  wss.serverType = serverType;
   var connCount = 1;
 
   wss.on("connection", function (ws) {
+    ws.serverType = wss.serverType;
     ws.id = connCount;
     connCount += 1;
     ws.channels = {};

@@ -140,7 +140,7 @@ Challenge.accept = function (req, res, cb) {
       if (error) {
         return cb(error);
       }
-      res.msgs = []; // clear the game create msgs - SWD - should add res.clear();
+      res.clear();  // ignore the "game.create" responses
       res.add(sh.event("challenge.accept", {chId: req.body.chId}));
 
       // wait for game to save to avoid race condition

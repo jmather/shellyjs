@@ -159,7 +159,7 @@ Game.notifyTurn = function (req, res) {
   counter.incr(gameData.whoTurn, "turns");
 
   // notify anyone that is onine
-  res.notify(gameData.playerOrder, event, req.session.uid);  // exclude me
+  res.notifyAdd(gameData.playerOrder, event, req.session.uid);  // exclude me
 
   // noitify me - rest support
   res.add(event);

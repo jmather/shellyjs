@@ -39,6 +39,8 @@ function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
   shlog.debug("recv", "rest - %j", req.body);
 
+  req.apiType = "rest";
+
   // handle the multi msgs case
   var msgs = null;
   if (_.isArray(req.body.batch)) {
@@ -59,8 +61,8 @@ function respond(req, res, next) {
     // wait on dump to avoid any timing issues
     req.loader.dump(function (err) {
       try {
-        res.sendAll();
-        res.notifyAll();
+        res.flush();
+        res.notifyFlush();
       } catch (err1) {
         res.add(sh.error("res-flush", "problem sending responses", { message: err1.message, stack: err1.stack }));
       }
