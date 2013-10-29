@@ -10,6 +10,8 @@ shelly.start({}, function (err, data) {
 });
 ```
 
+Fore more documentation see [shellyjs.com](http://shellyjs.com/)
+
 ## Installation
 
     $ npm install shellyjs
