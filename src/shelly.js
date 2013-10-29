@@ -34,7 +34,10 @@ var gConfig = {};
 function initConfig(config) {
   gConfig = config;
 
-  // set any configs passed in on command line, force set with CFDEF
+  // set any configs passed into constructor
+  _.assign(global.C, config);
+
+  // set any configs passed in on command line, force set with CFDEF so they take priority
   var i = 0;
   for (i = 2; i < process.argv.length; i += 1) {
     var argParts = process.argv[i].split("=");
@@ -45,9 +48,6 @@ function initConfig(config) {
       global.CFDEF(argParts[0], argParts[1]);
     }
   }
-
-  // set any configs passed into constructor
-  _.assign(global.C, config);
 
   global.CDEF("CONFIG_DIR", global.C.BASE_DIR + "/config");
 

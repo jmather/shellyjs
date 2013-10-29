@@ -13,6 +13,19 @@ global.CDEF = function (name, value) {
 };
 
 global.C = {};
+
+// set any configs passed in on command line, force set with CFDEF
+var i = 0;
+for (i = 2; i < process.argv.length; i += 1) {
+  var argParts = process.argv[i].split("=");
+  if (argParts.length === 2) {
+    if (argParts[0].indexOf("DIR") !== -1) {
+      argParts[1] = path.resolve(argParts[1]);
+    }
+    global.CDEF(argParts[0], argParts[1]);
+  }
+}
+
 global.CDEF("BASE_DIR", path.dirname(__dirname));
 global.CDEF("DOCS_PORT", 5180);
 
