@@ -281,11 +281,11 @@ example.echo = function (req, res, cb) {
                       it gets processed and ends up with a call to the API command handler function declared in the module file.  This function is passed a
                       Request (req) object, a Response (res) object, and a callback (cb) function.</p>
                   <p>Given the API commands work against REST, WebSocket, and TCP interfaces only the following members should be used
-                  without checking the API type (apiType).  The req and res objects under the REST interface have a super set of the member below
+                  without checking the API type (req.api).  The req and res objects under the REST interface have a super set of the member below
                   and those found in Express.  The WebSocket and TCP objects are similar.</p>
                   <h3>Request (req) Object</h3>
                   <p>This object holds all the information about the API command called from the client.</p>
-                  <p><b>req.apiType</b> (string): API the client command was issued against ("rest", "socket", "tcp")</p>
+                  <p><b>req.api</b> (string): API the client command was issued against ("rest", "socket", "tcp")</p>
                   <p><b>req.session</b> (object): Session object if valid.</p>
                   <p><b>req.session.user</b> (object): Full user object for the current command. (See shuser.js)</p>
                   <p><b>req.session.uid</b> (string): Short cut for user id req.session.user.get("oid")</p>

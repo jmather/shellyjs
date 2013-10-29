@@ -39,7 +39,7 @@ function respond(req, res, next) {
   _.isFunction(next);  // jslint fix - end of line so never gets called;
   shlog.debug("recv", "rest - %j", req.body);
 
-  req.apiType = "rest";
+  req.api = "rest";
 
   // handle the multi msgs case
   var msgs = null;

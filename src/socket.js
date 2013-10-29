@@ -92,7 +92,7 @@ function onMessage(data) {
 
   // setup req/res
   var loader = new ShLoader();
-  var req = {session: {valid: false}, body: {}, loader: loader, apiType: this.serverType};
+  var req = {session: {valid: false}, body: {}, loader: loader, api: this.serverType};
 
   var res = new ShRes();
   res.req = req;
