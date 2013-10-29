@@ -296,13 +296,22 @@ example.echo = function (req, res, cb) {
                   <p><b>req.env</b> (object): Object for modules to use to pass information between pre, command, and post API module functions.</p>
 
                   <h3>Response (res) Object</h3>
-                  <p>This object is used to return information to the caller.</p>
-                  <p><b>res.add(data (object))</b>: </p>
-                  <p><b>res.flush()</b>: </p>
-                  <p><b>res.notifyAdd(uids (array), data (object), uids (string|array))</b>:</p>
-                  <p><b>res.notifyFlush()</b>: </p>
-                  <p><b>res.clear()</b>: </p>
+                  <p>This object is used to return information to the caller.  Responses are queued until after the call completes and
+                  any modified data is written back to the datastore - this is important to avoid any race conditions with notifications.</p>
+                  <p><b>res.add(data (object))</b>: queue an object to be sent back to the client JSON.stringified</p>
+                  <p><b>res.flush()</b>: send all data objects back to client</p>
+                  <p><b>res.clear()</b>: remove all data objects from the queue</p>
+                  <p><b>res.notifyAdd(uids (array), data (object), exUids (string|array))</b>:  queue the data object to push
+                      to the list of uids if they currently have a Websocket or TCP connections.  exUids are removed from the list
+                      before sending.  exUids can be a single uid string or an array of uid strings.  This handles the common
+                      case where res.add is sending the message back to the caller and you don't want to double send.</p>
+                  <p><b>res.notifyFlush()</b>: push all data objects to the target users</p>
+                  <p><b>res.notifyClear()</b>: remove all push data objects from the queue</p>
                   <h3>Callback (cb) Function</h3>
+                  <p><b>cb(err, data)</b>: Function to call when done processing the command. If err is returned the command processor
+                  will stop processing the message, save any modified data objects, and flush any responses, notifications.</p>
+                  <p>NOTE: error responses should be added via res.add as returning an err via the callback function will only stop
+                  command processing.</p>
 
                   <p>The following is a slightly more complicated example from the Object API:</p>
 <pre class="prettyprint linenums">
