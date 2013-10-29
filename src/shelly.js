@@ -141,7 +141,6 @@ shelly.start = function (config, cb) {
       shlog.system("shelly", "server:", global.server);
       shlog.system("shelly", "configBase:", global.C.CONFIG_DIR);
       shlog.info("shelly", "config:", sh.secure(global.C));
-      sh.configDoc(global.C);
       _.each(global.C.CLUSTER, function (info, name) {
         var i = 0;
         for (i = 0; i < info.num; i += 1) {
