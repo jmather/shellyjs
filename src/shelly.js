@@ -204,7 +204,7 @@ process.on("message", function (msg) {
     return;
   }
   if (msg.cmd === "user.direct") {
-    if (process.env.WTYPE !== "socket") {
+    if (process.env.WTYPE !== "socket" && process.env.WTYPE !== "tcp") {
       shlog.error("shelly", "non-socket got a sendDirect", msg);
       return;
     }
