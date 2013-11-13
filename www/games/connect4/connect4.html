@@ -220,12 +220,6 @@
                 $(".uid"+msg.data.uid).find("#playerStatus").text(msg.data.status);
                 return;
             }
-            if (msg.event == "channel.message") {
-                for (var i=0; i<msg.data.bank.length; i++) {
-                    addMessage(msg.data.channel, msg.data.bank[i]);
-                }
-                return;
-            }
         }
 
         function onopen() {
@@ -260,7 +254,7 @@
             });
 
             commInit();
-            messageInit("game:" + Env.gameId);
+            messageInit(Env.channel);
             initGame();
             Crafty.scene("game");
             Crafty.canvas.context.font = "40px Arial";
@@ -304,7 +298,7 @@
                 <div class="gameBoxHeaderDiv">Messages</div>
                 <div class="gameBoxInnerDiv" readonly>
                     <div id="messageLog" style="overflow: auto;" readonly></div>
-                    <div class="gameBoxFooterDiv" style="width: 228px">
+                    <div class="gameBoxFooterDiv">
                         <input id="chatInput" type="text" style="width: 170px;"></input/>
                         <button id="sendChat" class="btn btn-small" style="float: right">send</button>
                     </div>

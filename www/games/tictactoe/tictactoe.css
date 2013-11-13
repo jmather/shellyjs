@@ -64,3 +64,20 @@ button {
     font-weight:bold;
     color:#000000;
 }
+
+#messageLog
+{
+    height: 115px;
+}
+
+#chatInput
+{
+    margin-top: 3px;
+    width: 240px;
+}
+
+#errorMessage, #infoMessage
+{
+    margin-top: 5px;
+    margin-bottom: 0;
+}

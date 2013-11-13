@@ -9,11 +9,11 @@ var Env = <%- EnvJson %>;
 
 Env.players = {};
 Env.gameId = "0";
-
 var pgameId = getURLParameter("gameId");
 if (pgameId !== null) {
     Env.gameId = pgameId.toString();
 }
+Env.channel = "game:" + Env.gameId;
 
 function setPlayers(playerList, whoTurn) {
     $(".activePlayer").remove();
@@ -112,7 +112,7 @@ function onopen() {
         shellys.call({session: Env.session,
             batch: [ {cmd: "game.enter", gameId: Env.gameId},
                 {cmd: "game.playing"},
-                {cmd: "channel.add", channel: "game:" + Env.gameId, _pt: "foo"}
+                {cmd: "channel.add", channel: Env.channel, _pt: "foo"}
             ]});
     }
 }
@@ -188,6 +188,7 @@ function init() {
     });
 
     commInit();
+    messageInit(Env.channel);
     shellys.log = log;
     shellys.onopen = onopen;
     shellys.onmessage = onmessage;
@@ -220,17 +221,29 @@ function init() {
                     <td><div id="x2y2" class="tictactoeDiv"></div></td>
                 </tr>
             </table>
+            <%- include ../errorbox.html %>
         </div>
         <div class="gamePlayersDiv gameBoxDiv span4">
             <div class="gameBoxHeaderDiv" style="">Game Players</div>
-            <div id="playerList" class="gameBoxInnerDiv" style="margin-bottom: 10px;">
+            <div id="playerList" class="gameBoxInnerDiv" style="">
                 <div id="playerTemplate" style="display:none;">
                     <span id="playerName">player-0</span> <span id="playerStatus">offline</span> </span> <span
                         id="playerTurn"></span>
                 </div>
             </div>
-            <%- include ../errorbox.html %>
         </div>
+        <div class="messageLogDiv gameBoxDiv span4">
+            <div class="gameBoxHeaderDiv">Messages</div>
+            <div class="gameBoxInnerDiv" readonly>
+                <div id="messageLog" style="overflow: auto;" readonly></div>
+                <div class="gameBoxFooterDiv">
+                    <input id="chatInput" type="text"></input/>
+                    <button id="sendChat" class="btn btn-small" style="float: right">send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
     </div>
 
     <div class="row">

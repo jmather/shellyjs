@@ -204,9 +204,12 @@ function uiOnMessage(msg) {
   if (msg.event == "user.get") {
     Env.user = msg.data;
     $("#shUserName").text(Env.user.name);
-  }
-  if (msg.event === "counter.update" || msg.event === "counter.get") {
+  } else if (msg.event === "counter.update" || msg.event === "counter.get") {
     updateCount(msg.data);
+  } else if (msg.event == "channel.message") {
+    for (var i=0; i<msg.data.bank.length; i++) {
+      addMessage(msg.data.channel, msg.data.bank[i]);
+    }
   }
 }
 
@@ -235,9 +238,11 @@ function sendRestCmd(cmd, data, cb) {
  * Message bank functions
  ***********************/
 var gMessageCount = 0;
+var gMessageChannel = "";
 
-function messageInit()
+function messageInit(channel)
 {
+  gMessageChannel = channel;
   $("#chatInput").bind('keypress', function(e){
     if ( e.keyCode == 13 ) {
       if($(this).val() !== "")
@@ -262,7 +267,7 @@ function messageReset() {
 }
 
 function addMessage(channel, data) {
-  if(channel !== Env.channel) {
+  if(channel !== gMessageChannel) {
     // drop it for now
     return;
   }
@@ -295,7 +300,7 @@ function addMessage(channel, data) {
 }
 
 function sendMessage(msg) {
-  sendCmd("channel.send", {channel: Env.channel, message: msg});
+  sendCmd("channel.send", {channel: gMessageChannel, message: msg});
 }
 
 
