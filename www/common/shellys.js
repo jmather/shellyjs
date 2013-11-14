@@ -3,19 +3,28 @@ function ShellyS() {
   this.wsUrl = "";
   this.restUrl = "";
   this.closing = false;
+  this.connected = false;
 }
 
 ShellyS.prototype.connect = function (wsUrl) {
   $("#serverDisconnectDlg").modal({keyboard: false, show: false});
   this.wsUrl = wsUrl;
 
+  this.ws = null;
   this.ws = new WebSocket(this.wsUrl);
   var self = this;
+  this.timeout = setTimeout(function () {
+    if (!self.connected) {
+      self.log("socket", "reconnect:", this.wsUrl);
+      self.connect(self.wsUrl);
+    }
+  }, 5000);
   this.ws.onopen = function (evt) {
+    self.connected = true;
     self.log("socket", "onopen", self.wsUrl);
     $("#serverDisconnectDlg").modal("hide");
     self.onopen(evt);
-    self.call({cmd: "system.connInfo"})
+    self.call({cmd: "system.connInfo"});
   };
   this.ws.onmessage = function (evt) {
     self.log("socket", "onmessage", evt.data);
@@ -31,36 +40,39 @@ ShellyS.prototype.connect = function (wsUrl) {
     self.log("socket", "onclose", evt);
     self.onclose(evt);
     if (!self.closing) {
-      self.ws.onerror(evt);
+      clearTimeout(self.timeout);
+      self.connected = false;
+      $("#serverDisconnectDlg").modal("show");
+      setTimeout(function () {
+        self.connect(self.wsUrl);
+      }, 5000);
     }
   };
   this.ws.onerror = function (evt) {
     if (evt.code === 1001) { return; }  // browser close
     self.log("socket", "onerror", evt);
-    $("#serverDisconnectDlg").modal("show");
     self.onerror(evt);
-    self.reconnect();
   };
+};
+
+ShellyS.prototype.send = function (msg) {
+  if (this.connected) {
+    this.ws.send(msg);
+  } else {
+    this.log("socket", "send-error", "socket not open: " + msg);
+  }
 };
 
 ShellyS.prototype.close = function () {
   this.closing = true;
   this.ws.close();
-}
-
-ShellyS.prototype.reconnect = function () {
-  this.log("socket", "reconnect:", this.wsUrl);
-  var self = this;
-  setTimeout(function () {
-    self.connect(self.wsUrl);
-  }, 5000);
 };
 
 ShellyS.prototype.call = function (data) {
   try {
     var msg = JSON.stringify(data);
     this.log("socket", "send-batch", msg);
-    this.ws.send(msg);
+    this.send(msg);
   } catch(e) {
     this.log("socket", "error", e.toString())
   }

@@ -129,13 +129,15 @@ Channel.sendInt = function (channel, event, excludeIds, cb) {
 Channel.send = function (req, res, cb) {
   shlog.info("channel", "channel.message: ", req.body.channel, req.body.message);
 
+  var ts = Math.round(new Date().getTime() / 1000);
   var msgBlock = {
     from: req.session.uid,
     name: req.session.user.get("name"),
     pic: "",
-    message: req.body.message
+    message: req.body.message,
+    ts: ts
   };
-  var event = sh.event("channel.message", {channel: req.body.channel, bank: [msgBlock]});
+  var event = sh.event("channel.message", {channel: req.body.channel, mode: "send", bank: [msgBlock]});
 
   Channel.sendInt(req.body.channel, event, null, _w(cb, function (err, uidList) {
     // SWD don't really need to wait or care about send err
