@@ -1,6 +1,6 @@
 {
   "name": "shellyjs",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "build": "0000",
   "private": false,
   "description": "Synchonous and Asynchronous API server over HTTP, WebSockets, and TCP",
