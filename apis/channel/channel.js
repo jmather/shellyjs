@@ -37,7 +37,7 @@ Channel.add = function (req, res, cb) {
   shlog.info("channel", "channel.add: ", req.body.channel, req.session.uid);
 
   if (res.ws === null) {
-    res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
+    res.add(sh.error("call-bad", "this call can only be made from a socket interaface"));
     return cb(1);
   }
 
@@ -71,7 +71,7 @@ Channel.add = function (req, res, cb) {
       // send back any messages on the channel
       req.loader.get("kMessageBank", req.body.channel, _w(cb, function (err, ml) {
         if (!err) {
-          res.add(sh.event("channel.message", {channel: req.body.channel, bank: ml.get("bank")}));
+          res.add(sh.event("channel.message", {channel: req.body.channel, mode: "add", bank: ml.get("bank")}));
         }
         return cb(0);
       }));
@@ -98,7 +98,7 @@ Channel.remove = function (req, res, cb) {
   shlog.info("channel", "channel.remove: ", req.body.channel, req.session.uid);
 
   if (res.ws === null) {
-    res.add(sh.error("call-bad", "this call can only be made from the socket interafce"));
+    res.add(sh.error("call-bad", "this call can only be made from a socket interface"));
     return cb(1);
   }
 
