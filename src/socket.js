@@ -86,7 +86,10 @@ function onMessage(data) {
   try {
     packet = JSON.parse(data);
   } catch (err) {
-    sh.sendWs(this, sh.error("socket-parse", "unable to parse json message", { message: err.message, stack: err.stack }));
+    var errorMsg = sh.error("socket-parse", "unable to parse json message", { message: err.message, stack: err.stack });
+    shlog.error("socket-parse", errorMsg);
+    shlog.error("socket-parse-data", data.length, data);
+    sh.sendWs(this, errorMsg);
     return;
   }
 
@@ -131,19 +134,25 @@ function onMessage(data) {
 
 // Used in TCP only version as framer
 function onData(data) {
-  shlog.debug("tcp", "onData", this.id, data.length, data.toString("utf8"));
-  var chunk = data.toString("utf8");
-  var endMsg = chunk.indexOf('\n');
-  if (endMsg === -1) {
-    this.msg += chunk;  // end not found
-    shlog.info("tcp", "onData-buffer", this.id, this.msg);
+  var i = 0;
+  shlog.debug("tcp", "onData", this.id, data.length, data);
+  var block = this.msg + data; // and any previous partial
+  this.msg = "";               // clear the buffer
+  var chunks = block.split("\n");
+  if (chunks.length === 1) {
+    this.msg += chunks[0];  // end not found at all
+    shlog.info("tcp", "onData-buffer-front", this.id, this.msg.length, this.msg);
     return;
   }
-
-  this.msg += chunk.substr(0, endMsg);
-  shlog.info("tcp", "onData-process", this.id, this.msg);
-  onMessage.call(this, this.msg);
-  this.msg = "";  // reset the buffer
+  for (i = 0; i < chunks.length - 1; i += 1) {
+    shlog.info("tcp", "onData-process", this.id, chunks[i]);
+    onMessage.call(this, chunks[i]);
+  }
+  if (chunks[chunks.length - 1].length !== 0) {
+    this.msg += chunks[chunks.length - 1];  // list of cmds ends in partial command
+    shlog.info("tcp", "onData-buffer-back", this.id, this.msg);
+    return;
+  }
 }
 
 function onCloseError(err, data) {
@@ -196,6 +205,7 @@ function handleConnect(ws) {
   ws.hbTimer = setInterval(heartBeat, global.C.HEART_BEAT);
 
   if (wss.serverType === "tcp") {
+    ws.setEncoding("utf8");
     ws.msg = "";
     ws.send = function (data) { this.write(data + "\n"); };
     ws.on("data", onData);
