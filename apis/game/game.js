@@ -53,7 +53,7 @@ function gameInit(dir, cb) {
               maxPlayers: 2
             };
             if (_.isObject(module.config)) {
-              _.assign(global.games[entry], module.config)
+              _.assign(global.games[entry], module.config);
             }
           }
           return lcb(0);
@@ -145,18 +145,22 @@ Game.notify = function (req, res, event) {
   res.add(event);
 };
 
-Game.notifyTurn = function (req, res) {
+// sends to all users online - in game channel or not
+Game.notifyStatus = function (req, res) {
   // notify any players online
   var gameData = req.env.game.getData();
-  var event = sh.event("game.turn.next", {gameId: gameData.oid,
+  var event = sh.event("game.status", {gameId: gameData.oid,
+    status: gameData.status,
     gameName: gameData.name,
     gameUrl: sh.gameUrl(gameData.name, {gameId: gameData.oid}),
     whoTurn: gameData.whoTurn,
-    name: (gameData.whoTurn === "0" ? "no one" : gameData.players[gameData.whoTurn].name),
+    name: (gameData.whoTurn === "" ? "no one" : gameData.players[gameData.whoTurn].name),
     pic: ""});
 
   // increment the turns counter
-  counter.incr(gameData.whoTurn, "turns");
+  if (gameData.whoTurn !== "") {
+    counter.incr(gameData.whoTurn, "turns");
+  }
 
   // notify anyone that is onine
   res.notifyAdd(gameData.playerOrder, event, req.session.uid);  // exclude me
@@ -346,16 +350,19 @@ Game.turn = function (req, res, cb) {
     if (error) {
       return cb(error);
     }
+    if (gameData.status === "over") {
+      gameData.whoTurn = "";
+    }
     // fill in data from gameModule
     if (!data) {
       data = gameData;
     }
     Game.notify(req, res, sh.event("game.turn", data));
+    Game.notifyStatus(req, res);
     if (gameData.status === "over") {
       Game.notify(req, res, sh.event("game.over", gameData));
       return cb(0);  // no one has next turn, so end
     }
-    Game.notifyTurn(req, res);
     return cb(0);
   }));
 };
@@ -370,12 +377,10 @@ Game.get = function (req, res, cb) {
 Game.reset = function (req, res, cb) {
   var gameData = req.env.game.getData();
 
-  var newTurn = false;
   gameData.rounds += 1;
   gameData.turns = 0;
   if (gameData.status === "over") {
     gameData.whoTurn = req.session.uid;
-    newTurn = true;
   }
   gameData.status = "playing";
 
@@ -397,9 +402,7 @@ Game.reset = function (req, res, cb) {
       data = req.env.game.getData();
     }
     Game.notify(req, res, sh.event("game.reset", data));
-    if (newTurn) {
-      Game.notifyTurn(req, res);
-    }
+    Game.notifyStatus(req, res);
     return cb(0);
   }));
 };

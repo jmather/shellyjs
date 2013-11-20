@@ -116,7 +116,6 @@ tictactoe.turn = function (req, res, cb) {
   var win = checkWin(gameBoard);
   if (win.winner !== "") {
     game.set("status", "over");
-    game.set("whoTurn", "");
     state.winner = uid;
     state.winnerSet = win.set;
     game.set("state", state);
@@ -125,7 +124,6 @@ tictactoe.turn = function (req, res, cb) {
 
   if (checkFull(gameBoard)) {
     game.set("status", "over");
-    game.set("whoTurn", "");
     state.winner = "";
     state.winnerSet = null;
     game.set("state", state);

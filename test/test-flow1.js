@@ -22,7 +22,7 @@ function playGame() {
   it("turn 1", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 0}},
       function (err, res) {
-        res[1].should.have.property("event", "game.turn.next");
+        res[1].should.have.property("event", "game.status");
         gWhoTurn = res[1].data.whoTurn;
         done();
       });
@@ -30,7 +30,7 @@ function playGame() {
   it("turn 2", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 0, y: 1}},
       function (err, res) {
-        res[1].should.have.property("event", "game.turn.next");
+        res[1].should.have.property("event", "game.status");
         gWhoTurn = res[1].data.whoTurn;
         done();
       });
@@ -38,7 +38,7 @@ function playGame() {
   it("turn 3", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 0}},
       function (err, res) {
-        res[1].should.have.property("event", "game.turn.next");
+        res[1].should.have.property("event", "game.status");
         gWhoTurn = res[1].data.whoTurn;
         done();
       });
@@ -46,7 +46,7 @@ function playGame() {
   it("turn 4", function (done) {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 1, y: 1}},
       function (err, res) {
-        res[1].should.have.property("event", "game.turn.next");
+        res[1].should.have.property("event", "game.status");
         gWhoTurn = res[1].data.whoTurn;
         done();
       });
@@ -55,8 +55,9 @@ function playGame() {
     gConns[gWhoTurn].call("game.turn", {gameId: gGameId, move: {x: 2, y: 0}},
       function (err, res) {
         res[0].should.have.property("event", "game.turn");
-        res[1].should.have.property("event", "game.over");
+        res[1].should.have.property("event", "game.status");
         res[1].data.should.have.property("whoTurn", "");
+        res[2].should.have.property("event", "game.over");
         done();
       });
   });

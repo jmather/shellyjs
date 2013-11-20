@@ -111,7 +111,7 @@ ws.on('message', function (message) {
         sendCmd("game.get", {gameId: gameId});  // trigger a move base on gameBoard
       }
     });
-  } else if (msg.event === "game.turn.next") {
+  } else if (msg.event === "game.status") {
     if (msg.data.whoTurn === gUid) {
       sendCmd("game.get", {gameId: msg.data.gameId});  // trigger a move base on gameBoard
     }

@@ -103,7 +103,7 @@ function onmessage(res) {
         setLobbyGames(res.data);
         return;
     }
-    if (res.event == "game.turn.next") {
+    if (res.event == "game.status") {
         setLobbyTurn(res.data.gameId, res.data.whoTurn, res.data);
         return;
     }

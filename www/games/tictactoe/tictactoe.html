@@ -151,7 +151,7 @@ function onmessage(res) {
         }
         return;
     }
-    if (res.event === "game.turn.next") {
+    if (res.event === "game.status") {
         if (res.data.gameId != Env.gameId && res.data.whoTurn === Env.user.oid) {
             updateMyTurns(res.data.gameId, res.data);
         }

@@ -116,7 +116,7 @@ function Player(id) {
       this.joined = true;
       //console.log("game.join", this.email, msg.data.state.gameBoard);
       if (msg.data.status === "over" && msg.data.ownerId === this.uid) {
-        this.resetGame(msg.data.oid);  // reset does a game.turn.next
+        this.resetGame(msg.data.oid);  // reset does a game.status
         return;
       }
       //console.log(msg.data.whoTurn, this.uid);
@@ -137,7 +137,7 @@ function Player(id) {
           self1.makeMove(msg.data);
         }, gTurnSleep);
       }
-    } else if (msg.event === "game.turn.next") {
+    } else if (msg.event === "game.status") {
       if (!this.joined) {
         console.log("SWD - turn before join", this.email);
         return;

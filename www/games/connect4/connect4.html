@@ -189,7 +189,7 @@
                 }
                 return;
             }
-            if (msg.event === "game.turn.next") {
+            if (msg.event === "game.status") {
                 if(msg.data.gameId === Env.gameId) {
                     setWhoTurn(msg.data.whoTurn);
                 } else if (msg.data.whoTurn === Env.user.oid) {
