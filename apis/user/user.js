@@ -32,6 +32,11 @@ user.set = function (req, res, cb) {
     return cb(1);
   }
 
+  if (userData.email) {
+    res.add(sh.error("user-email", "email address must be set via a register call"));
+    return cb(1);
+  }
+
   req.loader.exists("kUser", req.session.uid, _w(cb, function (err, user) {
     if (err) {
       res.add(sh.errordb(user));

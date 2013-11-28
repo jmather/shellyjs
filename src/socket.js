@@ -110,9 +110,15 @@ function onMessage(data) {
   }
 
   if (_.isObject(res.ws.session)) {
-    // SWD: we must refresh the user data so it doesn't get stale
     req.session = res.ws.session;
-    makeCalls(msgs, req, res);
+    req.loader.get("kUser", req.session.uid, _w(onMessageError, function (error, user) {
+      if (error) {
+        req.session.error = sh.error("user-load", "unable to load user", {uid: req.session.uid, error: error, user: user});
+        return onMessageError(1);
+      }
+      req.session.user = user;
+      makeCalls(msgs, req, res);
+    }));
   } else {
     shcall.fillSession(packet.session, req, res, _w(onMessageError, function (err) {
       // req.session.valid now used to control access
