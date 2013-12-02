@@ -2,7 +2,7 @@ global.CDEF("MODULE_CACHE", false);
 
 global.CDEF("CLUSTER_NUM_SOCKET", 1);
 
-global.CDEF("EMAIL_NOSEND", true);
+global.CDEF("EMAIL_NOSEND", false);
 global.CDEF("EMAIL_SENDTO", "scott@lgdales.com");
 
 //global.CDEF("LOG_CONSOLE_OPTS", { level: "debug", colorize: true, timestamp: false });

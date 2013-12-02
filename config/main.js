@@ -105,3 +105,4 @@ global.CDEF("MATCHER_INTERVAL", 3000);
 
 // reg options
 global.CDEF("REG_RESET_URL", global.C.GAMES_URL + "/reg/reset.html");
+global.CDEF("REG_CONFIRM_URL", global.C.GAMES_URL + "/reg/confirm.html");

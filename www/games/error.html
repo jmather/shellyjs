@@ -25,8 +25,18 @@
 <body>
 <%- include header.html %>
 
-<div>Error: <pre id="pageErrorMessage"></pre></div>
-<div>Stack: <pre id="pageErrorStack" class="ErrorPre"></pre></div>
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            Error: <pre id="pageErrorMessage"></pre>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span12">
+            Stack: <pre id="pageErrorStack" class="ErrorPre"></pre>
+        </div>
+    </div>
+</div>
 
 <%- include footer.html %></body>
 </html>

@@ -1,0 +1,31 @@
+<html>
+
+<head>
+<style>
+p
+{
+    margin-bottom: 20px;
+}
+</style>
+</head>
+
+<body>
+<p>
+  <div>Confirm your email by clicking the link below.  If you did not set your email in the ShellyJS example ignore this message.</div>
+  <a href="<%= confirmUrl %>">Click here to confirm.</a>
+</p>
+
+<p>
+  <div>If you want to use your account on another device you may login with the following:</div>
+  <div>user: <%= email %></div>
+  <div>password: <%= password %></div>
+</p>
+
+<p>
+  <div>time queued: <%= new Date(timeQueued).toUTCString() %></div>
+  <div>time Sent: <%= new Date(timeSent).toUTCString() %></div>
+  <div>retries: <%= retries %></div>
+</p>
+</body>
+
+</html>

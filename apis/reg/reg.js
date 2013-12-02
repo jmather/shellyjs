@@ -163,6 +163,11 @@ exports.login = function (req, res, cb) {
       return cb(1);
     }
 
+    if (!em.get("confirmed")) {
+      res.add(sh.error("email-unconfirmed", "this email address has not been confirmed", {email: email}));
+      return cb(1);
+    }
+
     req.loader.get("kUser", em.get("uid"), _w(cb, function (error, user) {
       if (error) {
         res.add(sh.error("user-bad", "unable to get user", user));
@@ -219,11 +224,7 @@ exports.anonymous = function (req, res, cb) {
         res.add(sh.errordb(user));
         return cb(1);
       }
-      // have they upgraded already
-      if (user.get("email").length) {
-        res.add(sh.error("user-upgraded", "user has already upgraded the anonymous account"));
-        return cb(1);
-      }
+
       var out = {};
       out.uid = tm.get("uid");
       out.session = session.create(tm.get("uid"));
@@ -247,6 +248,22 @@ exports.check = function (req, res, cb) {
   }));
 };
 
+function sendUpgradeEmail(em, password, req, res) {
+  var email = req.session.user.get("email");
+  var emailInfo = {email: email,
+    subject: "email confirmation for " + email,
+    password: password,
+    confirmUrl: global.C.REG_CONFIRM_URL + "?" + querystring.stringify(
+      {"type": "email", "link": email, "cid": em.get("cid")}
+    ),
+    template: "confirm"};
+  shlog.info("reg", emailInfo);
+
+  mailer.send(emailInfo, req, res, function () {
+    // don't care
+  });
+}
+
 exports.upgrade = function (req, res, cb) {
   var email = sanitize(req.body.email).trim();
   var password = sanitize(req.body.password).trim();
@@ -259,10 +276,10 @@ exports.upgrade = function (req, res, cb) {
   }
 
   // make sure the email is not already set
-  if (req.session.user.get("email").length > 0) {
-    res.add(sh.error("email-set", "email is already set for this user", req.session.user.getData()));
-    return cb(1);
-  }
+//  if (req.session.user.get("email").length > 0) {
+//    res.add(sh.error("email-set", "email is already set for this user", req.session.user.getData()));
+//    return cb(1);
+//  }
 
   // make sure the email is not in use by someone else
   req.loader.exists("kEmailMap", email, _w(cb, function (error, em) {
@@ -270,19 +287,21 @@ exports.upgrade = function (req, res, cb) {
       res.add(sh.errordb(em));
       return cb(1);
     }
+    // check the existing map
     if (em !== null) {
-      if (em.get("uid") === req.session.user.get("oid")) {
-        // set it just in case something went wrong before
-        req.session.user.set("email", email);
-        res.add(sh.event("reg.upgrade", req.session.user.getData()));
-        return cb(0);
+      // make sure the map is for current user and confirmed
+      if (em.get("confirmed") && em.get("uid") !== req.session.user.get("oid")) {
+        res.add(sh.error("email-inuse", "email is already used by another user"));
+        return cb(1);
       }
-      res.add(sh.error("email-inuse", "email is already used by another user"));
-      return cb(1);
+      // reset just in case user changed
+      req.session.user.set("email", email);
+      em.set("password", hashPassword(req.session.uid, password));
+
+      sendUpgradeEmail(em, password, req, res);
+      res.add(sh.event("reg.upgrade", req.session.user.getData()));
+      return cb(0);
     }
-    // set the email for the user, don't worry about the lock here
-    req.session.user.set("email", email);
-    req.session.user.set("name", email.split("@")[0]);
 
     // create the email map
     createEmailReg(req.loader, req.session.uid, email, password, _w(cb, function (error, em) {
@@ -290,6 +309,10 @@ exports.upgrade = function (req, res, cb) {
         res.add(sh.error("emailmap-create", "unable to create email map", em));
         return cb(2);
       }
+      req.session.user.set("email", email);
+      req.session.user.set("name", email.split("@")[0]);
+
+      sendUpgradeEmail(em, password, req, res);
       res.add(sh.event("reg.upgrade", req.session.user.getData()));
       return cb(0);
     }));
