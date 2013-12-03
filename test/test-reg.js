@@ -56,6 +56,24 @@ describe("module reg", function () {
     });
   });
 
+  describe("CMD reg.aconfirm", function () {
+    it("bad confirm, good password, valid session", function (done) {
+      st.call({cmd: "reg.login", email: gEmail, password: gPassword},
+        function (err, res) {
+          res.body.should.have.property("event", "error");
+          res.body.data.should.not.have.property("session");
+          done();
+        });
+    });
+    it("admin confirm", function (done) {
+      st.adminCall({cmd: "reg.aconfirm", email: gEmail},
+        function (err, res) {
+          res.body.should.have.property("event", "reg.aconfirm");
+          done();
+        });
+    });
+  });
+
   describe("CMD reg.login", function () {
     it("good password, valid session", function (done) {
       st.call({cmd: "reg.login", email: gEmail, password: gPassword},
@@ -156,13 +174,6 @@ describe("module reg", function () {
         });
     });
 
-    it("user already upgraded", function (done) {
-      st.call({cmd: "reg.anonymous", token: gToken},
-        function (err, res) {
-          res.body.should.have.property("event", "error");
-          done();
-        });
-    });
   });
 
 });

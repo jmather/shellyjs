@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<title>Shelly Reset</title>
+	<title>Shelly Confirm</title>
     <meta charset="UTF-8">
     <script src="/common/jquery-1.9.1.js"></script>
     <script src="/common/jquery.cookie.js"></script>
@@ -16,29 +16,34 @@
 <script>
 
 var Env = <%- EnvJson %>;
-Env.rid = getURLParameter("rid", "");
-Env.uid = getURLParameter("uid", "");
+Env.cid = getURLParameter("cid", "");
+Env.link = getURLParameter("link", "");
 console.log(Env.rid, Env.uid);
 
 $(init);
 function init() {
     $(".header-user-info").css("display", "none");
     $(".main-menu-items").css("display", "none");
-    $("#shSubTitle").text("Password Reset");
+    $("#shSubTitle").text("Email Confirmation");
+
+    $("#emailToConfirm").text(Env.link);
 
     hideAllMessages();
     commInit();
 
-    $("#resetBtn").click(function(e) {
-        doReset(Env.uid, Env.rid);
-        e.preventDefault();
-        return false;
-    });
 
-    $(".CredsInput").on('keyup', function(e) {
-        if (e.which == 13) {
-            doReset(Env.uid, Env.rid);
-            e.preventDefault();
+    var data = {cmd: "reg.confirm",
+        email: Env.link,
+        cid: Env.cid
+    };
+    shelly.call(data, function (res, status) {
+        console.log(res);
+        if (res[0].event === "reg.confirm") {
+            info(res[0].data.message);
+//            $.cookie("shSession", res[0].data.session, {path: "/", expires: 365});
+//            window.location.href = "/index.html";
+        } else {
+            error("Unable to confirm email: " + res[0].message);
         }
     });
 }
@@ -77,10 +82,8 @@ function init() {
 
     <div class="row" style="margin-top: 80px;">
         <form class="form-signin" autocomplete="off">
-            <div><h4>Enter new password for your account.</h4></div>
-            <input type="password" id="pass" class="input-block-level CredsInput" placeholder="Password">
-            <input type="password" id="passVerify" class="input-block-level CredsInput registerConfig" placeholder="Verify Password">
-            <button id="resetBtn" class="btn btn-primary login-inline" type="submit">Reset</button>
+            <div><h4>Confirmed email for <span id="emailToConfirm"></span></h4></div>
+            <button id="resetBtn" class="btn btn-primary login-inline" type="submit">Play</button>
         </form>
     </div>
 

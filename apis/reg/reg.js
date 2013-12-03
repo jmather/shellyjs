@@ -33,7 +33,10 @@ exports.functions = {
   requestReset: {desc: "start the password reset process", params: {email: {dtype: "string"}}, security: [], noSession: true},
   reset: {desc: "reset the password on this account", params: {uid: {dtype: "string"}, rid: {dtype: "string"},
     password: {dtype: "string"}}, security: [], noSession: true},
+  confirm: {desc: "testing only - confirm the email used", params: {email: {dtype: "string"}, cid: {dtype: "string"}},
+    security: [], noSession: true},
 
+  aconfirm: {desc: "testing only - confirm the email used", params: {email: {dtype: "string"}}, security: ["admin"]},
   remove: {desc: "testing only - remove a registered user", params: {email: {dtype: "string"}}, security: ["admin"]},
   downgrade: {desc: "testing only - remove email from user object", params: {uid: {dtype: "string"}}, security: ["admin"]}
 };
@@ -69,6 +72,7 @@ exports.verifyUser = function (loader, email, password, cb) {
         if (error) {
           return cb(1, sh.intMsg("emailmap-failed"));
         }
+        em.set("confirmed", true);
         loader.get("kUser", em.get("uid"), _w(cb, function (error, user) {
           if (error) {
             return cb(2, sh.intMsg("db-error", user));
@@ -83,6 +87,7 @@ exports.verifyUser = function (loader, email, password, cb) {
         }));
       });
     } else {
+      em.set("confirmed", true);  // SWD fix up any old DBs
       return cb(0, sh.intMsg("user-exists"));
     }
   }));
@@ -132,7 +137,6 @@ exports.findUserByToken = function (loader, token, cb) {
 };
 
 exports.login = function (req, res, cb) {
-  var out = {};
 
   var email = sanitize(req.body.email).trim();
   var password = sanitize(req.body.password).trim();
@@ -369,6 +373,9 @@ exports.create = function (req, res, cb) {
         res.add(sh.error("emailmap-create", "unable to create email map", em));
         return cb(3, em);
       }
+      if (req.body.autoConfirm) {
+        em.set("confirmed", true);
+      }
       req.loader.get("kUser", em.get("uid"), _w(cb, function (error, user) {
         if (error) {
           res.add(sh.error("user-bad", "unable to load user", user));
@@ -480,6 +487,46 @@ exports.requestReset = function (req, res, cb) {
 
       return mailer.send(emailInfo, req, res, cb);
     }));
+  }));
+};
+
+exports.confirm = function (req, res, cb) {
+  req.loader.exists("kEmailMap", req.body.email, _w(cb, function (err, em) {
+    if (err) {
+      res.add(sh.errordb(em));
+      return cb(1);
+    }
+    if (em === null) {
+      res.add(sh.error("email-bad", "user does not exist"));
+      return cb(0);
+    }
+    if (em.get("confirmed")) {
+      res.add(sh.event("reg.confirm", {status: "ok", message: "user email already confirmed"}));
+      return cb(0);
+    }
+    if (req.body.cid !== em.get("cid")) {
+      res.add(sh.error("confirm-bad", "confirm id is incorrect"));
+      return cb(0);
+    }
+    em.set("confirmed", true);
+    res.add(sh.event("reg.confirm", {status: "ok", message: "user email now confirmed"}));
+    return cb(0);
+  }));
+}
+
+exports.aconfirm = function (req, res, cb) {
+  req.loader.exists("kEmailMap", req.body.email, _w(cb, function (err, em) {
+    if (err) {
+      res.add(sh.errordb(em));
+      return cb(1);
+    }
+    if (em === null) {
+      res.add(sh.error("email-bad", "user does not exist"));
+      return cb(0);
+    }
+    em.set("confirmed", true);
+    res.add(sh.event("reg.aconfirm", {status: "ok", message: "user email now confirmed"}));
+    return cb(0);
   }));
 };
 

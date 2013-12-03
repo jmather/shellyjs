@@ -55,13 +55,16 @@ shtest.init = function (email, password, cb) {
 
     self.call({cmd: "reg.create", email: email, password: password}, function (err, res) {
       // ignore error for already exists and just try login
-      self.call({cmd: "reg.login", email: email, password: password}, function (err, res) {
-        if (err) {
+      self.call({cmd: "reg.aconfirm", email: email}, function (err, res) {
+        // ignore error for already confirmed
+        self.call({cmd: "reg.login", email: email, password: password}, function (err, res) {
+          if (err) {
+            cb(err, res);
+            return;
+          }
+          gUserSession = res.body.data.session;
           cb(err, res);
-          return;
-        }
-        gUserSession = res.body.data.session;
-        cb(err, res);
+        });
       });
     });
   });

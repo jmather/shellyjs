@@ -276,6 +276,7 @@ Challenge.email = function (req, res, cb) {
   req.body.cmd = "reg.create";
   req.body.password = "XXXXXX";
   req.body.toUid = null;
+  req.body.autoConfirm = true;
   shcall.make(req, res, _w(cb, function (error, data) {
     res.msgs = []; // SWD clear the reg.create event - dont' want it  - should also switch this to res.clear
     if (error && error !== 2) {
