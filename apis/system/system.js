@@ -5,6 +5,7 @@ var shlog = require(global.C.BASE_DIR + "/lib/shlog.js");
 var sh = require(global.C.BASE_DIR + "/lib/shutil.js");
 var stats = require(global.C.BASE_DIR + "/lib/shstats.js");
 var _w = require(global.C.BASE_DIR + "/lib/shcb.js")._w;
+var ShHash = require(global.C.BASE_DIR + "/lib/shhash.js");
 
 var system = exports;
 
@@ -13,6 +14,7 @@ system.functions = {
   config: {desc: "get all server settings", params: {}, security: ["admin"]},
   rawGet: {desc: "get an object given any key", params: {key: {dtype: "string"}}, security: ["admin"]},
   rawSet: {desc: "set an object given any key", params: {key: {dtype: "string"}, value: {dtype: "object"}}, security: ["admin"]},
+  hashGetAll: {desc: "get the hash object given any key", params: {key: {dtype: "string"}}, security: ["admin"]},
   connInfo: {desc: "return info about connection", params: {}, security: [], noSession: true},
   osInfo: {desc: "get operating system info", params: {}, security: ["admin"]}
 };
@@ -45,6 +47,20 @@ system.rawSet = function (req, res, cb) {
       return cb(1);
     }
     res.add(sh.event("system.rawSet", {key: req.body.key, value: req.body.value}));
+    return cb(0);
+  }));
+};
+
+system.hashGetAll = function (req, res, cb) {
+  shlog.debug("system", "system.hashGetAll");
+
+  var set = new ShHash(req.body.key);
+  set.getAll(_w(cb, function (err, data) {
+    if (err || data === null) {
+      res.add(sh.error("object-get", "unable to get object", data));
+      return cb(1);
+    }
+    res.add(sh.event("system.hashGetAll", {key: req.body.key, value: data}));
     return cb(0);
   }));
 };
