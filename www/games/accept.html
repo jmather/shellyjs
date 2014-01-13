@@ -1,0 +1,175 @@
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+<title>Accept Challenge</title>
+<%- include head.html %>
+
+<style>
+
+    #challengeList {
+        height: 361px;
+    }
+
+    .userPictImg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .userAttr {
+        margin-left: 5px;
+    }
+
+</style>
+
+<script language="javascript">
+var Env = <%- EnvJson %>;
+Env.chId = getURLParameter("chId", "");
+Env.chs = getURLParameter("chs", "");
+Env.fuid = getURLParameter("fuid", "");
+
+console.log("fuid: " + Env.fuid);
+console.log("chId: " + Env.chId);
+console.log("chs: " + Env.chs);
+
+function addChallenge(chId, challenge) {
+    if ($("#" + chId.replace(":", "\\:")).length !== 0) {  // must escape the : in the id for select
+        return;
+    }
+    var $newChallenge = $("#challengeTemplate").clone();
+    $newChallenge.find("#challengerName").text(challenge.name);
+    $newChallenge.find("#challengerAge").text(challenge.age);
+    $newChallenge.find("#challengerGender").text(challenge.gender);
+    $newChallenge.find("#challengeGame").text(challenge.game);
+    $newChallenge.find("#challengerPict").attr("src", challenge.pict);
+    $newChallenge.addClass("activeChallenge");
+    $newChallenge.attr("id", chId);
+    $newChallenge.css("display", "block");
+
+    $newChallenge.find("#challengeAccept").attr("chId", chId);
+    $newChallenge.find("#challengeDecline").attr("chId", chId);
+
+    $newChallenge.find("#challengeAccept").click(function () {
+        var chId =$(this).attr("chId");
+        console.log("accept", chId);
+        sendCmd("challenge.accept", {chId: chId});
+        $("#" + chId.replace(":", "\\:")).remove();
+    });
+    $newChallenge.find("#challengeDecline").click(function () {
+        var chId =$(this).attr("chId");
+        console.log("decline", chId);
+        sendCmd("challenge.decline", {chId: chId});
+        $("#" + chId.replace(":", "\\:")).remove();
+    });
+
+    $("#challengeList").append($newChallenge);
+}
+
+function setChallengeInfo(challengeList) {
+    $(".activeChallenge").remove();
+    for (chId in challengeList) {
+        addChallenge(chId, challengeList[chId]);
+    }
+}
+
+function onmessage(res) {
+    uiOnMessage(res);
+
+    var from = "socket"
+    if (typeof(res.event) == "undefined") {
+        log(from, "error", "old message: " + JSON.stringify(res));
+        return;
+    }
+    if (res.event == "error") {
+        showError(res.message);
+        log(from, "error", JSON.stringify(res));
+        return;
+    }
+    if (res.event == "heartbeat") {
+        return;
+    }
+    /* challenge events */
+    if (res.event == "challenge.list") {
+        setChallengeInfo(res.data);
+        return;
+    }
+    if (res.event == "challenge.send") {
+        addChallenge(res.data.chId, res.data.challenge);
+        return;
+    }
+    if (res.event == "challenge.start") {
+        gameInit(res.data);
+        return;
+    }
+    log(from, "unknown-event", JSON.stringify(res));
+}
+
+function onopen() {
+    shellys.call({session: Env.session,
+        batch: [{cmd: "challenge.acceptLink", fromUid: Env.fuid, chId: Env.chId}
+        ]});
+}
+
+$(init);
+function init() {
+    $("#shSystem").text("Example");
+    $("#shSubTitle").text("Accept Challenge");
+
+    window.addEventListener("load", function () {
+        new FastClick(document.body);
+    }, false);
+
+    $("#gameTicTacToe").click(function () {
+        sendCmd("match.add", {name: "tictactoe"});
+        $("#dialog").dialog();
+    });
+
+    commInit();
+
+    shellys.log = log
+    shellys.onopen = onopen;
+    shellys.onmessage = onmessage;
+    shellys.connect(Env.socketUrl);
+}
+</script>
+</head>
+<body>
+<%- include header.html %>
+<%- include errorbox.html %>
+
+<div class="container">
+    <div class="row">
+
+        <div class="offset3 span6">
+            <div class="challengesDiv gameBoxDiv">
+                <div class="gameBoxHeaderDiv">Challenges</div>
+                <div id="challengeList" class="gameBoxInnerDiv">
+                    <div id="challengeTemplate" style="display:none;">
+                        <table style="width: 100%">
+                            <tr>
+                                <td rowspan="2" style="width: 40px;">
+                                    <img id="challengerPict" class="userPictImg img-rounded" src="/static/images/dflt-avatar.png"/>
+                                </td>
+                                <td>
+                                    <span id="challengerName" class="userAttr" style="">player</span>
+                                    <button id="challengeAccept" class="btn UserBtn" style="float:right">accept</button>
+                                    <button id="challengeDecline" class="btn UserBtn" style="float:right">decline</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span id="challengerGender" class="userAttr" style="float:left">U</span>
+                                    <span id="challengerAge" class="userAttr" style="float:left">0</span>
+                                    <span id="challengeGame" class="userAttr" style="float:right">unknown</span>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<%- include footer.html %></body>
+</html>
